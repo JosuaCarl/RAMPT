@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "mine2sirius-pipe"
+version = "0.1.0"
+description = "mzMine to SIRIUS pipeline"
+authors = ["JosuaCarl <josua.carl@student.uni-tuebingen.de>"]
+license = "GPL-3.0 license"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+polars = "^1.8.2"
+numpy = "^2.1.1"
+scipy = "^1.14.1"
+pyarrow = "^17.0.0"
+jupyter = "^1.1.1"
+tqdm = "^4.66.5"
+dask = "^2024.9.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
