@@ -15,6 +15,7 @@ pyarrow = "^17.0.0"
 jupyter = "^1.1.1"
 tqdm = "^4.66.5"
 dask = "^2024.9.1"
+argparse = "^1.4.0"
 
 
 [build-system]
