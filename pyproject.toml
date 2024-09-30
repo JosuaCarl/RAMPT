@@ -17,6 +17,8 @@ tqdm = "^4.66.5"
 dask = "^2024.9.1"
 argparse = "^1.4.0"
 pytest = "^8.3.3"
+sphinx = "^7"
+sphinx-rtd-theme = "^2.0.0"
 
 
 [build-system]
