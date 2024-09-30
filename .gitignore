@@ -166,8 +166,12 @@ cython_debug/
 
 ## Folders
 data/
+.conda/
+docsource/_build/
 
 ## Files
 Notes.md
 source/tryout.ipynb
 source/quick_scripts
+
+poetry.lock
