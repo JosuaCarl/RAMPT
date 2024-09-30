@@ -32,17 +32,18 @@ def main(args):
     contains    = args.contains     if args.contains else None
     overwrite   = args.overwrite    if args.overwrite else False
     n_workers   = args.workers      if args.workers else 1
+    platform    = args.platform     if args.platform else "windows"
     verbosity   = args.verbosity    if args.verbosity else 1
     
     # Conversion
     convert_files( root_folder=in_dir, out_root_folder=join( out_dir ),
                    suffix=suffix, prefix=prefix, contains=contains, 
                    format=format, n_workers=n_workers, overwrite=overwrite,
-                   verbosity=verbosity )
+                   platform=platform, verbosity=verbosity )
 
 
 
-def convert_file(in_path:str, out_folder:str, format:str="mzML"):
+def convert_file(in_path:str, out_folder:str, format:str="mzML", platform:str="windows", verbosity:int=0):
     """
     Convert one file with msconvert.
 
@@ -52,16 +53,25 @@ def convert_file(in_path:str, out_folder:str, format:str="mzML"):
     :type out_dir: str
     :param format: Format for conversion.
     :type out_dir: str
+    :param platform: platform on which operated, defaults to windows
+    :type platform: str, optional
+    :param verbosity: Verbosity, defaults to 0
+    :type verbosity: int, optional
     """
     format = format.replace(".", "")
     format = change_case_str(s=format, range=slice(2, len(format)), conversion="upper")
-
-    os.system( f'msconvert --{format} --64 -o {out_folder} {in_path}' )
+    if verbosity >= 2:
+        os.system( f'msconvert --{format} --64 -o {out_folder} {in_path}')
+    elif platform.lower() == "windows":
+        os.system( f'msconvert --{format} --64 -o {out_folder} {in_path} > nul')
+    else:
+        os.system( f'msconvert --{format} --64 -o {out_folder} {in_path} > /dev/null')
 
 
 def convert_files(root_folder:StrPath, out_root_folder:StrPath,
                   suffix:str=None, prefix:str=None, contains:str=None,
-                  format:str="mzML", n_workers=1, overwrite:bool=False, verbosity:int=0):
+                  format:str="mzML", n_workers=1, overwrite:bool=False,
+                  platform:str="windows", verbosity:int=0):
     """
     Converts multiple files in multiple folders, found in root_folder with msconvert and saves them
     to a location out_root_folder again into their respective folders.
@@ -82,6 +92,8 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
     :type n_workers: int, optional
     :param overwrite: Overwrite all, do not check whether file already exists, defaults to False
     :type overwrite: bool, optional
+    :param platform: platform on which operated, defaults to windows
+    :type platform: str, optional
     :param verbosity: Verbosity, defaults to 0
     :type verbosity: int, optional
     """
@@ -119,10 +131,15 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
                 if overwrite or \
                    ( not os.path.isfile(out_path) ) or \
                    os.path.getsize( out_path ) < 1e8 :
-                    futures.append( dask.delayed(convert_file)(in_path=in_path, out_folder=out_folder, format=format) )
-            with TqdmCallback(desc="compute", disable=verbosity >= 1):
-                dask.compute(futures)
-                
+                    futures.append( dask.delayed(convert_file)(in_path=in_path, out_folder=out_folder, 
+                                                               platform=platform, format=format,
+                                                               verbosity=verbosity) )
+            if verbosity >=1:
+                with TqdmCallback(desc="compute"):
+                    dask.compute(futures)
+            else:
+                dask.compute(futures)  
+
 
 
 if __name__ == "__main__":
@@ -136,6 +153,7 @@ if __name__ == "__main__":
     parser.add_argument('-c',   '--contains',   required=False)
     parser.add_argument('-o',   '--overwrite',  required=False,     action="store_true")
     parser.add_argument('-w',   '--workers',    required=False,     type=int)
+    parser.add_argument('-plat', '--platform',  required=False)
     parser.add_argument('-v',   '--verbosity',  required=False,     type=int)
 
     
