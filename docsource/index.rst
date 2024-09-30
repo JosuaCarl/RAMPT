@@ -6,9 +6,12 @@
 mine2sirius documentation
 =========================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+Welcome to mine2sirius's documentation!
+=================================================================
+This documention was created with the aim of making my work more accessible to interpretation.
+I hope I can deliver some insight into my dimensionality reduction attempts of flow-injection mass spectrometry data
+and subsequent community composition inference.
+
 
 
 .. toctree::
@@ -22,3 +25,10 @@ documentation for details.
    source.helpers
    source.tests
 
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
