@@ -1,8 +1,7 @@
-import sys
-sys.path.append( '..' )
+#!/usr/bin/env python
 
 import pytest
-from helpers.general import *
+from source.helpers.general import *
 
 def test_change_case_str():
     assert change_case_str("abc", slice(1,3) , "upper") == "aBC"

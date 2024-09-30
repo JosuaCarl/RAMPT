@@ -163,4 +163,11 @@ cython_debug/
 
 
 # OWN
+
+## Folders
 data/
+
+## Files
+Notes.md
+source/tryout.ipynb
+source/quick_scripts

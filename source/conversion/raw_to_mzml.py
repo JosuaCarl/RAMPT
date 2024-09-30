@@ -1,16 +1,21 @@
+#!/usr/bin/env python
+
 """
 Conversion of manufacturer MS files to .mzML or .mzXML format. The folder structure is mimiced at the place of the output.
 """
-
 import os
-import platform
 import argparse
 
-from tqdm import tqdm
+from os import listdir
+from os.path import join
+from tqdm.auto import tqdm
+from tqdm.dask import TqdmCallback
 import dask.multiprocessing
 
+from source.helpers.general import change_case_str
+from source.helpers.types import StrPath
 
- 
+
 def main(args):
     """
     Execute the conversion.
@@ -19,17 +24,25 @@ def main(args):
     :type args: any
     """
     # Extract arguments
-    in_dir = args.in_dir
-    out_dir = args.out_dir
-    overwrite = args.overwrite if args.overwrite else False
-    n_workers = args.workers if args.workers else 1
-    verbosity = args.verbosity if args.verbosity else 1
+    in_dir      = args.in_dir
+    out_dir     = args.out_dir
+    format      = args.format       if args.format else "mzML"
+    suffix      = args.suffix       if args.suffix else None
+    prefix      = args.prefix       if args.prefix else None
+    contains    = args.contains     if args.contains else None
+    overwrite   = args.overwrite    if args.overwrite else False
+    n_workers   = args.workers      if args.workers else 1
+    verbosity   = args.verbosity    if args.verbosity else 1
     
     # Conversion
-    convert_files(root_folder=start, out_root_folder=join(start, "Out_msconv"), verbosity=0)
+    convert_files( root_folder=in_dir, out_root_folder=join( out_dir ),
+                   suffix=suffix, prefix=prefix, contains=contains, 
+                   format=format, n_workers=n_workers, overwrite=overwrite,
+                   verbosity=verbosity )
 
 
-def convert_file(in_path:str, out_dir:str, format:str="mzML"):
+
+def convert_file(in_path:str, out_folder:str, format:str="mzML"):
     """
     Convert one file with msconvert.
 
@@ -37,53 +50,93 @@ def convert_file(in_path:str, out_dir:str, format:str="mzML"):
     :type in_path: str
     :param out_dir: Path to output directory.
     :type out_dir: str
+    :param format: Format for conversion.
+    :type out_dir: str
     """
-    format 
+    format = format.replace(".", "")
+    format = change_case_str(s=format, range=slice(2, len(format)), conversion="upper")
 
-    os.system( f'msconvert --{format} --64 -o {out_dir} {in_path}' )
+    os.system( f'msconvert --{format} --64 -o {out_folder} {in_path}' )
 
-def convert_files(root_folder, out_root_folder, verbosity:int=0):
+
+def convert_files(root_folder:StrPath, out_root_folder:StrPath,
+                  suffix:str=None, prefix:str=None, contains:str=None,
+                  format:str="mzML", n_workers=1, overwrite:bool=False, verbosity:int=0):
     """
     Converts multiple files in multiple folders, found in root_folder with msconvert and saves them
     to a location out_root_folder again into their respective folders.
+
+    :param root_folder: Starting folder for descent.
+    :type root_folder: StrPath
+    :param out_root_folder: Folder where structure is mimiced and files are converted to.
+    :type out_root_folder: StrPath
+    :param suffix: Suffix for folder matching, defaults to None
+    :type suffix: str, optional
+    :param prefix: Prefix for folder matching, defaults to None
+    :type prefix: str, optional
+    :param contains: Contained strings for folder matching, defaults to None
+    :type contains: str, optional
+    :param format: Target format, defaults to "mzML"
+    :type format: str, optional
+    :param n_workers: Number of workers, defaults to 1
+    :type n_workers: int, optional
+    :param overwrite: Overwrite all, do not check whether file already exists, defaults to False
+    :type overwrite: bool, optional
+    :param verbosity: Verbosity, defaults to 0
+    :type verbosity: int, optional
     """
     # Outer loop over all files in root folder
-    for entry in tqdm( listdir(root_folder) ):
+    for entry in listdir(root_folder):
+
         folder = join(root_folder, entry)
 
         if entry == "System Volume Information":
             continue
+
         # Conditions for selecting folder for conversion
-        if os.path.isdir(folder) and listdir(folder) and listdir(folder)[0].endswith(".d"):          # When the first entry ends with .d in the folder, it is seen as having MS entries
+        if os.path.isdir(folder) and \
+           (not suffix or listdir(folder)[0].endswith(suffix)) and \
+           (not prefix or listdir(folder)[0].startswith(prefix)) and \
+           (not contains or contains in listdir(folder)[0]):
+            
             folder = join(root_folder, folder)    
 
             # Inner loop to convert all files in the folder
-            dask.config.set(scheduler='processes', num_workers=workers)
+            dask.config.set(scheduler='processes', num_workers=n_workers)
             futures = []
             for file in listdir(folder):
+
                 # Make a new folder in the out_root_folder with the same name as the folder with MS entries
-                if not entry in list( listdir(out_root_folder)):
+                if not entry in list( listdir(out_root_folder) ):
                     os.mkdir( join(out_root_folder, entry) )
 
-                in_path = join(folder, file)
-                out_folder = join(out_root_folder, entry)
-                out_path = join(out_folder, f'{".".join(file.split(".")[:-1])}.mzXML')
+                in_path = join( folder, file )
+                out_folder = join( out_root_folder, entry )
+                out_path = join( out_folder, f'{".".join(file.split(".")[:-1])}.{format}' )
                 
             
-                # Check for existing files at the path
-                if (not os.path.isfile(out_path)) or os.path.getsize(out_path) < 1e8 :
-                    futures.append(dask.delayed(convert_file)(in_path=in_path, out_folder=out_folder))
-            dask.compute(futures)
+                # Check whether overwrite is set orfor existing files at the path
+                if overwrite or \
+                   ( not os.path.isfile(out_path) ) or \
+                   os.path.getsize( out_path ) < 1e8 :
+                    futures.append( dask.delayed(convert_file)(in_path=in_path, out_folder=out_folder, format=format) )
+            with TqdmCallback(desc="compute", disable=verbosity >= 1):
+                dask.compute(futures)
                 
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='raw_to_mzml.py',
                                 description='Conversion of manufacturer MS files to .mzML or .mzXML format. The folder structure is mimiced at the place of the output.')
-    parser.add_argument('-i', '--in_dir', required=True)
-    parser.add_argument('-r', '--out_dir', required=True)
-    parser.add_argument('-o', '--overwrite', action="store_true", required=False)
-    parser.add_argument('-w', '--workers', type=int, required=False)
-    parser.add_argument('-v', '--verbosity', type=int, required=False)
+    parser.add_argument('-in',  '--in_dir',     required=True)
+    parser.add_argument('-out', '--out_dir',    required=True)
+    parser.add_argument('-f',   '--format',     required=False)
+    parser.add_argument('-s',   '--suffix',     required=False)
+    parser.add_argument('-p',   '--prefix',     required=False)
+    parser.add_argument('-c',   '--contains',   required=False)
+    parser.add_argument('-o',   '--overwrite',  required=False,     action="store_true")
+    parser.add_argument('-w',   '--workers',    required=False,     type=int)
+    parser.add_argument('-v',   '--verbosity',  required=False,     type=int)
 
     
     args = parser.parse_args()
