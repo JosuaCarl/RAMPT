@@ -16,12 +16,15 @@ from source.helpers.general import change_case_str
 from source.helpers.types import StrPath
 
 
-def main(args):
+
+def main(args, unknown_args):
     """
     Execute the conversion.
 
     :param args: Command line arguments
     :type args: any
+    :param unknown_args: Command line arguments that are not known.
+    :type unknown_args: any
     """
     # Extract arguments
     in_dir      = args.in_dir
@@ -35,16 +38,19 @@ def main(args):
     n_workers   = args.workers      if args.workers else 1
     platform    = args.platform     if args.platform else "windows"
     verbosity   = args.verbosity    if args.verbosity else 1
+    additional_args = args.additional_arguments if args.additional_arguments else unknown_args
     
     # Conversion
     convert_files( root_folder=in_dir, out_root_folder=join( out_dir ),
                    suffix=suffix, prefix=prefix, contains=contains, 
-                   format=format, n_workers=n_workers, overwrite=overwrite,
+                   format=format, n_workers=n_workers, 
+                   redo_threshold=redo_threshold, overwrite=overwrite,
+                   additional_args=additional_args,
                    platform=platform, verbosity=verbosity )
 
 
 
-def convert_file(in_path:str, out_folder:str, format:str="mzML", platform:str="windows", verbosity:int=0):
+def convert_file(in_path:str, out_folder:str, format:str="mzML", additional_args:list=[], platform:str="windows", verbosity:int=0):
     """
     Convert one file with msconvert.
 
@@ -54,6 +60,8 @@ def convert_file(in_path:str, out_folder:str, format:str="mzML", platform:str="w
     :type out_dir: str
     :param format: Format for conversion.
     :type out_dir: str
+    :param additional_args: Additional arguments for msconvert, defaults to []
+    :type additional_args: list, optional
     :param platform: platform on which operated, defaults to windows
     :type platform: str, optional
     :param verbosity: Verbosity, defaults to 0
@@ -61,18 +69,21 @@ def convert_file(in_path:str, out_folder:str, format:str="mzML", platform:str="w
     """
     format = format.replace(".", "")
     format = change_case_str(s=format, range=slice(2, len(format)), conversion="upper")
+    
+    cmd = f'msconvert --{format} --64 -o {out_folder} {in_path} {" ".join(additional_args)}'
     if verbosity >= 2:
-        os.system( f'msconvert --{format} --64 -o {out_folder} {in_path}')
+        os.system( cmd )
     elif platform.lower() == "windows":
-        os.system( f'msconvert --{format} --64 -o {out_folder} {in_path} > nul')
+        os.system( cmd + ' > nul')
     else:
-        os.system( f'msconvert --{format} --64 -o {out_folder} {in_path} > /dev/null')
+        os.system( cmd + ' > /dev/null')
 
 
 def convert_files(root_folder:StrPath, out_root_folder:StrPath,
                   suffix:str=None, prefix:str=None, contains:str=None,
                   format:str="mzML", n_workers=1,
                   redo_threshold:float=1e8, overwrite:bool=False,
+                  additional_args:list=[],
                   platform:str="windows", verbosity:int=0):
     """
     Converts multiple files in multiple folders, found in root_folder with msconvert and saves them
@@ -93,9 +104,11 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
     :param n_workers: Number of workers, defaults to 1
     :type n_workers: int, optional
     :param redo_threshold: Threshold in bytess for a target file to be considered as incomplete and scheduled for re running the conversion, defaults to 1e8
-    :type redo_threshold: bool, optional
+    :type redo_threshold: float, optional
     :param overwrite: Overwrite all, do not check whether file already exists, defaults to False
     :type overwrite: bool, optional
+    :param additional_args: Additional arguments for msconvert, defaults to []
+    :type additional_args: list, optional
     :param platform: platform on which operated, defaults to windows
     :type platform: str, optional
     :param verbosity: Verbosity, defaults to 0
@@ -160,7 +173,8 @@ if __name__ == "__main__":
     parser.add_argument('-w',   '--workers',    required=False,     type=int)
     parser.add_argument('-plat', '--platform',  required=False)
     parser.add_argument('-v',   '--verbosity',  required=False,     type=int)
+    parser.add_argument('-aa',   '--additional_arguments',  required=False, nargs=argparse.REMAINDER)
 
     
-    args = parser.parse_args()
-    main(args=args)
+    args, unknown_args = parser.parse_known_args()
+    main(args=args, unknown_args=unknown_args)
