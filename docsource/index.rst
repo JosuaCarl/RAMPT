@@ -8,9 +8,7 @@ mine2sirius documentation
 
 Welcome to mine2sirius's documentation!
 =================================================================
-This documention was created with the aim of making my work more accessible to interpretation.
-I hope I can deliver some insight into my dimensionality reduction attempts of flow-injection mass spectrometry data
-and subsequent community composition inference.
+The aim of this project is to construct a integrated pipeline from conversion of prorietory formats to the networking, feature finding and annotation of novel metabolites.
 
 
 

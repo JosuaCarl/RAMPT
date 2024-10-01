@@ -30,6 +30,7 @@ def main(args):
     suffix      = args.suffix       if args.suffix else None
     prefix      = args.prefix       if args.prefix else None
     contains    = args.contains     if args.contains else None
+    redo_threshold = args.redo_threshold if args.redo_threshold else 1e8
     overwrite   = args.overwrite    if args.overwrite else False
     n_workers   = args.workers      if args.workers else 1
     platform    = args.platform     if args.platform else "windows"
@@ -70,7 +71,8 @@ def convert_file(in_path:str, out_folder:str, format:str="mzML", platform:str="w
 
 def convert_files(root_folder:StrPath, out_root_folder:StrPath,
                   suffix:str=None, prefix:str=None, contains:str=None,
-                  format:str="mzML", n_workers=1, overwrite:bool=False,
+                  format:str="mzML", n_workers=1,
+                  redo_threshold:float=1e8, overwrite:bool=False,
                   platform:str="windows", verbosity:int=0):
     """
     Converts multiple files in multiple folders, found in root_folder with msconvert and saves them
@@ -90,6 +92,8 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
     :type format: str, optional
     :param n_workers: Number of workers, defaults to 1
     :type n_workers: int, optional
+    :param redo_threshold: Threshold in bytess for a target file to be considered as incomplete and scheduled for re running the conversion, defaults to 1e8
+    :type redo_threshold: bool, optional
     :param overwrite: Overwrite all, do not check whether file already exists, defaults to False
     :type overwrite: bool, optional
     :param platform: platform on which operated, defaults to windows
@@ -130,7 +134,7 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
                 # Check whether overwrite is set orfor existing files at the path
                 if overwrite or \
                    ( not os.path.isfile(out_path) ) or \
-                   os.path.getsize( out_path ) < 1e8 :
+                   os.path.getsize( out_path ) < float(redo_threshold) :
                     futures.append( dask.delayed(convert_file)(in_path=in_path, out_folder=out_folder, 
                                                                platform=platform, format=format,
                                                                verbosity=verbosity) )
@@ -151,6 +155,7 @@ if __name__ == "__main__":
     parser.add_argument('-s',   '--suffix',     required=False)
     parser.add_argument('-p',   '--prefix',     required=False)
     parser.add_argument('-c',   '--contains',   required=False)
+    parser.add_argument('-rt',   '--redo_threshold',   required=False)
     parser.add_argument('-o',   '--overwrite',  required=False,     action="store_true")
     parser.add_argument('-w',   '--workers',    required=False,     type=int)
     parser.add_argument('-plat', '--platform',  required=False)
