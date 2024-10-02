@@ -116,7 +116,7 @@ def convert_file( in_path:str, out_path:str,
     if verbosity >= 2:
         os.system( cmd )
     elif platform.lower() == "windows":
-        os.system( cmd + ' > nul')
+        os.system( cmd + ' > NUL')
     else:
         os.system( cmd + ' > /dev/null')
     return True

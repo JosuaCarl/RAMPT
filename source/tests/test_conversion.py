@@ -11,7 +11,9 @@ from source.conversion.raw_to_mzml import main as raw_to_mzml_main
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
 
+import platform as pf
 
+platform = pf.system()
 filepath = get_internal_filepath(__file__)
 
 def test_raw_to_mzml_main():
@@ -19,14 +21,14 @@ def test_raw_to_mzml_main():
                                out_dir=construct_path(filepath, "..", "out"),
                                format="mzML", suffix=".mzML",
                                prefix=None, contains=None, redo_threshold=None, overwrite=None, workers=None,
-                               platform=None, verbosity=None, msconv_arguments=None)
+                               platform=platform, verbosity=None, msconv_arguments=None)
     raw_to_mzml_main(args, unknown_args=[])
 
     args = argparse.Namespace(in_dir=construct_path(filepath, "..", "test_files"),
                                out_dir=construct_path(filepath, "..", "out"),
                                format="mzXML", suffix=".mzXML",
                                prefix=None, contains=None, redo_threshold=None, overwrite=None, workers=None,
-                               platform=None, verbosity=None, msconv_arguments=None)
+                               platform=platform, verbosity=None, msconv_arguments=None)
     raw_to_mzml_main(args, unknown_args=[])
     
     assert os.path.isfile( construct_path(filepath, "..", "out/minimal_file.mzML") )
