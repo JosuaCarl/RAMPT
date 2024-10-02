@@ -7,7 +7,6 @@ import os
 import argparse
 import regex
 
-from os import listdir
 from os.path import join
 from tqdm.auto import tqdm
 from tqdm.dask import TqdmCallback
@@ -163,7 +162,7 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
     """
     # Outer loop over all files in root folder
     for root, dirs, files in os.walk(root_folder):
-        for dir in tqdm(dirs, disable=verbosity <= 0, desc="Directories"):
+        for dir in tqdm(dirs, disable=verbosity < 2, desc="Directories"):
             if check_entry( in_path=join( root_folder, dir ),
                             out_path=join( out_root_folder, f'{".".join(dir.split(".")[:-1])}.{format}' ),
                             suffix=suffix, prefix=prefix, contains=contains,
@@ -180,7 +179,7 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
                                            platform=platform, verbosity=verbosity,
                                            futures=futures, original=False ) ) 
 
-        for file in tqdm(files, disable=verbosity <= 0, desc="Files"):
+        for file in tqdm(files, disable=verbosity < 2, desc="Files"):
             if check_entry( in_path=join( root_folder, file ),
                             out_path=join( out_root_folder, f'{".".join(file.split(".")[:-1])}.{format}' ),
                             suffix=suffix, prefix=prefix, contains=contains,

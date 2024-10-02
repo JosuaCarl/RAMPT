@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 """
 Methods that are helpful for general processing.
