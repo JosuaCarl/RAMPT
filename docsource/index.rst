@@ -13,7 +13,6 @@ The aim of this project is to construct a integrated pipeline from conversion of
 
 
 .. toctree::
-   :titlesonly:
    :maxdepth: 3
    :caption: Contents:
 
