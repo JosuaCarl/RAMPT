@@ -16,12 +16,7 @@ The aim of this project is to construct a integrated pipeline from conversion of
    :maxdepth: 2
    :caption: Contents:
 
-   source.conversion
-   source.feature_finding
-   source.networking
-   source.annotation
-   source.helpers
-   source.tests
+   source
 
 
 Indices and tables

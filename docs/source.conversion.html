@@ -20,7 +20,9 @@
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="source.feature_finding package" href="source.feature_finding.html" />
+    <link rel="prev" title="mine2sirius documentation" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,21 +44,27 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">source.conversion package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-source.conversion.raw_to_mzml">source.conversion.raw_to_mzml module</a><ul>
-<li><a class="reference internal" href="#source.conversion.raw_to_mzml.convert_file"><code class="docutils literal notranslate"><span class="pre">convert_file()</span></code></a></li>
-<li><a class="reference internal" href="#source.conversion.raw_to_mzml.convert_files"><code class="docutils literal notranslate"><span class="pre">convert_files()</span></code></a></li>
-<li><a class="reference internal" href="#source.conversion.raw_to_mzml.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">source.conversion package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-source.conversion.raw_to_mzml">source.conversion.raw_to_mzml module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#source.conversion.raw_to_mzml.check_entry"><code class="docutils literal notranslate"><span class="pre">check_entry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#source.conversion.raw_to_mzml.convert_file"><code class="docutils literal notranslate"><span class="pre">convert_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#source.conversion.raw_to_mzml.convert_files"><code class="docutils literal notranslate"><span class="pre">convert_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#source.conversion.raw_to_mzml.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-source.conversion">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-source.conversion">Module contents</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="source.feature_finding.html">source.feature_finding package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source.networking.html">source.networking package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source.annotation.html">source.annotation package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source.helpers.html">source.helpers package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source.tests.html">source.tests package</a></li>
 </ul>
-</div>
+
         </div>
       </div>
     </nav>
@@ -90,52 +98,95 @@
 <span id="source-conversion-raw-to-mzml-module"></span><h2>source.conversion.raw_to_mzml module<a class="headerlink" href="#module-source.conversion.raw_to_mzml" title="Link to this heading"></a></h2>
 <p>Conversion of manufacturer MS files to .mzML or .mzXML format. The folder structure is mimiced at the place of the output.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="source.conversion.raw_to_mzml.convert_file">
-<span class="sig-prename descclassname"><span class="pre">source.conversion.raw_to_mzml.</span></span><span class="sig-name descname"><span class="pre">convert_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mzML'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">platform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'windows'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/source/conversion/raw_to_mzml.html#convert_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.conversion.raw_to_mzml.convert_file" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="source.conversion.raw_to_mzml.check_entry">
+<span class="sig-prename descclassname"><span class="pre">source.conversion.raw_to_mzml.</span></span><span class="sig-name descname"><span class="pre">check_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contains</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">redo_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/source/conversion/raw_to_mzml.html#check_entry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.conversion.raw_to_mzml.check_entry" title="Link to this definition"></a></dt>
 <dd><p>Convert one file with msconvert.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>in_path</strong> (<em>str</em>) – Path to scheduled file.</p></li>
-<li><p><strong>out_dir</strong> (<em>str</em>) – Path to output directory.</p></li>
-<li><p><strong>format</strong> – Format for conversion.</p></li>
+<li><p><strong>out_path</strong> (<em>str</em>) – Path to output directory.</p></li>
+<li><p><strong>suffix</strong> (<em>str</em><em>, </em><em>optional</em>) – Suffix for folder matching, defaults to None</p></li>
+<li><p><strong>prefix</strong> (<em>str</em><em>, </em><em>optional</em>) – Prefix for folder matching, defaults to None</p></li>
+<li><p><strong>contains</strong> (<em>str</em><em>, </em><em>optional</em>) – Contained strings for folder matching, defaults to None</p></li>
+<li><p><strong>redo_threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold in bytess for a target file to be considered as incomplete and scheduled for re running the conversion, defaults to 1e8</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – Overwrite all, do not check whether file already exists, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether the file was converted</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="source.conversion.raw_to_mzml.convert_file">
+<span class="sig-prename descclassname"><span class="pre">source.conversion.raw_to_mzml.</span></span><span class="sig-name descname"><span class="pre">convert_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mzML'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">platform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'windows'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/source/conversion/raw_to_mzml.html#convert_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.conversion.raw_to_mzml.convert_file" title="Link to this definition"></a></dt>
+<dd><p>Convert one file with msconvert.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_path</strong> (<em>str</em>) – Path to scheduled file.</p></li>
+<li><p><strong>out_path</strong> (<em>str</em>) – Path to output directory.</p></li>
+<li><p><strong>format</strong> (<em>str</em>) – Format for conversion.</p></li>
+<li><p><strong>additional_args</strong> (<em>list</em><em>, </em><em>optional</em>) – Additional arguments for msconvert, defaults to []</p></li>
 <li><p><strong>platform</strong> (<em>str</em><em>, </em><em>optional</em>) – platform on which operated, defaults to windows</p></li>
 <li><p><strong>verbosity</strong> (<em>int</em><em>, </em><em>optional</em>) – Verbosity, defaults to 0</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether the file was converted</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="source.conversion.raw_to_mzml.convert_files">
-<span class="sig-prename descclassname"><span class="pre">source.conversion.raw_to_mzml.</span></span><span class="sig-name descname"><span class="pre">convert_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_root_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contains</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mzML'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">platform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'windows'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/source/conversion/raw_to_mzml.html#convert_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.conversion.raw_to_mzml.convert_files" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">source.conversion.raw_to_mzml.</span></span><span class="sig-name descname"><span class="pre">convert_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_root_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contains</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mzML'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">redo_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">platform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'windows'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">futures</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/source/conversion/raw_to_mzml.html#convert_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.conversion.raw_to_mzml.convert_files" title="Link to this definition"></a></dt>
 <dd><p>Converts multiple files in multiple folders, found in root_folder with msconvert and saves them
 to a location out_root_folder again into their respective folders.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>root_folder</strong> (<em>StrPath</em>) – Starting folder for descent.</p></li>
-<li><p><strong>out_root_folder</strong> (<em>StrPath</em>) – Folder where structure is mimiced and files are converted to.</p></li>
+<li><p><strong>out_root_folder</strong> (<em>StrPath</em>) – Folder where structure is mimiced and files are converted to</p></li>
 <li><p><strong>suffix</strong> (<em>str</em><em>, </em><em>optional</em>) – Suffix for folder matching, defaults to None</p></li>
 <li><p><strong>prefix</strong> (<em>str</em><em>, </em><em>optional</em>) – Prefix for folder matching, defaults to None</p></li>
 <li><p><strong>contains</strong> (<em>str</em><em>, </em><em>optional</em>) – Contained strings for folder matching, defaults to None</p></li>
 <li><p><strong>format</strong> (<em>str</em><em>, </em><em>optional</em>) – Target format, defaults to “mzML”</p></li>
 <li><p><strong>n_workers</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of workers, defaults to 1</p></li>
+<li><p><strong>redo_threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold in bytess for a target file to be considered as incomplete and scheduled for re running the conversion, defaults to 1e8</p></li>
 <li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – Overwrite all, do not check whether file already exists, defaults to False</p></li>
+<li><p><strong>additional_args</strong> (<em>list</em><em>, </em><em>optional</em>) – Additional arguments for msconvert, defaults to []</p></li>
 <li><p><strong>platform</strong> (<em>str</em><em>, </em><em>optional</em>) – platform on which operated, defaults to windows</p></li>
 <li><p><strong>verbosity</strong> (<em>int</em><em>, </em><em>optional</em>) – Verbosity, defaults to 0</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of future computations</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="source.conversion.raw_to_mzml.main">
-<span class="sig-prename descclassname"><span class="pre">source.conversion.raw_to_mzml.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/source/conversion/raw_to_mzml.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.conversion.raw_to_mzml.main" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">source.conversion.raw_to_mzml.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unknown_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/source/conversion/raw_to_mzml.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.conversion.raw_to_mzml.main" title="Link to this definition"></a></dt>
 <dd><p>Execute the conversion.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>args</strong> (<em>any</em>) – Command line arguments</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>any</em>) – Command line arguments</p></li>
+<li><p><strong>unknown_args</strong> (<em>any</em>) – Command line arguments that are not known.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -149,7 +200,10 @@ to a location out_root_folder again into their respective folders.</p>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="mine2sirius documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="source.feature_finding.html" class="btn btn-neutral float-right" title="source.feature_finding package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
