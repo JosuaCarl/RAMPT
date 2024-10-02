@@ -19,6 +19,9 @@ argparse = "^1.4.0"
 pytest = "^8.3.3"
 sphinx = "^7"
 sphinx-rtd-theme = "^2.0.0"
+regex = "^2024.9.11"
+beautifulsoup4 = "^4.12.3"
+lxml = "^5.3.0"
 
 
 [build-system]
