@@ -74,17 +74,15 @@ def check_entry(  in_path:str, out_path:str,
     :rtype: bool
     """
     # Check origin
-    if (not suffix or in_path.endswith(suffix)) and \
-       (not prefix or in_path.startswith(prefix)) and \
-       (not contains or contains in in_path):
-        
-        # Check target
-        if overwrite or \
-        ( not os.path.isfile(out_path) ) or \
-        os.path.getsize( out_path ) < float(redo_threshold) or \
-        not regex.search("^</.*>$", open_last_line_with_content(filepath=out_path)):
-            return True
-    return False
+    origin_valid = (not suffix or in_path.endswith(suffix)) and \
+                   (not prefix or in_path.startswith(prefix)) and \
+                   (not contains or contains in in_path)
+    # Check target
+    target_valid = overwrite or ( not os.path.isfile(out_path) ) or \
+                   os.path.getsize( out_path ) < float(redo_threshold) or \
+                   not regex.search( "^</.*>$", open_last_line_with_content(filepath=out_path) )
+
+    return origin_valid, target_valid
         
 
 def convert_file( in_path:str, out_path:str,
@@ -113,7 +111,7 @@ def convert_file( in_path:str, out_path:str,
     format = change_case_str(s=format, range=slice(2, len(format)), conversion="upper")
 
     cmd = f'msconvert --{format} --64 -o {out_path} {in_path} {" ".join(additional_args)}'
-    if verbosity >= 2:
+    if verbosity >= 3:
         os.system( cmd )
     elif platform.lower() == "windows":
         os.system( cmd + ' > NUL')
@@ -128,7 +126,7 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
                   redo_threshold:float=1e8, overwrite:bool=False,
                   additional_args:list=[],
                   platform:str="windows", verbosity:int=0,
-                  futures:list=[], original:bool=True) -> bool:
+                  futures:list=[], original:bool=True) -> list:
     """
     Converts multiple files in multiple folders, found in root_folder with msconvert and saves them
     to a location out_root_folder again into their respective folders.
@@ -161,29 +159,37 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
     :rtype: list
     """
     # Outer loop over all files in root folder
+    verbose_tqdm = verbosity < 2 if original else verbosity < 3
     for root, dirs, files in os.walk(root_folder):
-        for dir in tqdm(dirs, disable=verbosity < 2, desc="Directories"):
-            if check_entry( in_path=join( root_folder, dir ),
-                            out_path=join( out_root_folder, f'{".".join(dir.split(".")[:-1])}.{format}' ),
-                            suffix=suffix, prefix=prefix, contains=contains,
-                            redo_threshold=redo_threshold, overwrite=overwrite ):
+        for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
+            origin_valid, target_valid = check_entry( in_path=join( root_folder, dir ),
+                                                      out_path=join( out_root_folder, f'{".".join(dir.split(".")[:-1])}.{format}' ),
+                                                      suffix=suffix, prefix=prefix, contains=contains,
+                                                      redo_threshold=redo_threshold, overwrite=overwrite )
+            if origin_valid and target_valid:
                 futures.append( dask.delayed(convert_file)( in_path=join( root_folder, dir ),
                                                             out_path=join( out_root_folder ), 
                                                             format=format, additional_args=additional_args,
                                                             platform=platform, verbosity=verbosity ) )
-            futures.append( convert_files( root_folder=join(root_folder, dir), out_root_folder=join(out_root_folder, dir),
+            elif not origin_valid:
+                print(dir)
+                scheduled = convert_files( root_folder=join(root_folder, dir), out_root_folder=join(out_root_folder, dir),
                                            suffix=suffix, prefix=prefix, contains=contains,
                                            format=format, n_workers=n_workers,
                                            redo_threshold=redo_threshold, overwrite=overwrite,
                                            additional_args=additional_args,
                                            platform=platform, verbosity=verbosity,
-                                           futures=futures, original=False ) ) 
+                                           futures=futures, original=False )
+                for i in range( len(scheduled) ): # I dont know why, but list comprehension loops endlessly if done by direct element aquisition
+                    if scheduled[i] is not None:
+                        futures.append( scheduled[i] ) 
 
-        for file in tqdm(files, disable=verbosity < 2, desc="Files"):
-            if check_entry( in_path=join( root_folder, file ),
-                            out_path=join( out_root_folder, f'{".".join(file.split(".")[:-1])}.{format}' ),
-                            suffix=suffix, prefix=prefix, contains=contains,
-                            redo_threshold=redo_threshold, overwrite=overwrite ):
+        for file in tqdm(files, disable=verbose_tqdm, desc="Files"):
+            origin_valid, target_valid = check_entry( in_path=join( root_folder, file ),
+                                                      out_path=join( out_root_folder, f'{".".join(file.split(".")[:-1])}.{format}' ),
+                                                      suffix=suffix, prefix=prefix, contains=contains,
+                                                      redo_threshold=redo_threshold, overwrite=overwrite )
+            if origin_valid and target_valid:
                 futures.append( dask.delayed(convert_file)( in_path=join( root_folder, file ),
                                                             out_path=join( out_root_folder ),
                                                             format=format, additional_args=additional_args,
@@ -192,13 +198,15 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
         if futures and os.path.isdir(root_folder):
             make_new_dir( join(out_root_folder, root) )
             
-        if original:       
+        if original:
             dask.config.set(scheduler='processes', num_workers=n_workers)
             if verbosity >=1:
                 with TqdmCallback(desc="Compute"):
                     dask.compute(futures)
             else:
-                dask.compute(futures)  
+                dask.compute(futures)
+        
+        return futures
 
 
 

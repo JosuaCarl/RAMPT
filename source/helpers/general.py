@@ -108,7 +108,7 @@ def open_last_line_with_content(filepath:str) -> str:
     :rtype: str
     """
     n = 1
-    while n < 1e6:
+    while n < 1e3:
         try:
             line = open_last_n_line(filepath=filepath, n=n)
         except OSError:
@@ -116,4 +116,4 @@ def open_last_line_with_content(filepath:str) -> str:
         if regex.search(r".*\S.*", line):
             return line
         n += 1
-    raise(ValueError(f"File {filepath} does not contain a line with content for 1e6 lines"))
+    raise(ValueError(f"File {filepath} does not contain a line with content for 1000 lines"))
