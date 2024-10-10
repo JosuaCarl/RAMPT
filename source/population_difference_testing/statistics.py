@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Analyze the statistical significance of the population of annotations (i.e. compounds or formlae).
+Analyze the statistical significance of a population.
 """
 
 # Imports
@@ -9,20 +9,56 @@ from typing import Callable
 import pandas as pd
 from scipy import stats
 from statsmodels.sandbox.stats.multicomp import multipletests
+import warnings
+from source.helpers.types import Array
 
 
 
-def choose_test(X:pd.DataFrame, Y:pd.DataFrame=None, paired:bool=False) -> Callable:
+def choose_test(X:Array, groups:Array=None, paired:bool=False) -> str:
+    test_name = None
     # Check for normality
-    normality_X = stats.shapiro(X).pvalue > 0.05
-    if Y:
-        normality_Y = stats.shapiro(Y).pvalue > 0.05
+    X_normal = stats.shapiro(X).pvalue > 0.05
+    if paired:
+        if X_normal:
+            test_name = "Paired-sample t-test"
+        else:
+            test_name = "Wilcoxon signed-rank test"
+    else:
+        if X_normal:
+            test_name = "One-sample t-test"
+        else:
+            test_name = "Wilcoxon matched pairs test"
+
+    return test_name
+            
 
 
-def execute_test(X:pd.DataFrame, Y:pd.DataFrame, test:str) -> bool:
+
+def execute_test(x:Array, y:Array=None, test:str=None, axis:int=0,
+                 alternative_hypothesis:str="two-sided", cutoff:float=0.05,
+                 multiple_testing_correction:str="bonferroni", *args) -> bool:
+
     match test:
+        case "Paired-sample t-test":
+            p_values = stats.ttest_rel(x, y, axis=axis, alternative=alternative_hypothesis, *args)
+        case "Wilcoxon signed-rank test":
+            p_values = stats.wilcoxon(x, y, axis=axis, alternative=alternative_hypothesis, *args)
         case "ttest_ind":
-            stats.ttest_ind(X, Y, equal_var=False)
+            p_values = stats.ttest_ind(x, y, equal_var=False, axis=axis, alternative=alternative_hypothesis, *args)
+        case "One-sample t-test":
+            if y:
+                warnings.warn(f"Passed y vector for a one-sample test.", UserWarning)
+            p_values = stats.ttest_1samp(x, axis=axis, alternative=alternative_hypothesis)
+        case "Wilcoxon matched pairs test":
+            if y:
+                warnings.warn(f"Passed y vector for a one-sample test.", UserWarning)
+            p_values = stats.wilcoxon(x, axis=axis, alternative=alternative_hypothesis, *args)
+
+    if multiple_testing_correction:
+        passed, p_values, *_ = multipletests(p_values, alpha=cutoff, method=multiple_testing_correction.lower())
+    
+    return p_values
+
 
 
 def p_val_to_star(p:float) -> str:
