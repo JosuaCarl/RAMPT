@@ -12,7 +12,7 @@ from tqdm.auto import tqdm
 from tqdm.dask import TqdmCallback
 import dask.multiprocessing
 
-from source.helpers.general import change_case_str, open_last_line_with_content, make_new_dir
+from source.helpers.general import change_case_str, open_last_line_with_content, make_new_dir, execute_verbose_command
 from source.helpers.types import StrPath
 
 
@@ -111,13 +111,9 @@ def convert_file( in_path:str, out_path:str,
     format = change_case_str(s=format, range=slice(2, len(format)), conversion="upper")
 
     cmd = f'msconvert --{format} --64 -o {out_path} {in_path} {" ".join(additional_args)}'
-    if verbosity >= 3:
-        os.system( cmd )
-    elif platform.lower() == "windows":
-        os.system( cmd + ' > NUL')
-    else:
-        os.system( cmd + ' > /dev/null')
-    return True
+
+    return execute_verbose_command(cmd=cmd, platform=platform, verbosity=verbosity)
+
 
 
 def convert_files(root_folder:StrPath, out_root_folder:StrPath,
@@ -172,7 +168,6 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
                                                             format=format, additional_args=additional_args,
                                                             platform=platform, verbosity=verbosity ) )
             elif not origin_valid:
-                print(dir)
                 scheduled = convert_files( root_folder=join(root_folder, dir), out_root_folder=join(out_root_folder, dir),
                                            suffix=suffix, prefix=prefix, contains=contains,
                                            format=format, n_workers=n_workers,
@@ -200,7 +195,7 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
             
         if original:
             dask.config.set(scheduler='processes', num_workers=n_workers)
-            if verbosity >=1:
+            if verbosity >= 1:
                 with TqdmCallback(desc="Compute"):
                     dask.compute(futures)
             else:

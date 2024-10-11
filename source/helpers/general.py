@@ -77,6 +77,26 @@ def change_case_str(s:str, range:SupportsIndex, conversion:str) -> str:
     return "".join(str_list)
 
 
+class Substring(str):
+    """
+    Class for matching substrings, rather than strings
+
+    :param str: string
+    :type str: str-type
+    """
+    def __eq__(self, other) -> bool:
+        """
+        Define == as containing the string
+
+        :param other: other String
+        :type other: Any
+        :return: Whether the string is contained in the Substring
+        :rtype: bool
+        """
+        return other in self
+
+
+
 def open_last_n_line(filepath:str, n:int=1) -> str:
     """
     Open the n-th line from the back of a file
@@ -117,3 +137,27 @@ def open_last_line_with_content(filepath:str) -> str:
             return line
         n += 1
     raise(ValueError(f"File {filepath} does not contain a line with content for 1000 lines"))
+
+
+
+# Command methods
+def execute_verbose_command(cmd:str, platform:str, verbosity:int=1) -> bool:
+    """
+    Execute a command with the adequate verbosity.
+
+    :param cmd: Command as a string
+    :type cmd: str
+    :param platform: Current OS platform
+    :type platform: str
+    :param verbosity: Verbosity level, defaults to 1
+    :type verbosity: int, optional
+    :return: Success of execution
+    :rtype: bool
+    """
+    if verbosity >= 3:
+        os.system( cmd )
+    elif platform.lower() == "windows":
+        os.system( cmd + ' > NUL')
+    else:
+        os.system( cmd + ' > /dev/null')
+    return True
