@@ -307,6 +307,7 @@ document.write(`
 <span class="sd">Methods that are helpful for general processing.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">regex</span>
 <span class="kn">from</span> <span class="nn">source.helpers.types</span> <span class="kn">import</span> <span class="o">*</span>
 
@@ -393,6 +394,29 @@ document.write(`
 
 
 
+<div class="viewcode-block" id="Substring">
+<a class="viewcode-back" href="../../../source.helpers.html#source.helpers.general.Substring">[docs]</a>
+<span class="k">class</span> <span class="nc">Substring</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for matching substrings, rather than strings</span>
+
+<span class="sd">    :param str: string</span>
+<span class="sd">    :type str: str-type</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define == as containing the string</span>
+
+<span class="sd">        :param other: other String</span>
+<span class="sd">        :type other: Any</span>
+<span class="sd">        :return: Whether the string is contained in the Substring</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">other</span> <span class="ow">in</span> <span class="bp">self</span></div>
+
+
+
+
 <div class="viewcode-block" id="open_last_n_line">
 <a class="viewcode-back" href="../../../source.helpers.html#source.helpers.general.open_last_n_line">[docs]</a>
 <span class="k">def</span> <span class="nf">open_last_n_line</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -438,6 +462,36 @@ document.write(`
             <span class="k">return</span> <span class="n">line</span>
         <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">raise</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2"> does not contain a line with content for 1000 lines&quot;</span><span class="p">))</span></div>
+
+
+
+
+<span class="c1"># Command methods</span>
+<div class="viewcode-block" id="execute_verbose_command">
+<a class="viewcode-back" href="../../../source.helpers.html#source.helpers.general.execute_verbose_command">[docs]</a>
+<span class="k">def</span> <span class="nf">execute_verbose_command</span><span class="p">(</span><span class="n">cmd</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">platform</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">verbosity</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Execute a command with the adequate verbosity.</span>
+
+<span class="sd">    :param cmd: Command as a string</span>
+<span class="sd">    :type cmd: str</span>
+<span class="sd">    :param platform: Current OS platform</span>
+<span class="sd">    :type platform: str</span>
+<span class="sd">    :param verbosity: Verbosity level, defaults to 1</span>
+<span class="sd">    :type verbosity: int, optional</span>
+<span class="sd">    :return: Success of execution</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">verbosity</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;windows&quot;</span><span class="p">:</span>
+             <span class="n">cmd</span> <span class="o">=</span> <span class="n">cmd</span> <span class="o">+</span> <span class="s2">&quot; &gt; NUL&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="n">cmd</span> <span class="o">+</span> <span class="s2">&quot; &gt; /dev/null&quot;</span>
+    <span class="k">if</span> <span class="n">verbosity</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">cmd</span> <span class="o">+</span> <span class="s2">&quot; 2&gt;&amp;1&quot;</span>
+
+    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span> <span class="n">cmd</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
 
 </pre></div>
 

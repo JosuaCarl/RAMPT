@@ -316,7 +316,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">tqdm.dask</span> <span class="kn">import</span> <span class="n">TqdmCallback</span>
 <span class="kn">import</span> <span class="nn">dask.multiprocessing</span>
 
-<span class="kn">from</span> <span class="nn">source.helpers.general</span> <span class="kn">import</span> <span class="n">change_case_str</span><span class="p">,</span> <span class="n">open_last_line_with_content</span><span class="p">,</span> <span class="n">make_new_dir</span>
+<span class="kn">from</span> <span class="nn">source.helpers.general</span> <span class="kn">import</span> <span class="n">change_case_str</span><span class="p">,</span> <span class="n">open_last_line_with_content</span><span class="p">,</span> <span class="n">make_new_dir</span><span class="p">,</span> <span class="n">execute_verbose_command</span>
 <span class="kn">from</span> <span class="nn">source.helpers.types</span> <span class="kn">import</span> <span class="n">StrPath</span>
 
 
@@ -423,13 +423,9 @@ document.write(`
     <span class="nb">format</span> <span class="o">=</span> <span class="n">change_case_str</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nb">format</span><span class="p">)),</span> <span class="n">conversion</span><span class="o">=</span><span class="s2">&quot;upper&quot;</span><span class="p">)</span>
 
     <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;msconvert --</span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s1"> --64 -o </span><span class="si">{</span><span class="n">out_path</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">in_path</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">additional_args</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
-    <span class="k">if</span> <span class="n">verbosity</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span> <span class="n">cmd</span> <span class="p">)</span>
-    <span class="k">elif</span> <span class="n">platform</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;windows&quot;</span><span class="p">:</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span> <span class="n">cmd</span> <span class="o">+</span> <span class="s1">&#39; &gt; NUL&#39;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span> <span class="n">cmd</span> <span class="o">+</span> <span class="s1">&#39; &gt; /dev/null&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="kc">True</span></div>
+
+    <span class="k">return</span> <span class="n">execute_verbose_command</span><span class="p">(</span><span class="n">cmd</span><span class="o">=</span><span class="n">cmd</span><span class="p">,</span> <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="n">verbosity</span><span class="p">)</span></div>
+
 
 
 
@@ -487,7 +483,6 @@ document.write(`
                                                             <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="n">additional_args</span><span class="o">=</span><span class="n">additional_args</span><span class="p">,</span>
                                                             <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="n">verbosity</span> <span class="p">)</span> <span class="p">)</span>
             <span class="k">elif</span> <span class="ow">not</span> <span class="n">origin_valid</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
                 <span class="n">scheduled</span> <span class="o">=</span> <span class="n">convert_files</span><span class="p">(</span> <span class="n">root_folder</span><span class="o">=</span><span class="n">join</span><span class="p">(</span><span class="n">root_folder</span><span class="p">,</span> <span class="nb">dir</span><span class="p">),</span> <span class="n">out_root_folder</span><span class="o">=</span><span class="n">join</span><span class="p">(</span><span class="n">out_root_folder</span><span class="p">,</span> <span class="nb">dir</span><span class="p">),</span>
                                            <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="n">contains</span><span class="p">,</span>
                                            <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="n">n_workers</span><span class="o">=</span><span class="n">n_workers</span><span class="p">,</span>
@@ -515,7 +510,7 @@ document.write(`
             
         <span class="k">if</span> <span class="n">original</span><span class="p">:</span>
             <span class="n">dask</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">scheduler</span><span class="o">=</span><span class="s1">&#39;processes&#39;</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="n">n_workers</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">verbosity</span> <span class="o">&gt;=</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbosity</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">with</span> <span class="n">TqdmCallback</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Compute&quot;</span><span class="p">):</span>
                     <span class="n">dask</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>

@@ -331,6 +331,18 @@ document.write(`
 <section id="module-source.helpers.general">
 <span id="source-helpers-general-module"></span><h2>source.helpers.general module<a class="headerlink" href="#module-source.helpers.general" title="Link to this heading">#</a></h2>
 <p>Methods that are helpful for general processing.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="source.helpers.general.Substring">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">source.helpers.general.</span></span><span class="sig-name descname"><span class="pre">Substring</span></span><a class="reference internal" href="_modules/source/helpers/general.html#Substring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.helpers.general.Substring" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+<p>Class for matching substrings, rather than strings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>str</strong> (<em>str-type</em>) – string</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="source.helpers.general.change_case_str">
 <span class="sig-prename descclassname"><span class="pre">source.helpers.general.</span></span><span class="sig-name descname"><span class="pre">change_case_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">SupportsIndex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conversion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/source/helpers/general.html#change_case_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.helpers.general.change_case_str" title="Link to this definition">#</a></dt>
@@ -362,6 +374,27 @@ document.write(`
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>StrPath</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="source.helpers.general.execute_verbose_command">
+<span class="sig-prename descclassname"><span class="pre">source.helpers.general.</span></span><span class="sig-name descname"><span class="pre">execute_verbose_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">platform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/source/helpers/general.html#execute_verbose_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.helpers.general.execute_verbose_command" title="Link to this definition">#</a></dt>
+<dd><p>Execute a command with the adequate verbosity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cmd</strong> (<em>str</em>) – Command as a string</p></li>
+<li><p><strong>platform</strong> (<em>str</em>) – Current OS platform</p></li>
+<li><p><strong>verbosity</strong> (<em>int</em><em>, </em><em>optional</em>) – Verbosity level, defaults to 1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Success of execution</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -495,8 +528,10 @@ document.write(`
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-source.helpers.general">source.helpers.general module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.Substring"><code class="docutils literal notranslate"><span class="pre">Substring</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.change_case_str"><code class="docutils literal notranslate"><span class="pre">change_case_str()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.construct_path"><code class="docutils literal notranslate"><span class="pre">construct_path()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.execute_verbose_command"><code class="docutils literal notranslate"><span class="pre">execute_verbose_command()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.get_internal_filepath"><code class="docutils literal notranslate"><span class="pre">get_internal_filepath()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.make_new_dir"><code class="docutils literal notranslate"><span class="pre">make_new_dir()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.open_last_line_with_content"><code class="docutils literal notranslate"><span class="pre">open_last_line_with_content()</span></code></a></li>

@@ -13,7 +13,7 @@ from tqdm.auto import tqdm
 from tqdm.dask import TqdmCallback
 import dask.multiprocessing
 
-from source.helpers.general import Substring, change_case_str, open_last_line_with_content, make_new_dir, execute_verbose_command
+from source.helpers.general import Substring, execute_verbose_command
 from source.helpers.types import StrPath
 
 
@@ -69,8 +69,29 @@ def main(args, unknown_args):
 
 
 class MZmine_runner:
+    """
+    A runner for mzmine operations.
+    """
     def __init__( self, mzmine_path:StrPath, batch_path:StrPath, platform:str, login:str="-login", valid_formats:list=["mzML", "mzXML", "imzML"],
                   additional_args:list=[], verbosity:int=1):
+        """
+        Initialize the MZmine_runner.
+
+        :param mzmine_path: Path to mzmine executable
+        :type mzmine_path: StrPath
+        :param batch_path: Path to mzmine batch file
+        :type batch_path: StrPath
+        :param platform: Operating system platform
+        :type platform: str
+        :param login: Login or user command, defaults to "-login"
+        :type login: str, optional
+        :param valid_formats: Formats to search for as valid endings, defaults to ["mzML", "mzXML", "imzML"]
+        :type valid_formats: list, optional
+        :param additional_args: Additional arguments for mzmine, defaults to []
+        :type additional_args: list, optional
+        :param verbosity: Level of verbosity, defaults to 1
+        :type verbosity: int, optional
+        """
         self.mzmine_path        = mzmine_path
         self.login              = login
         self.batch_path         = batch_path
@@ -81,6 +102,16 @@ class MZmine_runner:
 
 
     def run_mzmine_batch( self, in_path:StrPath, out_path:StrPath ) -> bool:
+        """
+        Run a single mzmine batch.
+
+        :param in_path: Path to in files (as a .txt with filepaths or glob string)
+        :type in_path: StrPath
+        :param out_path: Output directory
+        :type out_path: StrPath
+        :return: Success of the command
+        :rtype: bool
+        """
         cmd = f'\"{self.mzmine_path}\" {self.login} --batch {self.batch_path} --input {in_path} --output {out_path}\
                 {" ".join(self.additional_args)}'
 
@@ -89,6 +120,20 @@ class MZmine_runner:
 
     def run_nested_mzmine_batches( self, root_dir:StrPath, out_root_dir:StrPath,
                                    futures:list=[], original:bool=True) -> list:
+        """
+        Run a mzmine batch on a nested structure
+
+        :param root_dir: Root directory for descending the structure
+        :type root_dir: StrPath
+        :param out_root_dir: Root directory for output
+        :type out_root_dir: StrPath
+        :param futures: Open computations, defaults to []
+        :type futures: list, optional
+        :param original: Recursion instance is original or not, defaults to True
+        :type original: bool, optional
+        :return: Open computations from found valid files
+        :rtype: list
+        """
         verbose_tqdm = self.verbosity < 2 if original else self.verbosity < 3
         in_paths_file = join(out_root_dir, "source_files.txt")
 
