@@ -60,7 +60,7 @@ def main(args, unknown_args):
     mzmine_runner = MZmine_runner( mzmine_path=mzmine_path, batch_path=batch_path, platform=platform, login=login,
                                    valid_formats=valid_formats, additional_args=additional_args, verbosity=verbosity)
     if nested:
-        mzmine_runner.run_nested_mzmine_batches( root_folder=in_dir, out_root_folder=out_dir )
+        mzmine_runner.run_nested_mzmine_batches( root_dir=in_dir, out_root_dir=out_dir )
     else:
         mzmine_runner.run_mzmine_batch( in_path=in_dir, out_path=out_dir )
 
@@ -84,31 +84,29 @@ class MZmine_runner:
         return execute_verbose_command(cmd=cmd, platform=self.platform, verbosity=self.verbosity)
 
 
-    def run_nested_mzmine_batches( self, root_folder:StrPath, out_root_folder:StrPath,
+    def run_nested_mzmine_batches( self, root_dir:StrPath, out_root_dir:StrPath,
                                    futures:list=[], original:bool=True) -> list:
-        
         verbose_tqdm = self.verbosity < 2 if original else self.verbosity < 3
-        in_paths_file = join(out_root_folder, "source_files.txt")
-        for root, dirs, files in os.walk(root_folder):
-            found_files = [join(root_folder, file) for file in files if file.split(".")[-1] in self.valid_formats]
+        in_paths_file = join(out_root_dir, "source_files.txt")
+
+        for root, dirs, files in os.walk(root_dir):
+            found_files = [join(root_dir, file) for file in files if file.split(".")[-1] in self.valid_formats]
             
             if found_files:
+                os.makedirs(out_root_dir, exist_ok=True)
                 with open(in_paths_file , "w" ) as f:
                     f.write( "\n".join(found_files) )
-                futures.append( dask.delayed(self.run_mzmine_batch)( self, in_path=in_paths_file, out_path=out_root_folder ) )
+                futures.append( dask.delayed(self.run_mzmine_batch)( self, in_path=in_paths_file, out_path=out_root_dir ) )
 
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
                 scheduled = self.run_nested_mzmine_batches( self,
-                                                            root_folder=join(root_folder, dir),
-                                                            out_root_folder=join(out_root_folder, dir),
+                                                            root_folder=join(root_dir, dir),
+                                                            out_root_folder=join(out_root_dir, dir),
                                                             futures=futures, original=False )
                 
                 for i in range( len(scheduled) ): # I dont know why, but list comprehension loops endlessly if done by direct element aquisition
                     if scheduled[i] is not None:
                         futures.append( scheduled[i] )
-            
-            if futures and os.path.isdir(root_folder):
-                make_new_dir( join(out_root_folder, root) )
 
             if original:
                 dask.config.set(scheduler='processes', num_workers=1)

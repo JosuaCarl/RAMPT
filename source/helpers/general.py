@@ -3,6 +3,7 @@
 Methods that are helpful for general processing.
 """
 import os
+import warnings
 import regex
 from source.helpers.types import *
 
