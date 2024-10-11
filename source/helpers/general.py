@@ -155,10 +155,13 @@ def execute_verbose_command(cmd:str, platform:str, verbosity:int=1) -> bool:
     :return: Success of execution
     :rtype: bool
     """
-    if verbosity >= 3:
-        os.system( cmd )
-    elif platform.lower() == "windows":
-        os.system( cmd + ' > NUL')
-    else:
-        os.system( cmd + ' > /dev/null')
+    if verbosity <= 2:
+        if platform.lower() == "windows":
+             cmd = cmd + " > NUL"
+        else:
+            cmd = cmd + " > /dev/null"
+    if verbosity <= 1:
+        cmd = cmd + " 2>&1"
+
+    os.system( cmd )
     return True

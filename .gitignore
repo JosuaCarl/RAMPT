@@ -169,10 +169,12 @@ data/
 .conda/
 docsource/_build/
 project_batches/
+source/tests/out/*
 
 ## Files
 Notes.md
 source/tryout.ipynb
 source/quick_scripts
+source/tests/example_files/*
 
 poetry.lock

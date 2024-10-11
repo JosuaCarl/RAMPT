@@ -37,12 +37,12 @@ def main(args, unknown_args):
     nested          = args.nested           if args.nested else False
     platform        = args.platform         if args.platform else "windows"
     verbosity       = args.verbosity        if args.verbosity else 1
-    additional_args = args.msconv_arguments if args.msconv_arguments else unknown_args
+    additional_args = args.mzmine_arguments if args.mzmine_arguments else unknown_args
     
     if not mzmine_path:
         match Substring(platform.lower()):
             case "linux":
-                mzmine_path = r'/opt/mzmine/bin/mzmine' 
+                mzmine_path = r'/opt/mzmine-linux-installer/bin/mzmine' 
             case "windows":
                 mzmine_path = r'C:\"Program Files"\mzmine\mzmine_console.exe'
             case "mac":
@@ -51,7 +51,10 @@ def main(args, unknown_args):
                 mzmine_path = r"mzmine"
 
     if user:
-        login = f"-user {user}"
+        if user == "console":
+            login = "-login-console"
+        else:
+            login = f"-user {user}"
     else:
         print("You did not provide a user. You will be prompted to login by mzmine.\
                For future use please find your user file under $USER/.mzmine/users/ after completing the login.")
@@ -78,7 +81,7 @@ class MZmine_runner:
 
 
     def run_mzmine_batch( self, in_path:StrPath, out_path:StrPath ) -> bool:
-        cmd = f'{self.mzmine_path} {self.login} --batch {self.batch_path} --input {in_path} --output {out_path}\
+        cmd = f'\"{self.mzmine_path}\" {self.login} --batch {self.batch_path} --input {in_path} --output {out_path}\
                 {" ".join(self.additional_args)}'
 
         return execute_verbose_command(cmd=cmd, platform=self.platform, verbosity=self.verbosity)
@@ -96,12 +99,11 @@ class MZmine_runner:
                 os.makedirs(out_root_dir, exist_ok=True)
                 with open(in_paths_file , "w" ) as f:
                     f.write( "\n".join(found_files) )
-                futures.append( dask.delayed(self.run_mzmine_batch)( self, in_path=in_paths_file, out_path=out_root_dir ) )
+                futures.append( dask.delayed(self.run_mzmine_batch)( in_path=in_paths_file, out_path=out_root_dir ) )
 
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
-                scheduled = self.run_nested_mzmine_batches( self,
-                                                            root_folder=join(root_dir, dir),
-                                                            out_root_folder=join(out_root_dir, dir),
+                scheduled = self.run_nested_mzmine_batches( root_dir=join(root_dir, dir),
+                                                            out_root_dir=join(out_root_dir, dir),
                                                             futures=futures, original=False )
                 
                 for i in range( len(scheduled) ): # I dont know why, but list comprehension loops endlessly if done by direct element aquisition
@@ -128,10 +130,10 @@ if __name__ == "__main__":
     parser.add_argument('-in',      '--in_dir',             required=True)
     parser.add_argument('-out',     '--out_dir',            required=True)
     parser.add_argument('-batch',   '--batch_path',         required=True)
-    parser.add_argument('-formats', '--valid_formats',      required=False)
+    parser.add_argument('-formats', '--valid_formats',      required=False,     nargs='+')
     parser.add_argument('-u',       '--user',               required=False)
     parser.add_argument('-n',       '--nested',             required=False,     action="store_true")
-    parser.add_argument('-plat',    '--platform',           required=False)
+    parser.add_argument('-p',       '--platform',           required=False)
     parser.add_argument('-v',       '--verbosity',          required=False,     type=int)
     parser.add_argument('-mzmine',  '--mzmine_arguments',   required=False,     nargs=argparse.REMAINDER)
 
