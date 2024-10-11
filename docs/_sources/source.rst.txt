@@ -11,7 +11,6 @@ Subpackages
    source.conversion
    source.feature_finding
    source.helpers
-   source.networking
    source.tests
 
 Module contents
