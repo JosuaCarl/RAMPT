@@ -36,6 +36,7 @@ def main(args, unknown_args):
     user            = args.user             if args.user else None
     nested          = args.nested           if args.nested else False
     platform        = args.platform         if args.platform else "windows"
+    gnps_pipe       = args.gnps_pipe        if args.gnps_pipe else False
     verbosity       = args.verbosity        if args.verbosity else 1
     additional_args = args.mzmine_arguments if args.mzmine_arguments else unknown_args
     
@@ -61,7 +62,8 @@ def main(args, unknown_args):
         login = "-login"
 
     mzmine_runner = MZmine_runner( mzmine_path=mzmine_path, batch_path=batch_path, platform=platform, login=login,
-                                   valid_formats=valid_formats, additional_args=additional_args, verbosity=verbosity)
+                                   valid_formats=valid_formats, gnps_pipe=gnps_pipe,
+                                   additional_args=additional_args, verbosity=verbosity)
     if nested:
         mzmine_runner.run_nested_mzmine_batches( root_dir=in_dir, out_root_dir=out_dir )
     else:
@@ -73,7 +75,7 @@ class MZmine_runner:
     A runner for mzmine operations.
     """
     def __init__( self, mzmine_path:StrPath, batch_path:StrPath, platform:str, login:str="-login", valid_formats:list=["mzML", "mzXML", "imzML"],
-                  additional_args:list=[], verbosity:int=1):
+                  gnps_pipe:bool=False, additional_args:list=[], verbosity:int=1):
         """
         Initialize the MZmine_runner.
 
@@ -99,6 +101,7 @@ class MZmine_runner:
         self.platform           = platform
         self.additional_args    = additional_args
         self.verbosity          = verbosity
+        self.gnps_pipe          = gnps_pipe
 
 
     def run_mzmine_batch( self, in_path:StrPath, out_path:StrPath ) -> bool:
@@ -114,8 +117,11 @@ class MZmine_runner:
         """
         cmd = f'\"{self.mzmine_path}\" {self.login} --batch {self.batch_path} --input {in_path} --output {out_path}\
                 {" ".join(self.additional_args)}'
-
-        return execute_verbose_command(cmd=cmd, platform=self.platform, verbosity=self.verbosity)
+        
+        if self.gnps_pipe:
+            cmd = f"{cmd} | "
+        return execute_verbose_command( cmd=cmd, platform=self.platform, verbosity=self.verbosity,
+                                        outpath=join(out_path, "out.txt") if self.gnps_pipe else None )
 
 
     def run_nested_mzmine_batches( self, root_dir:StrPath, out_root_dir:StrPath,
@@ -179,6 +185,7 @@ if __name__ == "__main__":
     parser.add_argument('-u',       '--user',               required=False)
     parser.add_argument('-n',       '--nested',             required=False,     action="store_true")
     parser.add_argument('-p',       '--platform',           required=False)
+    parser.add_argument('-gnps',    '--gnps_pipe',          required=False)
     parser.add_argument('-v',       '--verbosity',          required=False,     type=int)
     parser.add_argument('-mzmine',  '--mzmine_arguments',   required=False,     nargs=argparse.REMAINDER)
 

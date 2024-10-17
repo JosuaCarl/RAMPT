@@ -168,7 +168,7 @@ cython_debug/
 data/
 .conda/
 docsource/_build/
-project_batches/
+substep_batches/
 source/tests/out/*
 
 ## Files

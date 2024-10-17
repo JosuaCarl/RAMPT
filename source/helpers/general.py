@@ -142,7 +142,7 @@ def open_last_line_with_content(filepath:str) -> str:
 
 
 # Command methods
-def execute_verbose_command(cmd:str, platform:str, verbosity:int=1) -> bool:
+def execute_verbose_command(cmd:str, platform:str, verbosity:int=1, outpath:StrPath=None) -> bool:
     """
     Execute a command with the adequate verbosity.
 
@@ -155,6 +155,8 @@ def execute_verbose_command(cmd:str, platform:str, verbosity:int=1) -> bool:
     :return: Success of execution
     :rtype: bool
     """
+    if outpath:
+        cmd = cmd + f" | tee {outpath}"
     if verbosity <= 2:
         if platform.lower() == "windows":
              cmd = cmd + " > NUL"
