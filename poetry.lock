@@ -3525,6 +3525,17 @@ develop = ["colorama", "cython (>=3.0.10)", "cython (>=3.0.10,<4)", "flake8", "i
 docs = ["ipykernel", "jupyter-client", "matplotlib", "nbconvert", "nbformat", "numpydoc", "pandas-datareader", "sphinx"]
 
 [[package]]
+name = "tee-subprocess"
+version = "1.1.0"
+description = "A subprocess replacement with tee support for both synchronous and asynchronous contexts."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "tee_subprocess-1.1.0-py3-none-any.whl", hash = "sha256:c4265c7a0290694e55853461563bf50641e9dd1d1c8fac7e12c7b73dddee67e8"},
+    {file = "tee_subprocess-1.1.0.tar.gz", hash = "sha256:2ee099876bfcd3cdbb2768d122fa2b5275175586e533a3479b93dbc4122397dc"},
+]
+
+[[package]]
 name = "tenacity"
 version = "9.0.0"
 description = "Retry code until it succeeds"
@@ -3775,4 +3786,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "6b8fbfca84c8d562b08df6788f4fee1027114a7d346bb62db91dc496284ca13e"
+content-hash = "68aebda621b8441cbed5dab8ea0458df3f3989c673924fff17766866aa757502"

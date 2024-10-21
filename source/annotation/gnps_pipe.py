@@ -6,60 +6,54 @@ Use GNPS for anntating compounds.
 
 # Imports
 import warnings
-import time
-import math
-import requests
+import json
+from os.path import join
+from source.helpers.general import check_for_str_request
+from source.helpers.types import StrPath
 
 
-
-def main():
-    pass
-
-
-
-def check_for_str_request(url:str | bytes, query:str, retries:int=100, allowed_fails:int=10, expected_wait_time:float=600.0, verbosity:int=1, **kwargs) -> bool:
+def main(args, unknown_args):
     """
-    Check the given URL for a given query. The task is retried a number of times with logarithmically (log2) decreasing time between requests after one initial request.
+    Execute the conversion.
 
-    :param url: Target URL
-    :type url: str | bytes
-    :param query: Query string that is searched in response
-    :type query: str
-    :param retries: Number of retries, defaults to 100
-    :type retries: int, optional
-    :param allowed_fails: Number of times the request are allowed to fail, defaults to 10
-    :type allowed_fails: int, optional
-    :param expected_wait_time: Expected time until query is found, defaults to 10.0
-    :type expected_wait_time: float, optional
-    :param verbosity: Level of verbosity, defaults to 1
-    :type verbosity: int, optional
-    :param kwargs: Additional arguments, passed on to requests.get()
-    :type kwargs: any, optional
-    :return: Query found ?
-    :rtype: bool
+    :param args: Command line arguments
+    :type args: any
+    :param unknown_args: Command line arguments that are not known.
+    :type unknown_args: any
     """
-    fails = []
-    for i in range(retries):
-        response = requests.get(url,  **kwargs)
-        if response.status_code == 200:
-            if query in  str(response.content):
-                return True
-        else:
-            fails.append(response.status_code)
-            if verbosity >= 1:
-                warnings.warn( f"{url} returned status code {response.status_code} after {i} retries.\
-                            Requesting this URL will be terminated after further {allowed_fails - len(fails)} failed requests.",
-                            category=UserWarning )
-        if len(fails) > allowed_fails:
-            raise LookupError(f"The request to {url} failed more than {allowed_fails} times with the following status codes:\n{fails}")
-        
-        # Retry
-        retry_time = ( 1 / math.log2(i + 2) ) * expected_wait_time
-        if verbosity >= 2:
-            print(f"{query} not found at {url}. Retrying in {retry_time}s.")
-        time.sleep(retry_time)
-    return False
+    # Extract arguments
+    mzmine_path     = args.mzmine_path      if args.mzmine_path else None
+    in_dir          = args.in_dir
+    out_dir         = args.out_dir
+    batch_path      = args.batch_path
+    valid_formats   = args.valid_formats    if args.valid_formats else ["mzML", "mzXML", "imzML"]
+    user            = args.user             if args.user else None
+    nested          = args.nested           if args.nested else False
+    platform        = args.platform         if args.platform else "windows"
+    gnps_pipe       = args.gnps_pipe        if args.gnps_pipe else False
+    verbosity       = args.verbosity        if args.verbosity else 1
+    additional_args = args.mzmine_arguments if args.mzmine_arguments else unknown_args
 
-task_id = "bb679dc3f6cf4383b8c8e58a73b97b39"
-url = f"https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={task_id}"
-check_for_str_request(url=url, query='\"status\":\"DONE\"', retries=100, allowed_fails=10, wait_time_init=10.0, timeout=5)
+
+def filter_cmd_output(out_path:StrPath, query:str) -> dict:
+    with open( join(out_path, "out.txt"), "r") as f:
+        for line in f.readlines():
+            if query in line:
+                response_json = line.split(query)[-1]
+                return json.loads(response_json)
+
+def check_task_finished(out_path=StrPath):
+    gnps_response = filter_cmd_output(out_path=out_path, query="io.github.mzmine.modules.io.export_features_gnps.GNPSUtils submitFbmnJob GNPS FBMN/IIMN response:")
+    if gnps_response["status"] == "Success":
+        task_id = gnps_response["task_id"]
+    else:
+        warnings.warn(f"{join(out_path, "out.txt")} reports an unsuccessful job submission to GNPS by mzmine.", UserWarning)
+        print("The job will be resubmitted to ")
+    url = f"https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={task_id}"
+    return check_for_str_request(url=url, query='\"status\":\"DONE\"', retries=100, allowed_fails=10, expected_wait_time=600.0, timeout=5)
+
+
+def 
+
+
+

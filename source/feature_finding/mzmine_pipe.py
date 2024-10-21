@@ -36,7 +36,7 @@ def main(args, unknown_args):
     user            = args.user             if args.user else None
     nested          = args.nested           if args.nested else False
     platform        = args.platform         if args.platform else "windows"
-    gnps_pipe       = args.gnps_pipe        if args.gnps_pipe else False
+    save_out        = args.save_out         if args.save_out else False
     verbosity       = args.verbosity        if args.verbosity else 1
     additional_args = args.mzmine_arguments if args.mzmine_arguments else unknown_args
     
@@ -53,16 +53,16 @@ def main(args, unknown_args):
 
     if user:
         if user == "console":
-            login = "-login-console"
+            login = "--login-console"
         else:
-            login = f"-user {user}"
+            login = f"--user {user}"
     else:
         print("You did not provide a user. You will be prompted to login by mzmine.\
                For future use please find your user file under $USER/.mzmine/users/ after completing the login.")
-        login = "-login"
+        login = "--login"
 
     mzmine_runner = MZmine_runner( mzmine_path=mzmine_path, batch_path=batch_path, platform=platform, login=login,
-                                   valid_formats=valid_formats, gnps_pipe=gnps_pipe,
+                                   valid_formats=valid_formats, save_out=save_out,
                                    additional_args=additional_args, verbosity=verbosity)
     if nested:
         mzmine_runner.run_nested_mzmine_batches( root_dir=in_dir, out_root_dir=out_dir )
@@ -75,7 +75,7 @@ class MZmine_runner:
     A runner for mzmine operations.
     """
     def __init__( self, mzmine_path:StrPath, batch_path:StrPath, platform:str, login:str="-login", valid_formats:list=["mzML", "mzXML", "imzML"],
-                  gnps_pipe:bool=False, additional_args:list=[], verbosity:int=1):
+                  save_out:bool=False, additional_args:list=[], verbosity:int=1):
         """
         Initialize the MZmine_runner.
 
@@ -101,7 +101,7 @@ class MZmine_runner:
         self.platform           = platform
         self.additional_args    = additional_args
         self.verbosity          = verbosity
-        self.gnps_pipe          = gnps_pipe
+        self.save_out           = save_out
 
 
     def run_mzmine_batch( self, in_path:StrPath, out_path:StrPath ) -> bool:
@@ -117,11 +117,9 @@ class MZmine_runner:
         """
         cmd = f'\"{self.mzmine_path}\" {self.login} --batch {self.batch_path} --input {in_path} --output {out_path}\
                 {" ".join(self.additional_args)}'
-        
-        if self.gnps_pipe:
-            cmd = f"{cmd} | "
-        return execute_verbose_command( cmd=cmd, platform=self.platform, verbosity=self.verbosity,
-                                        outpath=join(out_path, "out.txt") if self.gnps_pipe else None )
+              
+        return execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
+                                        out_path=join(out_path, "out.txt") if self.save_out else None )
 
 
     def run_nested_mzmine_batches( self, root_dir:StrPath, out_root_dir:StrPath,
@@ -153,13 +151,9 @@ class MZmine_runner:
                 futures.append( dask.delayed(self.run_mzmine_batch)( in_path=in_paths_file, out_path=out_root_dir ) )
 
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
-                scheduled = self.run_nested_mzmine_batches( root_dir=join(root_dir, dir),
+                futures = self.run_nested_mzmine_batches( root_dir=join(root_dir, dir),
                                                             out_root_dir=join(out_root_dir, dir),
                                                             futures=futures, original=False )
-                
-                for i in range( len(scheduled) ): # I dont know why, but list comprehension loops endlessly if done by direct element aquisition
-                    if scheduled[i] is not None:
-                        futures.append( scheduled[i] )
 
             if original:
                 dask.config.set(scheduler='processes', num_workers=1)
@@ -185,7 +179,7 @@ if __name__ == "__main__":
     parser.add_argument('-u',       '--user',               required=False)
     parser.add_argument('-n',       '--nested',             required=False,     action="store_true")
     parser.add_argument('-p',       '--platform',           required=False)
-    parser.add_argument('-gnps',    '--gnps_pipe',          required=False)
+    parser.add_argument('-s',       '--save_out',           required=False,     action="store_true")
     parser.add_argument('-v',       '--verbosity',          required=False,     type=int)
     parser.add_argument('-mzmine',  '--mzmine_arguments',   required=False,     nargs=argparse.REMAINDER)
 

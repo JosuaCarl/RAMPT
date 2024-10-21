@@ -112,7 +112,7 @@ def convert_file( in_path:str, out_path:str,
 
     cmd = f'msconvert --{format} --64 -o {out_path} {in_path} {" ".join(additional_args)}'
 
-    return execute_verbose_command(cmd=cmd, platform=platform, verbosity=verbosity)
+    return execute_verbose_command(cmd=cmd, verbosity=verbosity)
 
 
 
