@@ -7,7 +7,7 @@ import os
 import shutil
 
 from source.helpers.general import construct_path, get_internal_filepath
-from source.conversion.raw_to_mzml import *
+from source.conversion.msconv_pipe import *
 from source.feature_finding.mzmine_pipe import main as mzmine_pipe_main
 import pandas as pd
 

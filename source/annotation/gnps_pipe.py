@@ -134,9 +134,8 @@ class GNPS_Runner:
 
 
     def get_nested_gnps_results( self, root_dir:StrPath, out_root_dir:StrPath,
-                                 futures:list=[], original:bool=True) -> list:
-        verbose_tqdm = self.verbosity < 2 if original else self.verbosity < 3
-
+                                 futures:list=[], recusion_level:int=0) -> list:
+        verbose_tqdm = self.verbosity >= recusion_level + 2
         for root, dirs, files in os.walk(root_dir):
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
                 feature_ms2_found, feature_quantification_found = self.check_dir_files(dir=dir)
@@ -146,14 +145,14 @@ class GNPS_Runner:
                 else:
                     futures = self.get_gnps_results( root_dir=join(root_dir, dir),
                                                      out_root_dir=join(out_root_dir, dir),
-                                                     futures=futures, original=False )
+                                                     futures=futures, recusion_level=recusion_level+1 )
 
             return futures
 
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser( prog='mzmine_pipe.py',
+    parser = argparse.ArgumentParser( prog='gnps_pipe.py',
                                       description='Obtain anntations from MS2 feature networking by GNPS.')
     parser.add_argument('-in',      '--in_dir',             required=True)
     parser.add_argument('-out',     '--out_dir',            required=True)

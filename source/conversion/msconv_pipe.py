@@ -120,11 +120,11 @@ def convert_file( in_path:str, out_path:str,
 
 def convert_files(root_folder:StrPath, out_root_folder:StrPath,
                   suffix:str=None, prefix:str=None, contains:str=None,
-                  format:str="mzML", n_workers=1,
+                  format:str="mzML",
                   redo_threshold:float=1e8, overwrite:bool=False,
                   additional_args:list=[],
                   platform:str="windows", verbosity:int=0,
-                  futures:list=[], original:bool=True) -> list:
+                  futures:list=[], recusion_level:int=0) -> list:
     """
     Converts multiple files in multiple folders, found in root_folder with msconvert and saves them
     to a location out_root_folder again into their respective folders.
@@ -141,8 +141,6 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
     :type contains: str, optional
     :param format: Target format, defaults to "mzML"
     :type format: str, optional
-    :param n_workers: Number of workers, defaults to 1
-    :type n_workers: int, optional
     :param redo_threshold: Threshold in bytess for a target file to be considered as incomplete and scheduled for re running the conversion, defaults to 1e8
     :type redo_threshold: float, optional
     :param overwrite: Overwrite all, do not check whether file already exists, defaults to False
@@ -157,7 +155,7 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
     :rtype: list
     """
     # Outer loop over all files in root folder
-    verbose_tqdm = verbosity < 2 if original else verbosity < 3
+    verbose_tqdm = verbosity >= recusion_level + 2
     for root, dirs, files in os.walk(root_folder):
         for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
             origin_valid, target_valid = check_entry( in_path=join( root_folder, dir ),
@@ -172,11 +170,11 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
             elif not origin_valid:
                 scheduled = convert_files( root_folder=join(root_folder, dir), out_root_folder=join(out_root_folder, dir),
                                            suffix=suffix, prefix=prefix, contains=contains,
-                                           format=format, n_workers=n_workers,
+                                           format=format, 
                                            redo_threshold=redo_threshold, overwrite=overwrite,
                                            additional_args=additional_args,
                                            platform=platform, verbosity=verbosity,
-                                           futures=futures, original=False )
+                                           futures=futures, recusion_level=recusion_level+1 )
                 for i in range( len(scheduled) ): # I dont know why, but list comprehension loops endlessly if done by direct element aquisition
                     if scheduled[i] is not None:
                         futures.append( scheduled[i] ) 
@@ -200,7 +198,7 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog='raw_to_mzml.py',
+    parser = argparse.ArgumentParser(prog='msconv_pipe.py',
                                 description='Conversion of manufacturer MS files to .mzML or .mzXML format.\
                                              The folder structure is mimiced at the place of the output.')
     parser.add_argument('-in',      '--in_dir',             required=True)

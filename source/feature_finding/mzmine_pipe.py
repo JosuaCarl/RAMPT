@@ -132,7 +132,7 @@ class MZmine_Runner:
 
 
     def run_nested_mzmine_batches( self, root_dir:StrPath, out_root_dir:StrPath,
-                                   futures:list=[], original:bool=True) -> list:
+                                   futures:list=[], recusion_level:int=0) -> list:
         """
         Run a mzmine batch on a nested structure.
 
@@ -147,7 +147,7 @@ class MZmine_Runner:
         :return: Open computations from found valid files
         :rtype: list
         """
-        verbose_tqdm = self.verbosity < 2 if original else self.verbosity < 3
+        verbose_tqdm = self.verbosity >= recusion_level + 2
         in_paths_file = join(out_root_dir, "source_files.txt")
 
         for root, dirs, files in os.walk(root_dir):
@@ -161,8 +161,8 @@ class MZmine_Runner:
 
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
                 futures = self.run_nested_mzmine_batches( root_dir=join(root_dir, dir),
-                                                            out_root_dir=join(out_root_dir, dir),
-                                                            futures=futures)
+                                                          out_root_dir=join(out_root_dir, dir),
+                                                          futures=futures, recusion_level=recusion_level+1)
             
             return futures
 
