@@ -12,7 +12,7 @@ from tqdm.auto import tqdm
 from tqdm.dask import TqdmCallback
 import dask.multiprocessing
 
-from source.helpers.general import change_case_str, open_last_line_with_content, make_new_dir, execute_verbose_command
+from source.helpers.general import change_case_str, open_last_line_with_content, make_new_dir, execute_verbose_command, compute_scheduled
 from source.helpers.types import StrPath
 
 
@@ -41,12 +41,14 @@ def main(args, unknown_args):
     additional_args = args.msconv_arguments if args.msconv_arguments else unknown_args
     
     # Conversion
-    convert_files( root_folder=in_dir, out_root_folder=join( out_dir ),
-                   suffix=suffix, prefix=prefix, contains=contains, 
-                   format=format, n_workers=n_workers, 
-                   redo_threshold=redo_threshold, overwrite=overwrite,
-                   additional_args=additional_args,
-                   platform=platform, verbosity=verbosity )
+    futures = convert_files( root_folder=in_dir, out_root_folder=join( out_dir ),
+                             suffix=suffix, prefix=prefix, contains=contains, 
+                             format=format,
+                             redo_threshold=redo_threshold, overwrite=overwrite,
+                             additional_args=additional_args,
+                             platform=platform, verbosity=verbosity )
+    
+    computation_complete = compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
 
 
 
@@ -192,15 +194,7 @@ def convert_files(root_folder:StrPath, out_root_folder:StrPath,
                 
         if futures and os.path.isdir(root_folder):
             make_new_dir( join(out_root_folder, root) )
-            
-        if original:
-            dask.config.set(scheduler='processes', num_workers=n_workers)
-            if verbosity >= 1:
-                with TqdmCallback(desc="Compute"):
-                    dask.compute(futures)
-            else:
-                dask.compute(futures)
-        
+                    
         return futures
 
 

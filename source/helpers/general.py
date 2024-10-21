@@ -10,6 +10,8 @@ import math
 import warnings
 import regex
 import requests
+import dask
+from tqdm.dask import TqdmCallback
 
 import tee_subprocess
 
@@ -175,7 +177,20 @@ def execute_verbose_command(cmd:str|list, verbosity:int=1, out_path:StrPath=None
         with open(out_path, "w") as out_file:
             out_file.write(f"out:\n{process.stdout}\n\n\nerr:\n{process.stderr}")
 
-    return True
+    return process.stdout, process.stderr
+
+
+
+# Parallel processing
+def compute_scheduled( futures:list, num_workers:int=1, verbose:bool=False ) -> bool:
+        dask.config.set(scheduler='processes', num_workers=num_workers)
+        if verbose:
+            with TqdmCallback(desc="Compute"):
+                dask.compute(futures)
+        else:
+            dask.compute(futures)
+        
+        return True
 
 
 

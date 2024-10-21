@@ -6,14 +6,14 @@ Use mzmine for feature finding.
 
 # Imports
 import os
+import asyncio
 import argparse
 
 from os.path import join
 from tqdm.auto import tqdm
-from tqdm.dask import TqdmCallback
 import dask.multiprocessing
 
-from source.helpers.general import Substring, execute_verbose_command
+from source.helpers.general import Substring, execute_verbose_command, compute_scheduled
 from source.helpers.types import StrPath
 
 
@@ -50,6 +50,9 @@ def main(args, unknown_args):
                 mzmine_path = r'/Applications/mzmine.app/Contents/MacOS/mzmine'
             case _:
                 mzmine_path = r"mzmine"
+    
+    if platform.lower() == "windows":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     if user:
         if user == "console":
@@ -61,20 +64,21 @@ def main(args, unknown_args):
                For future use please find your user file under $USER/.mzmine/users/ after completing the login.")
         login = "--login"
 
-    mzmine_runner = MZmine_runner( mzmine_path=mzmine_path, batch_path=batch_path, platform=platform, login=login,
+    mzmine_runner = MZmine_Runner( mzmine_path=mzmine_path, batch_path=batch_path, login=login,
                                    valid_formats=valid_formats, save_out=save_out,
                                    additional_args=additional_args, verbosity=verbosity)
     if nested:
-        mzmine_runner.run_nested_mzmine_batches( root_dir=in_dir, out_root_dir=out_dir )
+        futures = mzmine_runner.run_nested_mzmine_batches( root_dir=in_dir, out_root_dir=out_dir )
+        computation_complete = compute_scheduled( futures=futures, num_workers=1, verbose=verbosity >= 1)
     else:
         mzmine_runner.run_mzmine_batch( in_path=in_dir, out_path=out_dir )
 
 
-class MZmine_runner:
+class MZmine_Runner:
     """
-    A runner for mzmine operations.
+    A runner for mzmine operations. Collects processed files and console outputs/errors.
     """
-    def __init__( self, mzmine_path:StrPath, batch_path:StrPath, platform:str, login:str="-login", valid_formats:list=["mzML", "mzXML", "imzML"],
+    def __init__( self, mzmine_path:StrPath, batch_path:StrPath, login:str="-login", valid_formats:list=["mzML", "mzXML", "imzML"],
                   save_out:bool=False, additional_args:list=[], verbosity:int=1):
         """
         Initialize the MZmine_runner.
@@ -83,8 +87,6 @@ class MZmine_runner:
         :type mzmine_path: StrPath
         :param batch_path: Path to mzmine batch file
         :type batch_path: StrPath
-        :param platform: Operating system platform
-        :type platform: str
         :param login: Login or user command, defaults to "-login"
         :type login: str, optional
         :param valid_formats: Formats to search for as valid endings, defaults to ["mzML", "mzXML", "imzML"]
@@ -98,10 +100,13 @@ class MZmine_runner:
         self.login              = login
         self.batch_path         = batch_path
         self.valid_formats      = valid_formats
-        self.platform           = platform
         self.additional_args    = additional_args
         self.verbosity          = verbosity
         self.save_out           = save_out
+        self.processed_in       = []
+        self.processed_out      = []
+        self.outs               = []
+        self.errs               = []
 
 
     def run_mzmine_batch( self, in_path:StrPath, out_path:StrPath ) -> bool:
@@ -118,14 +123,18 @@ class MZmine_runner:
         cmd = f'\"{self.mzmine_path}\" {self.login} --batch {self.batch_path} --input {in_path} --output {out_path}\
                 {" ".join(self.additional_args)}'
               
-        return execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
-                                        out_path=join(out_path, "out.txt") if self.save_out else None )
+        out, err = execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
+                                            out_path=join(out_path, "mzmine_log.txt") if self.save_out else None )
+        self.processed_in.append(in_path)
+        self.processed_out.append(out_path)
+        self.outs.append(out)
+        self.errs.append(err)
 
 
     def run_nested_mzmine_batches( self, root_dir:StrPath, out_root_dir:StrPath,
                                    futures:list=[], original:bool=True) -> list:
         """
-        Run a mzmine batch on a nested structure
+        Run a mzmine batch on a nested structure.
 
         :param root_dir: Root directory for descending the structure
         :type root_dir: StrPath
@@ -153,15 +162,7 @@ class MZmine_runner:
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
                 futures = self.run_nested_mzmine_batches( root_dir=join(root_dir, dir),
                                                             out_root_dir=join(out_root_dir, dir),
-                                                            futures=futures, original=False )
-
-            if original:
-                dask.config.set(scheduler='processes', num_workers=1)
-                if self.verbosity >= 1:
-                    with TqdmCallback(desc="Compute"):
-                        dask.compute(futures)
-                else:
-                    dask.compute(futures)
+                                                            futures=futures)
             
             return futures
 
