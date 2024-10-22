@@ -19,6 +19,7 @@ import dask.multiprocessing
 
 from source.helpers.general import check_for_str_request, compute_scheduled
 from source.helpers.types import StrPath
+from source.helpers.classes import Pipe_Step
 
 
 def main(args, unknown_args):
@@ -32,41 +33,38 @@ def main(args, unknown_args):
     """
     # Extract arguments
     in_dir          = args.in_dir
-    out_dir         = args.out_dir
+    out_dir         = args.out_dir          if args.out_dir else args.in_dir
     nested          = args.nested           if args.nested else False
     n_workers       = args.workers          if args.workers else 1
+    save_out        = args.save_out         if args.save_out else False
     verbosity       = args.verbosity        if args.verbosity else 1
     additional_args = args.gnps_args        if args.gnps_args else unknown_args
 
-    gnps_runner = GNPS_Runner()
+    gnps_runner = GNPS_Runner( save_out=save_out, additional_args=additional_args)
 
-    futures = gnps_runner.get_nested_gnps_results()
-    computation_complete = compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
+    if nested:
+        futures = gnps_runner.get_nested_gnps_results( root_dir=in_dir, out_root_dir=out_dir )
+        computation_complete = compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
+    else:
+        futures = gnps_runner.get_gnps_results( in_dir=in_dir, out_dir=out_dir )
     
 
 
-class GNPS_Runner:
-    def __init__(self, save_out:bool=False, additional_args:list=[], verbosity:int=1):
-        self.additional_args    = additional_args
-        self.verbosity          = verbosity
-        self.save_out           = save_out
-        self.mzmine_log_query   = "io.github.mzmine.modules.io.export_features_gnps.GNPSUtils\
-                                   submitFbmnJob GNPS FBMN/IIMN response:"
-        self.processed_in       = []
-        self.processed_out      = []
-        self.outs               = []
-        self.errs               = []
+class GNPS_Runner(Pipe_Step):
+    def __init__( self, save_out:bool=False, additional_args:list=[], verbosity:int=1 ):
+        super.__init__( save_out=save_out, additional_args=additional_args, verbosity=verbosity)
+        self.mzmine_log_query   = "io.github.mzmine.modules.io.export_features_gnps.GNPSUtils submitFbmnJob GNPS FBMN/IIMN response: "
 
 
 
-    def extract_json_from_output( self, out_path:StrPath, query:str, mzmine_log:str=None ) -> dict:
+    def extract_json_from_output( self, work_path:StrPath, query:str, mzmine_log:str=None ) -> dict:
         if mzmine_log:
             for line in mzmine_log.split("\n"):
                 if query in line:
                     response_json = line.split(query)[-1]
                     return json.loads(response_json) 
         else:
-            with open( join(out_path, "mzmine_log.txt"), "r") as f:
+            with open( join(work_path, "mzmine_log.txt"), "r") as f:
                 for line in f.readlines():
                     if query in line:
                         response_json = line.split(query)[-1]
@@ -85,16 +83,16 @@ class GNPS_Runner:
 
 
 
-    def check_task_finished( self, out_path:StrPath, mzmine_log:str=None ) -> tuple[str, bool]:
-        gnps_response = self. extract_json_from_output( out_path=out_path,
-                                                        query=self.mzmine_log_query, 
-                                                        mzmine_log=mzmine_log )
+    def check_task_finished( self, work_path:StrPath, mzmine_log:str=None ) -> tuple[str, bool]:
+        gnps_response = self.extract_json_from_output( work_path=work_path,
+                                                       query=self.mzmine_log_query, 
+                                                       mzmine_log=mzmine_log )
             
         if gnps_response["status"] == "Success":
             task_id = gnps_response["task_id"]
         else:
-            warnings.warn(f"{join(out_path, 'mzmine_log.txt')} reports an unsuccessful job submission to GNPS by mzmine.", UserWarning)
-            self.post_gnps_request(out_path=out_path)
+            warnings.warn(f"{join(work_path, 'mzmine_log.txt')} reports an unsuccessful job submission to GNPS by mzmine.", UserWarning)
+            self.post_gnps_request(work_path=work_path)
             
         url = f"https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={task_id}"
         return task_id, check_for_str_request( url=url, query='\"status\":\"DONE\"',
@@ -104,15 +102,15 @@ class GNPS_Runner:
 
     def fetch_results( self, task_id:str, out_path:StrPath=None ):
         response = requests.get(f"https://gnps.ucsd.edu/ProteoSAFe/result_json.jsp?task={task_id}&view=view_all_annotations_DB")
-        
+
         if out_path:
             with open(out_path, "w") as file:
-                file.write(response)
+                file.write(response.text)
 
-        return json.loads(response)
+        return json.loads(response.text)
 
 
-    def check_dir_files(dir:StrPath) -> tuple[bool, bool]:
+    def check_dir_files( self, dir:StrPath ) -> tuple[bool, bool]:
         feature_ms2_found = False
         feature_quantification_found = False
         for root, dirs, files in os.walk(dir):
@@ -123,12 +121,21 @@ class GNPS_Runner:
 
 
 
-    def get_gnps_results( self, out_path:StrPath, mzmine_log:str=None):
-        task_id, status = self.check_task_finished( out_path=out_path,
+    def get_gnps_results( self, in_dir:StrPath, out_dir:StrPath, mzmine_log:str=None):
+        task_id, status = self.check_task_finished( work_path=in_dir,
                                                     mzmine_log=mzmine_log )
         if status:
-            return self.fetch_results( task_id=task_id,
-                                       out_path=join(out_path, f"{basename(out_path)}_gnps_all_db_annotations.json") )
+            self.processed_in.append( in_dir )
+            self.processed_in.append( out_dir )
+            results_dict = self.fetch_results( task_id=task_id,
+                                               out_path=join(out_dir, f"{basename(in_dir)}_gnps_all_db_annotations.json") )
+            self.outs.append(results_dict)
+            if self.verbosity >= 3:
+                print(f"GNPS results {basename(in_dir)}:\n")
+                print(f"task_id:{task_id}\n")
+                print(results_dict)
+            return results_dict
+
         else:
             raise BrokenPipeError(f"Status of {task_id} was not marked DONE.")
 
@@ -137,16 +144,16 @@ class GNPS_Runner:
                                  futures:list=[], recusion_level:int=0) -> list:
         verbose_tqdm = self.verbosity >= recusion_level + 2
         for root, dirs, files in os.walk(root_dir):
+            feature_ms2_found, feature_quantification_found = self.check_dir_files(dir=root)
+            if feature_ms2_found and feature_quantification_found:
+                os.makedirs(out_root_dir, exist_ok=True)
+                futures.append( dask.delayed(self.get_gnps_results)( in_dir=root_dir, out_dir=out_root_dir ) )
+
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
-                feature_ms2_found, feature_quantification_found = self.check_dir_files(dir=dir)
-
-                if feature_ms2_found and feature_quantification_found:
-                    futures.append( dask.delayed(self.get_gnps_results)( out_path=join(out_root_dir, dir) ) )
-                else:
-                    futures = self.get_gnps_results( root_dir=join(root_dir, dir),
-                                                     out_root_dir=join(out_root_dir, dir),
-                                                     futures=futures, recusion_level=recusion_level+1 )
-
+                futures = self.get_gnps_results( root_dir=join(root_dir, dir),
+                                                    out_root_dir=join(out_root_dir, dir),
+                                                    futures=futures, recusion_level=recusion_level+1 )
+                    
             return futures
 
 
@@ -155,12 +162,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser( prog='gnps_pipe.py',
                                       description='Obtain anntations from MS2 feature networking by GNPS.')
     parser.add_argument('-in',      '--in_dir',             required=True)
-    parser.add_argument('-out',     '--out_dir',            required=True)
+    parser.add_argument('-out',     '--out_dir',            required=False)
     parser.add_argument('-n',       '--nested',             required=False,     action="store_true")
     parser.add_argument('-s',       '--save_out',           required=False,     action="store_true")
     parser.add_argument('-w',       '--workers',            required=False,     type=int)
     parser.add_argument('-v',       '--verbosity',          required=False,     type=int)
-    parser.add_argument('-gnps',    '--gnps_arguments',     required=False,     nargs=argparse.REMAINDER)
+    parser.add_argument('-gnps',    '--gnps_args',          required=False,     nargs=argparse.REMAINDER)
 
     args, unknown_args = parser.parse_known_args()
 

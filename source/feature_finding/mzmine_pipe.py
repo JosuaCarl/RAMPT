@@ -15,7 +15,7 @@ import dask.multiprocessing
 
 from source.helpers.general import Substring, execute_verbose_command, compute_scheduled
 from source.helpers.types import StrPath
-
+from source.helpers.classes import Pipe_Step
 
 
 def main(args, unknown_args):
@@ -74,7 +74,7 @@ def main(args, unknown_args):
         mzmine_runner.run_mzmine_batch( in_path=in_dir, out_path=out_dir )
 
 
-class MZmine_Runner:
+class MZmine_Runner(Pipe_Step):
     """
     A runner for mzmine operations. Collects processed files and console outputs/errors.
     """
@@ -96,17 +96,12 @@ class MZmine_Runner:
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
+        super().__init__( )
         self.mzmine_path        = mzmine_path
         self.login              = login
         self.batch_path         = batch_path
         self.valid_formats      = valid_formats
-        self.additional_args    = additional_args
-        self.verbosity          = verbosity
-        self.save_out           = save_out
-        self.processed_in       = []
-        self.processed_out      = []
-        self.outs               = []
-        self.errs               = []
+
 
 
     def run_mzmine_batch( self, in_path:StrPath, out_path:StrPath ) -> bool:
