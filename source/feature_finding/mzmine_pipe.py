@@ -122,10 +122,10 @@ class MZmine_Runner(Pipe_Step):
               
         out, err = execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
                                             out_path=join(out_path, "mzmine_log.txt") if self.save_out else None )
-        self.processed_in.append(in_path)
-        self.processed_out.append(out_path)
-        self.outs.append(out)
-        self.errs.append(err)
+        self.processed_in.append( in_path)
+        self.processed_out.append( out_path )
+        self.outs.append( out )
+        self.errs.append( err )
 
 
     def run_nested_mzmine_batches( self, root_dir:StrPath, out_root_dir:StrPath,
