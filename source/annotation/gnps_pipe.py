@@ -202,8 +202,6 @@ class GNPS_Runner(Pipe_Step):
                                                     mzmine_log=mzmine_log,
                                                     gnps_response=gnps_response )
         if status:
-            self.processed_in.append( gnps_response if gnps_response else mzmine_log if mzmine_log else in_dir )
-            self.processed_in.append( out_dir )
             out_path = join(out_dir, f"{basename(in_dir)}_gnps_all_db_annotations.json") if out_dir else None
             results_dict = self.fetch_results( task_id=task_id,
                                                out_path=out_path )
@@ -212,6 +210,9 @@ class GNPS_Runner(Pipe_Step):
                 print(f"GNPS results {basename(in_dir)}:\n")
                 print(f"task_id:{task_id}\n")
                 print(results_dict)
+            
+            self.processed_in.append( gnps_response if gnps_response else mzmine_log if mzmine_log else in_dir )
+            self.processed_out.append( out_path )
             return results_dict
 
         else:

@@ -114,9 +114,9 @@ class File_Converter(Pipe_Step):
                         (not self.prefix or in_path.startswith(self.prefix))    and \
                         (not self.contains or self.contains in in_path)
         # Check target
-        target_valid = self.overwrite or ( not os.path.isfile(out_path) ) or \
-                    os.path.getsize( out_path ) < float(self.redo_threshold) or \
-                    not regex.search( "^</.*>$", open_last_line_with_content(filepath=out_path) )
+        target_valid = self.overwrite or ( not os.path.isfile(out_path) )       or \
+                       os.path.getsize( out_path ) < float(self.redo_threshold) or \
+                       not regex.search( "^</.*>$", open_last_line_with_content(filepath=out_path) )
 
         return origin_valid, target_valid
             
@@ -137,8 +137,12 @@ class File_Converter(Pipe_Step):
 
         cmd = f'msconvert --{target_format} --64 -o {out_path} {in_path} {" ".join(self.additional_args)}'
 
-        return execute_verbose_command(cmd=cmd, verbosity=self.verbosity)
-
+        out, err =  execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
+                                             out_path=join(out_path, "msconv_log.txt") if self.save_log else None)
+        self.processed_in.append( in_path )
+        self.processed_out.append( out_path )
+        self.outs.append( out )
+        self.errs.append( err )
 
 
     def convert_files_nested( self, root_folder:StrPath, out_root_folder:StrPath,
@@ -158,8 +162,9 @@ class File_Converter(Pipe_Step):
         :return: List of future computations
         :rtype: list
         """
-        # Outer loop over all files in root folder
         verbose_tqdm = self.verbosity >= recusion_level + 2
+        
+        # Outer loop over all files in root folder
         for root, dirs, files in os.walk(root_folder):
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
                 origin_valid, target_valid = self.check_entry( in_path=join( root_folder, dir ),

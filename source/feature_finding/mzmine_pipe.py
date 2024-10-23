@@ -122,7 +122,7 @@ class MZmine_Runner(Pipe_Step):
               
         out, err = execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
                                             out_path=join(out_path, "mzmine_log.txt") if self.save_log else None )
-        self.processed_in.append( in_path)
+        self.processed_in.append( in_path )
         self.processed_out.append( out_path )
         self.outs.append( out )
         self.errs.append( err )
