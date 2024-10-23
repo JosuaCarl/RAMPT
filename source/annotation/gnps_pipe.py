@@ -36,14 +36,14 @@ def main(args, unknown_args):
     out_dir         = args.out_dir          if args.out_dir else args.in_dir
     nested          = args.nested           if args.nested else False
     n_workers       = args.workers          if args.workers else 1
-    save_out        = args.save_out         if args.save_out else False
+    save_log        = args.save_log         if args.save_log else False
     verbosity       = args.verbosity        if args.verbosity else 1
     additional_args = args.gnps_args        if args.gnps_args else unknown_args
 
-    gnps_runner = GNPS_Runner( save_out=save_out, additional_args=additional_args)
+    gnps_runner = GNPS_Runner( save_log=save_log, additional_args=additional_args)
 
     if nested:
-        futures = gnps_runner.get_nested_gnps_results( root_dir=in_dir, out_root_dir=out_dir )
+        futures = gnps_runner.get_gnps_results_nested( root_dir=in_dir, out_root_dir=out_dir )
         computation_complete = compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
     else:
         futures = gnps_runner.get_gnps_results( in_dir=in_dir, out_dir=out_dir )
@@ -54,18 +54,18 @@ class GNPS_Runner(Pipe_Step):
     """
     A runner for checking on the GNPS process and subsequently saving the results.
     """
-    def __init__( self, save_out:bool=False, additional_args:list=[], verbosity:int=1 ):
+    def __init__( self, save_log:bool=False, additional_args:list=[], verbosity:int=1 ):
         """
         Initialize the GNPS_Runner.
 
-        :param save_out: Whether to save the output(s).
-        :type save_out: bool, optional
+        :param save_log: Whether to save the output(s).
+        :type save_log: bool, optional
         :param additional_args: Additional arguments for mzmine, defaults to []
         :type additional_args: list, optional
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__( save_out=save_out, additional_args=additional_args, verbosity=verbosity)
+        super().__init__( save_log=save_log, additional_args=additional_args, verbosity=verbosity)
         self.mzmine_log_query   = "io.github.mzmine.modules.io.export_features_gnps.GNPSUtils submitFbmnJob GNPS FBMN/IIMN response: "
 
 
@@ -204,7 +204,7 @@ class GNPS_Runner(Pipe_Step):
         if status:
             self.processed_in.append( gnps_response if gnps_response else mzmine_log if mzmine_log else in_dir )
             self.processed_in.append( out_dir )
-            out_path = join(out_dir, f"{basename(in_dir)}_gnps_all_db_annotations.json") if out_dir and self.save_out else None
+            out_path = join(out_dir, f"{basename(in_dir)}_gnps_all_db_annotations.json") if out_dir else None
             results_dict = self.fetch_results( task_id=task_id,
                                                out_path=out_path )
             self.outs.append( results_dict )
@@ -218,7 +218,7 @@ class GNPS_Runner(Pipe_Step):
             raise BrokenPipeError(f"Status of {task_id} was not marked DONE.")
 
 
-    def get_nested_gnps_results( self, root_dir:StrPath, out_root_dir:StrPath,
+    def get_gnps_results_nested( self, root_dir:StrPath, out_root_dir:StrPath,
                                  futures:list=[], recusion_level:int=0) -> list:
         """
         Construct a list of necessary computations for getting the GNPS results from a nested scheme of mzmine results.
@@ -242,7 +242,7 @@ class GNPS_Runner(Pipe_Step):
                 futures.append( dask.delayed(self.get_gnps_results)( in_dir=root_dir, out_dir=out_root_dir ) )
 
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
-                futures = self.get_nested_gnps_results( root_dir=join(root_dir, dir),
+                futures = self.get_gnps_results_nested( root_dir=join(root_dir, dir),
                                                         out_root_dir=join(out_root_dir, dir),
                                                         futures=futures, recusion_level=recusion_level+1 )
                     
@@ -256,7 +256,7 @@ if __name__ == "__main__":
     parser.add_argument('-in',      '--in_dir',             required=True)
     parser.add_argument('-out',     '--out_dir',            required=False)
     parser.add_argument('-n',       '--nested',             required=False,     action="store_true")
-    parser.add_argument('-s',       '--save_out',           required=False,     action="store_true")
+    parser.add_argument('-s',       '--save_log',           required=False,     action="store_true")
     parser.add_argument('-w',       '--workers',            required=False,     type=int)
     parser.add_argument('-v',       '--verbosity',          required=False,     type=int)
     parser.add_argument('-gnps',    '--gnps_args',          required=False,     nargs=argparse.REMAINDER)

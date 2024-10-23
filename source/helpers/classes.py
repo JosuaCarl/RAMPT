@@ -7,12 +7,12 @@ class Pipe_Step:
     """
     Class for steps in the pipeline.
     """
-    def __init__( self, save_out:bool=False, additional_args:list=[], verbosity:int=1 ):
+    def __init__( self, save_log:bool=False, additional_args:list=[], verbosity:int=1 ):
         """
         Initialize the step. Provides additional variables for saving processed input and out_locations, its output, and errors.
 
-        :param save_out: Whether to save the output(s).
-        :type save_out: bool, optional
+        :param save_log: Whether to save the output(s).
+        :type save_log: bool, optional
         :param additional_args: Additional arguments for mzmine, defaults to []
         :type additional_args: list, optional
         :param verbosity: Level of verbosity, defaults to 1
@@ -20,7 +20,7 @@ class Pipe_Step:
         """
         self.additional_args    = additional_args
         self.verbosity          = verbosity
-        self.save_out           = save_out
+        self.save_log           = save_log
         self.processed_in       = []
         self.processed_out      = []
         self.outs               = []

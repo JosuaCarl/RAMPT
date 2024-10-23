@@ -21,7 +21,7 @@ filepath = get_internal_filepath(__file__)
 def test_gnps_pipe_main():
     args = argparse.Namespace( in_dir=construct_path(filepath, "..", "example_files"),
                                out_dir=construct_path(filepath, "..", "out"),
-                               nested=True, workers=1, save_out=True,
+                               nested=True, workers=1, save_log=True,
                                verbosity=0, gnps_args=None )
     
     gnps_pipe_main( args, unknown_args=[] )

@@ -39,11 +39,11 @@ def main(args, unknown_args):
     config          = args.config           if args.config else None
     nested          = args.nested           if args.nested else False
     n_workers       = args.workers          if args.workers else 1
-    save_out        = args.save_out         if args.save_out else False
+    save_log        = args.save_log         if args.save_log else False
     verbosity       = args.verbosity        if args.verbosity else 1
     additional_args = args.gnps_args        if args.gnps_args else unknown_args
 
-    sirius_runner = Sirius_Runner( sirius_path=sirius_path, config=config, save_out=save_out, additional_args=additional_args, verbosity=verbosity )
+    sirius_runner = Sirius_Runner( sirius_path=sirius_path, config=config, save_log=save_log, additional_args=additional_args, verbosity=verbosity )
 
     if nested:
         futures = sirius_runner.run_nested_sirius( root_dir=in_dir, out_root_dir=out_dir )
@@ -57,7 +57,7 @@ class Sirius_Runner(Pipe_Step):
     """
     A runner for SIRIUS annotation.
     """
-    def __init__( self, sirius_path:StrPath=None, config:StrPath=None, save_out:bool=False, additional_args:list=[], verbosity:int=1 ):
+    def __init__( self, sirius_path:StrPath=None, config:StrPath=None, save_log:bool=False, additional_args:list=[], verbosity:int=1 ):
         """
         Initialize the GNPS_Runner.
 
@@ -65,14 +65,14 @@ class Sirius_Runner(Pipe_Step):
         :type sirius_path: StrPath
         :param config: Path to SIRIS configuration file or direct configuration string
         :type config: StrPath
-        :param save_out: Whether to save the output(s).
-        :type save_out: bool, optional
+        :param save_log: Whether to save the output(s).
+        :type save_log: bool, optional
         :param additional_args: Additional arguments for mzmine, defaults to []
         :type additional_args: list, optional
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__( save_out=save_out, additional_args=additional_args, verbosity=verbosity)
+        super().__init__( save_log=save_log, additional_args=additional_args, verbosity=verbosity)
         self.sirius_path = sirius_path if sirius_path else "sirius"
         if os.path.isfile(config):
             with open( config, "r") as config_file:
@@ -99,7 +99,7 @@ class Sirius_Runner(Pipe_Step):
                 {" ".join(self.additional_args)}'
               
         out, err = execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
-                                            out_path=join(out_path, "sirius_log.txt") if self.save_out else None )
+                                            out_path=join(out_path, "sirius_log.txt") if self.save_log else None )
         
         self.processed_in.append( in_path )
         self.processed_out.append( out_path )
@@ -107,7 +107,7 @@ class Sirius_Runner(Pipe_Step):
         self.errs.append( err )
 
 
-    def run_nested_sirius( self, ):
+    def run_sirius_nested( self, ):
         # TODO
         pass
 
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     parser.add_argument('-p',       '--projectspace',       required=True)
     parser.add_argument('-c',       '--config',             required=False)
     parser.add_argument('-n',       '--nested',             required=False,     action="store_true")
-    parser.add_argument('-s',       '--save_out',           required=False,     action="store_true")
+    parser.add_argument('-s',       '--save_log',           required=False,     action="store_true")
     parser.add_argument('-w',       '--workers',            required=False,     type=int)
     parser.add_argument('-v',       '--verbosity',          required=False,     type=int)
     parser.add_argument('-sirius',  '--sirius_args',        required=False,     nargs=argparse.REMAINDER)

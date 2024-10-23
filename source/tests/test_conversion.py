@@ -20,16 +20,16 @@ filepath = get_internal_filepath(__file__)
 def test_msconv_pipe_main():
     args = argparse.Namespace(in_dir=construct_path(filepath, "..", "test_files"),
                                out_dir=construct_path(filepath, "..", "out"),
-                               format="mzML", suffix=".mzML",
+                               target_format="mzML", suffix=".mzML", nested=True,
                                prefix=None, contains=None, redo_threshold=None, overwrite=None, workers=None,
-                               platform=platform, verbosity=2, msconv_arguments=None)
+                               platform=platform, verbosity=2, msconv_arguments=None, save_log=False)
     msconv_pipe_main(args, unknown_args=[])
 
     args = argparse.Namespace(in_dir=construct_path(filepath, "..", "test_files"),
                                out_dir=construct_path(filepath, "..", "out"),
-                               format="mzXML", suffix=".mzXML",
+                               target_format="mzXML", suffix=".mzXML", nested=True,
                                prefix=None, contains=None, redo_threshold=None, overwrite=None, workers=None,
-                               platform=platform, verbosity=2, msconv_arguments=None)
+                               platform=platform, verbosity=2, msconv_arguments=None, save_log=False)
     msconv_pipe_main(args, unknown_args=[])
     
     assert os.path.isfile( construct_path(filepath, "..", "out/minimal_file.mzML") )

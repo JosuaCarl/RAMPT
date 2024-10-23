@@ -24,7 +24,7 @@ def test_mzmine_pipe_main():
                                out_dir=construct_path(filepath, "..", "out"),
                                batch_path=construct_path(filepath, "..", "batch_files/minimal.mzbatch"),
                                valid_formats=["mzML"],
-                               user="joca", nested=True, platform=platform, save_out=False,
+                               user="joca", nested=True, platform=platform, save_log=False,
                                verbosity=0, mzmine_arguments=None)
     mzmine_pipe_main(args, unknown_args=[])
     

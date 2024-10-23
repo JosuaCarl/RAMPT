@@ -36,7 +36,7 @@ def main(args, unknown_args):
     user            = args.user             if args.user else None
     nested          = args.nested           if args.nested else False
     platform        = args.platform         if args.platform else "windows"
-    save_out        = args.save_out         if args.save_out else False
+    save_log        = args.save_log         if args.save_log else False
     verbosity       = args.verbosity        if args.verbosity else 1
     additional_args = args.mzmine_arguments if args.mzmine_arguments else unknown_args
     
@@ -65,10 +65,10 @@ def main(args, unknown_args):
         login = "--login"
 
     mzmine_runner = MZmine_Runner( mzmine_path=mzmine_path, batch_path=batch_path, login=login,
-                                   valid_formats=valid_formats, save_out=save_out,
+                                   valid_formats=valid_formats, save_log=save_log,
                                    additional_args=additional_args, verbosity=verbosity)
     if nested:
-        futures = mzmine_runner.run_nested_mzmine_batches( root_dir=in_dir, out_root_dir=out_dir )
+        futures = mzmine_runner.run_mzmine_batches_nested( root_dir=in_dir, out_root_dir=out_dir )
         computation_complete = compute_scheduled( futures=futures, num_workers=1, verbose=verbosity >= 1)
     else:
         mzmine_runner.run_mzmine_batch( in_path=in_dir, out_path=out_dir )
@@ -79,7 +79,7 @@ class MZmine_Runner(Pipe_Step):
     A runner for mzmine operations. Collects processed files and console outputs/errors.
     """
     def __init__( self, mzmine_path:StrPath, batch_path:StrPath, login:str="-login", valid_formats:list=["mzML", "mzXML", "imzML"],
-                  save_out:bool=False, additional_args:list=[], verbosity:int=1 ):
+                  save_log:bool=False, additional_args:list=[], verbosity:int=1 ):
         """
         Initialize the MZmine_runner.
 
@@ -91,14 +91,14 @@ class MZmine_Runner(Pipe_Step):
         :type login: str, optional
         :param valid_formats: Formats to search for as valid endings, defaults to ["mzML", "mzXML", "imzML"]
         :type valid_formats: list, optional
-        :param save_out: Whether to save the output(s).
-        :type save_out: bool, optional
+        :param save_log: Whether to save the output(s).
+        :type save_log: bool, optional
         :param additional_args: Additional arguments for mzmine, defaults to []
         :type additional_args: list, optional
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__( save_out=save_out, additional_args=additional_args, verbosity=verbosity )
+        super().__init__( save_log=save_log, additional_args=additional_args, verbosity=verbosity )
         self.mzmine_path        = mzmine_path
         self.login              = login
         self.batch_path         = batch_path
@@ -121,14 +121,14 @@ class MZmine_Runner(Pipe_Step):
                 {" ".join(self.additional_args)}'
               
         out, err = execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
-                                            out_path=join(out_path, "mzmine_log.txt") if self.save_out else None )
+                                            out_path=join(out_path, "mzmine_log.txt") if self.save_log else None )
         self.processed_in.append( in_path)
         self.processed_out.append( out_path )
         self.outs.append( out )
         self.errs.append( err )
 
 
-    def run_nested_mzmine_batches( self, root_dir:StrPath, out_root_dir:StrPath,
+    def run_mzmine_batches_nested( self, root_dir:StrPath, out_root_dir:StrPath,
                                    futures:list=[], recusion_level:int=0) -> list:
         """
         Run a mzmine batch on a nested structure.
@@ -137,10 +137,10 @@ class MZmine_Runner(Pipe_Step):
         :type root_dir: StrPath
         :param out_root_dir: Root directory for output
         :type out_root_dir: StrPath
-        :param futures: Open computations, defaults to []
+        :param futures: Future computations for parallelization, defaults to []
         :type futures: list, optional
-        :param original: Recursion instance is original or not, defaults to True
-        :type original: bool, optional
+        :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
+        :type recusion_level: int, optional
         :return: Open computations from found valid files
         :rtype: list
         """
@@ -157,7 +157,7 @@ class MZmine_Runner(Pipe_Step):
                 futures.append( dask.delayed(self.run_mzmine_batch)( in_path=in_paths_file, out_path=out_root_dir ) )
 
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
-                futures = self.run_nested_mzmine_batches( root_dir=join(root_dir, dir),
+                futures = self.run_mzmine_batches_nested( root_dir=join(root_dir, dir),
                                                           out_root_dir=join(out_root_dir, dir),
                                                           futures=futures, recusion_level=recusion_level+1)
             
@@ -177,7 +177,7 @@ if __name__ == "__main__":
     parser.add_argument('-u',       '--user',               required=False)
     parser.add_argument('-n',       '--nested',             required=False,     action="store_true")
     parser.add_argument('-p',       '--platform',           required=False)
-    parser.add_argument('-s',       '--save_out',           required=False,     action="store_true")
+    parser.add_argument('-s',       '--save_log',           required=False,     action="store_true")
     parser.add_argument('-v',       '--verbosity',          required=False,     type=int)
     parser.add_argument('-mzmine',  '--mzmine_arguments',   required=False,     nargs=argparse.REMAINDER)
 
