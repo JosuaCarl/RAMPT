@@ -247,7 +247,7 @@ class GNPS_Runner(Pipe_Step):
                                                         out_root_dir=join(out_root_dir, dir),
                                                         futures=futures, recusion_level=recusion_level+1 )
                     
-            return futures
+        return futures
 
 
 

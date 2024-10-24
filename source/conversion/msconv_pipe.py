@@ -12,7 +12,7 @@ from tqdm.auto import tqdm
 from tqdm.dask import TqdmCallback
 import dask.multiprocessing
 
-from source.helpers.general import change_case_str, open_last_line_with_content, make_new_dir, execute_verbose_command, compute_scheduled
+import source.helpers.general as helpers
 from source.helpers.types import StrPath
 from source.helpers.classes import Pipe_Step
 
@@ -31,6 +31,7 @@ def main(args, unknown_args):
     in_dir          = args.in_dir
     out_dir         = args.out_dir
     target_format   = args.target_format    if args.target_format else "mzML"
+    pattern         = args.pattern          if args.pattern else r""
     suffix          = args.suffix           if args.suffix else None
     prefix          = args.prefix           if args.prefix else None
     contains        = args.contains         if args.contains else None
@@ -45,14 +46,15 @@ def main(args, unknown_args):
     
     # Conversion
     file_converter = File_Converter( platform=platform, target_format=target_format,
-                                     suffix=suffix, prefix=prefix, contains=contains, 
+                                     pattern=pattern, suffix=suffix, prefix=prefix, contains=contains, 
                                      redo_threshold=redo_threshold, overwrite=overwrite,
                                      save_log=save_log, additional_args=additional_args, verbosity=verbosity )
     if nested:
-        futures = file_converter.convert_files_nested( root_folder=in_dir, out_root_folder=out_dir )
-        computation_complete = compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
+        futures = file_converter.convert_files_nested( root_dir=in_dir, out_root_dir=out_dir )
+        computation_complete = helpers.compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
     else:
         file_converter.convert_file( in_path=in_dir, out_path=out_dir )
+
 
 
 class File_Converter(Pipe_Step):
@@ -60,7 +62,7 @@ class File_Converter(Pipe_Step):
     General class for file conversion along matched patterns.
     """
     def __init__( self, platform:str="windows", target_format:str="mzML",
-                  suffix:str=None, prefix:str=None, contains:str=None,
+                  pattern:str=r"", suffix:str=None, prefix:str=None, contains:str=None,
                   redo_threshold:float=1e8, overwrite:bool=False,
                   save_log = False, additional_args = ..., verbosity = 1 ):
         """
@@ -70,6 +72,8 @@ class File_Converter(Pipe_Step):
         :type platform: str, optional
         :param target_format: _description_, defaults to "mzML"
         :type target_format: str, optional
+        :param pattern: Pattern for folder matching, defaults to ""
+        :type pattern: str, optional
         :param suffix: Suffix for folder matching, defaults to None
         :type suffix: str, optional
         :param prefix: Prefix for folder matching, defaults to None
@@ -87,18 +91,22 @@ class File_Converter(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__(save_log, additional_args, verbosity)
+        super().__init__( patterns={"in": pattern}, save_log=save_log, additional_args=additional_args, verbosity=verbosity)
+        if contains:
+            self.patterns["in"] = rf"{pattern}.*{contains}.*"
+        if suffix:
+            self.patterns["in"] = rf"{pattern}.*{suffix}$"
+        if prefix:
+            self.patterns["in"] = rf"^{prefix}.*{pattern}"
+        
         self.redo_threshold = redo_threshold
         self.overwrite      = overwrite
         self.platform       = platform
         self.target_format  = target_format
-        self.suffix         = suffix
-        self.prefix         = prefix
-        self.contains       = contains
 
 
 
-    def check_entry( self, in_path:str, out_path:str ) -> bool:
+    def select_for_conversion( self, in_path:str, out_path:str ) -> bool:
         """
         Convert one file with msconvert.
 
@@ -110,15 +118,13 @@ class File_Converter(Pipe_Step):
         :rtype: bool
         """
         # Check origin
-        origin_valid =  (not self.suffix or in_path.endswith(self.suffix))      and \
-                        (not self.prefix or in_path.startswith(self.prefix))    and \
-                        (not self.contains or self.contains in in_path)
+        in_valid =  super().match_file_name( pattern=self.patterns["in"], file_name=in_path )
         # Check target
-        target_valid = self.overwrite or ( not os.path.isfile(out_path) )       or \
-                       os.path.getsize( out_path ) < float(self.redo_threshold) or \
-                       not regex.search( "^</.*>$", open_last_line_with_content(filepath=out_path) )
+        out_valid = self.overwrite or ( not os.path.isfile(out_path) )       or \
+                    os.path.getsize( out_path ) < float(self.redo_threshold) or \
+                    not regex.search( "^</.*>$", helpers.open_last_line_with_content(filepath=out_path) )
 
-        return origin_valid, target_valid
+        return in_valid, out_valid
             
 
     def convert_file( self, in_path:str, out_path:str ) -> bool:
@@ -133,28 +139,28 @@ class File_Converter(Pipe_Step):
         :rtype: bool
         """
         target_format = self.target_format.replace(".", "")
-        target_format = change_case_str(s=target_format, range=slice(2, len(target_format)), conversion="upper")
+        target_format = helpers.change_case_str(s=target_format, range=slice(2, len(target_format)), conversion="upper")
 
         cmd = f'msconvert --{target_format} --64 -o {out_path} {in_path} {" ".join(self.additional_args)}'
 
-        out, err =  execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
-                                             out_path=join(out_path, "msconv_log.txt") if self.save_log else None)
+        out, err =  helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
+                                                     out_path=join(out_path, "msconv_log.txt") if self.save_log else None)
         self.processed_in.append( in_path )
         self.processed_out.append( out_path )
         self.outs.append( out )
         self.errs.append( err )
 
 
-    def convert_files_nested( self, root_folder:StrPath, out_root_folder:StrPath,
+    def convert_files_nested( self, root_dir:StrPath, out_root_dir:StrPath,
                               futures:list=[], recusion_level:int=0 ) -> list:
         """
-        Converts multiple files in multiple folders, found in root_folder with msconvert and saves them
-        to a location out_root_folder again into their respective folders.
+        Converts multiple files in multiple folders, found in root_dir with msconvert and saves them
+        to a location out_root_dir again into their respective folders.
 
-        :param root_folder: Starting folder for descent.
-        :type root_folder: StrPath
-        :param out_root_folder: Folder where structure is mimiced and files are converted to
-        :type out_root_folder: StrPath
+        :param root_dir: Starting folder for descent.
+        :type root_dir: StrPath
+        :param out_root_dir: Folder where structure is mimiced and files are converted to
+        :type out_root_dir: StrPath
         :param futures: Future computations for parallelization, defaults to []
         :type futures: list, optional
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
@@ -164,33 +170,21 @@ class File_Converter(Pipe_Step):
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
         
-        # Outer loop over all files in root folder
-        for root, dirs, files in os.walk(root_folder):
-            for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
-                origin_valid, target_valid = self.check_entry( in_path=join( root_folder, dir ),
-                                                               out_path=join( out_root_folder, f'{".".join(dir.split(".")[:-1])}.{self.target_format}' ) )
-                if origin_valid and target_valid:
-                    futures.append( dask.delayed(self.convert_file)( in_path=join( root_folder, dir ),
-                                                                     out_path=out_root_folder ) )
-                elif not origin_valid:
-                    scheduled = self.convert_files_nested( root_folder=join(root_folder, dir),
-                                                           out_root_folder=join(out_root_folder, dir),
-                                                           futures=futures, recusion_level=recusion_level+1 )
-                    for i in range( len(scheduled) ): # I dont know why, but list comprehension loops endlessly if done by direct element aquisition
-                        if scheduled[i] is not None:
-                            futures.append( scheduled[i] ) 
+        for entry in tqdm(os.listdir(root_dir), disable=verbose_tqdm, desc="Schedule conversions"):
+            in_path=join( root_dir, entry )
+            out_path=join( out_root_dir, helpers.replace_file_ending( entry, self.target_format ) )
+            in_valid, out_valid = self.select_for_conversion( in_path=in_path, out_path=out_path)
 
-            for file in tqdm(files, disable=verbose_tqdm, desc="Files"):
-                origin_valid, target_valid = self.check_entry( in_path=join( root_folder, file ),
-                                                               out_path=join( out_root_folder, f'{".".join(file.split(".")[:-1])}.{self.target_format}' ) )
-                if origin_valid and target_valid:
-                    futures.append( dask.delayed(self.convert_file)( in_path=join( root_folder, file ),
-                                                                     out_path=join( out_root_folder ) ) )
-                    
-            if futures and os.path.isdir(root_folder):
-                make_new_dir( join(out_root_folder, root) )
-                        
-            return futures
+            if in_valid and out_valid:
+                futures.append( dask.delayed(self.convert_file)( in_path=in_path, out_path=out_root_dir ) )
+            elif os.path.isdir(in_path) and not in_valid:
+                futures = self.convert_files_nested( root_dir=in_path, out_root_dir=join(out_root_dir, entry),
+                                                     futures=futures, recusion_level=recusion_level+1 )
+            
+        if futures:
+            helpers.make_new_dir( out_root_dir )
+
+        return futures
 
 
 
@@ -201,9 +195,10 @@ if __name__ == "__main__":
     parser.add_argument('-in',      '--in_dir',             required=True)
     parser.add_argument('-out',     '--out_dir',            required=True)
     parser.add_argument('-tf',      '--target_format',      required=False)
-    parser.add_argument('-suf',       '--suffix',             required=False)
-    parser.add_argument('-pre',       '--prefix',             required=False)
-    parser.add_argument('-con',       '--contains',           required=False)
+    parser.add_argument('-pat',     '--pattern',            required=False)
+    parser.add_argument('-suf',     '--suffix',             required=False)
+    parser.add_argument('-pre',     '--prefix',             required=False)
+    parser.add_argument('-con',     '--contains',           required=False)
     parser.add_argument('-rt',      '--redo_threshold',     required=False)
     parser.add_argument('-o',       '--overwrite',          required=False,     action="store_true")
     parser.add_argument('-n',       '--nested',             required=False,     action="store_true")

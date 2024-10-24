@@ -17,7 +17,7 @@ from tqdm.dask import TqdmCallback
 import dask.multiprocessing
 
 
-from source.helpers.general import compute_scheduled, execute_verbose_command
+import source.helpers.general as helpers
 from source.helpers.types import StrPath
 from source.helpers.classes import Pipe_Step
 
@@ -47,7 +47,7 @@ def main(args, unknown_args):
 
     if nested:
         futures = sirius_runner.run_nested_sirius( root_dir=in_dir, out_root_dir=out_dir )
-        computation_complete = compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
+        computation_complete = helpers.compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
     else:
         futures = sirius_runner.run_sirius( in_dir=in_dir, out_dir=out_dir, projectspace=projectspace )
     
@@ -72,12 +72,14 @@ class Sirius_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__( save_log=save_log, additional_args=additional_args, verbosity=verbosity)
+        super().__init__( patterns={"in": r"_sirius.mgf$"},
+                          save_log=save_log, additional_args=additional_args, verbosity=verbosity)
         self.sirius_path = sirius_path if sirius_path else "sirius"
         if os.path.isfile(config):
             with open( config, "r") as config_file:
                 config = config_file.read()
-        self.config = config.replace("config", "").strip()
+        config = config[6:] if config.startswith("config") else config
+        self.config = config.strip()
 
 
 
@@ -98,8 +100,8 @@ class Sirius_Runner(Pipe_Step):
                  formulas zodiac fingerprints structures denovo-structures classes write-summaries --output {out_path}\
                 {" ".join(self.additional_args)}'
               
-        out, err = execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
-                                            out_path=join(out_path, "sirius_log.txt") if self.save_log else None )
+        out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
+                                                    out_path=join(out_path, "sirius_log.txt") if self.save_log else None )
         
         self.processed_in.append( in_path )
         self.processed_out.append( out_path )
@@ -107,10 +109,38 @@ class Sirius_Runner(Pipe_Step):
         self.errs.append( err )
 
 
-    def run_sirius_nested( self, ):
-        # TODO
-        pass
+    def run_sirius_nested( self, root_dir:StrPath, out_root_dir:StrPath,
+                           futures:list=[], recusion_level:int=0) -> list:
+        """
+        Run SIRIUS Pipeline in nested directories.
 
+        :param root_dir: Root input directory
+        :type root_dir: StrPath
+        :param out_root_dir: Root output directory
+        :type out_root_dir: StrPath
+        :param futures: Future computations for parallelization, defaults to []
+        :type futures: list, optional
+        :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
+        :type recusion_level: int, optional
+        :return: Future computations
+        :rtype: list
+        """
+        verbose_tqdm = self.verbosity >= recusion_level + 2
+        for root, dirs, files in os.walk(root_dir):
+            for file in tqdm( files, disable=verbose_tqdm, desc="Searching files" ):
+                if super().match_file_name( pattern=self.patterns["in"], file_name=file):
+                    futures.append( dask.delayed(self.run_sirius)( in_path=join( root_dir, file ),
+                                                                   out_path=out_root_dir,
+                                                                   projectspace=out_root_dir ) )
+            for dir in tqdm( dirs, disable=verbose_tqdm, desc="Searching directories" ):
+                futures = self.run_sirius_nested( root_dir=join(root_dir, dir),
+                                                  out_root_dir=join(out_root_dir, dir),
+                                                  futures=futures, recusion_level=recusion_level+1)
+
+        if futures:
+            helpers.make_new_dir( out_root_dir )
+
+        return futures
 
 
 if __name__ == "__main__":

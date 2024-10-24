@@ -33,7 +33,7 @@ def test_mzmine_pipe_main():
 
     with open( construct_path(filepath, "..", "out/source_files.txt"), "r" ) as f:
         text = f.read()
-        assert text == str(construct_path(filepath, "..", "example_files/acnA_R1_P3-C1_pos.mzML"))
+        assert text == str( construct_path(filepath, "..", "example_files/acnA_R1_P3-C1_pos.mzML") )
 
     df = pd.read_csv( construct_path(filepath, "..", "out/example_nested/example_nested_iimn_fbmn_quant.csv") )
     assert "row retention time" in df.columns
@@ -42,4 +42,4 @@ def test_mzmine_pipe_main():
     del text
 
     shutil.rmtree( construct_path(filepath, "..", "out") )
-    make_new_dir( construct_path(filepath, "..", "out") )
+    helpers.make_new_dir( construct_path(filepath, "..", "out") )

@@ -151,6 +151,20 @@ def open_last_line_with_content(filepath:str) -> str:
     raise(ValueError(f"File {filepath} does not contain a line with content for 1000 lines"))
 
 
+def replace_file_ending( path:StrPath, new_ending:str ) -> str:
+    """
+    Replace the ending of a file by matchin the last ".".
+
+    :param path: Path to file
+    :type path: StrPath
+    :param new_ending: _description_
+    :type new_ending: new_ending
+    :return: File path with new ending
+    :rtype: str
+    """
+    return regex.sub(r"(.*\.).*", rf"\1{new_ending}", path)
+
+
 
 # Command methods
 def execute_verbose_command(cmd:str|list, verbosity:int=1, out_path:StrPath=None) -> bool:

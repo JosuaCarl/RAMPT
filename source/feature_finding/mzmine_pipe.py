@@ -13,10 +13,11 @@ from os.path import join
 from tqdm.auto import tqdm
 import dask.multiprocessing
 
-from source.helpers.general import Substring, execute_verbose_command, compute_scheduled
+import source.helpers.general as helpers
 from source.helpers.types import StrPath
 from source.helpers.classes import Pipe_Step
 
+import regex
 
 def main(args, unknown_args):
     """
@@ -41,7 +42,7 @@ def main(args, unknown_args):
     additional_args = args.mzmine_arguments if args.mzmine_arguments else unknown_args
     
     if not mzmine_path:
-        match Substring(platform.lower()):
+        match helpers.Substring(platform.lower()):
             case "linux":
                 mzmine_path = r'/opt/mzmine-linux-installer/bin/mzmine' 
             case "windows":
@@ -69,7 +70,7 @@ def main(args, unknown_args):
                                    additional_args=additional_args, verbosity=verbosity)
     if nested:
         futures = mzmine_runner.run_mzmine_batches_nested( root_dir=in_dir, out_root_dir=out_dir )
-        computation_complete = compute_scheduled( futures=futures, num_workers=1, verbose=verbosity >= 1)
+        computation_complete = helpers.compute_scheduled( futures=futures, num_workers=1, verbose=verbosity >= 1)
     else:
         mzmine_runner.run_mzmine_batch( in_path=in_dir, out_path=out_dir )
 
@@ -98,11 +99,11 @@ class MZmine_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__( save_log=save_log, additional_args=additional_args, verbosity=verbosity )
+        super().__init__( patterns={"in": rf".*({r'|'.join(valid_formats)})$"}, 
+                          save_log=save_log, additional_args=additional_args, verbosity=verbosity )
         self.mzmine_path        = mzmine_path
         self.login              = login
         self.batch_path         = batch_path
-        self.valid_formats      = valid_formats
 
 
 
@@ -120,8 +121,8 @@ class MZmine_Runner(Pipe_Step):
         cmd = f'\"{self.mzmine_path}\" {self.login} --batch {self.batch_path} --input {in_path} --output {out_path}\
                 {" ".join(self.additional_args)}'
               
-        out, err = execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
-                                            out_path=join(out_path, "mzmine_log.txt") if self.save_log else None )
+        out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
+                                                    out_path=join(out_path, "mzmine_log.txt") if self.save_log else None )
         self.processed_in.append( in_path )
         self.processed_out.append( out_path )
         self.outs.append( out )
@@ -129,7 +130,7 @@ class MZmine_Runner(Pipe_Step):
 
 
     def run_mzmine_batches_nested( self, root_dir:StrPath, out_root_dir:StrPath,
-                                   futures:list=[], recusion_level:int=0) -> list:
+                                   futures:list=[], recusion_level:int=0 ) -> list:
         """
         Run a mzmine batch on a nested structure.
 
@@ -147,8 +148,8 @@ class MZmine_Runner(Pipe_Step):
         verbose_tqdm = self.verbosity >= recusion_level + 2
         in_paths_file = join(out_root_dir, "source_files.txt")
 
-        for root, dirs, files in os.walk(root_dir):
-            found_files = [join(root_dir, file) for file in files if file.split(".")[-1] in self.valid_formats]
+        for root, dirs, files in os.walk(root_dir):                
+            found_files = [join(root_dir, file) for file in files if self.match_file_name(pattern=self.patterns["in"], file_name=file)]
             
             if found_files:
                 os.makedirs(out_root_dir, exist_ok=True)
@@ -160,8 +161,10 @@ class MZmine_Runner(Pipe_Step):
                 futures = self.run_mzmine_batches_nested( root_dir=join(root_dir, dir),
                                                           out_root_dir=join(out_root_dir, dir),
                                                           futures=futures, recusion_level=recusion_level+1)
-            
-            return futures
+        if futures:
+            helpers.make_new_dir( out_root_dir )
+
+        return futures
 
 
 

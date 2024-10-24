@@ -33,6 +33,8 @@ def test_open_last_line_with_content():
     with pytest.raises(ValueError):
         open_last_line_with_content(filepath= construct_path(filepath, "..", "test_files/empty_text.txt"))
 
+def test_replace_file_ending():
+    assert replace_file_ending( os.path.join("a", "b..", "c.anaconda"), "conda") == os.path.join("a", "b..", "c.conda")
 
 
 # CMD

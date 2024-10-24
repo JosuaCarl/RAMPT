@@ -20,7 +20,7 @@ import pyopenms as oms
 
 from source.helpers.types import StrPath
 from source.helpers.classes import Pipe_Step
-from source.helpers.general import compute_scheduled
+import source.helpers.general as helpers
 
 
 def main(args, unknown_args):
@@ -49,86 +49,9 @@ def main(args, unknown_args):
 
     if nested:
         futures = ion_exclusion_runner.run_nested_sirius( root_dir=in_dir, out_root_dir=out_dir )
-        computation_complete = compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
+        computation_complete = helpers.compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
     else:
         futures = ion_exclusion_runner.check_ms2_presence( in_dir=in_dir, out_dir=out_dir, msconv_out_dir=msconv_out_dir )
-    
-
-
-class Ion_exclusion_Runner(Pipe_Step):
-    """
-    Select abundant MS2 fragmented m/z for exclusion.
-    """
-    def __init__( self, relative_tolerance:float|int=1e-5, absolute_tolerance:float=5e-3, save_log:bool=False, additional_args:list=[], verbosity:int=1 ):
-        super().__init__( save_log=save_log, additional_args=additional_args, verbosity=verbosity )
-        self.relative_tolerance = relative_tolerance if isinstance(relative_tolerance, float) else relative_tolerance * 1e-6
-        self.absolute_tolerance = absolute_tolerance
-        self.file_handler       = OpenMS_File_Handler()
-
-
-
-    def check_ms2_presence( self, in_dir:StrPath, msconv_out_dir:StrPath, out_dir:StrPath ):
-        experiments = self.file_handler.load_experiments_df( in_dir, file_ending=".mzML")
-    
-        ms2_in_files = {}
-        for i, row in experiments.iterrows():
-            experiment = row["experiment"]
-            ms2_spectra = [ spectrum for spectrum in experiment.getSpectra() if spectrum.getMSLevel() >= 2 ]
-            precursor_mzs = list( set( [ precursor.getMZ() for ms2_spectrum in ms2_spectra for precursor in ms2_spectrum.getPrecursors() ] ) )
-            ms2_in_files[basename(experiment.getLoadedFilePath())] = precursor_mzs
-
-        quantification_df  = pd.read_csv(f"{join(msconv_out_dir, basename(msconv_out_dir))}_iimn_fbmn_quant.csv")
-        mz_in_ms2 = {}
-        for file_name, ms2_mzs in ms2_in_files.items():
-            for mz_val in quantification_df["row m/z"]:
-                mz_found = int( np.any( np.isclose( mz_val, ms2_mzs, rtol=1e-5, atol=5e-3) ) )
-                if file_name not in mz_in_ms2.keys():
-                    mz_in_ms2[file_name] = [mz_found]
-                else:
-                    mz_in_ms2[file_name].append( mz_found )
-
-        row_info = pd.DataFrame( { "id": quantification_df["row ID"],
-                                   "m/z": quantification_df["row m/z"],
-                                   "rt": quantification_df["row retention time"] } )
-        ms2_presence_df = pd.DataFrame( mz_in_ms2 )
-        ms2_presence_df = row_info.join(ms2_presence_df)
-        
-        local_annotations = pd.read_csv(f"{join(msconv_out_dir, basename(msconv_out_dir))}_annotations")
-        annotated_ms2_presence = pd.merge(ms2_presence_df, local_annotations, left_on="id", right_on="id", how="inner")
-
-        annotated_ms2_presence.to_csv( f"{join(out_dir, basename(msconv_out_dir))}_ms2_presence_annotated.csv" )
-
-
-    def check_ms2_presences_nested( self, root_dir:StrPath, out_root_dir:StrPath,
-                                   futures:list=[], recusion_level:int=0) -> list:
-        """
-        Check which m/z values were fragmented in nested folders.
-
-        :param root_dir: Root input directory
-        :type root_dir: StrPath
-        :param out_root_dir: Root output directory
-        :type out_root_dir: StrPath
-        :param futures: Future computations for parallelization, defaults to []
-        :type futures: list, optional
-        :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
-        :type recusion_level: int, optional
-        :return: Future computations
-        :rtype: list
-        """
-        verbose_tqdm = self.verbosity >= recusion_level + 2
-        for root, dirs, files in os.walk(root_dir):
-            feature_ms2_found, feature_quantification_found = self.check_dir_files(dir=root)
-            if feature_ms2_found and feature_quantification_found:
-                os.makedirs(out_root_dir, exist_ok=True)
-                futures.append( dask.delayed(self.get_gnps_results)( in_dir=root_dir, out_dir=out_root_dir ) )
-
-            for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
-                futures = self.get_nested_gnps_results( root_dir=join(root_dir, dir),
-                                                        out_root_dir=join(out_root_dir, dir),
-                                                        futures=futures, recusion_level=recusion_level+1 )
-                    
-            return futures
-
 
 
 
@@ -300,7 +223,87 @@ class OpenMS_File_Handler:
         fia_df = fia_df.transpose()
         fia_df.columns = ["sample", "polarity", "experiment"]
         return fia_df
+
     
+
+
+class Ion_exclusion_Runner(Pipe_Step):
+    """
+    Select abundant MS2 fragmented m/z for exclusion.
+    """
+    def __init__( self, relative_tolerance:float|int=1e-5, absolute_tolerance:float=5e-3, save_log:bool=False, additional_args:list=[], verbosity:int=1 ):
+        super().__init__( save_log=save_log, additional_args=additional_args, verbosity=verbosity )
+        self.relative_tolerance = relative_tolerance if isinstance(relative_tolerance, float) else relative_tolerance * 1e-6
+        self.absolute_tolerance = absolute_tolerance
+        self.file_handler       = OpenMS_File_Handler()
+
+
+
+    def check_ms2_presence( self, in_dir:StrPath, msconv_out_dir:StrPath, out_dir:StrPath ):
+        experiments = self.file_handler.load_experiments_df( in_dir, file_ending=".mzML")
+    
+        ms2_in_files = {}
+        for i, row in experiments.iterrows():
+            experiment = row["experiment"]
+            ms2_spectra = [ spectrum for spectrum in experiment.getSpectra() if spectrum.getMSLevel() >= 2 ]
+            precursor_mzs = list( set( [ precursor.getMZ() for ms2_spectrum in ms2_spectra for precursor in ms2_spectrum.getPrecursors() ] ) )
+            ms2_in_files[basename(experiment.getLoadedFilePath())] = precursor_mzs
+
+        quantification_df  = pd.read_csv(f"{join(msconv_out_dir, basename(msconv_out_dir))}_iimn_fbmn_quant.csv")
+        mz_in_ms2 = {}
+        for file_name, ms2_mzs in ms2_in_files.items():
+            for mz_val in quantification_df["row m/z"]:
+                mz_found = int( np.any( np.isclose( mz_val, ms2_mzs, rtol=1e-5, atol=5e-3) ) )
+                if file_name not in mz_in_ms2.keys():
+                    mz_in_ms2[file_name] = [mz_found]
+                else:
+                    mz_in_ms2[file_name].append( mz_found )
+
+        row_info = pd.DataFrame( { "id": quantification_df["row ID"],
+                                   "m/z": quantification_df["row m/z"],
+                                   "rt": quantification_df["row retention time"] } )
+        ms2_presence_df = pd.DataFrame( mz_in_ms2 )
+        ms2_presence_df = row_info.join(ms2_presence_df)
+        
+        local_annotations = pd.read_csv(f"{join(msconv_out_dir, basename(msconv_out_dir))}_annotations")
+        annotated_ms2_presence = pd.merge(ms2_presence_df, local_annotations, left_on="id", right_on="id", how="inner")
+
+        annotated_ms2_presence.to_csv( f"{join(out_dir, basename(msconv_out_dir))}_ms2_presence_annotated.csv" )
+
+
+    def check_ms2_presences_nested( self, root_dir:StrPath, out_root_dir:StrPath,
+                                    futures:list=[], recusion_level:int=0) -> list:
+        """
+        Run SIRIUS Pipeline in nested directories.
+
+        :param root_dir: Root input directory
+        :type root_dir: StrPath
+        :param out_root_dir: Root output directory
+        :type out_root_dir: StrPath
+        :param futures: Future computations for parallelization, defaults to []
+        :type futures: list, optional
+        :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
+        :type recusion_level: int, optional
+        :return: Future computations
+        :rtype: list
+        """
+        verbose_tqdm = self.verbosity >= recusion_level + 2
+        for root, dirs, files in os.walk(root_dir):
+            for file in tqdm( files, disable=verbose_tqdm, desc="Searching files" ):
+                if super().match_file_name( pattern=self.patterns["in"], file_name=file):
+                    futures.append( dask.delayed(self.check_ms2_presence)( in_dir=join( root_dir, file ),
+                                                                           msconv_out_dir=,
+                                                                           out_dir=out_root_dir, ) )
+            for dir in tqdm( dirs, disable=verbose_tqdm, desc="Searching directories" ):
+                futures = self.run_sirius_nested( root_dir=join(root_dir, dir),
+                                                  out_root_dir=join(out_root_dir, dir),
+                                                  futures=futures, recusion_level=recusion_level+1)
+
+        if futures:
+            helpers.make_new_dir( out_root_dir )
+
+        return futures
+            
 
 
 if __name__ == "__main__":
