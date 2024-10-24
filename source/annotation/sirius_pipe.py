@@ -8,12 +8,9 @@ Use Sirius to annotate compounds and extract matching formulae and chemical clas
 # Imports
 import os
 import argparse
-import warnings
-import json
 
-from os.path import join, basename
+from os.path import join
 from tqdm.auto import tqdm
-from tqdm.dask import TqdmCallback
 import dask.multiprocessing
 
 
@@ -32,7 +29,7 @@ def main(args, unknown_args):
     :type unknown_args: any
     """    
     # Extract arguments
-    sirius_path     = args.sirius_path      if args.sirius_path else None
+    sirius_path     = args.sirius_path      if args.sirius_path else "sirius"
     in_dir          = args.in_dir
     out_dir         = args.out_dir          if args.out_dir else args.in_dir
     projectspace    = args.projectspace     if args.projectspace else out_dir
@@ -41,12 +38,12 @@ def main(args, unknown_args):
     n_workers       = args.workers          if args.workers else 1
     save_log        = args.save_log         if args.save_log else False
     verbosity       = args.verbosity        if args.verbosity else 1
-    additional_args = args.gnps_args        if args.gnps_args else unknown_args
+    additional_args = args.sirius_args      if args.sirius_args else unknown_args
 
     sirius_runner = Sirius_Runner( sirius_path=sirius_path, config=config, save_log=save_log, additional_args=additional_args, verbosity=verbosity )
 
     if nested:
-        futures = sirius_runner.run_nested_sirius( in_root_dir=in_dir, out_root_dir=out_dir )
+        futures = sirius_runner.run_sirius_nested( in_root_dir=in_dir, out_root_dir=out_dir )
         computation_complete = helpers.compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
     else:
         futures = sirius_runner.run_sirius( in_dir=in_dir, out_dir=out_dir, projectspace=projectspace )
@@ -96,9 +93,7 @@ class Sirius_Runner(Pipe_Step):
         :return: Success of the command
         :rtype: bool
         """
-        cmd = f'\"{self.sirius_path}\" config {self.config} --project {projectspace} --input {in_path}\
-                 formulas zodiac fingerprints structures denovo-structures classes write-summaries --output {out_path}\
-                {" ".join(self.additional_args)}'
+        cmd = rf'"{self.sirius_path}" --project {join(projectspace, "projectspace")} --input {in_path} config {self.config} write-summaries --output {out_path} {" ".join(self.additional_args)}'
               
         out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
                                                     out_path=join(out_path, "sirius_log.txt") if self.save_log else None )

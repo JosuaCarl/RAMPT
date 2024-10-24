@@ -35,23 +35,23 @@ def main(args, unknown_args):
     # Extract arguments
     in_dir              = args.in_dir
     out_dir             = args.out_dir              if args.out_dir else args.in_dir
-    msconv_out_dir      = args.msconv_out_dir       if args.out_dir else out_dir
+    data_dir            = args.data_dir             if args.data_dir else out_dir
     relative_tolerance  = args.relative_tolerance   if args.relative_tolerance else 1e-05
     absolute_tolerance  = args.absolute_tolerance   if args.absolute_tolerance else 1e-08
     nested              = args.nested               if args.nested else False
     n_workers           = args.workers              if args.workers else 1
     save_log            = args.save_log             if args.save_log else False
     verbosity           = args.verbosity            if args.verbosity else 1
-    additional_args     = args.gnps_args            if args.gnps_args else unknown_args
+    additional_args     = args.ion_exclusion_args   if args.ion_exclusion_args else unknown_args
 
     ion_exclusion_runner = Ion_exclusion_Runner( relative_tolerance=relative_tolerance, absolute_tolerance=absolute_tolerance,
                                                  save_log=save_log, additional_args=additional_args, verbosity=verbosity )
 
     if nested:
-        futures = ion_exclusion_runner.run_nested_sirius( root_dir=in_dir, out_root_dir=out_dir )
+        futures = ion_exclusion_runner.check_ms2_presences_nested( in_root_dir=in_dir, out_root_dir=out_dir, data_root_dir=data_dir )
         computation_complete = helpers.compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
     else:
-        futures = ion_exclusion_runner.check_ms2_presence( in_dir=in_dir, out_dir=out_dir, msconv_out_dir=msconv_out_dir )
+        futures = ion_exclusion_runner.check_ms2_presence( in_dir=in_dir, out_dir=out_dir, data_dir=data_dir )
 
 
 
@@ -239,8 +239,8 @@ class Ion_exclusion_Runner(Pipe_Step):
 
 
 
-    def check_ms2_presence( self, in_dir:StrPath, out_dir:StrPath, msconv_dir:StrPath, annotation_file:StrPath=None ):
-        experiments = self.file_handler.load_experiments_df( in_dir, file_ending=".mzML")
+    def check_ms2_presence( self, in_dir:StrPath, out_dir:StrPath, data_dir:StrPath, annotation_file:StrPath=None ):
+        experiments = self.file_handler.load_experiments_df( data_dir, file_ending=".mzML")
     
         ms2_in_files = {}
         for i, row in experiments.iterrows():
@@ -249,7 +249,7 @@ class Ion_exclusion_Runner(Pipe_Step):
             precursor_mzs = list( set( [ precursor.getMZ() for ms2_spectrum in ms2_spectra for precursor in ms2_spectrum.getPrecursors() ] ) )
             ms2_in_files[basename(experiment.getLoadedFilePath())] = precursor_mzs
 
-        quantification_df  = pd.read_csv(f"{join(msconv_dir, basename(msconv_dir))}_iimn_fbmn_quant.csv")
+        quantification_df  = pd.read_csv(f"{join(in_dir, basename(in_dir))}_iimn_fbmn_quant.csv")
         mz_in_ms2 = {}
         for file_name, ms2_mzs in ms2_in_files.items():
             for mz_val in quantification_df["row m/z"]:
@@ -269,12 +269,12 @@ class Ion_exclusion_Runner(Pipe_Step):
             local_annotations = pd.read_csv( annotation_file )
             annotated_ms2_presence = pd.merge(ms2_presence_df, local_annotations, left_on="id", right_on="id", how="inner")
 
-            annotated_ms2_presence.to_csv( f"{join(out_dir, basename(msconv_dir))}_ms2_presence_annotated.tsv", sep="\t" )
+            annotated_ms2_presence.to_csv( f"{join(out_dir, basename(in_dir))}_ms2_presence_annotated.tsv", sep="\t" )
         else:
-            ms2_presence_df.to_csv( f"{join(out_dir, basename(msconv_dir))}_ms2_presence.tsv" )
+            ms2_presence_df.to_csv( f"{join(out_dir, basename(in_dir))}_ms2_presence.tsv", sep="\t")
 
 
-    def check_ms2_presences_nested( self, in_root_dir:StrPath, ms_conv_root_dir:StrPath, out_root_dir:StrPath,
+    def check_ms2_presences_nested( self, in_root_dir:StrPath, data_root_dir:StrPath, out_root_dir:StrPath,
                                    futures:list=[], recusion_level:int=0 ) -> list:
         """
         Check for MS2 presence in a nested fashion.
@@ -294,7 +294,7 @@ class Ion_exclusion_Runner(Pipe_Step):
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
         quant_file, annot_file = (None, None)
-        for entry in tqdm( os.listdir(in_root_dir), disable=verbose_tqdm, desc="Schedule Sirius annotation" ):
+        for entry in tqdm( os.listdir(in_root_dir), disable=verbose_tqdm, desc="Schedule ion exclusion" ):
             entry_path = join(in_root_dir, entry)
                  
             if os.path.isfile( entry_path ):
@@ -307,13 +307,13 @@ class Ion_exclusion_Runner(Pipe_Step):
             elif os.path.isdir( entry_path ):
                 futures = self.check_ms2_presences_nested( in_root_dir=entry_path,
                                                            out_root_dir=join( out_root_dir, entry ),
-                                                           ms_conv_root_dir=join( ms_conv_root_dir, entry ),
+                                                           data_root_dir=join( data_root_dir, entry ),
                                                            futures=futures, recusion_level=recusion_level+1 )
                 
         if quant_file:
             futures.append( dask.delayed(self.check_ms2_presence)( in_dir=in_root_dir,
                                                                    out_dir=out_root_dir, 
-                                                                   msconv_dir=ms_conv_root_dir,
+                                                                   data_dir=data_root_dir,
                                                                    annotation_file=annot_file ) )
         if futures:
             os.makedirs(out_root_dir, exist_ok=True)
@@ -323,17 +323,18 @@ class Ion_exclusion_Runner(Pipe_Step):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser( prog='sirius_pipe.py',
-                                      description='Obtain anntations from MS1 & MS2 feature annotation by SIRIUS.')
+    parser = argparse.ArgumentParser( prog='ion_exclusion.py',
+                                      description='Select ions for exclusion, based on MS2.')
     parser.add_argument('-in',      '--in_dir',             required=True)
     parser.add_argument('-out',     '--out_dir',            required=False)
+    parser.add_argument('-data',    '--data_dir',           required=False)
     parser.add_argument('-r',       '--relative_tolerance', required=False)
     parser.add_argument('-a',       '--absolute_tolerance', required=False)
     parser.add_argument('-n',       '--nested',             required=False,     action="store_true")
     parser.add_argument('-s',       '--save_log',           required=False,     action="store_true")
     parser.add_argument('-w',       '--workers',            required=False,     type=int)
     parser.add_argument('-v',       '--verbosity',          required=False,     type=int)
-    parser.add_argument('-sirius',  '--sirius_args',        required=False,     nargs=argparse.REMAINDER)
+    parser.add_argument('-ion_ex',  '--ion_exclusion_args', required=False,     nargs=argparse.REMAINDER)
 
     args, unknown_args = parser.parse_known_args()
 

@@ -12,7 +12,7 @@ import regex
 import requests
 import dask
 from tqdm.dask import TqdmCallback
-
+import chardet
 import tee_subprocess
 
 from source.helpers.types import *
@@ -184,7 +184,7 @@ def execute_verbose_command(cmd:str|list, verbosity:int=1, out_path:StrPath=None
                                   shell=True, 
                                   stdout=None if verbosity >= 3 else subprocess.DEVNULL,
                                   stderr=None if verbosity >= 2 else subprocess.DEVNULL,
-                                  text=True,
+                                  text=False,
                                   capture_output=True )
     
     if out_path:
