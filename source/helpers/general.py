@@ -167,7 +167,7 @@ def replace_file_ending( path:StrPath, new_ending:str ) -> str:
 
 
 # Command methods
-def execute_verbose_command(cmd:str|list, verbosity:int=1, out_path:StrPath=None) -> bool:
+def execute_verbose_command(cmd:str|list, verbosity:int=1, out_path:StrPath=None, decode_text:StrPath=True) -> bool:
     """
     Execute a command with the adequate verbosity.
 
@@ -184,7 +184,7 @@ def execute_verbose_command(cmd:str|list, verbosity:int=1, out_path:StrPath=None
                                   shell=True, 
                                   stdout=None if verbosity >= 3 else subprocess.DEVNULL,
                                   stderr=None if verbosity >= 2 else subprocess.DEVNULL,
-                                  text=False,
+                                  text=decode_text,
                                   capture_output=True )
     
     if out_path:

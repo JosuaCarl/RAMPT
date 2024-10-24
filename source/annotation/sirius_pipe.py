@@ -96,7 +96,8 @@ class Sirius_Runner(Pipe_Step):
         cmd = rf'"{self.sirius_path}" --project {join(projectspace, "projectspace")} --input {in_path} config {self.config} write-summaries --output {out_path} {" ".join(self.additional_args)}'
               
         out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
-                                                    out_path=join(out_path, "sirius_log.txt") if self.save_log else None )
+                                                    out_path=join(out_path, "sirius_log.txt") if self.save_log else None,
+                                                    decode_text=False )
         
         self.processed_in.append( in_path )
         self.processed_out.append( out_path )

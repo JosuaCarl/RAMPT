@@ -14,9 +14,9 @@ import dask
 from typing import Union, Sequence, Optional, List
 from os.path import join, basename
 
+import pyopenms as oms
 import numpy as np
 import pandas as pd
-import pyopenms as oms
 
 from source.helpers.types import StrPath
 from source.helpers.classes import Pipe_Step

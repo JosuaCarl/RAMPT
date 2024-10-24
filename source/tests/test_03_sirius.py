@@ -34,7 +34,8 @@ def test_sirius_pipe_main():
     assert os.path.isfile( helpers.construct_path(filepath, "..", "out/example_nested/projectspace.sirius") )
 
     df = pd.read_csv( helpers.construct_path(filepath, "..", "out/formula_identifications.tsv") , sep="\t" )
-    assert df.loc[0]["molecularFormula"] == "C30H61NO4S"
+    assert df.loc[0]["formulaRank"] == 1
+    assert df.loc[0]["molecularFormula"] == "C31H60N8O6"
 
     shutil.rmtree( helpers.construct_path(filepath, "..", "out") )
     helpers.make_new_dir( helpers.construct_path(filepath, "..", "out") )
