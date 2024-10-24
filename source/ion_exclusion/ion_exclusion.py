@@ -239,7 +239,7 @@ class Ion_exclusion_Runner(Pipe_Step):
 
 
 
-    def check_ms2_presence( self, in_dir:StrPath, msconv_out_dir:StrPath, out_dir:StrPath ):
+    def check_ms2_presence( self, in_dir:StrPath, out_dir:StrPath, msconv_dir:StrPath, annotation_file:StrPath=None ):
         experiments = self.file_handler.load_experiments_df( in_dir, file_ending=".mzML")
     
         ms2_in_files = {}
@@ -249,7 +249,7 @@ class Ion_exclusion_Runner(Pipe_Step):
             precursor_mzs = list( set( [ precursor.getMZ() for ms2_spectrum in ms2_spectra for precursor in ms2_spectrum.getPrecursors() ] ) )
             ms2_in_files[basename(experiment.getLoadedFilePath())] = precursor_mzs
 
-        quantification_df  = pd.read_csv(f"{join(msconv_out_dir, basename(msconv_out_dir))}_iimn_fbmn_quant.csv")
+        quantification_df  = pd.read_csv(f"{join(msconv_dir, basename(msconv_dir))}_iimn_fbmn_quant.csv")
         mz_in_ms2 = {}
         for file_name, ms2_mzs in ms2_in_files.items():
             for mz_val in quantification_df["row m/z"]:
@@ -265,19 +265,24 @@ class Ion_exclusion_Runner(Pipe_Step):
         ms2_presence_df = pd.DataFrame( mz_in_ms2 )
         ms2_presence_df = row_info.join(ms2_presence_df)
         
-        local_annotations = pd.read_csv(f"{join(msconv_out_dir, basename(msconv_out_dir))}_annotations")
-        annotated_ms2_presence = pd.merge(ms2_presence_df, local_annotations, left_on="id", right_on="id", how="inner")
+        if annotation_file:
+            local_annotations = pd.read_csv( annotation_file )
+            annotated_ms2_presence = pd.merge(ms2_presence_df, local_annotations, left_on="id", right_on="id", how="inner")
 
-        annotated_ms2_presence.to_csv( f"{join(out_dir, basename(msconv_out_dir))}_ms2_presence_annotated.csv" )
+            annotated_ms2_presence.to_csv( f"{join(out_dir, basename(msconv_dir))}_ms2_presence_annotated.tsv", sep="\t" )
+        else:
+            ms2_presence_df.to_csv( f"{join(out_dir, basename(msconv_dir))}_ms2_presence.tsv" )
 
 
-    def check_ms2_presences_nested( self, root_dir:StrPath, out_root_dir:StrPath,
-                                    futures:list=[], recusion_level:int=0) -> list:
+    def check_ms2_presences_nested( self, in_root_dir:StrPath, ms_conv_root_dir:StrPath, out_root_dir:StrPath,
+                                   futures:list=[], recusion_level:int=0 ) -> list:
         """
-        Run SIRIUS Pipeline in nested directories.
+        Check for MS2 presence in a nested fashion.
 
         :param root_dir: Root input directory
         :type root_dir: StrPath
+        :param ms_conv_root_dir: Root msconv output directory
+        :type ms_conv_root_dir: StrPath
         :param out_root_dir: Root output directory
         :type out_root_dir: StrPath
         :param futures: Future computations for parallelization, defaults to []
@@ -288,22 +293,33 @@ class Ion_exclusion_Runner(Pipe_Step):
         :rtype: list
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
-        for root, dirs, files in os.walk(root_dir):
-            for file in tqdm( files, disable=verbose_tqdm, desc="Searching files" ):
-                if super().match_file_name( pattern=self.patterns["in"], file_name=file):
-                    futures.append( dask.delayed(self.check_ms2_presence)( in_dir=join( root_dir, file ),
-                                                                           msconv_out_dir=,
-                                                                           out_dir=out_root_dir, ) )
-            for dir in tqdm( dirs, disable=verbose_tqdm, desc="Searching directories" ):
-                futures = self.run_sirius_nested( root_dir=join(root_dir, dir),
-                                                  out_root_dir=join(out_root_dir, dir),
-                                                  futures=futures, recusion_level=recusion_level+1)
-
+        quant_file, annot_file = (None, None)
+        for entry in tqdm( os.listdir(in_root_dir), disable=verbose_tqdm, desc="Schedule Sirius annotation" ):
+            entry_path = join(in_root_dir, entry)
+                 
+            if os.path.isfile( entry_path ):
+                if entry == f"{basename(in_root_dir)}_annotations":
+                        annot_file = entry_path
+                elif entry == f"{basename(in_root_dir)}_iimn_fbmn_quant.csv":
+                    quant_file = entry_path
+                
+                
+            elif os.path.isdir( entry_path ):
+                futures = self.check_ms2_presences_nested( in_root_dir=entry_path,
+                                                           out_root_dir=join( out_root_dir, entry ),
+                                                           ms_conv_root_dir=join( ms_conv_root_dir, entry ),
+                                                           futures=futures, recusion_level=recusion_level+1 )
+                
+        if quant_file:
+            futures.append( dask.delayed(self.check_ms2_presence)( in_dir=in_root_dir,
+                                                                   out_dir=out_root_dir, 
+                                                                   msconv_dir=ms_conv_root_dir,
+                                                                   annotation_file=annot_file ) )
         if futures:
-            helpers.make_new_dir( out_root_dir )
+            os.makedirs(out_root_dir, exist_ok=True)
 
         return futures
-            
+
 
 
 if __name__ == "__main__":

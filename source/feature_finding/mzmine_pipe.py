@@ -69,7 +69,7 @@ def main(args, unknown_args):
                                    valid_formats=valid_formats, save_log=save_log,
                                    additional_args=additional_args, verbosity=verbosity)
     if nested:
-        futures = mzmine_runner.run_mzmine_batches_nested( root_dir=in_dir, out_root_dir=out_dir )
+        futures = mzmine_runner.run_mzmine_batches_nested( in_root_dir=in_dir, out_root_dir=out_dir )
         computation_complete = helpers.compute_scheduled( futures=futures, num_workers=1, verbose=verbosity >= 1)
     else:
         mzmine_runner.run_mzmine_batch( in_path=in_dir, out_path=out_dir )
@@ -129,13 +129,13 @@ class MZmine_Runner(Pipe_Step):
         self.errs.append( err )
 
 
-    def run_mzmine_batches_nested( self, root_dir:StrPath, out_root_dir:StrPath,
+    def run_mzmine_batches_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
                                    futures:list=[], recusion_level:int=0 ) -> list:
         """
         Run a mzmine batch on a nested structure.
 
-        :param root_dir: Root directory for descending the structure
-        :type root_dir: StrPath
+        :param in_root_dir: Root directory for descending the structure
+        :type in_root_dir: StrPath
         :param out_root_dir: Root directory for output
         :type out_root_dir: StrPath
         :param futures: Future computations for parallelization, defaults to []
@@ -146,23 +146,23 @@ class MZmine_Runner(Pipe_Step):
         :rtype: list
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
-        in_paths_file = join(out_root_dir, "source_files.txt")
+        found_files = []
+        for entry in tqdm( os.listdir(in_root_dir), disable=verbose_tqdm, desc="Schedule feature_finding" ):
+            entry_path = join(in_root_dir, entry)
 
-        for root, dirs, files in os.walk(root_dir):                
-            found_files = [join(root_dir, file) for file in files if self.match_file_name(pattern=self.patterns["in"], file_name=file)]
-            
-            if found_files:
-                os.makedirs(out_root_dir, exist_ok=True)
-                with open(in_paths_file , "w" ) as f:
-                    f.write( "\n".join(found_files) )
-                futures.append( dask.delayed(self.run_mzmine_batch)( in_path=in_paths_file, out_path=out_root_dir ) )
-
-            for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
-                futures = self.run_mzmine_batches_nested( root_dir=join(root_dir, dir),
-                                                          out_root_dir=join(out_root_dir, dir),
+            if self.match_file_name( pattern=self.patterns["in"], file_name=entry ):
+                found_files.append( entry_path )
+            elif os.path.isdir( entry_path ):
+                futures = self.run_mzmine_batches_nested( in_root_dir=entry_path,
+                                                          out_root_dir=join( out_root_dir, entry ),
                                                           futures=futures, recusion_level=recusion_level+1)
-        if futures:
-            helpers.make_new_dir( out_root_dir )
+
+        source_paths_file = join( out_root_dir, "source_files.txt" )
+        if found_files:
+            os.makedirs(out_root_dir, exist_ok=True)
+            with open(source_paths_file , "w", encoding="utf8" ) as f:
+                f.write( "\n".join(found_files) )
+            futures.append( dask.delayed( self.run_mzmine_batch )( in_path=source_paths_file, out_path=out_root_dir ) )
 
         return futures
 

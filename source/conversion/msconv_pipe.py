@@ -50,7 +50,7 @@ def main(args, unknown_args):
                                      redo_threshold=redo_threshold, overwrite=overwrite,
                                      save_log=save_log, additional_args=additional_args, verbosity=verbosity )
     if nested:
-        futures = file_converter.convert_files_nested( root_dir=in_dir, out_root_dir=out_dir )
+        futures = file_converter.convert_files_nested( in_root_dir=in_dir, out_root_dir=out_dir )
         computation_complete = helpers.compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
     else:
         file_converter.convert_file( in_path=in_dir, out_path=out_dir )
@@ -151,14 +151,14 @@ class File_Converter(Pipe_Step):
         self.errs.append( err )
 
 
-    def convert_files_nested( self, root_dir:StrPath, out_root_dir:StrPath,
+    def convert_files_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
                               futures:list=[], recusion_level:int=0 ) -> list:
         """
-        Converts multiple files in multiple folders, found in root_dir with msconvert and saves them
+        Converts multiple files in multiple folders, found in in_root_dir with msconvert and saves them
         to a location out_root_dir again into their respective folders.
 
-        :param root_dir: Starting folder for descent.
-        :type root_dir: StrPath
+        :param in_root_dir: Starting folder for descent.
+        :type in_root_dir: StrPath
         :param out_root_dir: Folder where structure is mimiced and files are converted to
         :type out_root_dir: StrPath
         :param futures: Future computations for parallelization, defaults to []
@@ -169,16 +169,15 @@ class File_Converter(Pipe_Step):
         :rtype: list
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
-        
-        for entry in tqdm(os.listdir(root_dir), disable=verbose_tqdm, desc="Schedule conversions"):
-            in_path=join( root_dir, entry )
-            out_path=join( out_root_dir, helpers.replace_file_ending( entry, self.target_format ) )
-            in_valid, out_valid = self.select_for_conversion( in_path=in_path, out_path=out_path)
+        for entry in tqdm(os.listdir(in_root_dir), disable=verbose_tqdm, desc="Schedule conversions"):
+            entry_path = join( in_root_dir, entry )
+            out_path = join( out_root_dir, helpers.replace_file_ending( entry, self.target_format ) )
+            in_valid, out_valid = self.select_for_conversion( in_path=entry_path, out_path=out_path)
 
             if in_valid and out_valid:
-                futures.append( dask.delayed(self.convert_file)( in_path=in_path, out_path=out_root_dir ) )
-            elif os.path.isdir(in_path) and not in_valid:
-                futures = self.convert_files_nested( root_dir=in_path, out_root_dir=join(out_root_dir, entry),
+                futures.append( dask.delayed(self.convert_file)( in_path=entry_path, out_path=out_root_dir ) )
+            elif os.path.isdir( entry_path ) and not in_valid:
+                futures = self.convert_files_nested( in_root_dir=entry_path, out_root_dir=join(out_root_dir, entry),
                                                      futures=futures, recusion_level=recusion_level+1 )
             
         if futures:

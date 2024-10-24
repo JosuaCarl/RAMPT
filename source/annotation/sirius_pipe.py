@@ -46,7 +46,7 @@ def main(args, unknown_args):
     sirius_runner = Sirius_Runner( sirius_path=sirius_path, config=config, save_log=save_log, additional_args=additional_args, verbosity=verbosity )
 
     if nested:
-        futures = sirius_runner.run_nested_sirius( root_dir=in_dir, out_root_dir=out_dir )
+        futures = sirius_runner.run_nested_sirius( in_root_dir=in_dir, out_root_dir=out_dir )
         computation_complete = helpers.compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
     else:
         futures = sirius_runner.run_sirius( in_dir=in_dir, out_dir=out_dir, projectspace=projectspace )
@@ -109,13 +109,13 @@ class Sirius_Runner(Pipe_Step):
         self.errs.append( err )
 
 
-    def run_sirius_nested( self, root_dir:StrPath, out_root_dir:StrPath,
-                           futures:list=[], recusion_level:int=0) -> list:
+    def run_sirius_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
+                           futures:list=[], recusion_level:int=0 ) -> list:
         """
         Run SIRIUS Pipeline in nested directories.
 
-        :param root_dir: Root input directory
-        :type root_dir: StrPath
+        :param in_root_dir: Root input directory
+        :type in_root_dir: StrPath
         :param out_root_dir: Root output directory
         :type out_root_dir: StrPath
         :param futures: Future computations for parallelization, defaults to []
@@ -126,21 +126,22 @@ class Sirius_Runner(Pipe_Step):
         :rtype: list
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
-        for root, dirs, files in os.walk(root_dir):
-            for file in tqdm( files, disable=verbose_tqdm, desc="Searching files" ):
-                if super().match_file_name( pattern=self.patterns["in"], file_name=file):
-                    futures.append( dask.delayed(self.run_sirius)( in_path=join( root_dir, file ),
-                                                                   out_path=out_root_dir,
-                                                                   projectspace=out_root_dir ) )
-            for dir in tqdm( dirs, disable=verbose_tqdm, desc="Searching directories" ):
-                futures = self.run_sirius_nested( root_dir=join(root_dir, dir),
-                                                  out_root_dir=join(out_root_dir, dir),
-                                                  futures=futures, recusion_level=recusion_level+1)
+        for entry in tqdm( os.listdir(in_root_dir), disable=verbose_tqdm, desc="Schedule Sirius annotation" ):
+            entry_path = join(in_root_dir, entry)
 
+            if self.match_file_name( pattern=self.patterns["in"], file_name=entry ):
+                futures.append( dask.delayed(self.run_sirius)( in_path=entry_path,
+                                                               out_path=out_root_dir,
+                                                               projectspace=out_root_dir ) )
+            elif os.path.isdir( entry_path ):
+                futures = self.run_sirius_nested( in_root_dir=entry_path,
+                                                  out_root_dir=join( out_root_dir, entry ),
+                                                  futures=futures, recusion_level=recusion_level+1)
         if futures:
-            helpers.make_new_dir( out_root_dir )
+            os.makedirs(out_root_dir, exist_ok=True)
 
         return futures
+
 
 
 if __name__ == "__main__":
