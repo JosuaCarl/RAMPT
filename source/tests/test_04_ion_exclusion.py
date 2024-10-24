@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 """
-Testing the GNPS annotation.
+Testing the ion exclusion list creation.
 """
 
 import os
 import shutil
 
 import source.helpers.general as helpers
-from source.annotation.gnps_pipe import *
-from source.annotation.gnps_pipe import main as gnps_pipe_main
+from source.ion_exclusion.ion_exclusion import *
+from source.ion_exclusion.ion_exclusion import main as ion_exclusion_pipe_main
 import pandas as pd
 
 import platform as pf
@@ -18,13 +18,14 @@ filepath = helpers.get_internal_filepath(__file__)
 
 
 
-def test_gnps_pipe_main():
+def test_ion_exclusion_pipe_main():
+    # TODO
     args = argparse.Namespace( in_dir=helpers.construct_path(filepath, "..", "example_files"),
                                out_dir=helpers.construct_path(filepath, "..", "out"),
                                nested=True, workers=1, save_log=True,
                                verbosity=0, gnps_args=None )
     
-    gnps_pipe_main( args, unknown_args=[] )
+    ion_exclusion_pipe_main( args, unknown_args=[] )
     
     assert os.path.isfile( helpers.construct_path(filepath, "..", "out/example_files_gnps_all_db_annotations.json") )
     assert os.path.isfile( helpers.construct_path(filepath, "..", "out/example_nested/example_nested_gnps_all_db_annotations.json") )
