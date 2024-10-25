@@ -306,10 +306,21 @@ document.write(`
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Methods that are helpful for general processing.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">regex</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">dask</span>
+<span class="kn">from</span> <span class="nn">tqdm.dask</span> <span class="kn">import</span> <span class="n">TqdmCallback</span>
+<span class="kn">import</span> <span class="nn">chardet</span>
+<span class="kn">import</span> <span class="nn">tee_subprocess</span>
+
 <span class="kn">from</span> <span class="nn">source.helpers.types</span> <span class="kn">import</span> <span class="o">*</span>
+
 
 
 
@@ -465,33 +476,119 @@ document.write(`
 
 
 
+<div class="viewcode-block" id="replace_file_ending">
+<a class="viewcode-back" href="../../../source.helpers.html#source.helpers.general.replace_file_ending">[docs]</a>
+<span class="k">def</span> <span class="nf">replace_file_ending</span><span class="p">(</span> <span class="n">path</span><span class="p">:</span><span class="n">StrPath</span><span class="p">,</span> <span class="n">new_ending</span><span class="p">:</span><span class="nb">str</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Replace the ending of a file by matchin the last &quot;.&quot;.</span>
+
+<span class="sd">    :param path: Path to file</span>
+<span class="sd">    :type path: StrPath</span>
+<span class="sd">    :param new_ending: _description_</span>
+<span class="sd">    :type new_ending: new_ending</span>
+<span class="sd">    :return: File path with new ending</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">regex</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(.*\.).*&quot;</span><span class="p">,</span> <span class="sa">rf</span><span class="s2">&quot;\1</span><span class="si">{</span><span class="n">new_ending</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
+
+
+
 
 <span class="c1"># Command methods</span>
 <div class="viewcode-block" id="execute_verbose_command">
 <a class="viewcode-back" href="../../../source.helpers.html#source.helpers.general.execute_verbose_command">[docs]</a>
-<span class="k">def</span> <span class="nf">execute_verbose_command</span><span class="p">(</span><span class="n">cmd</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">platform</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">verbosity</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">execute_verbose_command</span><span class="p">(</span><span class="n">cmd</span><span class="p">:</span><span class="nb">str</span><span class="o">|</span><span class="nb">list</span><span class="p">,</span> <span class="n">verbosity</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">out_path</span><span class="p">:</span><span class="n">StrPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">decode_text</span><span class="p">:</span><span class="n">StrPath</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Execute a command with the adequate verbosity.</span>
 
 <span class="sd">    :param cmd: Command as a string</span>
 <span class="sd">    :type cmd: str</span>
-<span class="sd">    :param platform: Current OS platform</span>
-<span class="sd">    :type platform: str</span>
 <span class="sd">    :param verbosity: Verbosity level, defaults to 1</span>
 <span class="sd">    :type verbosity: int, optional</span>
+<span class="sd">    :param out_path: Path to outfile.</span>
+<span class="sd">    :type out_path: StrPath</span>
 <span class="sd">    :return: Success of execution</span>
 <span class="sd">    :rtype: bool</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">verbosity</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;windows&quot;</span><span class="p">:</span>
-             <span class="n">cmd</span> <span class="o">=</span> <span class="n">cmd</span> <span class="o">+</span> <span class="s2">&quot; &gt; NUL&quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">cmd</span> <span class="o">=</span> <span class="n">cmd</span> <span class="o">+</span> <span class="s2">&quot; &gt; /dev/null&quot;</span>
-    <span class="k">if</span> <span class="n">verbosity</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">cmd</span> <span class="o">=</span> <span class="n">cmd</span> <span class="o">+</span> <span class="s2">&quot; 2&gt;&amp;1&quot;</span>
+    <span class="n">process</span> <span class="o">=</span> <span class="n">tee_subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span> <span class="n">cmd</span><span class="p">,</span> 
+                                  <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+                                  <span class="n">stdout</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">verbosity</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
+                                  <span class="n">stderr</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">verbosity</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
+                                  <span class="n">text</span><span class="o">=</span><span class="n">decode_text</span><span class="p">,</span>
+                                  <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span> <span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">out_path</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out_file</span><span class="p">:</span>
+            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;out:</span><span class="se">\n</span><span class="si">{</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="si">}</span><span class="se">\n\n\n</span><span class="s2">err:</span><span class="se">\n</span><span class="si">{</span><span class="n">process</span><span class="o">.</span><span class="n">stderr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span> <span class="n">cmd</span> <span class="p">)</span>
-    <span class="k">return</span> <span class="kc">True</span></div>
+    <span class="k">return</span> <span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">process</span><span class="o">.</span><span class="n">stderr</span></div>
+
+
+
+
+<span class="c1"># Parallel processing</span>
+<div class="viewcode-block" id="compute_scheduled">
+<a class="viewcode-back" href="../../../source.helpers.html#source.helpers.general.compute_scheduled">[docs]</a>
+<span class="k">def</span> <span class="nf">compute_scheduled</span><span class="p">(</span> <span class="n">futures</span><span class="p">:</span><span class="nb">list</span><span class="p">,</span> <span class="n">num_workers</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">dask</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">scheduler</span><span class="o">=</span><span class="s1">&#39;processes&#39;</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="n">num_workers</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">TqdmCallback</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Compute&quot;</span><span class="p">):</span>
+                <span class="n">dask</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dask</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+
+
+<span class="c1"># Webrequests</span>
+<div class="viewcode-block" id="check_for_str_request">
+<a class="viewcode-back" href="../../../source.helpers.html#source.helpers.general.check_for_str_request">[docs]</a>
+<span class="k">def</span> <span class="nf">check_for_str_request</span><span class="p">(</span><span class="n">url</span><span class="p">:</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">retries</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">allowed_fails</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">expected_wait_time</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">600.0</span><span class="p">,</span> <span class="n">verbosity</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check the given URL for a given query. The task is retried a number of times with logarithmically (log2) decreasing time between requests after one initial request.</span>
+
+<span class="sd">    :param url: Target URL</span>
+<span class="sd">    :type url: str | bytes</span>
+<span class="sd">    :param query: Query string that is searched in response</span>
+<span class="sd">    :type query: str</span>
+<span class="sd">    :param retries: Number of retries, defaults to 100</span>
+<span class="sd">    :type retries: int, optional</span>
+<span class="sd">    :param allowed_fails: Number of times the request are allowed to fail, defaults to 10</span>
+<span class="sd">    :type allowed_fails: int, optional</span>
+<span class="sd">    :param expected_wait_time: Expected time until query is found, defaults to 10.0</span>
+<span class="sd">    :type expected_wait_time: float, optional</span>
+<span class="sd">    :param verbosity: Level of verbosity, defaults to 1</span>
+<span class="sd">    :type verbosity: int, optional</span>
+<span class="sd">    :param kwargs: Additional arguments, passed on to requests.get()</span>
+<span class="sd">    :type kwargs: any, optional</span>
+<span class="sd">    :return: Query found ?</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fails</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">retries</span><span class="p">):</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span>  <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">query</span> <span class="ow">in</span>  <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fails</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">verbosity</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2"> returned status code </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2"> after </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> retries.</span><span class="se">\</span>
+<span class="s2">                            Requesting this URL will be terminated after further </span><span class="si">{</span><span class="n">allowed_fails</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">fails</span><span class="p">)</span><span class="si">}</span><span class="s2"> failed requests.&quot;</span><span class="p">,</span>
+                            <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fails</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">allowed_fails</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">LookupError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The request to </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2"> failed more than </span><span class="si">{</span><span class="n">allowed_fails</span><span class="si">}</span><span class="s2"> times with the following status codes:</span><span class="se">\n</span><span class="si">{</span><span class="n">fails</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Retry</span>
+        <span class="n">retry_time</span> <span class="o">=</span> <span class="p">(</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="p">)</span> <span class="o">*</span> <span class="n">expected_wait_time</span>
+        <span class="k">if</span> <span class="n">verbosity</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="s2"> not found at </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">. Retrying in </span><span class="si">{</span><span class="n">retry_time</span><span class="si">}</span><span class="s2">s.&quot;</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">retry_time</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">False</span></div>
 
 </pre></div>
 

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>source package &#8212; mine2sirius 0.1.0 documentation</title>
+    <title>source package &#8212; mine2sirius 0.2.0 documentation</title>
   
   
   
@@ -35,7 +35,7 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="_static/documentation_options.js?v=01f34227"></script>
+    <script src="_static/documentation_options.js?v=938c9ccc"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'source';</script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">mine2sirius 0.1.0 documentation</p>
+    <p class="title logo__title">mine2sirius 0.2.0 documentation</p>
   
 </a></div>
     
@@ -135,6 +135,13 @@
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="#">
     source package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tests.html">
+    tests package
   </a>
 </li>
 
@@ -228,6 +235,13 @@ document.write(`
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tests.html">
+    tests package
+  </a>
+</li>
+
   </ul>
 </nav></div>
           
@@ -264,7 +278,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="source.conversion.html">source.conversion package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source.feature_finding.html">source.feature_finding package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source.helpers.html">source.helpers package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="source.tests.html">source.tests package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source.ion_exclusion.html">source.ion_exclusion package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source.population_difference_testing.html">source.population_difference_testing package</a></li>
 </ul>
 </div>
 </nav></div>
@@ -326,56 +341,125 @@ document.write(`
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="source.annotation.html">source.annotation package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="source.annotation.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source.annotation.html#module-source.annotation.gnps_pipe">source.annotation.gnps_pipe module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source.annotation.html#source.annotation.gnps_pipe.GNPS_Runner"><code class="docutils literal notranslate"><span class="pre">GNPS_Runner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source.annotation.html#source.annotation.gnps_pipe.GNPS_Runner.check_dir_files"><code class="docutils literal notranslate"><span class="pre">GNPS_Runner.check_dir_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.annotation.html#source.annotation.gnps_pipe.GNPS_Runner.check_task_finished"><code class="docutils literal notranslate"><span class="pre">GNPS_Runner.check_task_finished()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.annotation.html#source.annotation.gnps_pipe.GNPS_Runner.extract_task_info"><code class="docutils literal notranslate"><span class="pre">GNPS_Runner.extract_task_info()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.annotation.html#source.annotation.gnps_pipe.GNPS_Runner.fetch_results"><code class="docutils literal notranslate"><span class="pre">GNPS_Runner.fetch_results()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.annotation.html#source.annotation.gnps_pipe.GNPS_Runner.get_gnps_results"><code class="docutils literal notranslate"><span class="pre">GNPS_Runner.get_gnps_results()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.annotation.html#source.annotation.gnps_pipe.GNPS_Runner.get_gnps_results_nested"><code class="docutils literal notranslate"><span class="pre">GNPS_Runner.get_gnps_results_nested()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.annotation.html#source.annotation.gnps_pipe.GNPS_Runner.post_gnps_request"><code class="docutils literal notranslate"><span class="pre">GNPS_Runner.post_gnps_request()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source.annotation.html#source.annotation.gnps_pipe.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source.annotation.html#module-source.annotation.sirius_pipe">source.annotation.sirius_pipe module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source.annotation.html#source.annotation.sirius_pipe.Sirius_Runner"><code class="docutils literal notranslate"><span class="pre">Sirius_Runner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source.annotation.html#source.annotation.sirius_pipe.Sirius_Runner.run_sirius"><code class="docutils literal notranslate"><span class="pre">Sirius_Runner.run_sirius()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.annotation.html#source.annotation.sirius_pipe.Sirius_Runner.run_sirius_nested"><code class="docutils literal notranslate"><span class="pre">Sirius_Runner.run_sirius_nested()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source.annotation.html#source.annotation.sirius_pipe.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="source.annotation.html#module-source.annotation">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="source.conversion.html">source.conversion package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="source.conversion.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="source.conversion.html#module-source.conversion.raw_to_mzml">source.conversion.raw_to_mzml module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="source.conversion.html#source.conversion.raw_to_mzml.check_entry"><code class="docutils literal notranslate"><span class="pre">check_entry()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="source.conversion.html#source.conversion.raw_to_mzml.convert_file"><code class="docutils literal notranslate"><span class="pre">convert_file()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="source.conversion.html#source.conversion.raw_to_mzml.convert_files"><code class="docutils literal notranslate"><span class="pre">convert_files()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="source.conversion.html#source.conversion.raw_to_mzml.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="source.conversion.html#module-source.conversion.msconv_pipe">source.conversion.msconv_pipe module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source.conversion.html#source.conversion.msconv_pipe.File_Converter"><code class="docutils literal notranslate"><span class="pre">File_Converter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source.conversion.html#source.conversion.msconv_pipe.File_Converter.convert_file"><code class="docutils literal notranslate"><span class="pre">File_Converter.convert_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.conversion.html#source.conversion.msconv_pipe.File_Converter.convert_files_nested"><code class="docutils literal notranslate"><span class="pre">File_Converter.convert_files_nested()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.conversion.html#source.conversion.msconv_pipe.File_Converter.select_for_conversion"><code class="docutils literal notranslate"><span class="pre">File_Converter.select_for_conversion()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source.conversion.html#source.conversion.msconv_pipe.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="source.conversion.html#module-source.conversion">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="source.feature_finding.html">source.feature_finding package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="source.feature_finding.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source.feature_finding.html#module-source.feature_finding.mzmine_pipe">source.feature_finding.mzmine_pipe module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source.feature_finding.html#source.feature_finding.mzmine_pipe.MZmine_Runner"><code class="docutils literal notranslate"><span class="pre">MZmine_Runner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source.feature_finding.html#source.feature_finding.mzmine_pipe.MZmine_Runner.run_mzmine_batch"><code class="docutils literal notranslate"><span class="pre">MZmine_Runner.run_mzmine_batch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.feature_finding.html#source.feature_finding.mzmine_pipe.MZmine_Runner.run_mzmine_batches_nested"><code class="docutils literal notranslate"><span class="pre">MZmine_Runner.run_mzmine_batches_nested()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="source.feature_finding.html#source.feature_finding.mzmine_pipe.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="source.feature_finding.html#module-source.feature_finding">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="source.helpers.html">source.helpers package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="source.helpers.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source.helpers.html#module-source.helpers.classes">source.helpers.classes module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source.helpers.html#source.helpers.classes.Pipe_Step"><code class="docutils literal notranslate"><span class="pre">Pipe_Step</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source.helpers.html#source.helpers.classes.Pipe_Step.match_file_name"><code class="docutils literal notranslate"><span class="pre">Pipe_Step.match_file_name()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="source.helpers.html#module-source.helpers.general">source.helpers.general module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="source.helpers.html#source.helpers.general.Substring"><code class="docutils literal notranslate"><span class="pre">Substring</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="source.helpers.html#source.helpers.general.change_case_str"><code class="docutils literal notranslate"><span class="pre">change_case_str()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source.helpers.html#source.helpers.general.check_for_str_request"><code class="docutils literal notranslate"><span class="pre">check_for_str_request()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source.helpers.html#source.helpers.general.compute_scheduled"><code class="docutils literal notranslate"><span class="pre">compute_scheduled()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="source.helpers.html#source.helpers.general.construct_path"><code class="docutils literal notranslate"><span class="pre">construct_path()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="source.helpers.html#source.helpers.general.execute_verbose_command"><code class="docutils literal notranslate"><span class="pre">execute_verbose_command()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="source.helpers.html#source.helpers.general.get_internal_filepath"><code class="docutils literal notranslate"><span class="pre">get_internal_filepath()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="source.helpers.html#source.helpers.general.make_new_dir"><code class="docutils literal notranslate"><span class="pre">make_new_dir()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="source.helpers.html#source.helpers.general.open_last_line_with_content"><code class="docutils literal notranslate"><span class="pre">open_last_line_with_content()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="source.helpers.html#source.helpers.general.open_last_n_line"><code class="docutils literal notranslate"><span class="pre">open_last_n_line()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source.helpers.html#source.helpers.general.replace_file_ending"><code class="docutils literal notranslate"><span class="pre">replace_file_ending()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="source.helpers.html#module-source.helpers.types">source.helpers.types module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="source.helpers.html#module-source.helpers">Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="source.tests.html">source.tests package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="source.tests.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="source.tests.html#module-source.tests.test_conversion">source.tests.test_conversion module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="source.tests.html#source.tests.test_conversion.test_raw_to_mzml_main"><code class="docutils literal notranslate"><span class="pre">test_raw_to_mzml_main()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="source.ion_exclusion.html">source.ion_exclusion package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="source.ion_exclusion.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source.ion_exclusion.html#module-source.ion_exclusion.ion_exclusion">source.ion_exclusion.ion_exclusion module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source.ion_exclusion.html#source.ion_exclusion.ion_exclusion.Ion_exclusion_Runner"><code class="docutils literal notranslate"><span class="pre">Ion_exclusion_Runner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source.ion_exclusion.html#source.ion_exclusion.ion_exclusion.Ion_exclusion_Runner.check_ms2_presence"><code class="docutils literal notranslate"><span class="pre">Ion_exclusion_Runner.check_ms2_presence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.ion_exclusion.html#source.ion_exclusion.ion_exclusion.Ion_exclusion_Runner.check_ms2_presences_nested"><code class="docutils literal notranslate"><span class="pre">Ion_exclusion_Runner.check_ms2_presences_nested()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="source.tests.html#module-source.tests.test_helpers">source.tests.test_helpers module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="source.tests.html#source.tests.test_helpers.test_change_case_str"><code class="docutils literal notranslate"><span class="pre">test_change_case_str()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="source.tests.html#source.tests.test_helpers.test_execute_verbose_command"><code class="docutils literal notranslate"><span class="pre">test_execute_verbose_command()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="source.tests.html#source.tests.test_helpers.test_open_last_line_with_content"><code class="docutils literal notranslate"><span class="pre">test_open_last_line_with_content()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="source.tests.html#source.tests.test_helpers.test_open_last_n_line"><code class="docutils literal notranslate"><span class="pre">test_open_last_n_line()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source.ion_exclusion.html#source.ion_exclusion.ion_exclusion.OpenMS_File_Handler"><code class="docutils literal notranslate"><span class="pre">OpenMS_File_Handler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="source.ion_exclusion.html#source.ion_exclusion.ion_exclusion.OpenMS_File_Handler.check_ending_experiment"><code class="docutils literal notranslate"><span class="pre">OpenMS_File_Handler.check_ending_experiment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.ion_exclusion.html#source.ion_exclusion.ion_exclusion.OpenMS_File_Handler.load_experiment"><code class="docutils literal notranslate"><span class="pre">OpenMS_File_Handler.load_experiment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.ion_exclusion.html#source.ion_exclusion.ion_exclusion.OpenMS_File_Handler.load_experiments"><code class="docutils literal notranslate"><span class="pre">OpenMS_File_Handler.load_experiments()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.ion_exclusion.html#source.ion_exclusion.ion_exclusion.OpenMS_File_Handler.load_experiments_df"><code class="docutils literal notranslate"><span class="pre">OpenMS_File_Handler.load_experiments_df()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.ion_exclusion.html#source.ion_exclusion.ion_exclusion.OpenMS_File_Handler.load_name"><code class="docutils literal notranslate"><span class="pre">OpenMS_File_Handler.load_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.ion_exclusion.html#source.ion_exclusion.ion_exclusion.OpenMS_File_Handler.load_names_batch"><code class="docutils literal notranslate"><span class="pre">OpenMS_File_Handler.load_names_batch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="source.ion_exclusion.html#source.ion_exclusion.ion_exclusion.OpenMS_File_Handler.read_experiment"><code class="docutils literal notranslate"><span class="pre">OpenMS_File_Handler.read_experiment()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="source.tests.html#module-source.tests">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="source.ion_exclusion.html#source.ion_exclusion.ion_exclusion.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source.ion_exclusion.html#module-source.ion_exclusion">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="source.population_difference_testing.html">source.population_difference_testing package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="source.population_difference_testing.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source.population_difference_testing.html#module-source.population_difference_testing.annotations">source.population_difference_testing.annotations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source.population_difference_testing.html#module-source.population_difference_testing.chemical_groups">source.population_difference_testing.chemical_groups module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source.population_difference_testing.html#module-source.population_difference_testing.pathways">source.population_difference_testing.pathways module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source.population_difference_testing.html#module-source.population_difference_testing.statistics">source.population_difference_testing.statistics module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="source.population_difference_testing.html#source.population_difference_testing.statistics.choose_test"><code class="docutils literal notranslate"><span class="pre">choose_test()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source.population_difference_testing.html#source.population_difference_testing.statistics.execute_test"><code class="docutils literal notranslate"><span class="pre">execute_test()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="source.population_difference_testing.html#source.population_difference_testing.statistics.p_val_to_star"><code class="docutils literal notranslate"><span class="pre">p_val_to_star()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="source.population_difference_testing.html#module-source.population_difference_testing">Module contents</a></li>
 </ul>
 </li>
 </ul>

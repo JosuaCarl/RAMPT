@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>source.annotation package &#8212; mine2sirius 0.1.0 documentation</title>
+    <title>source.annotation package &#8212; mine2sirius 0.2.0 documentation</title>
   
   
   
@@ -35,7 +35,7 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="_static/documentation_options.js?v=01f34227"></script>
+    <script src="_static/documentation_options.js?v=938c9ccc"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'source.annotation';</script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">mine2sirius 0.1.0 documentation</p>
+    <p class="title logo__title">mine2sirius 0.2.0 documentation</p>
   
 </a></div>
     
@@ -135,6 +135,13 @@
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="source.html">
     source package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tests.html">
+    tests package
   </a>
 </li>
 
@@ -228,6 +235,13 @@ document.write(`
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tests.html">
+    tests package
+  </a>
+</li>
+
   </ul>
 </nav></div>
           
@@ -264,8 +278,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="source.conversion.html">source.conversion package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source.feature_finding.html">source.feature_finding package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source.helpers.html">source.helpers package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="source.networking.html">source.networking package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="source.tests.html">source.tests package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source.ion_exclusion.html">source.ion_exclusion package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source.population_difference_testing.html">source.population_difference_testing package</a></li>
 </ul>
 </div>
 </nav></div>
@@ -325,6 +339,241 @@ document.write(`
                   
   <section id="source-annotation-package">
 <h1>source.annotation package<a class="headerlink" href="#source-annotation-package" title="Link to this heading">#</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">#</a></h2>
+</section>
+<section id="module-source.annotation.gnps_pipe">
+<span id="source-annotation-gnps-pipe-module"></span><h2>source.annotation.gnps_pipe module<a class="headerlink" href="#module-source.annotation.gnps_pipe" title="Link to this heading">#</a></h2>
+<p>Use GNPS for anntating compounds.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="source.annotation.gnps_pipe.GNPS_Runner">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">source.annotation.gnps_pipe.</span></span><span class="sig-name descname"><span class="pre">GNPS_Runner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/source/annotation/gnps_pipe.html#GNPS_Runner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.annotation.gnps_pipe.GNPS_Runner" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="source.helpers.html#source.helpers.classes.Pipe_Step" title="source.helpers.classes.Pipe_Step"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipe_Step</span></code></a></p>
+<p>A runner for checking on the GNPS process and subsequently saving the results.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="source.annotation.gnps_pipe.GNPS_Runner.check_dir_files">
+<span class="sig-name descname"><span class="pre">check_dir_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/source/annotation/gnps_pipe.html#GNPS_Runner.check_dir_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.annotation.gnps_pipe.GNPS_Runner.check_dir_files" title="Link to this definition">#</a></dt>
+<dd><p>Check whether the needed files for GNPS POST request are present, according to mzmine naming scheme.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dir</strong> (<em>StrPath</em>) – Directory to search in</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>MS2 feature and feature quantification file presence</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[bool, bool]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="source.annotation.gnps_pipe.GNPS_Runner.check_task_finished">
+<span class="sig-name descname"><span class="pre">check_task_finished</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">work_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mzmine_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gnps_response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/source/annotation/gnps_pipe.html#GNPS_Runner.check_task_finished"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.annotation.gnps_pipe.GNPS_Runner.check_task_finished" title="Link to this definition">#</a></dt>
+<dd><p>Check GNPS API for the status of the task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>work_path</strong> (<em>StrPath</em>) – Path where mzmine.log can be found (only needed if no mzmin_log is provided)</p></li>
+<li><p><strong>mzmine_log</strong> (<em>str</em><em>, </em><em>optional</em>) – Output of mzmine including GNPS POST request, defaults to None</p></li>
+<li><p><strong>gnps_response</strong> (<em>dict</em><em>, </em><em>optional</em>) – Resonse from GNPS, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Task ID and whether the task was completed during search time</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[str, bool]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="source.annotation.gnps_pipe.GNPS_Runner.extract_task_info">
+<span class="sig-name descname"><span class="pre">extract_task_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">work_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mzmine_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/source/annotation/gnps_pipe.html#GNPS_Runner.extract_task_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.annotation.gnps_pipe.GNPS_Runner.extract_task_info" title="Link to this definition">#</a></dt>
+<dd><p>Extract the information about the started GNPS task from the mzmin_log.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query</strong> (<em>str</em>) – Query to match the info against.</p></li>
+<li><p><strong>work_path</strong> (<em>StrPath</em>) – Path where mzmine.log can be found (only needed if no mzmin_log is provided).</p></li>
+<li><p><strong>mzmine_log</strong> (<em>str</em><em>, </em><em>optional</em>) – Output of mzmine including GNPS POST request, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Response from GNPS as a dictionary.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="source.annotation.gnps_pipe.GNPS_Runner.fetch_results">
+<span class="sig-name descname"><span class="pre">fetch_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/source/annotation/gnps_pipe.html#GNPS_Runner.fetch_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.annotation.gnps_pipe.GNPS_Runner.fetch_results" title="Link to this definition">#</a></dt>
+<dd><p>Fetch all resulting annotations from a GNSP Task and optionally save it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task_id</strong> (<em>str</em>) – Task ID from GNPS</p></li>
+<li><p><strong>out_path</strong> (<em>StrPath</em><em>, </em><em>optional</em>) – Path for saving the output json, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Result as a dictionary</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="source.annotation.gnps_pipe.GNPS_Runner.get_gnps_results">
+<span class="sig-name descname"><span class="pre">get_gnps_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mzmine_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gnps_response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/source/annotation/gnps_pipe.html#GNPS_Runner.get_gnps_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.annotation.gnps_pipe.GNPS_Runner.get_gnps_results" title="Link to this definition">#</a></dt>
+<dd><p>Get the GNPS results from a single path, mzmine_log or GNPS response.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_dir</strong> (<em>StrPath</em><em>, </em><em>optional</em>) – Input directory, defaults to None</p></li>
+<li><p><strong>out_dir</strong> (<em>StrPath</em>) – Output directory of result</p></li>
+<li><p><strong>mzmine_log</strong> (<em>str</em><em>, </em><em>optional</em>) – mzmine_log String containing GNPS response, defaults to None</p></li>
+<li><p><strong>gnps_response</strong> (<em>dict</em><em>, </em><em>optional</em>) – GNPS response to POST request, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>BrokenPipeError</strong> – When the task does not complete in the expected time</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Resulting anntations dictionary</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="source.annotation.gnps_pipe.GNPS_Runner.get_gnps_results_nested">
+<span class="sig-name descname"><span class="pre">get_gnps_results_nested</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_root_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">futures</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recusion_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/source/annotation/gnps_pipe.html#GNPS_Runner.get_gnps_results_nested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.annotation.gnps_pipe.GNPS_Runner.get_gnps_results_nested" title="Link to this definition">#</a></dt>
+<dd><p>Construct a list of necessary computations for getting the GNPS results from a nested scheme of mzmine results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>root_dir</strong> (<em>StrPath</em>) – Root input directory</p></li>
+<li><p><strong>out_root_dir</strong> (<em>StrPath</em>) – Root output directory</p></li>
+<li><p><strong>futures</strong> (<em>list</em><em>, </em><em>optional</em>) – Future computations for parallelization, defaults to []</p></li>
+<li><p><strong>recusion_level</strong> (<em>int</em><em>, </em><em>optional</em>) – Current level of recursion, important for determination of level of verbose output, defaults to 0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Future computations</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="source.annotation.gnps_pipe.GNPS_Runner.post_gnps_request">
+<span class="sig-name descname"><span class="pre">post_gnps_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">work_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/source/annotation/gnps_pipe.html#GNPS_Runner.post_gnps_request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.annotation.gnps_pipe.GNPS_Runner.post_gnps_request" title="Link to this definition">#</a></dt>
+<dd><p>print(“The job will be resubmitted to <a class="reference external" href="https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking">https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking</a>”)
+requests.post( “<a class="reference external" href="https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking">https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking</a>”,</p>
+<blockquote>
+<div><dl class="simple">
+<dt>data={ “featurems2”: join(out_path, f”{os.path.basename(out_path)}_iimn_fbmn.mgf”),</dt><dd><p>“featurequantification”: join(out_path, f”{os.path.basename(out_path)}_iimn_fbmn_quant.csv”)})</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="source.annotation.gnps_pipe.main">
+<span class="sig-prename descclassname"><span class="pre">source.annotation.gnps_pipe.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unknown_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/source/annotation/gnps_pipe.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.annotation.gnps_pipe.main" title="Link to this definition">#</a></dt>
+<dd><p>Execute the GNPS annotation fetching.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>any</em>) – Command line arguments</p></li>
+<li><p><strong>unknown_args</strong> (<em>any</em>) – Command line arguments that are not known.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-source.annotation.sirius_pipe">
+<span id="source-annotation-sirius-pipe-module"></span><h2>source.annotation.sirius_pipe module<a class="headerlink" href="#module-source.annotation.sirius_pipe" title="Link to this heading">#</a></h2>
+<p>Use Sirius to annotate compounds and extract matching formulae and chemical classes.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="source.annotation.sirius_pipe.Sirius_Runner">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">source.annotation.sirius_pipe.</span></span><span class="sig-name descname"><span class="pre">Sirius_Runner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sirius_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/source/annotation/sirius_pipe.html#Sirius_Runner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.annotation.sirius_pipe.Sirius_Runner" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="source.helpers.html#source.helpers.classes.Pipe_Step" title="source.helpers.classes.Pipe_Step"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipe_Step</span></code></a></p>
+<p>A runner for SIRIUS annotation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="source.annotation.sirius_pipe.Sirius_Runner.run_sirius">
+<span class="sig-name descname"><span class="pre">run_sirius</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projectspace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/source/annotation/sirius_pipe.html#Sirius_Runner.run_sirius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.annotation.sirius_pipe.Sirius_Runner.run_sirius" title="Link to this definition">#</a></dt>
+<dd><p>Run a single SIRIUS configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_path</strong> (<em>StrPath</em>) – Path to in file</p></li>
+<li><p><strong>out_path</strong> (<em>StrPath</em>) – Output directory</p></li>
+<li><p><strong>out_path</strong> – Path to projectspace file / directory</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Success of the command</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="source.annotation.sirius_pipe.Sirius_Runner.run_sirius_nested">
+<span class="sig-name descname"><span class="pre">run_sirius_nested</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_root_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_root_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">futures</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recusion_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/source/annotation/sirius_pipe.html#Sirius_Runner.run_sirius_nested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.annotation.sirius_pipe.Sirius_Runner.run_sirius_nested" title="Link to this definition">#</a></dt>
+<dd><p>Run SIRIUS Pipeline in nested directories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_root_dir</strong> (<em>StrPath</em>) – Root input directory</p></li>
+<li><p><strong>out_root_dir</strong> (<em>StrPath</em>) – Root output directory</p></li>
+<li><p><strong>futures</strong> (<em>list</em><em>, </em><em>optional</em>) – Future computations for parallelization, defaults to []</p></li>
+<li><p><strong>recusion_level</strong> (<em>int</em><em>, </em><em>optional</em>) – Current level of recursion, important for determination of level of verbose output, defaults to 0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Future computations</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="source.annotation.sirius_pipe.main">
+<span class="sig-prename descclassname"><span class="pre">source.annotation.sirius_pipe.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unknown_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/source/annotation/sirius_pipe.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.annotation.sirius_pipe.main" title="Link to this definition">#</a></dt>
+<dd><p>Execute the conversion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>any</em>) – Command line arguments</p></li>
+<li><p><strong>unknown_args</strong> (<em>any</em>) – Command line arguments that are not known.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-source.annotation">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-source.annotation" title="Link to this heading">#</a></h2>
 </section>
@@ -376,6 +625,30 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-source.annotation.gnps_pipe">source.annotation.gnps_pipe module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.annotation.gnps_pipe.GNPS_Runner"><code class="docutils literal notranslate"><span class="pre">GNPS_Runner</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#source.annotation.gnps_pipe.GNPS_Runner.check_dir_files"><code class="docutils literal notranslate"><span class="pre">GNPS_Runner.check_dir_files()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#source.annotation.gnps_pipe.GNPS_Runner.check_task_finished"><code class="docutils literal notranslate"><span class="pre">GNPS_Runner.check_task_finished()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#source.annotation.gnps_pipe.GNPS_Runner.extract_task_info"><code class="docutils literal notranslate"><span class="pre">GNPS_Runner.extract_task_info()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#source.annotation.gnps_pipe.GNPS_Runner.fetch_results"><code class="docutils literal notranslate"><span class="pre">GNPS_Runner.fetch_results()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#source.annotation.gnps_pipe.GNPS_Runner.get_gnps_results"><code class="docutils literal notranslate"><span class="pre">GNPS_Runner.get_gnps_results()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#source.annotation.gnps_pipe.GNPS_Runner.get_gnps_results_nested"><code class="docutils literal notranslate"><span class="pre">GNPS_Runner.get_gnps_results_nested()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#source.annotation.gnps_pipe.GNPS_Runner.post_gnps_request"><code class="docutils literal notranslate"><span class="pre">GNPS_Runner.post_gnps_request()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.annotation.gnps_pipe.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-source.annotation.sirius_pipe">source.annotation.sirius_pipe module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.annotation.sirius_pipe.Sirius_Runner"><code class="docutils literal notranslate"><span class="pre">Sirius_Runner</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#source.annotation.sirius_pipe.Sirius_Runner.run_sirius"><code class="docutils literal notranslate"><span class="pre">Sirius_Runner.run_sirius()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#source.annotation.sirius_pipe.Sirius_Runner.run_sirius_nested"><code class="docutils literal notranslate"><span class="pre">Sirius_Runner.run_sirius_nested()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.annotation.sirius_pipe.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-source.annotation">Module contents</a></li>
 </ul>
   </nav></div>

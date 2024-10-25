@@ -170,6 +170,7 @@ data/
 docsource/_build/
 substep_batches/
 tests/out/*
+backup/
 
 ## Files
 Notes.md

@@ -1,0 +1,685 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>source.annotation.gnps_pipe &#8212; mine2sirius 0.2.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../_static/documentation_options.js?v=938c9ccc"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/source/annotation/gnps_pipe';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">mine2sirius 0.2.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source.html">
+    source package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../tests.html">
+    tests package
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../source.html">
+    source package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../tests.html">
+    tests package
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">source.annot...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for source.annotation.gnps_pipe</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Use GNPS for anntating compounds.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Imports</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">basename</span>
+<span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">tqdm.dask</span> <span class="kn">import</span> <span class="n">TqdmCallback</span>
+<span class="kn">import</span> <span class="nn">dask.multiprocessing</span>
+
+
+<span class="kn">from</span> <span class="nn">source.helpers.general</span> <span class="kn">import</span> <span class="n">check_for_str_request</span><span class="p">,</span> <span class="n">compute_scheduled</span>
+<span class="kn">from</span> <span class="nn">source.helpers.types</span> <span class="kn">import</span> <span class="n">StrPath</span>
+<span class="kn">from</span> <span class="nn">source.helpers.classes</span> <span class="kn">import</span> <span class="n">Pipe_Step</span>
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../../source.annotation.html#source.annotation.gnps_pipe.main">[docs]</a>
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">unknown_args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Execute the GNPS annotation fetching.</span>
+
+<span class="sd">    :param args: Command line arguments</span>
+<span class="sd">    :type args: any</span>
+<span class="sd">    :param unknown_args: Command line arguments that are not known.</span>
+<span class="sd">    :type unknown_args: any</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Extract arguments</span>
+    <span class="n">in_dir</span>          <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">in_dir</span>
+    <span class="n">out_dir</span>         <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">out_dir</span>          <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">out_dir</span> <span class="k">else</span> <span class="n">args</span><span class="o">.</span><span class="n">in_dir</span>
+    <span class="n">nested</span>          <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">nested</span>           <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">nested</span> <span class="k">else</span> <span class="kc">False</span>
+    <span class="n">n_workers</span>       <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">workers</span>          <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">workers</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="n">save_log</span>        <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">save_log</span>         <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">save_log</span> <span class="k">else</span> <span class="kc">False</span>
+    <span class="n">verbosity</span>       <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">verbosity</span>        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbosity</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="n">additional_args</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">gnps_args</span>        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">gnps_args</span> <span class="k">else</span> <span class="n">unknown_args</span>
+
+    <span class="n">gnps_runner</span> <span class="o">=</span> <span class="n">GNPS_Runner</span><span class="p">(</span> <span class="n">save_log</span><span class="o">=</span><span class="n">save_log</span><span class="p">,</span> <span class="n">additional_args</span><span class="o">=</span><span class="n">additional_args</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">nested</span><span class="p">:</span>
+        <span class="n">futures</span> <span class="o">=</span> <span class="n">gnps_runner</span><span class="o">.</span><span class="n">get_gnps_results_nested</span><span class="p">(</span> <span class="n">root_dir</span><span class="o">=</span><span class="n">in_dir</span><span class="p">,</span> <span class="n">out_root_dir</span><span class="o">=</span><span class="n">out_dir</span> <span class="p">)</span>
+        <span class="n">computation_complete</span> <span class="o">=</span> <span class="n">compute_scheduled</span><span class="p">(</span> <span class="n">futures</span><span class="o">=</span><span class="n">futures</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="n">n_workers</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbosity</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">futures</span> <span class="o">=</span> <span class="n">gnps_runner</span><span class="o">.</span><span class="n">get_gnps_results</span><span class="p">(</span> <span class="n">in_dir</span><span class="o">=</span><span class="n">in_dir</span><span class="p">,</span> <span class="n">out_dir</span><span class="o">=</span><span class="n">out_dir</span> <span class="p">)</span></div>
+
+    
+
+
+<div class="viewcode-block" id="GNPS_Runner">
+<a class="viewcode-back" href="../../../source.annotation.html#source.annotation.gnps_pipe.GNPS_Runner">[docs]</a>
+<span class="k">class</span> <span class="nc">GNPS_Runner</span><span class="p">(</span><span class="n">Pipe_Step</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A runner for checking on the GNPS process and subsequently saving the results.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">save_log</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">additional_args</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="p">[],</span> <span class="n">verbosity</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span> <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the GNPS_Runner.</span>
+
+<span class="sd">        :param save_log: Whether to save the output(s).</span>
+<span class="sd">        :type save_log: bool, optional</span>
+<span class="sd">        :param additional_args: Additional arguments for mzmine, defaults to []</span>
+<span class="sd">        :type additional_args: list, optional</span>
+<span class="sd">        :param verbosity: Level of verbosity, defaults to 1</span>
+<span class="sd">        :type verbosity: int, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="n">save_log</span><span class="o">=</span><span class="n">save_log</span><span class="p">,</span> <span class="n">additional_args</span><span class="o">=</span><span class="n">additional_args</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="n">verbosity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mzmine_log_query</span>   <span class="o">=</span> <span class="s2">&quot;io.github.mzmine.modules.io.export_features_gnps.GNPSUtils submitFbmnJob GNPS FBMN/IIMN response: &quot;</span>
+
+
+
+<div class="viewcode-block" id="GNPS_Runner.extract_task_info">
+<a class="viewcode-back" href="../../../source.annotation.html#source.annotation.gnps_pipe.GNPS_Runner.extract_task_info">[docs]</a>
+    <span class="k">def</span> <span class="nf">extract_task_info</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">work_path</span><span class="p">:</span><span class="n">StrPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mzmine_log</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract the information about the started GNPS task from the mzmin_log.</span>
+
+<span class="sd">        :param query: Query to match the info against.</span>
+<span class="sd">        :type query: str</span>
+<span class="sd">        :param work_path: Path where mzmine.log can be found (only needed if no mzmin_log is provided).</span>
+<span class="sd">        :type work_path: StrPath</span>
+<span class="sd">        :param mzmine_log: Output of mzmine including GNPS POST request, defaults to None</span>
+<span class="sd">        :type mzmine_log: str, optional</span>
+<span class="sd">        :return: Response from GNPS as a dictionary.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mzmine_log</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">mzmine_log</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="n">response_json</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">query</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response_json</span><span class="p">)</span> 
+        <span class="k">elif</span> <span class="n">work_path</span><span class="p">:</span>
+            <span class="n">log_path</span> <span class="o">=</span> <span class="n">work_path</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">work_path</span><span class="p">)</span> <span class="k">else</span> <span class="n">join</span><span class="p">(</span><span class="n">work_path</span><span class="p">,</span> <span class="s2">&quot;mzmine_log.txt&quot;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span> <span class="n">log_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="n">response_json</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">query</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response_json</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You must provide either a work_path with mzmine_log.txt or mzmine_log as a string.&quot;</span><span class="p">))</span>
+        
+        <span class="k">raise</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Query &lt;</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="s2">&gt; was not found at the path </span><span class="si">{</span><span class="n">work_path</span><span class="si">}</span><span class="s2"> or in mzmine_log&quot;</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="GNPS_Runner.post_gnps_request">
+<a class="viewcode-back" href="../../../source.annotation.html#source.annotation.gnps_pipe.GNPS_Runner.post_gnps_request">[docs]</a>
+    <span class="k">def</span> <span class="nf">post_gnps_request</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">work_path</span><span class="p">:</span><span class="n">StrPath</span> <span class="p">):</span>
+        <span class="c1"># TODO: Add own version of POST request to GNPS</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        print(&quot;The job will be resubmitted to https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking&quot;)</span>
+<span class="sd">        requests.post( &quot;https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking&quot;,</span>
+<span class="sd">                    data={ &quot;featurems2&quot;: join(out_path, f&quot;{os.path.basename(out_path)}_iimn_fbmn.mgf&quot;),</span>
+<span class="sd">                            &quot;featurequantification&quot;: join(out_path, f&quot;{os.path.basename(out_path)}_iimn_fbmn_quant.csv&quot;)})</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+
+
+<div class="viewcode-block" id="GNPS_Runner.check_task_finished">
+<a class="viewcode-back" href="../../../source.annotation.html#source.annotation.gnps_pipe.GNPS_Runner.check_task_finished">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_task_finished</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">work_path</span><span class="p">:</span><span class="n">StrPath</span><span class="p">,</span> <span class="n">mzmine_log</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gnps_response</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="kc">None</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check GNPS API for the status of the task.</span>
+
+<span class="sd">        :param work_path: Path where mzmine.log can be found (only needed if no mzmin_log is provided)</span>
+<span class="sd">        :type work_path: StrPath</span>
+<span class="sd">        :param mzmine_log: Output of mzmine including GNPS POST request, defaults to None</span>
+<span class="sd">        :type mzmine_log: str, optional</span>
+<span class="sd">        :param gnps_response: Resonse from GNPS, defaults to None</span>
+<span class="sd">        :type gnps_response: dict, optional</span>
+<span class="sd">        :return: Task ID and whether the task was completed during search time</span>
+<span class="sd">        :rtype: tuple[str, bool]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">gnps_response</span><span class="p">:</span>
+            <span class="n">gnps_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_task_info</span><span class="p">(</span> <span class="n">work_path</span><span class="o">=</span><span class="n">work_path</span><span class="p">,</span>
+                                                    <span class="n">query</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mzmine_log_query</span><span class="p">,</span> 
+                                                    <span class="n">mzmine_log</span><span class="o">=</span><span class="n">mzmine_log</span> <span class="p">)</span>
+            
+        <span class="k">if</span> <span class="n">gnps_response</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Success&quot;</span><span class="p">:</span>
+            <span class="n">task_id</span> <span class="o">=</span> <span class="n">gnps_response</span><span class="p">[</span><span class="s2">&quot;task_id&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">join</span><span class="p">(</span><span class="n">work_path</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;mzmine_log.txt&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> reports an unsuccessful job submission to GNPS by mzmine.&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">post_gnps_request</span><span class="p">(</span><span class="n">work_path</span><span class="o">=</span><span class="n">work_path</span><span class="p">)</span>
+            
+        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task=</span><span class="si">{</span><span class="n">task_id</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">check_for_str_request</span><span class="p">(</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">status</span><span class="se">\&quot;</span><span class="s1">:</span><span class="se">\&quot;</span><span class="s1">DONE</span><span class="se">\&quot;</span><span class="s1">&#39;</span><span class="p">,</span>
+                                               <span class="n">retries</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">allowed_fails</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">expected_wait_time</span><span class="o">=</span><span class="mf">600.0</span><span class="p">,</span>
+                                               <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="GNPS_Runner.fetch_results">
+<a class="viewcode-back" href="../../../source.annotation.html#source.annotation.gnps_pipe.GNPS_Runner.fetch_results">[docs]</a>
+    <span class="k">def</span> <span class="nf">fetch_results</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">out_path</span><span class="p">:</span><span class="n">StrPath</span><span class="o">=</span><span class="kc">None</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetch all resulting annotations from a GNSP Task and optionally save it.</span>
+
+<span class="sd">        :param task_id: Task ID from GNPS</span>
+<span class="sd">        :type task_id: str</span>
+<span class="sd">        :param out_path: Path for saving the output json, defaults to None</span>
+<span class="sd">        :type out_path: StrPath, optional</span>
+<span class="sd">        :return: Result as a dictionary</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;https://gnps.ucsd.edu/ProteoSAFe/result_json.jsp?task=</span><span class="si">{</span><span class="n">task_id</span><span class="si">}</span><span class="s2">&amp;view=view_all_annotations_DB&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">out_path</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="GNPS_Runner.check_dir_files">
+<a class="viewcode-back" href="../../../source.annotation.html#source.annotation.gnps_pipe.GNPS_Runner.check_dir_files">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_dir_files</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span><span class="n">StrPath</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check whether the needed files for GNPS POST request are present, according to mzmine naming scheme.</span>
+
+<span class="sd">        :param dir: Directory to search in</span>
+<span class="sd">        :type dir: StrPath</span>
+<span class="sd">        :return: MS2 feature and feature quantification file presence</span>
+<span class="sd">        :rtype: tuple[bool, bool]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">feature_ms2_found</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">feature_quantification_found</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="nb">dir</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="n">feature_ms2_found</span> <span class="o">|=</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_iimn_fbmn.mgf&quot;</span><span class="p">)</span>
+                <span class="n">feature_quantification_found</span> <span class="o">|=</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_iimn_fbmn_quant.csv&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">feature_ms2_found</span><span class="p">,</span> <span class="n">feature_quantification_found</span></div>
+
+
+
+
+<div class="viewcode-block" id="GNPS_Runner.get_gnps_results">
+<a class="viewcode-back" href="../../../source.annotation.html#source.annotation.gnps_pipe.GNPS_Runner.get_gnps_results">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_gnps_results</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">in_dir</span><span class="p">:</span><span class="n">StrPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">:</span><span class="n">StrPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mzmine_log</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gnps_response</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the GNPS results from a single path, mzmine_log or GNPS response.</span>
+
+<span class="sd">        :param in_dir: Input directory, defaults to None</span>
+<span class="sd">        :type in_dir: StrPath, optional</span>
+<span class="sd">        :param out_dir: Output directory of result</span>
+<span class="sd">        :type out_dir: StrPath</span>
+<span class="sd">        :param mzmine_log: mzmine_log String containing GNPS response, defaults to None</span>
+<span class="sd">        :type mzmine_log: str, optional</span>
+<span class="sd">        :param gnps_response: GNPS response to POST request, defaults to None</span>
+<span class="sd">        :type gnps_response: dict, optional</span>
+<span class="sd">        :raises BrokenPipeError: When the task does not complete in the expected time</span>
+<span class="sd">        :return: Resulting anntations dictionary</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">task_id</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_task_finished</span><span class="p">(</span> <span class="n">work_path</span><span class="o">=</span><span class="n">in_dir</span><span class="p">,</span>
+                                                    <span class="n">mzmine_log</span><span class="o">=</span><span class="n">mzmine_log</span><span class="p">,</span>
+                                                    <span class="n">gnps_response</span><span class="o">=</span><span class="n">gnps_response</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">status</span><span class="p">:</span>
+            <span class="n">out_path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">out_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">basename</span><span class="p">(</span><span class="n">in_dir</span><span class="p">)</span><span class="si">}</span><span class="s2">_gnps_all_db_annotations.json&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">out_dir</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">results_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_results</span><span class="p">(</span> <span class="n">task_id</span><span class="o">=</span><span class="n">task_id</span><span class="p">,</span>
+                                               <span class="n">out_path</span><span class="o">=</span><span class="n">out_path</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">outs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">results_dict</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GNPS results </span><span class="si">{</span><span class="n">basename</span><span class="p">(</span><span class="n">in_dir</span><span class="p">)</span><span class="si">}</span><span class="s2">:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;task_id:</span><span class="si">{</span><span class="n">task_id</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">results_dict</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">processed_in</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">gnps_response</span> <span class="k">if</span> <span class="n">gnps_response</span> <span class="k">else</span> <span class="n">mzmine_log</span> <span class="k">if</span> <span class="n">mzmine_log</span> <span class="k">else</span> <span class="n">in_dir</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">processed_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">out_path</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="n">results_dict</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">BrokenPipeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Status of </span><span class="si">{</span><span class="n">task_id</span><span class="si">}</span><span class="s2"> was not marked DONE.&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="GNPS_Runner.get_gnps_results_nested">
+<a class="viewcode-back" href="../../../source.annotation.html#source.annotation.gnps_pipe.GNPS_Runner.get_gnps_results_nested">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_gnps_results_nested</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">root_dir</span><span class="p">:</span><span class="n">StrPath</span><span class="p">,</span> <span class="n">out_root_dir</span><span class="p">:</span><span class="n">StrPath</span><span class="p">,</span>
+                                 <span class="n">futures</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="p">[],</span> <span class="n">recusion_level</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct a list of necessary computations for getting the GNPS results from a nested scheme of mzmine results.</span>
+
+<span class="sd">        :param root_dir: Root input directory</span>
+<span class="sd">        :type root_dir: StrPath</span>
+<span class="sd">        :param out_root_dir: Root output directory</span>
+<span class="sd">        :type out_root_dir: StrPath</span>
+<span class="sd">        :param futures: Future computations for parallelization, defaults to []</span>
+<span class="sd">        :type futures: list, optional</span>
+<span class="sd">        :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0</span>
+<span class="sd">        :type recusion_level: int, optional</span>
+<span class="sd">        :return: Future computations</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">verbose_tqdm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">&gt;=</span> <span class="n">recusion_level</span> <span class="o">+</span> <span class="mi">2</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">root_dir</span><span class="p">):</span>
+            <span class="n">feature_ms2_found</span><span class="p">,</span> <span class="n">feature_quantification_found</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_dir_files</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">feature_ms2_found</span> <span class="ow">and</span> <span class="n">feature_quantification_found</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">out_root_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">dask</span><span class="o">.</span><span class="n">delayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_gnps_results</span><span class="p">)(</span> <span class="n">in_dir</span><span class="o">=</span><span class="n">root_dir</span><span class="p">,</span> <span class="n">out_dir</span><span class="o">=</span><span class="n">out_root_dir</span> <span class="p">)</span> <span class="p">)</span>
+
+            <span class="k">for</span> <span class="nb">dir</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">dirs</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="n">verbose_tqdm</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Directories&quot;</span><span class="p">):</span>
+                <span class="n">futures</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_gnps_results_nested</span><span class="p">(</span> <span class="n">root_dir</span><span class="o">=</span><span class="n">join</span><span class="p">(</span><span class="n">root_dir</span><span class="p">,</span> <span class="nb">dir</span><span class="p">),</span>
+                                                        <span class="n">out_root_dir</span><span class="o">=</span><span class="n">join</span><span class="p">(</span><span class="n">out_root_dir</span><span class="p">,</span> <span class="nb">dir</span><span class="p">),</span>
+                                                        <span class="n">futures</span><span class="o">=</span><span class="n">futures</span><span class="p">,</span> <span class="n">recusion_level</span><span class="o">=</span><span class="n">recusion_level</span><span class="o">+</span><span class="mi">1</span> <span class="p">)</span>
+                    
+        <span class="k">return</span> <span class="n">futures</span></div>
+</div>
+
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span> <span class="n">prog</span><span class="o">=</span><span class="s1">&#39;gnps_pipe.py&#39;</span><span class="p">,</span>
+                                      <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Obtain anntations from MS2 feature networking by GNPS.&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-in&#39;</span><span class="p">,</span>      <span class="s1">&#39;--in_dir&#39;</span><span class="p">,</span>             <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-out&#39;</span><span class="p">,</span>     <span class="s1">&#39;--out_dir&#39;</span><span class="p">,</span>            <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-n&#39;</span><span class="p">,</span>       <span class="s1">&#39;--nested&#39;</span><span class="p">,</span>             <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>     <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-s&#39;</span><span class="p">,</span>       <span class="s1">&#39;--save_log&#39;</span><span class="p">,</span>           <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>     <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-w&#39;</span><span class="p">,</span>       <span class="s1">&#39;--workers&#39;</span><span class="p">,</span>            <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>     <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span>       <span class="s1">&#39;--verbosity&#39;</span><span class="p">,</span>          <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>     <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-gnps&#39;</span><span class="p">,</span>    <span class="s1">&#39;--gnps_args&#39;</span><span class="p">,</span>          <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>     <span class="n">nargs</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">REMAINDER</span><span class="p">)</span>
+
+    <span class="n">args</span><span class="p">,</span> <span class="n">unknown_args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">()</span>
+
+    <span class="n">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">unknown_args</span><span class="o">=</span><span class="n">unknown_args</span><span class="p">)</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024, Josua Carl.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

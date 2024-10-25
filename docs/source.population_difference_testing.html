@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>source.feature_finding package &#8212; mine2sirius 0.2.0 documentation</title>
+    <title>source.population_difference_testing package &#8212; mine2sirius 0.2.0 documentation</title>
   
   
   
@@ -38,11 +38,11 @@
     <script src="_static/documentation_options.js?v=938c9ccc"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'source.feature_finding';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'source.population_difference_testing';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="source.helpers package" href="source.helpers.html" />
-    <link rel="prev" title="source.conversion package" href="source.conversion.html" />
+    <link rel="next" title="tests package" href="tests.html" />
+    <link rel="prev" title="source.ion_exclusion package" href="source.ion_exclusion.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -276,10 +276,10 @@ document.write(`
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="source.annotation.html">source.annotation package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source.conversion.html">source.conversion package</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">source.feature_finding package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source.feature_finding.html">source.feature_finding package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source.helpers.html">source.helpers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source.ion_exclusion.html">source.ion_exclusion package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="source.population_difference_testing.html">source.population_difference_testing package</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">source.population_difference_testing package</a></li>
 </ul>
 </div>
 </nav></div>
@@ -320,7 +320,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="source.html" class="nav-link">source package</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">source.featu...</li>
+    <li class="breadcrumb-item active" aria-current="page">source.popul...</li>
   </ul>
 </nav>
 </div>
@@ -337,80 +337,56 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="source-feature-finding-package">
-<h1>source.feature_finding package<a class="headerlink" href="#source-feature-finding-package" title="Link to this heading">#</a></h1>
+  <section id="source-population-difference-testing-package">
+<h1>source.population_difference_testing package<a class="headerlink" href="#source-population-difference-testing-package" title="Link to this heading">#</a></h1>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">#</a></h2>
 </section>
-<section id="module-source.feature_finding.mzmine_pipe">
-<span id="source-feature-finding-mzmine-pipe-module"></span><h2>source.feature_finding.mzmine_pipe module<a class="headerlink" href="#module-source.feature_finding.mzmine_pipe" title="Link to this heading">#</a></h2>
-<p>Use mzmine for feature finding.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="source.feature_finding.mzmine_pipe.MZmine_Runner">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">source.feature_finding.mzmine_pipe.</span></span><span class="sig-name descname"><span class="pre">MZmine_Runner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mzmine_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">login</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'-login'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_formats</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">['mzML',</span> <span class="pre">'mzXML',</span> <span class="pre">'imzML']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/source/feature_finding/mzmine_pipe.html#MZmine_Runner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.feature_finding.mzmine_pipe.MZmine_Runner" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="source.helpers.html#source.helpers.classes.Pipe_Step" title="source.helpers.classes.Pipe_Step"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipe_Step</span></code></a></p>
-<p>A runner for mzmine operations. Collects processed files and console outputs/errors.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="source.feature_finding.mzmine_pipe.MZmine_Runner.run_mzmine_batch">
-<span class="sig-name descname"><span class="pre">run_mzmine_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/source/feature_finding/mzmine_pipe.html#MZmine_Runner.run_mzmine_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.feature_finding.mzmine_pipe.MZmine_Runner.run_mzmine_batch" title="Link to this definition">#</a></dt>
-<dd><p>Run a single mzmine batch.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>in_path</strong> (<em>StrPath</em>) – Path to in files (as a .txt with filepaths or glob string)</p></li>
-<li><p><strong>out_path</strong> (<em>StrPath</em>) – Output directory</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Success of the command</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="source.feature_finding.mzmine_pipe.MZmine_Runner.run_mzmine_batches_nested">
-<span class="sig-name descname"><span class="pre">run_mzmine_batches_nested</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_root_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_root_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">futures</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recusion_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/source/feature_finding/mzmine_pipe.html#MZmine_Runner.run_mzmine_batches_nested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.feature_finding.mzmine_pipe.MZmine_Runner.run_mzmine_batches_nested" title="Link to this definition">#</a></dt>
-<dd><p>Run a mzmine batch on a nested structure.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>in_root_dir</strong> (<em>StrPath</em>) – Root directory for descending the structure</p></li>
-<li><p><strong>out_root_dir</strong> (<em>StrPath</em>) – Root directory for output</p></li>
-<li><p><strong>futures</strong> (<em>list</em><em>, </em><em>optional</em>) – Future computations for parallelization, defaults to []</p></li>
-<li><p><strong>recusion_level</strong> (<em>int</em><em>, </em><em>optional</em>) – Current level of recursion, important for determination of level of verbose output, defaults to 0</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Open computations from found valid files</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
+<section id="module-source.population_difference_testing.annotations">
+<span id="source-population-difference-testing-annotations-module"></span><h2>source.population_difference_testing.annotations module<a class="headerlink" href="#module-source.population_difference_testing.annotations" title="Link to this heading">#</a></h2>
+<p>Analyze the statistical significance of the population of annotations (i.e. compounds or formlae).</p>
+</section>
+<section id="module-source.population_difference_testing.chemical_groups">
+<span id="source-population-difference-testing-chemical-groups-module"></span><h2>source.population_difference_testing.chemical_groups module<a class="headerlink" href="#module-source.population_difference_testing.chemical_groups" title="Link to this heading">#</a></h2>
+<p>Analyze the statistical significance of the population of chemical groups.</p>
+</section>
+<section id="module-source.population_difference_testing.pathways">
+<span id="source-population-difference-testing-pathways-module"></span><h2>source.population_difference_testing.pathways module<a class="headerlink" href="#module-source.population_difference_testing.pathways" title="Link to this heading">#</a></h2>
+<p>Analyze the statistical significance of the population of biological pathways.</p>
+</section>
+<section id="module-source.population_difference_testing.statistics">
+<span id="source-population-difference-testing-statistics-module"></span><h2>source.population_difference_testing.statistics module<a class="headerlink" href="#module-source.population_difference_testing.statistics" title="Link to this heading">#</a></h2>
+<p>Analyze the statistical significance of a population.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="source.population_difference_testing.statistics.choose_test">
+<span class="sig-prename descclassname"><span class="pre">source.population_difference_testing.statistics.</span></span><span class="sig-name descname"><span class="pre">choose_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Array</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">paired</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/source/population_difference_testing/statistics.html#choose_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.population_difference_testing.statistics.choose_test" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="source.feature_finding.mzmine_pipe.main">
-<span class="sig-prename descclassname"><span class="pre">source.feature_finding.mzmine_pipe.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unknown_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/source/feature_finding/mzmine_pipe.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.feature_finding.mzmine_pipe.main" title="Link to this definition">#</a></dt>
-<dd><p>Execute the conversion.</p>
+<dt class="sig sig-object py" id="source.population_difference_testing.statistics.execute_test">
+<span class="sig-prename descclassname"><span class="pre">source.population_difference_testing.statistics.</span></span><span class="sig-name descname"><span class="pre">execute_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Array</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative_hypothesis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'two-sided'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple_testing_correction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'bonferroni'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/source/population_difference_testing/statistics.html#execute_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.population_difference_testing.statistics.execute_test" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="source.population_difference_testing.statistics.p_val_to_star">
+<span class="sig-prename descclassname"><span class="pre">source.population_difference_testing.statistics.</span></span><span class="sig-name descname"><span class="pre">p_val_to_star</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/source/population_difference_testing/statistics.html#p_val_to_star"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.population_difference_testing.statistics.p_val_to_star" title="Link to this definition">#</a></dt>
+<dd><p>Generate star notation from p-value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>args</strong> (<em>any</em>) – Command line arguments</p></li>
-<li><p><strong>unknown_args</strong> (<em>any</em>) – Command line arguments that are not known.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>p</strong> (<em>float</em>) – p-value</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Star notation of p-value</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
 
 </section>
-<section id="module-source.feature_finding">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-source.feature_finding" title="Link to this heading">#</a></h2>
+<section id="module-source.population_difference_testing">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-source.population_difference_testing" title="Link to this heading">#</a></h2>
 </section>
 </section>
 
@@ -425,20 +401,20 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="source.conversion.html"
+       href="source.ion_exclusion.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">source.conversion package</p>
+        <p class="prev-next-title">source.ion_exclusion package</p>
       </div>
     </a>
     <a class="right-next"
-       href="source.helpers.html"
+       href="tests.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">source.helpers package</p>
+        <p class="prev-next-title">tests package</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -461,23 +437,23 @@ document.write(`
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-source.feature_finding.mzmine_pipe">source.feature_finding.mzmine_pipe module</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.feature_finding.mzmine_pipe.MZmine_Runner"><code class="docutils literal notranslate"><span class="pre">MZmine_Runner</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#source.feature_finding.mzmine_pipe.MZmine_Runner.run_mzmine_batch"><code class="docutils literal notranslate"><span class="pre">MZmine_Runner.run_mzmine_batch()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#source.feature_finding.mzmine_pipe.MZmine_Runner.run_mzmine_batches_nested"><code class="docutils literal notranslate"><span class="pre">MZmine_Runner.run_mzmine_batches_nested()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-source.population_difference_testing.annotations">source.population_difference_testing.annotations module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-source.population_difference_testing.chemical_groups">source.population_difference_testing.chemical_groups module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-source.population_difference_testing.pathways">source.population_difference_testing.pathways module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-source.population_difference_testing.statistics">source.population_difference_testing.statistics module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.population_difference_testing.statistics.choose_test"><code class="docutils literal notranslate"><span class="pre">choose_test()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.population_difference_testing.statistics.execute_test"><code class="docutils literal notranslate"><span class="pre">execute_test()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.population_difference_testing.statistics.p_val_to_star"><code class="docutils literal notranslate"><span class="pre">p_val_to_star()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.feature_finding.mzmine_pipe.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-source.feature_finding">Module contents</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-source.population_difference_testing">Module contents</a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="_sources/source.feature_finding.rst.txt">
+    <a href="_sources/source.population_difference_testing.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

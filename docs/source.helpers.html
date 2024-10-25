@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>source.helpers package &#8212; mine2sirius 0.1.0 documentation</title>
+    <title>source.helpers package &#8212; mine2sirius 0.2.0 documentation</title>
   
   
   
@@ -35,13 +35,13 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="_static/documentation_options.js?v=01f34227"></script>
+    <script src="_static/documentation_options.js?v=938c9ccc"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'source.helpers';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="source.networking package" href="source.networking.html" />
+    <link rel="next" title="source.ion_exclusion package" href="source.ion_exclusion.html" />
     <link rel="prev" title="source.feature_finding package" href="source.feature_finding.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">mine2sirius 0.1.0 documentation</p>
+    <p class="title logo__title">mine2sirius 0.2.0 documentation</p>
   
 </a></div>
     
@@ -135,6 +135,13 @@
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="source.html">
     source package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tests.html">
+    tests package
   </a>
 </li>
 
@@ -228,6 +235,13 @@ document.write(`
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tests.html">
+    tests package
+  </a>
+</li>
+
   </ul>
 </nav></div>
           
@@ -264,8 +278,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="source.conversion.html">source.conversion package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source.feature_finding.html">source.feature_finding package</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">source.helpers package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="source.networking.html">source.networking package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="source.tests.html">source.tests package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source.ion_exclusion.html">source.ion_exclusion package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source.population_difference_testing.html">source.population_difference_testing package</a></li>
 </ul>
 </div>
 </nav></div>
@@ -328,6 +342,37 @@ document.write(`
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">#</a></h2>
 </section>
+<section id="module-source.helpers.classes">
+<span id="source-helpers-classes-module"></span><h2>source.helpers.classes module<a class="headerlink" href="#module-source.helpers.classes" title="Link to this heading">#</a></h2>
+<p>Provide super classed for steps in program to ensure transition of intermediate results.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="source.helpers.classes.Pipe_Step">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">source.helpers.classes.</span></span><span class="sig-name descname"><span class="pre">Pipe_Step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">patterns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/source/helpers/classes.html#Pipe_Step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.helpers.classes.Pipe_Step" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for steps in the pipeline.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="source.helpers.classes.Pipe_Step.match_file_name">
+<span class="sig-name descname"><span class="pre">match_file_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/source/helpers/classes.html#Pipe_Step.match_file_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.helpers.classes.Pipe_Step.match_file_name" title="Link to this definition">#</a></dt>
+<dd><p>Match a file_name against a regex expression</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pattern</strong> (<em>str</em>) – Pattern</p></li>
+<li><p><strong>file_name</strong> (<em>StrPath</em>) – _description_</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-source.helpers.general">
 <span id="source-helpers-general-module"></span><h2>source.helpers.general module<a class="headerlink" href="#module-source.helpers.general" title="Link to this heading">#</a></h2>
 <p>Methods that are helpful for general processing.</p>
@@ -365,6 +410,36 @@ document.write(`
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="source.helpers.general.check_for_str_request">
+<span class="sig-prename descclassname"><span class="pre">source.helpers.general.</span></span><span class="sig-name descname"><span class="pre">check_for_str_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_fails</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_wait_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">600.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/source/helpers/general.html#check_for_str_request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.helpers.general.check_for_str_request" title="Link to this definition">#</a></dt>
+<dd><p>Check the given URL for a given query. The task is retried a number of times with logarithmically (log2) decreasing time between requests after one initial request.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<em>str</em><em> | </em><em>bytes</em>) – Target URL</p></li>
+<li><p><strong>query</strong> (<em>str</em>) – Query string that is searched in response</p></li>
+<li><p><strong>retries</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of retries, defaults to 100</p></li>
+<li><p><strong>allowed_fails</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of times the request are allowed to fail, defaults to 10</p></li>
+<li><p><strong>expected_wait_time</strong> (<em>float</em><em>, </em><em>optional</em>) – Expected time until query is found, defaults to 10.0</p></li>
+<li><p><strong>verbosity</strong> (<em>int</em><em>, </em><em>optional</em>) – Level of verbosity, defaults to 1</p></li>
+<li><p><strong>kwargs</strong> (<em>any</em><em>, </em><em>optional</em>) – Additional arguments, passed on to requests.get()</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Query found ?</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="source.helpers.general.compute_scheduled">
+<span class="sig-prename descclassname"><span class="pre">source.helpers.general.</span></span><span class="sig-name descname"><span class="pre">compute_scheduled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">futures</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/source/helpers/general.html#compute_scheduled"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.helpers.general.compute_scheduled" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="source.helpers.general.construct_path">
 <span class="sig-prename descclassname"><span class="pre">source.helpers.general.</span></span><span class="sig-name descname"><span class="pre">construct_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">StrPath</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">StrPath</span></span></span><a class="reference internal" href="_modules/source/helpers/general.html#construct_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.helpers.general.construct_path" title="Link to this definition">#</a></dt>
 <dd><p>Construct a path from the given list of paths</p>
@@ -380,14 +455,14 @@ document.write(`
 
 <dl class="py function">
 <dt class="sig sig-object py" id="source.helpers.general.execute_verbose_command">
-<span class="sig-prename descclassname"><span class="pre">source.helpers.general.</span></span><span class="sig-name descname"><span class="pre">execute_verbose_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">platform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/source/helpers/general.html#execute_verbose_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.helpers.general.execute_verbose_command" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">source.helpers.general.</span></span><span class="sig-name descname"><span class="pre">execute_verbose_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decode_text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/source/helpers/general.html#execute_verbose_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.helpers.general.execute_verbose_command" title="Link to this definition">#</a></dt>
 <dd><p>Execute a command with the adequate verbosity.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cmd</strong> (<em>str</em>) – Command as a string</p></li>
-<li><p><strong>platform</strong> (<em>str</em>) – Current OS platform</p></li>
 <li><p><strong>verbosity</strong> (<em>int</em><em>, </em><em>optional</em>) – Verbosity level, defaults to 1</p></li>
+<li><p><strong>out_path</strong> (<em>StrPath</em>) – Path to outfile.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -470,6 +545,26 @@ document.write(`
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="source.helpers.general.replace_file_ending">
+<span class="sig-prename descclassname"><span class="pre">source.helpers.general.</span></span><span class="sig-name descname"><span class="pre">replace_file_ending</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">StrPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_ending</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/source/helpers/general.html#replace_file_ending"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#source.helpers.general.replace_file_ending" title="Link to this definition">#</a></dt>
+<dd><p>Replace the ending of a file by matchin the last “.”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>StrPath</em>) – Path to file</p></li>
+<li><p><strong>new_ending</strong> (<em>new_ending</em>) – _description_</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>File path with new ending</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-source.helpers.types">
 <span id="source-helpers-types-module"></span><h2>source.helpers.types module<a class="headerlink" href="#module-source.helpers.types" title="Link to this heading">#</a></h2>
@@ -500,11 +595,11 @@ document.write(`
       </div>
     </a>
     <a class="right-next"
-       href="source.networking.html"
+       href="source.ion_exclusion.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">source.networking package</p>
+        <p class="prev-next-title">source.ion_exclusion package</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -527,15 +622,25 @@ document.write(`
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-source.helpers.classes">source.helpers.classes module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.classes.Pipe_Step"><code class="docutils literal notranslate"><span class="pre">Pipe_Step</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.classes.Pipe_Step.match_file_name"><code class="docutils literal notranslate"><span class="pre">Pipe_Step.match_file_name()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-source.helpers.general">source.helpers.general module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.Substring"><code class="docutils literal notranslate"><span class="pre">Substring</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.change_case_str"><code class="docutils literal notranslate"><span class="pre">change_case_str()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.check_for_str_request"><code class="docutils literal notranslate"><span class="pre">check_for_str_request()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.compute_scheduled"><code class="docutils literal notranslate"><span class="pre">compute_scheduled()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.construct_path"><code class="docutils literal notranslate"><span class="pre">construct_path()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.execute_verbose_command"><code class="docutils literal notranslate"><span class="pre">execute_verbose_command()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.get_internal_filepath"><code class="docutils literal notranslate"><span class="pre">get_internal_filepath()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.make_new_dir"><code class="docutils literal notranslate"><span class="pre">make_new_dir()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.open_last_line_with_content"><code class="docutils literal notranslate"><span class="pre">open_last_line_with_content()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.open_last_n_line"><code class="docutils literal notranslate"><span class="pre">open_last_n_line()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source.helpers.general.replace_file_ending"><code class="docutils literal notranslate"><span class="pre">replace_file_ending()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-source.helpers.types">source.helpers.types module</a></li>

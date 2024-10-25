@@ -11,7 +11,8 @@ Subpackages
    source.conversion
    source.feature_finding
    source.helpers
-   source.tests
+   source.ion_exclusion
+   source.population_difference_testing
 
 Module contents
 ---------------

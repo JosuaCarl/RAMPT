@@ -103,12 +103,10 @@ class GNPS_Runner(Pipe_Step):
 
     def post_gnps_request( self, work_path:StrPath ):
         # TODO: Add own version of POST request to GNPS
-        """
-        print("The job will be resubmitted to https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking")
-        requests.post( "https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking",
-                    data={ "featurems2": join(out_path, f"{os.path.basename(out_path)}_iimn_fbmn.mgf"),
-                            "featurequantification": join(out_path, f"{os.path.basename(out_path)}_iimn_fbmn_quant.csv")})
-        """
+        # print("The job will be resubmitted to https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking")
+        # requests.post( "https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking",
+        #             data={ "featurems2": join(out_path, f"{os.path.basename(out_path)}_iimn_fbmn.mgf"),
+        #                     "featurequantification": join(out_path, f"{os.path.basename(out_path)}_iimn_fbmn_quant.csv")})
         pass
 
 

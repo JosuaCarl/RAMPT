@@ -4,10 +4,10 @@ source.conversion package
 Submodules
 ----------
 
-source.conversion.raw\_to\_mzml module
---------------------------------------
+source.conversion.msconv\_pipe module
+-------------------------------------
 
-.. automodule:: source.conversion.raw_to_mzml
+.. automodule:: source.conversion.msconv_pipe
    :members:
    :undoc-members:
    :show-inheritance:

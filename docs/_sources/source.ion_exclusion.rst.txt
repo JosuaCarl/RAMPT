@@ -1,13 +1,13 @@
-source.feature\_finding package
-===============================
+source.ion\_exclusion package
+=============================
 
 Submodules
 ----------
 
-source.feature\_finding.mzmine\_pipe module
+source.ion\_exclusion.ion\_exclusion module
 -------------------------------------------
 
-.. automodule:: source.feature_finding.mzmine_pipe
+.. automodule:: source.ion_exclusion.ion_exclusion
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ source.feature\_finding.mzmine\_pipe module
 Module contents
 ---------------
 
-.. automodule:: source.feature_finding
+.. automodule:: source.ion_exclusion
    :members:
    :undoc-members:
    :show-inheritance:
