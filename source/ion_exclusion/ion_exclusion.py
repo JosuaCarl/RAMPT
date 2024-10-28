@@ -38,6 +38,7 @@ def main(args, unknown_args):
     data_dir            = args.data_dir             if args.data_dir else out_dir
     relative_tolerance  = args.relative_tolerance   if args.relative_tolerance else 1e-05
     absolute_tolerance  = args.absolute_tolerance   if args.absolute_tolerance else 1e-08
+    retention_time_tolerance  = args.retention_time_tolerance   if args.retention_time_tolerance else None
     nested              = args.nested               if args.nested else False
     n_workers           = args.workers              if args.workers else 1
     save_log            = args.save_log             if args.save_log else False
@@ -45,6 +46,7 @@ def main(args, unknown_args):
     additional_args     = args.ion_exclusion_args   if args.ion_exclusion_args else unknown_args
 
     ion_exclusion_runner = Ion_exclusion_Runner( relative_tolerance=relative_tolerance, absolute_tolerance=absolute_tolerance,
+                                                 retention_time_tolerance=retention_time_tolerance,
                                                  save_log=save_log, additional_args=additional_args, verbosity=verbosity )
 
     if nested:
@@ -231,33 +233,74 @@ class Ion_exclusion_Runner(Pipe_Step):
     """
     Select abundant MS2 fragmented m/z for exclusion.
     """
-    def __init__( self, relative_tolerance:float|int=1e-5, absolute_tolerance:float=5e-3, save_log:bool=False, additional_args:list=[], verbosity:int=1 ):
+    def __init__( self, relative_tolerance:float=1e-5, absolute_tolerance:float=5e-3, retention_time_tolerance:float=10.0,
+                  binary:bool=False, save_log:bool=False, additional_args:list=[], verbosity:int=1 ):
+        """
+        Initialize the ion exclusion runner.
+
+        :param relative_tolerance: Relative m/z tolerance (1e-6 = 1ppm), defaults to 1e-5
+        :type relative_tolerance: float, optional
+        :param absolute_tolerance: Absolute m/z tolerance (1.0 = 1 Da), defaults to 5e-3
+        :type absolute_tolerance: float, optional
+        :param retention_time_tolerance: Retention time tolerance (s), defaults to 10.0
+        :type retention_time_tolerance: float, optional
+        :param binary: Output as in/out or count, defaults to False
+        :type binary: bool, optional
+        :param save_log: Save the log file, defaults to False
+        :type save_log: bool, optional
+        :param additional_args: Additional arguments, defaults to []
+        :type additional_args: list, optional
+        :param verbosity: Level of verbosity, defaults to 1
+        :type verbosity: int, optional
+        """
         super().__init__( save_log=save_log, additional_args=additional_args, verbosity=verbosity )
         self.relative_tolerance = relative_tolerance if isinstance(relative_tolerance, float) else relative_tolerance * 1e-6
         self.absolute_tolerance = absolute_tolerance
+        self.retention_time_tolerance = retention_time_tolerance
+        self.binary             = binary
         self.file_handler       = OpenMS_File_Handler()
 
 
 
     def check_ms2_presence( self, in_dir:StrPath, out_dir:StrPath, data_dir:StrPath, annotation_file:StrPath=None ):
+        """
+        Check for MS2 fractioning precursors in aligned features.
+
+        :param in_dir: Path to input directory, including quantification file
+        :type in_dir: StrPath
+        :param out_dir: Path to output directory
+        :type out_dir: StrPath
+        :param data_dir: Path to data directory with raw spectra
+        :type data_dir: StrPath
+        :param annotation_file: Path to annotation file (as csv), defaults to None
+        :type annotation_file: StrPath, optional
+        """
         experiments = self.file_handler.load_experiments_df( data_dir, file_ending=".mzML")
     
-        ms2_in_files = {}
+        precursor_infos_files = {}
         for i, row in experiments.iterrows():
             experiment = row["experiment"]
             ms2_spectra = [ spectrum for spectrum in experiment.getSpectra() if spectrum.getMSLevel() >= 2 ]
             precursor_mzs = list( set( [ precursor.getMZ() for ms2_spectrum in ms2_spectra for precursor in ms2_spectrum.getPrecursors() ] ) )
-            ms2_in_files[basename(experiment.getLoadedFilePath())] = precursor_mzs
+            precursor_infos_files[basename(experiment.getLoadedFilePath())] = precursor_mzs
 
         quantification_df  = pd.read_csv(f"{join(in_dir, basename(in_dir))}_iimn_fbmn_quant.csv")
         mz_in_ms2 = {}
-        for file_name, ms2_mzs in ms2_in_files.items():
-            for mz_val in quantification_df["row m/z"]:
-                mz_found = int( np.any( np.isclose( mz_val, ms2_mzs, rtol=1e-5, atol=5e-3) ) )
-                if file_name not in mz_in_ms2.keys():
-                    mz_in_ms2[file_name] = [mz_found]
+        for file_name, precursor_infos in precursor_infos_files.items():
+            for i, feature in quantification_df.iterrows():
+                mz_matches = np.isclose( feature["row m/z"], precursor_infos["m/z"],
+                                         rtol=self.relative_tolerance, atol=self.absolute_tolerance)
+                if self.retention_time_tolerance is not None:
+                    retention_time_matches = np.isclose( feature["row retention time"], precursor_infos["rt"],
+                                                         rtol=0.0, atol=self.retention_time_tolerance)
+                    all_matches = mz_matches & retention_time_matches
                 else:
-                    mz_in_ms2[file_name].append( mz_found )
+                    all_matches = mz_matches
+                feature_found = int( np.any ( all_matches ) ) if self.binary else np.sum( all_matches ) 
+                if file_name not in mz_in_ms2.keys():
+                    mz_in_ms2[file_name] = [feature_found]
+                else:
+                    mz_in_ms2[file_name].append( feature_found )
 
         row_info = pd.DataFrame( { "id": quantification_df["row ID"],
                                    "m/z": quantification_df["row m/z"],
@@ -330,6 +373,7 @@ if __name__ == "__main__":
     parser.add_argument('-data',    '--data_dir',           required=False)
     parser.add_argument('-r',       '--relative_tolerance', required=False)
     parser.add_argument('-a',       '--absolute_tolerance', required=False)
+    parser.add_argument('-rt',       '--retention_time_tolerance', required=False)
     parser.add_argument('-n',       '--nested',             required=False,     action="store_true")
     parser.add_argument('-s',       '--save_log',           required=False,     action="store_true")
     parser.add_argument('-w',       '--workers',            required=False,     type=int)

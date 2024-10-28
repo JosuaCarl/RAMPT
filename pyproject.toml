@@ -32,6 +32,7 @@ pyopenms = "^3.2.0"
 chardet = "^5.2.0"
 snakemake = "^8.24.1"
 taipy = "^4.0.0"
+pyqt6 = "^6.7.1"
 
 
 [build-system]
