@@ -13,7 +13,8 @@ from source.conversion.msconv_pipe import File_Converter
 # 3. Prettify the execution process with parallelization depiction
 
 content = ""
-file_converter = File_Converter()
+selected_scenario = None
+selected_data_node = None
 
 pages = { "/": Markdown("pages/root.md"),
         
