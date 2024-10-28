@@ -15,7 +15,7 @@ from source.conversion.msconv_pipe import File_Converter
 content = ""
 file_converter = File_Converter()
 
-pages = { "/": Markdown("root.md"),
+pages = { "/": Markdown("pages/root.md"),
         
         }
 
