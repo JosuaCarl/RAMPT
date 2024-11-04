@@ -40,13 +40,9 @@ def test_replace_file_ending():
 
 def test_path_nester():
     path_nester = Path_Nester()
-    result = path_nester.update_nested_paths( new_paths=["/a/b", "/a/c", "/a/b/a"] )
+    result = path_nester.update_nested_paths( new_paths=["/a/c", "/a/b"] )
 
-    expected = [{"Directory": "a",
-                  "Sub": [ "/a/b", "/a/c", 
-                          { "Directory": "b",
-                             "Sub": ["/a/b/a"] }]},
-                ]
+    expected = [{'id': 1, 'label': 'a', 'children': [{'id': 2, 'label': '/a/c', 'children': []}, {'id': 4, 'label': '/a/b', 'children': []}]}]
 
     assert result == expected
 

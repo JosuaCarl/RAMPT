@@ -114,7 +114,7 @@ class Path_Nester:
     """
     Class for nesting paths into a list of directories with lists of subdirectories.
     """
-    def __init__( self, nesting_depth:int = 1, nested_paths:list=[], dir_name:str="Directory", sub_name:str="Sub" ):
+    def __init__( self, nesting_depth:int = 1, nested_paths:list=[], id_name:str="id", dir_name:str="label", sub_name:str="children" ):
         """
         Initalize Path_Nester
 
@@ -131,18 +131,21 @@ class Path_Nester:
         self.nested_paths   = nested_paths
         self.dir_name       = dir_name
         self.sub_name       = sub_name
-
+        self.id_name        = id_name
+        self.id_counter     = 0
 
     def add_nested_lists( self, split_steps, nested_paths, complete_path ):
+        self.id_counter += 1
         step = split_steps[0]
 
         if len(split_steps) == self.nesting_depth:
             if isinstance(nested_paths, list):
-                nested_paths.append( complete_path )
-            elif nested_path:
-                nested_paths[0][self.sub_name] = nested_paths[0][self.sub_name] + [complete_path]
+                nested_paths.append( { self.id_name: self.id_counter,
+                                        self.dir_name: complete_path,
+                                        self.sub_name: []} )
             else:
-                nested_paths = [{ self.dir_name: step,
+                nested_paths = [{ self.id_name: self.id_counter,
+                                  self.dir_name: step,
                                   self.sub_name: [complete_path]}]
             return nested_paths
         
@@ -155,7 +158,8 @@ class Path_Nester:
                 split_found = True
 
         if not split_found:
-            nested_paths.append( { self.dir_name: step,
+            nested_paths.append( { self.id_name: self.id_counter,
+                                   self.dir_name: step,
                                    self.sub_name: self.add_nested_lists( split_steps[1:],
                                                                          [],
                                                                          complete_path ) } )
@@ -170,7 +174,7 @@ class Path_Nester:
             self.nested_paths = self.add_nested_lists( split_path[1:],
                                                        self.nested_paths,
                                                        in_path)
-        return self.nested_paths      
+        return self.nested_paths
 
 
 

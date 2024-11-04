@@ -16,21 +16,19 @@ from source.conversion.msconv_pipe import File_Converter
 
 path = ""    
 in_paths = []
-nested_in_paths = []
+nested_in_paths = [{"id": "0", "label": "", "children": []}]
 path_nester = helpers.Path_Nester()
-selection = {"Directory": "", "Sub":[{"Directory": "", "Sub":[]}, {"Directory": "", "Sub":[]}]}
+selection = nested_in_paths[0]
 def add_in_path( state ):
     if isinstance( state.path, list ):
         in_paths.extend( state.path )
     else:
         in_paths.append( state.path )
-    nested_in_paths = path_nester.update_nested_paths( new_paths=in_paths )
 
+    nested_in_paths = path_nester.update_nested_paths( new_paths=state.path )
     state.nested_in_paths = nested_in_paths
     state.selection = nested_in_paths[0]
     state.refresh("nested_in_paths")
-    print(state.nested_in_paths)
-    print(nested_in_paths)
   
 
 
@@ -81,7 +79,7 @@ with tgb.Page() as root:
                 tgb.file_selector( "{path}",
                                    label="Select File", extensions="*", drop_message="Drop files for conversion here:",
                                    multiple=True, on_action=add_in_path )
-                tgb.tree( "{selection}", lov="{nested_in_paths}", filter=True, multiple=True )
+                tgb.tree( "{selection}", lov="{nested_in_paths}", label="Select for conversion", filter=True, multiple=True, expanded=True )
                 tgb.text( "Paths: {path}" )
                 tgb.button( label="Convert selected", on_action='{None}' )
 
