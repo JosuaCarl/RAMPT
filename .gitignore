@@ -171,6 +171,8 @@ docsource/_build/
 substep_batches/
 tests/out/*
 backup/
+.taipy/
+.vscode/
 
 ## Files
 Notes.md
