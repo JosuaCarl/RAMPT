@@ -173,6 +173,8 @@ tests/out/*
 backup/
 .taipy/
 .vscode/
+user_data/
+presentation/
 
 ## Files
 Notes.md

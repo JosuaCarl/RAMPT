@@ -37,6 +37,21 @@ def test_replace_file_ending():
     assert replace_file_ending( os.path.join("a", "b..", "c.anaconda"), "conda") == os.path.join("a", "b..", "c.conda")
 
 
+
+def test_path_nester():
+    path_nester = Path_Nester()
+    result = path_nester.update_nested_paths( new_paths=["/a/b", "/a/c", "/a/b/a"] )
+
+    expected = [{"Directory": "a",
+                  "Sub": [ "/a/b", "/a/c", 
+                          { "Directory": "b",
+                             "Sub": ["/a/b/a"] }]},
+                ]
+
+    assert result == expected
+
+
+
 # CMD
 def test_execute_verbose_command():
     execute_verbose_command(f"echo test4", verbosity=1)

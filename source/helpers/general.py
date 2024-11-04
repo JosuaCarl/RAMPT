@@ -109,6 +109,72 @@ class Substring(str):
 
 
 
+# Path operations
+class Path_Nester:
+    """
+    Class for nesting paths into a list of directories with lists of subdirectories.
+    """
+    def __init__( self, nesting_depth:int = 1, nested_paths:list=[], dir_name:str="Directory", sub_name:str="Sub" ):
+        """
+        Initalize Path_Nester
+
+        :param nesting_depth: Depth of nesting that is used to group final instances (number of subs in last sub), defaults to 1
+        :type nesting_depth: int, optional
+        :param nested_paths: Current nested paths, defaults to []
+        :type nested_paths: list, optional
+        :param dir_name: Name for directory structures, defaults to "Directory"
+        :type dir_name: str, optional
+        :param sub_name: Name for substructures, defaults to "Sub"
+        :type sub_name: str, optional
+        """
+        self.nesting_depth  = nesting_depth
+        self.nested_paths   = nested_paths
+        self.dir_name       = dir_name
+        self.sub_name       = sub_name
+
+
+    def add_nested_lists( self, split_steps, nested_paths, complete_path ):
+        step = split_steps[0]
+
+        if len(split_steps) == self.nesting_depth:
+            if isinstance(nested_paths, list):
+                nested_paths.append( complete_path )
+            elif nested_path:
+                nested_paths[0][self.sub_name] = nested_paths[0][self.sub_name] + [complete_path]
+            else:
+                nested_paths = [{ self.dir_name: step,
+                                  self.sub_name: [complete_path]}]
+            return nested_paths
+        
+        split_found = False
+        for nested_path in nested_paths :
+            if isinstance(nested_path, dict) and step == nested_path.get(self.dir_name):
+                nested_path[self.sub_name] = self.add_nested_lists( split_steps[1:],
+                                                                    nested_path.get(self.sub_name),
+                                                                    complete_path )
+                split_found = True
+
+        if not split_found:
+            nested_paths.append( { self.dir_name: step,
+                                   self.sub_name: self.add_nested_lists( split_steps[1:],
+                                                                         [],
+                                                                         complete_path ) } )
+
+        return nested_paths
+        
+
+    def update_nested_paths( self, new_paths ):
+        for new_path in new_paths:
+            in_path = os.path.normpath( new_path )
+            split_path = in_path.split( os.sep )
+            self.nested_paths = self.add_nested_lists( split_path[1:],
+                                                       self.nested_paths,
+                                                       in_path)
+        return self.nested_paths      
+
+
+
+# File operations
 def open_last_n_line(filepath:str, n:int=1) -> str:
     """
     Open the n-th line from the back of a file

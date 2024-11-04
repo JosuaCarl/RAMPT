@@ -6,17 +6,29 @@ storage_type = "pickle"
 scope = "SCENARIO:SCOPE"
 
 [TASK.convert_files]
-inputs = [ "raw_data:SECTION" ]
+inputs = [ "raw_data:SECTION", "args_convert:SECTION" ]
 outputs = [ "community_formatted_data:SECTION" ]
 function = "source.conversion.msconv_pipe.main:function"
 skippable = "False:bool"
 
-[SCENARIO.SCENARIO_1]
-additional_data_nodes = [ "args:SECTION" ]
-tasks = [ "convert_files:SECTION", "process_data:SECTION" ]
+[SCENARIO.MS_analysis]
+additional_data_nodes = [ ]
+tasks = [
+  "convert_files:SECTION",
+  "gnps_annotation:SECTION",
+  "process_data:SECTION",
+  "sirius_annotation:SECTION",
+  "analysis:SECTION"
+]
 
-[SCENARIO.SCENARIO_1.sequences]
-SEQUENCE_1 = []
+[SCENARIO.MS_analysis.sequences]
+all_steps = [
+  "analysis:SECTION",
+  "convert_files:SECTION",
+  "gnps_annotation:SECTION",
+  "process_data:SECTION",
+  "sirius_annotation:SECTION"
+]
 
 [DATA_NODE.community_formatted_data]
 storage_type = "pickle"
@@ -35,23 +47,54 @@ storage_type = "pickle"
 scope = "SCENARIO:SCOPE"
 
 [TASK.process_data]
-inputs = [ "community_formatted_data:SECTION", "raw_data:SECTION" ]
+inputs = [ "community_formatted_data:SECTION", "args_process:SECTION" ]
 outputs = [ "processed_data:SECTION" ]
-function = ""
+function = "source.conversion.msconv_pipe.main:function"
 skippable = "False:bool"
 
 [TASK.gnps_annotation]
-inputs = [ ]
-outputs = [ ]
-function = ""
+inputs = [ "processed_data:SECTION", "args_gnps:SECTION" ]
+outputs = [ "gnps_annotations:SECTION" ]
+function = "source.annotation.gnps_pipe.main:function"
 skippable = "False:bool"
 
 [TASK.sirius_annotation]
-inputs = [ ]
-outputs = [ ]
-function = ""
+inputs = [ "processed_data:SECTION", "args_sirius:SECTION" ]
+outputs = [ "sirius_anntations:SECTION" ]
+function = "source.annotation.sirius_pipe.main:function"
 skippable = "False:bool"
 
-[DATA_NODE.args]
+[DATA_NODE.args_convert]
+storage_type = "pickle"
+scope = "SCENARIO:SCOPE"
+
+[DATA_NODE.results]
+storage_type = "pickle"
+scope = "SCENARIO:SCOPE"
+
+[TASK.analysis]
+inputs = [
+  "processed_data:SECTION",
+  "gnps_annotations:SECTION",
+  "sirius_anntations:SECTION",
+  "args_analysis:SECTION"
+]
+outputs = [ "results:SECTION" ]
+function = "source.population_difference_testing.statistics.execute_test:function"
+skippable = "False:bool"
+
+[DATA_NODE.args_process]
+storage_type = "pickle"
+scope = "SCENARIO:SCOPE"
+
+[DATA_NODE.args_sirius]
+storage_type = "pickle"
+scope = "SCENARIO:SCOPE"
+
+[DATA_NODE.args_gnps]
+storage_type = "pickle"
+scope = "SCENARIO:SCOPE"
+
+[DATA_NODE.args_analysis]
 storage_type = "pickle"
 scope = "SCENARIO:SCOPE"

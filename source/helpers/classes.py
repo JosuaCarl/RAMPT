@@ -36,6 +36,15 @@ class Pipe_Step:
         self.errs               = []
 
 
+    def update( self, attributions:dict ):
+        """
+        Update an attribute of this object.
+
+        :param attributions: Key value pair of attribute name and value
+        :type attributions: str
+        """
+        self.__dict__.update(attributions)
+
 
     def match_file_name( self, pattern:str, file_name:StrPath ) -> bool:
         """
