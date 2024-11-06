@@ -40,13 +40,22 @@ def test_replace_file_ending():
 
 def test_path_nester():
     path_nester = Path_Nester()
+
     result = path_nester.update_nested_paths( new_paths=["/a/c", "/a/b"] )
-
     expected = [{'id': 1, 'label': 'a', 'children': [{'id': 2, 'label': '/a/c', 'children': []}, {'id': 4, 'label': '/a/b', 'children': []}]}]
-
     assert result == expected
 
+    path_nester.update_nested_paths( new_paths="/a/d" )
+    expected[0].get("children").append( {'id': 6, 'label': '/a/d', 'children': []} )
+    assert result == expected
 
+    path_nester.update_nested_paths( new_paths="/a/c" )
+    assert result == expected
+
+    path_nester.update_nested_paths( new_paths="/b" )
+    expected.append( {'id': 9, 'label': '/b', 'children': []} )
+    assert result == expected
+    
 
 # CMD
 def test_execute_verbose_command():

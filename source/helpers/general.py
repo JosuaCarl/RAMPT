@@ -138,11 +138,13 @@ class Path_Nester:
         self.id_counter += 1
         step = split_steps[0]
 
-        if len(split_steps) == self.nesting_depth:
+        if len(split_steps) == self.nesting_depth:  # Break recursion at desired depth
             if isinstance(nested_paths, list):
-                nested_paths.append( { self.id_name: self.id_counter,
-                                        self.dir_name: complete_path,
-                                        self.sub_name: []} )
+                entry_present = [True for nested_path in nested_paths if nested_path.get(self.dir_name) == complete_path]
+                if not entry_present:
+                    nested_paths.append( { self.id_name: self.id_counter,
+                                            self.dir_name: complete_path,
+                                            self.sub_name: [] } )
             else:
                 nested_paths = [{ self.id_name: self.id_counter,
                                   self.dir_name: step,
@@ -167,7 +169,9 @@ class Path_Nester:
         return nested_paths
         
 
-    def update_nested_paths( self, new_paths ):
+    def update_nested_paths( self, new_paths:str|list[str] ):
+        if isinstance(new_paths, str):
+            new_paths = [ new_paths ]
         for new_path in new_paths:
             in_path = os.path.normpath( new_path )
             split_path = in_path.split( os.sep )

@@ -3,45 +3,179 @@
 GUI creation with Taipy.
 """
 import os
+import tempfile
+import datetime
+
+from werkzeug.utils import secure_filename
 
 from taipy.gui import Gui
 from taipy import Config, Orchestrator
 import taipy.gui.builder as tgb
 
 import source.helpers.general as helpers
+from source.helpers.types import StrPath
+
 from source.conversion.msconv_pipe import File_Converter
 
 
-# Conversion
 
-path = ""    
-in_paths = []
-nested_in_paths = [{"id": "0", "label": "", "children": []}]
-path_nester = helpers.Path_Nester()
-selection = nested_in_paths[0]
-def add_in_path( state ):
-    if isinstance( state.path, list ):
-        in_paths.extend( state.path )
+# General
+
+## Working directory
+work_dir_root = tempfile.gettempdir()
+def change_work_dir_root( new_root:StrPath=None ):
+    global work_dir_root
+    if new_root:
+        if os.path.isdir( new_root ):
+            work_dir_root = os.path.normpath( new_root )
+        else:
+            raise( ValueError(f"{new_root} is not a valid directory") )
     else:
-        in_paths.append( state.path )
-
-    nested_in_paths = path_nester.update_nested_paths( new_paths=state.path )
-    state.nested_in_paths = nested_in_paths
-    state.selection = nested_in_paths[0]
-    state.refresh("nested_in_paths")
-  
+        work_dir_root = gui._get_config("upload_folder", tempfile.gettempdir())
 
 
+## Projects 
+project_counter = 0
+project_name = f"{datetime.date.today()}_{project_counter}"
+project_path = os.path.join( work_dir_root, project_name )
+projects = [ {"name": project_name, "path": project_path} ]
 
-out_path = ""
+def update_projects( project_id, project_name:str, project_path:StrPath ):
+    global projects
+    projects.append( {"id": project_id, "name": project_name, "path": project_path} )
+
+
+def add_project( new_project_name:str=None ):
+    global project_name
+    global project_path
+    global project_counter
+
+    project_counter += 1
+    
+    if new_project_name:
+        if os.path.isdir( new_project_name ):
+            directory, name = os.path.split( new_project_name )
+            project_name = name
+            change_work_dir_root( new_root=directory )
+        else:
+            project_name = new_project_name
+    else:
+        project_name = f"{datetime.date.today()}_{project_counter}"
+    project_path = os.path.join( work_dir_root, secure_filename( project_name ) )
+    update_projects( project_name, project_path )
+
+
+def change_project( path:StrPath ):
+    global project_name
+    global project_path
+    global projects
+
+    for project in projects:
+        if projects.get("path") == path:
+            project_path = project.get("path")
+            project_name = project.get("name")
+    
+
+
+## State handling
+def extract_attribute( state, state_attribute:str ):
+    return getattr( state, state_attribute )
+
+def replace_attribute( state, state_attribute:str, replacement ):
+    setattr( state, state_attribute, replacement )
+    state.refresh( state_attribute )
+
+def update_class_instance( class_instance, state, key, value ):
+    class_instance.update( {key: value} )
+
+def extend_local_list( local_list, state, state_attribute ):
+    value = extract_attribute( state, state_attribute )
+    if isinstance( value, list ):
+        local_list.extend( value )
+    else:
+        local_list.append( value )
+    return local_list
+
+
+### Trees
+def get_selection_labels( state, state_attribute:str ):
+    selection_labels = [ selection.get("label") for selection in extract_attribute( state, state_attribute ) ]
+    return selection_labels
+
+def add_path_to_tree( local_tree, state, path_state_attribute ):
+    local_tree = path_nester.update_nested_paths( new_paths=extract_attribute( state, path_state_attribute) )
+    return local_tree
+
+
+### Dialogs
+def evaluate_dialog( state, payload_pressed, option_list ):
+    value = option_list[payload_pressed["args"][0]]
+    state.show_dialog = False
+    return value
+
+
+
+## Helpers
+path_nester = helpers.Path_Nester()
+
+
+# General variables
 platform = ""
+overwrite = False
+show_ask_overwrite = False
+
+def evaluate_ask_overwrite( state, _, payload_pressed, option_list ):
+    state.overwrite = evaluate_dialog( state, payload_pressed, option_list)
+
+def ask_overwrite( state ):
+    state.show_ask_overwrite = True
+    return state
+
+
+
+# Conversion --------------------------------------------
+conv_path = ""
+conv_tree_paths = []
+conv_selection = ""
+conv_ask = False
+conv_progress = 0
 file_converter = File_Converter()
-def update_converter( state, var, val ):
-    file_converter.update( {var: val} )
+
+def construct_conversion_selection_tree( state ):
+    global conv_tree_paths
+    conv_tree_paths = add_path_to_tree( conv_tree_paths, state, "conv_path")
+    replace_attribute( state, "conv_tree_paths", conv_tree_paths )
+
+
+
+
+def evaluate_ask_overwrite( state, _, payload_pressed, option_list ):
+    state.overwrite = evaluate_dialog( state, payload_pressed, option_list)
+
 
 def convert_selected( state ):
-    for in_path in in_paths:
-        file_converter.convert_file( in_path=in_path, out_path=out_path )
+    global project_path
+    conv_out_path = os.path.join( project_path, "converted" )
+
+    selected_for_conversion = extract_attribute( state, "conv_selection" )
+    if os.path.isdir( conv_out_path ) and not state.conv_overwrite:
+        state = ask_overwrite( state )
+        if not state.overwrite:
+            return False
+    else:
+        os.makedirs( conv_out_path , exist_ok=True )
+
+    for i, in_path in enumerate(selected_for_conversion):
+        file_converter.convert_file( in_path=in_path, out_path=conv_out_path )
+        state.conv_progress = i + 1 / len( selected_for_conversion )
+    
+    return True
+
+def download_converted( state ):
+    # GREY OUT, WHEN converted IS NOT PRESENT
+    
+    pass
+
 
 
 # SCENARIOS
@@ -52,14 +186,12 @@ job = ""
 
 
 # OTHER
-def print_state_properies( state, var, val ):
+def print_state_properies( state ):
     print("STATE INFO:")
     print(state)
     print(dir(state))
     print(state.__dict__)
     print(state.path)
-    print("\nVALUE")
-    print(f"{var}: {val}")
     
 
 with tgb.Page() as root:
@@ -73,15 +205,31 @@ with tgb.Page() as root:
         # Main window
         with tgb.part():
             tgb.text( "## Manual configuration", mode="markdown" )
-            with tgb.expandable( title="Conversion", expanded=False, hover_text="Convert manufacturer files into communtiy formats." ):
+
+            with tgb.expandable( title="General" , expanded=False , hover_text=""):
                 tgb.selector( "{platform}",
-                              label="Platform", lov="Linux;Windows;MacOS", dropdown=True, on_change=update_converter )
-                tgb.file_selector( "{path}",
-                                   label="Select File", extensions="*", drop_message="Drop files for conversion here:",
-                                   multiple=True, on_action=add_in_path )
-                tgb.tree( "{selection}", lov="{nested_in_paths}", label="Select for conversion", filter=True, multiple=True, expanded=True )
-                tgb.text( "Paths: {path}" )
-                tgb.button( label="Convert selected", on_action='{None}' )
+                              label="Platform", lov="True;False",
+                              on_change=lambda state, key, value: update_class_instance( file_converter, state, key, value ) )
+                tgb.toggle( "{overwrite}",
+                            label="Overwrite", lov="Linux;Windows;MacOS", dropdown=True,
+                            on_change=lambda state, key, value: update_class_instance( file_converter, state, key, value ) )
+            with tgb.expandable( title="Conversion", expanded=False, hover_text="Convert manufacturer files into community formats." ):
+                with tgb.layout( columns="4 1", columns__mobile="1"):
+                    with tgb.part():
+                        tgb.text( "#### Settings", mode="markdown" )                        
+                        tgb.text( "#### File selection", mode="markdown" )
+                        tgb.file_selector( "{conv_path}",
+                                        label="Select File", extensions="*", drop_message="Drop files for conversion here:", multiple=True,
+                                        on_action=construct_conversion_selection_tree )
+                        
+                        tgb.dialog( "{show_ask_overwrite}", labels="Yes;No", title="This project was already converted.\nShould it be done again ?", on_action=evaluate_ask_overwrite)
+                        tgb.tree( "{conv_selection}", lov="{conv_tree_paths}", label="Select for conversion", filter=True, multiple=True, expanded=True )
+
+                        tgb.button( label="Convert selected", on_action=convert_selected )
+
+                    with tgb.part():
+                        tgb.progress( "{conv_progress}" )
+
 
             with tgb.expandable( title="Processing", expanded=False, hover_text="Process the data with mzmine through a batch file."):
                 tgb.text( "LOREM IPSUM" )
