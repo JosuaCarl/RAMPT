@@ -56,6 +56,8 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     else:
         file_converter.convert_file( in_path=in_dir, out_path=out_dir )
 
+    return file_converter.processed_out
+
 
 
 class File_Converter(Pipe_Step):

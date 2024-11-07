@@ -48,6 +48,8 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
         computation_complete = compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
     else:
         gnps_runner.get_gnps_results( in_dir=in_dir, out_dir=out_dir )
+
+    return gnps_runner.processed_out
     
 
 

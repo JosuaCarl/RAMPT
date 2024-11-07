@@ -56,6 +56,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     else:
         ion_exclusion_runner.check_ms2_presence( in_dir=in_dir, out_dir=out_dir, data_dir=data_dir )
 
+    return ion_exclusion_runner.processed_out
 
 
 

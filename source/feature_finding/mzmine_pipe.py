@@ -75,6 +75,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     else:
         mzmine_runner.run_mzmine_batch( in_path=in_dir, out_path=out_dir )
 
+    return mzmine_runner.processed_out
 
 class MZmine_Runner(Pipe_Step):
     """
