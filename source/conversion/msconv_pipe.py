@@ -151,6 +151,8 @@ class File_Converter(Pipe_Step):
         self.outs.append( out )
         self.errs.append( err )
 
+        return out_path
+
 
     def convert_files_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
                               futures:list=[], recusion_level:int=0 ) -> list:

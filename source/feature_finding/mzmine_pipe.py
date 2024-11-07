@@ -129,6 +129,8 @@ class MZmine_Runner(Pipe_Step):
         self.outs.append( out )
         self.errs.append( err )
 
+        out_path
+
 
     def run_mzmine_batches_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
                                    futures:list=[], recusion_level:int=0 ) -> list:

@@ -54,7 +54,8 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
         futures = ion_exclusion_runner.check_ms2_presences_nested( in_root_dir=in_dir, out_root_dir=out_dir, data_root_dir=data_dir )
         computation_complete = helpers.compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
     else:
-        futures = ion_exclusion_runner.check_ms2_presence( in_dir=in_dir, out_dir=out_dir, data_dir=data_dir )
+        ion_exclusion_runner.check_ms2_presence( in_dir=in_dir, out_dir=out_dir, data_dir=data_dir )
+
 
 
 
@@ -316,6 +317,11 @@ class Ion_exclusion_Runner(Pipe_Step):
             annotated_ms2_presence.to_csv( f"{join(out_dir, basename(in_dir))}_ms2_presence_annotated.tsv", sep="\t" )
         else:
             ms2_presence_df.to_csv( f"{join(out_dir, basename(in_dir))}_ms2_presence.tsv", sep="\t")
+
+        self.processed_in.append( in_dir )
+        self.processed_out.append( out_dir )
+
+        return out_dir
 
 
     def check_ms2_presences_nested( self, in_root_dir:StrPath, data_root_dir:StrPath, out_root_dir:StrPath,

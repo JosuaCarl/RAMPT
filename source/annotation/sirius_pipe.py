@@ -47,7 +47,8 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
         futures = sirius_runner.run_sirius_nested( in_root_dir=in_dir, out_root_dir=out_dir )
         computation_complete = helpers.compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
     else:
-        futures = sirius_runner.run_sirius( in_dir=in_dir, out_dir=out_dir, projectspace=projectspace )
+        sirius_runner.run_sirius( in_dir=in_dir, out_dir=out_dir, projectspace=projectspace )
+    
     
 
 
@@ -104,6 +105,8 @@ class Sirius_Runner(Pipe_Step):
         self.processed_out.append( out_path )
         self.outs.append( out )
         self.errs.append( err )
+
+        return out_path
 
 
     def run_sirius_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,

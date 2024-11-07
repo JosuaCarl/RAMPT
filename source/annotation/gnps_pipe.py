@@ -47,7 +47,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
         futures = gnps_runner.get_gnps_results_nested( root_dir=in_dir, out_root_dir=out_dir )
         computation_complete = compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
     else:
-        futures = gnps_runner.get_gnps_results( in_dir=in_dir, out_dir=out_dir )
+        gnps_runner.get_gnps_results( in_dir=in_dir, out_dir=out_dir )
     
 
 
@@ -212,6 +212,7 @@ class GNPS_Runner(Pipe_Step):
             
             self.processed_in.append( gnps_response if gnps_response else mzmine_log if mzmine_log else in_dir )
             self.processed_out.append( out_path )
+
             return results_dict
 
         else:
