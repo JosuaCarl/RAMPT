@@ -283,8 +283,13 @@ class Ion_exclusion_Runner(Pipe_Step):
         for i, row in experiments.iterrows():
             experiment = row["experiment"]
             ms2_spectra = [ spectrum for spectrum in experiment.getSpectra() if spectrum.getMSLevel() >= 2 ]
-            precursor_mzs = list( set( [ precursor.getMZ() for ms2_spectrum in ms2_spectra for precursor in ms2_spectrum.getPrecursors() ] ) )
-            precursor_infos_files[basename(experiment.getLoadedFilePath())] = precursor_mzs
+            retention_times = []
+            precursor_mzs = []
+            for ms2_spectrum in ms2_spectra:
+                for precursor in ms2_spectrum.getPrecursors():
+                    retention_times.append( ms2_spectrum.getRT() )
+                    precursor_mzs.append( precursor.getMZ() )
+            precursor_infos_files[basename(experiment.getLoadedFilePath())] = pd.DataFrame( {"m/z": precursor_mzs, "rt": retention_times} )
 
         quantification_df  = pd.read_csv(f"{join(in_dir, basename(in_dir))}_iimn_fbmn_quant.csv")
         mz_in_ms2 = {}
