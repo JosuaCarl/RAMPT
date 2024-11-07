@@ -34,9 +34,9 @@ def choose_test(X:Array, groups:Array=None, paired:bool=False) -> str:
 
 
 
-def execute_test(x:Array, y:Array=None, test:str=None, axis:int=0,
+def execute_test( x:Array, y:Array=None, test:str=None, axis:int=0,
                  alternative_hypothesis:str="two-sided", cutoff:float=0.05,
-                 multiple_testing_correction:str="bonferroni", *args) -> bool:
+                 multiple_testing_correction:str="bonferroni", *args ) -> bool:
 
     match test:
         case "Paired-sample t-test":

@@ -5,6 +5,7 @@ GUI creation with Taipy.
 import os
 import tempfile
 import datetime
+import yaml
 
 from werkzeug.utils import secure_filename
 
@@ -20,7 +21,6 @@ from source.conversion.msconv_pipe import File_Converter
 
 
 # General
-
 ## Working directory
 work_dir_root = tempfile.gettempdir()
 def change_work_dir_root( new_root:StrPath=None ):
@@ -32,49 +32,6 @@ def change_work_dir_root( new_root:StrPath=None ):
             raise( ValueError(f"{new_root} is not a valid directory") )
     else:
         work_dir_root = gui._get_config("upload_folder", tempfile.gettempdir())
-
-
-## Projects 
-project_counter = 0
-project_name = f"{datetime.date.today()}_{project_counter}"
-project_path = os.path.join( work_dir_root, project_name )
-projects = [ {"name": project_name, "path": project_path} ]
-
-def update_projects( project_id, project_name:str, project_path:StrPath ):
-    global projects
-    projects.append( {"id": project_id, "name": project_name, "path": project_path} )
-
-
-def add_project( new_project_name:str=None ):
-    global project_name
-    global project_path
-    global project_counter
-
-    project_counter += 1
-    
-    if new_project_name:
-        if os.path.isdir( new_project_name ):
-            directory, name = os.path.split( new_project_name )
-            project_name = name
-            change_work_dir_root( new_root=directory )
-        else:
-            project_name = new_project_name
-    else:
-        project_name = f"{datetime.date.today()}_{project_counter}"
-    project_path = os.path.join( work_dir_root, secure_filename( project_name ) )
-    update_projects( project_name, project_path )
-
-
-def change_project( path:StrPath ):
-    global project_name
-    global project_path
-    global projects
-
-    for project in projects:
-        if projects.get("path") == path:
-            project_path = project.get("path")
-            project_name = project.get("name")
-    
 
 
 ## State handling
@@ -119,17 +76,42 @@ def evaluate_dialog( state, payload_pressed, option_list ):
 path_nester = helpers.Path_Nester()
 
 
+class MS_Analysis_Configuration:
+    def __init__( self ): #, construction_dict:dict=None ):
+        #if construction_dict:
+        #    self.__dict__ = construction_dict
+        #else:
+        self.platform = "Linux"
+        self.overwrite = False
+        self.nested = True
+        self.file_converter = File_Converter()
+
+
+    def update( self, dictionary:dict, **kwargs ):
+        if not dictionary:
+            dictionary = kwargs
+        for key, value in dictionary:
+            setattr( self, key, value )
+
+    def save( self, location ):
+        with open( location, "w") as f:
+            yaml.safe_dump( self, f)
+
+
 # General variables
-platform = ""
-overwrite = False
-show_ask_overwrite = False
+configuration = MS_Analysis_Configuration()
 
-def evaluate_ask_overwrite( state, _, payload_pressed, option_list ):
-    state.overwrite = evaluate_dialog( state, payload_pressed, option_list)
 
-def ask_overwrite( state ):
-    state.show_ask_overwrite = True
-    return state
+
+
+def change_global_attibute( state, state_attribute:str ):
+    global file_converter
+
+    value = extract_attribute( state, state_attribute )
+    for pipe_step in [file_converter]:
+        if hasattr( pipe_step, state_attribute):
+            setattr( pipe_step, state_attribute, value)
+    print(value)
 
 
 
@@ -149,27 +131,6 @@ def construct_conversion_selection_tree( state ):
 
 
 
-def evaluate_ask_overwrite( state, _, payload_pressed, option_list ):
-    state.overwrite = evaluate_dialog( state, payload_pressed, option_list)
-
-
-def convert_selected( state ):
-    global project_path
-    conv_out_path = os.path.join( project_path, "converted" )
-
-    selected_for_conversion = extract_attribute( state, "conv_selection" )
-    if os.path.isdir( conv_out_path ) and not state.conv_overwrite:
-        state = ask_overwrite( state )
-        if not state.overwrite:
-            return False
-    else:
-        os.makedirs( conv_out_path , exist_ok=True )
-
-    for i, in_path in enumerate(selected_for_conversion):
-        file_converter.convert_file( in_path=in_path, out_path=conv_out_path )
-        state.conv_progress = i + 1 / len( selected_for_conversion )
-    
-    return True
 
 def download_converted( state ):
     # GREY OUT, WHEN converted IS NOT PRESENT
@@ -181,17 +142,24 @@ def download_converted( state ):
 # SCENARIOS
 scenario = ""
 
+def add_scenario( state, id ):
+    configuration.save( os.path.join(work_dir_root, f"{id}_config.yaml") )
+    configuration.update()
+
+
+def change_scenario( state, id ):
+    with open( os.path.join(work_dir_root, f"{id}_config.yaml"), "w") as f:
+        configuration = yaml.safe_load( f ) # MS_Analysis_Configuration( yaml.safe_load( f ) )
+    print( configuration )
+
+
 # JOBS
 job = ""
 
 
-# OTHER
-def print_state_properies( state ):
-    print("STATE INFO:")
-    print(state)
-    print(dir(state))
-    print(state.__dict__)
-    print(state.path)
+# DATA
+data_node = ""
+
     
 
 with tgb.Page() as root:
@@ -200,7 +168,8 @@ with tgb.Page() as root:
 
     with tgb.layout( columns="1 3 1", columns__mobile="1" ):
         with tgb.part():
-            tgb.scenario_selector( "{scenario}" )
+            # Scenario selector
+            tgb.scenario_selector( "{scenario}", on_creation=add_scenario, on_change=change_scenario )
         
         # Main window
         with tgb.part():
@@ -208,29 +177,22 @@ with tgb.Page() as root:
 
             # General settings
             with tgb.expandable( title="General" , expanded=False , hover_text=""):
-                tgb.input( "{project}", hover_text="Use the field to generate or switch between projects.")
-                # TODO: Add Project integration
-                tgb.selector( "{platform}",
-                              label="Platform", lov="Linux;Windows;MacOS",
-                              on_change=lambda state, key, value: update_class_instance( file_converter, state, key, value ) )
-                tgb.toggle( "{overwrite}",
-                            label="Overwrite", lov="True;False", dropdown=True,
-                            on_change=lambda state : print( state.overwrite ) )
+                tgb.selector( "{configuration.platform}",
+                              label="Platform", lov="Linux;Windows;MacOS", dropdown=True, hover_text="Operating system / Computational platform where this is operated." )
+                tgb.toggle( "{configuration.overwrite}",
+                            label="Overwrite", hover_text="Whether to overwrite upon re-execution.")
+                tgb.toggle( "{configuration.nested}",
+                            label="Nested execution", hover_text="Whether directories should be executed in a nested fashion.")
             
             # Conversion
             with tgb.expandable( title="Conversion", expanded=False, hover_text="Convert manufacturer files into community formats." ):
                 with tgb.layout( columns="4 1", columns__mobile="1"):
-                    with tgb.part():
-                        tgb.text( "#### Settings", mode="markdown" )                        
+                    with tgb.part():                   
                         tgb.text( "#### File selection", mode="markdown" )
                         tgb.file_selector( "{conv_path}",
                                         label="Select File", extensions="*", drop_message="Drop files for conversion here:", multiple=True,
                                         on_action=construct_conversion_selection_tree )
-                        
-                        tgb.dialog( "{show_ask_overwrite}", labels="Yes;No", title="This project was already converted.\nShould it be done again ?", on_action=evaluate_ask_overwrite)
                         tgb.tree( "{conv_selection}", lov="{conv_tree_paths}", label="Select for conversion", filter=True, multiple=True, expanded=True )
-
-                        tgb.button( label="Convert selected", on_action=convert_selected )
 
                     with tgb.part():
                         tgb.progress( "{conv_progress}" )
@@ -239,6 +201,8 @@ with tgb.Page() as root:
             with tgb.expandable( title="Processing", expanded=False, hover_text="Process the data with mzmine through a batch file."):
                 tgb.text( "LOREM IPSUM" )
             
+
+            # Scenario
             tgb.text( "## Scenario management", mode="markdown" )
             tgb.scenario( "{scenario}", show_tags=False, show_properties=False, show_sequences=False )
             tgb.scenario_dag( "{scenario}" )
@@ -246,7 +210,7 @@ with tgb.Page() as root:
             tgb.text("## Jobs", mode="markdown")
             tgb.job_selector( "{job}" )
 
-
+            tgb.data_node_selector( "{data_node}" )
         with tgb.part():
             pass
 
@@ -259,4 +223,4 @@ if __name__ == "__main__":
     Config.load( os.path.join( os.path.dirname( helpers.get_internal_filepath(__file__) ), "configuration", "config.toml" ) )
     Orchestrator().run()
 
-    gui.run(title="mine2sirius", use_reloader=True, port=5000, propagate=True)
+    gui.run(title="mine2sirius", use_reloader=True, port=5000, propagate=True, run_browser=False)

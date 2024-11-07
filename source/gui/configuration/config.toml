@@ -2,11 +2,11 @@
 core_version="3.0"
 
 [DATA_NODE.raw_data]
-storage_type = "generic"
+storage_type = "in_memory"
 scope = "SCENARIO:SCOPE"
 
 [TASK.convert_files]
-inputs = [ "raw_data:SECTION", "args_convert:SECTION" ]
+inputs = [ "raw_data:SECTION", "ms_analysis_configuration:SECTION" ]
 outputs = [ "community_formatted_data:SECTION" ]
 function = "source.conversion.msconv_pipe.main:function"
 skippable = "False:bool"
@@ -53,42 +53,46 @@ process_to_annotate = [
 ]
 
 [DATA_NODE.community_formatted_data]
-storage_type = "generic"
+storage_type = "in_memory"
 scope = "SCENARIO:SCOPE"
 
 [DATA_NODE.processed_data]
-storage_type = "generic"
+storage_type = "in_memory"
 scope = "SCENARIO:SCOPE"
 
 [DATA_NODE.gnps_annotations]
-storage_type = "generic"
+storage_type = "in_memory"
 scope = "SCENARIO:SCOPE"
 
 [DATA_NODE.sirius_anntations]
-storage_type = "generic"
+storage_type = "in_memory"
 scope = "SCENARIO:SCOPE"
 
 [TASK.find_features]
-inputs = [ "community_formatted_data:SECTION", "args_feature_finding:SECTION" ]
+inputs = [
+  "community_formatted_data:SECTION",
+  "ms_analysis_configuration:SECTION"
+]
 outputs = [ "processed_data:SECTION" ]
 function = "source.conversion.msconv_pipe.main:function"
 skippable = "False:bool"
 
 [TASK.gnps_annotation]
-inputs = [ "processed_data:SECTION", "args_gnps:SECTION" ]
+inputs = [
+  "processed_data:SECTION",
+  "ms_analysis_configuration:SECTION"
+]
 outputs = [ "gnps_annotations:SECTION" ]
 function = "source.annotation.gnps_pipe.main:function"
 skippable = "False:bool"
 
 [TASK.sirius_annotation]
-inputs = [ "processed_data:SECTION", "args_sirius:SECTION" ]
+inputs = [ "processed_data:SECTION", "ms_analysis_configuration:SECTION" ]
 outputs = [ "sirius_anntations:SECTION" ]
 function = "source.annotation.sirius_pipe.main:function"
 skippable = "False:bool"
 
-[DATA_NODE.args_convert]
-storage_type = "in_memory"
-scope = "SCENARIO:SCOPE"
+
 
 [DATA_NODE.results]
 storage_type = "csv"
@@ -99,24 +103,18 @@ inputs = [
   "processed_data:SECTION",
   "gnps_annotations:SECTION",
   "sirius_anntations:SECTION",
-  "args_analysis:SECTION"
+  "ms_analysis_configuration:SECTION"
 ]
 outputs = [ "results:SECTION" ]
 function = "source.population_difference_testing.statistics.execute_test:function"
 skippable = "True:bool"
 
-[DATA_NODE.args_feature_finding]
+
+
+[DATA_NODE.ms_analysis_configuration]
 storage_type = "in_memory"
 scope = "SCENARIO:SCOPE"
 
-[DATA_NODE.args_sirius]
-storage_type = "in_memory"
-scope = "SCENARIO:SCOPE"
 
-[DATA_NODE.args_gnps]
-storage_type = "in_memory"
-scope = "SCENARIO:SCOPE"
 
-[DATA_NODE.args_analysis]
-storage_type = "in_memory"
-scope = "SCENARIO:SCOPE"
+
