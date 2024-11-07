@@ -3,8 +3,82 @@
 Provide super classed for steps in program to ensure transition of intermediate results.
 """
 import regex
+from multipledispatch import dispatch
 
 from source.helpers.types import StrPath
+
+# Helper methods for classes / namespaces
+@dispatch(object, object)
+def get_value( instance:object|dict, key ):
+    """
+    Extract an attribute of a class or dictionary.
+
+    :param instance: Instance of a class or dictionary
+    :type instance: object | dict
+    :param key: Attribute or key
+    :type key: any
+    :return: Value of given key
+    :rtype: any
+    """
+    if isinstance( instance, dict ):
+        if key in instance:
+            return instance.get( key )
+    else:
+        return getattr( instance, key )
+
+@dispatch(object, object, object)
+def get_value( instance:object|dict, key, default ):
+    """
+    Extract an attribute of a class or dictionary. If none is present, return default.
+
+    :param instance: Instance of a class or dictionary
+    :type instance: object | dict
+    :param key: Attribute or key
+    :type key: any
+    :param default: Default if entry is not found
+    :type default: any
+    :return: Value of given key
+    :rtype: any
+    """
+    if isinstance( instance, dict ):
+        if key in instance:
+            return instance.get( key, default )
+    else:
+        if hasattr( instance, key ):
+            return getattr( instance, key )
+        else:
+            return default
+
+
+def set_value( instance:object|dict, key, new_value, add_key:bool ):
+    """
+    Set the value of an attribute or dictionary entry.
+
+    :param instance: Instance of a class or dictionary.
+    :type instance: object | dict
+    :param key: Attribute or key.
+    :type key: any
+    :param new_value: Value to link to entry.
+    :type new_value: any
+    :param add_key: Adds the key, if it is not already present.
+    :type add_key: bool
+    :return: Instance with updated value.
+    :rtype: any
+    """
+    if isinstance( instance, dict ):
+        if add_key:
+            instance.update( {key: new_value} )
+        else:
+            instance[ key ] = new_value
+    else:
+        if hasattr( instance, key ):
+            setattr( instance, key, new_value )
+        elif add_key:
+            setattr( instance, key, new_value )
+        else:
+            raise( ValueError(f"The key={key} is not found in instance={instance} and add_key={add_key}."))
+
+    return instance
 
 
 

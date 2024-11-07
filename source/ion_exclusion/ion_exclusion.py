@@ -19,31 +19,32 @@ import numpy as np
 import pandas as pd
 
 from source.helpers.types import StrPath
-from source.helpers.classes import Pipe_Step
+from source.helpers.classes import Pipe_Step, get_value, set_value
 import source.helpers.general as helpers
 
 
-def main(args, unknown_args):
+def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     """
     Execute the conversion.
 
     :param args: Command line arguments
-    :type args: any
+    :type args: argparse.Namespace|dict
     :param unknown_args: Command line arguments that are not known.
-    :type unknown_args: any
-    """    
+    :type unknown_args: list[str]
+    """
     # Extract arguments
-    in_dir              = args.in_dir
-    out_dir             = args.out_dir              if args.out_dir else args.in_dir
-    data_dir            = args.data_dir             if args.data_dir else out_dir
-    relative_tolerance  = args.relative_tolerance   if args.relative_tolerance else 1e-05
-    absolute_tolerance  = args.absolute_tolerance   if args.absolute_tolerance else 1e-08
-    retention_time_tolerance  = args.retention_time_tolerance   if args.retention_time_tolerance else None
-    nested              = args.nested               if args.nested else False
-    n_workers           = args.workers              if args.workers else 1
-    save_log            = args.save_log             if args.save_log else False
-    verbosity           = args.verbosity            if args.verbosity else 1
-    additional_args     = args.ion_exclusion_args   if args.ion_exclusion_args else unknown_args
+    in_dir                      = get_value(args, "in_dir" )
+    out_dir                     = get_value(args, "out_dir",                    in_dir)
+    data_dir                    = get_value(args, "data_dir",                   out_dir)
+    relative_tolerance          = get_value(args, "relative_tolerance",         1e-05) 
+    absolute_tolerance          = get_value(args, "absolute_tolerance",         1e-08)
+    retention_time_tolerance    = get_value(args, "retention_time_tolerance",   None)
+    nested                      = get_value(args, "nested",                     False)
+    n_workers                   = get_value(args, "workers",                    1)
+    save_log                    = get_value(args, "save_log",                   False)
+    verbosity                   = get_value(args, "verbosity",                  1)
+    additional_args             = get_value(args, "ion_exclusion_args",         unknown_args)
+    additional_args = additional_args if additional_args else unknown_args
 
     ion_exclusion_runner = Ion_exclusion_Runner( relative_tolerance=relative_tolerance, absolute_tolerance=absolute_tolerance,
                                                  retention_time_tolerance=retention_time_tolerance,
@@ -94,7 +95,7 @@ class OpenMS_File_Handler:
         elif experiment_path.endswith(".tsv") or experiment_path.endswith(".csv") or experiment_path.endswith(".txt"):
             exp_df = pd.read_csv(experiment_path, sep=separator)
             spectrum = oms.MSSpectrum()
-            spectrum.set_peaks( (exp_df["mz"], exp_df["inty"]) ) # type: ignore
+            spectrum.set_peaks( (exp_df["mz"], exp_df["inty"]) )
             experiment.addSpectrum(spectrum)
         else: 
             raise ValueError(f'Invalid ending of {experiment_path}. Must be in [".MzXML", ".mzXML", ".MzML", ".mzML", ".tsv", ".csv", ".txt"]')

@@ -15,31 +15,32 @@ import dask.multiprocessing
 
 import source.helpers.general as helpers
 from source.helpers.types import StrPath
-from source.helpers.classes import Pipe_Step
+from source.helpers.classes import Pipe_Step, get_value, set_value
 
 import regex
 
-def main(args, unknown_args):
+def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     """
     Execute the conversion.
 
     :param args: Command line arguments
-    :type args: any
+    :type args: argparse.Namespace|dict
     :param unknown_args: Command line arguments that are not known.
-    :type unknown_args: any
+    :type unknown_args: list[str]
     """
     # Extract arguments
-    mzmine_path     = args.mzmine_path      if args.mzmine_path else None
-    in_dir          = args.in_dir
-    out_dir         = args.out_dir
-    batch_path      = args.batch_path
-    valid_formats   = args.valid_formats    if args.valid_formats else ["mzML", "mzXML", "imzML"]
-    user            = args.user             if args.user else None
-    nested          = args.nested           if args.nested else False
-    platform        = args.platform         if args.platform else "windows"
-    save_log        = args.save_log         if args.save_log else False
-    verbosity       = args.verbosity        if args.verbosity else 1
-    additional_args = args.mzmine_arguments if args.mzmine_arguments else unknown_args
+    mzmine_path     = get_value(args, "mzmine_path",        None )
+    in_dir          = get_value(args, "in_dir" )
+    out_dir         = get_value(args, "out_dir" )
+    batch_path      = get_value(args, "batch_path" )
+    valid_formats   = get_value(args, "valid_formats",      ["mzML", "mzXML", "imzML"])
+    user            = get_value(args, "user",               None )
+    nested          = get_value(args, "nested",             False )
+    platform        = get_value(args, "platform",           "windows" )
+    save_log        = get_value(args, "save_log",           False )
+    verbosity       = get_value(args, "verbosity",          1 )
+    additional_args = get_value(args, "mzmine_arguments",   unknown_args )
+    additional_args = additional_args if additional_args else unknown_args
     
     if not mzmine_path:
         match helpers.Substring(platform.lower()):

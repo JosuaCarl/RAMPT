@@ -19,26 +19,27 @@ import dask.multiprocessing
 
 from source.helpers.general import check_for_str_request, compute_scheduled
 from source.helpers.types import StrPath
-from source.helpers.classes import Pipe_Step
+from source.helpers.classes import Pipe_Step, get_value, set_value
 
 
-def main(args, unknown_args):
+def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     """
-    Execute the GNPS annotation fetching.
+    Execute the conversion.
 
     :param args: Command line arguments
-    :type args: any
+    :type args: argparse.Namespace|dict
     :param unknown_args: Command line arguments that are not known.
-    :type unknown_args: any
+    :type unknown_args: list[str]
     """
     # Extract arguments
-    in_dir          = args.in_dir
-    out_dir         = args.out_dir          if args.out_dir else args.in_dir
-    nested          = args.nested           if args.nested else False
-    n_workers       = args.workers          if args.workers else 1
-    save_log        = args.save_log         if args.save_log else False
-    verbosity       = args.verbosity        if args.verbosity else 1
-    additional_args = args.gnps_args        if args.gnps_args else unknown_args
+    in_dir          = get_value(args, "in_dir")
+    out_dir         = get_value(args, "out_dir",    in_dir)
+    nested          = get_value(args, "nested",     False) 
+    n_workers       = get_value(args, "workers",    1 )
+    save_log        = get_value(args, "save_log",   False )
+    verbosity       = get_value(args, "verbosity",  1 )
+    additional_args = get_value(args, "gnps_args",  unknown_args )
+    additional_args = additional_args if additional_args else unknown_args
 
     gnps_runner = GNPS_Runner( save_log=save_log, additional_args=additional_args)
 

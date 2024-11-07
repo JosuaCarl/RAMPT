@@ -206,13 +206,18 @@ with tgb.Page() as root:
         with tgb.part():
             tgb.text( "## Manual configuration", mode="markdown" )
 
+            # General settings
             with tgb.expandable( title="General" , expanded=False , hover_text=""):
+                tgb.input( "{project}", hover_text="Use the field to generate or switch between projects.")
+                # TODO: Add Project integration
                 tgb.selector( "{platform}",
-                              label="Platform", lov="True;False",
+                              label="Platform", lov="Linux;Windows;MacOS",
                               on_change=lambda state, key, value: update_class_instance( file_converter, state, key, value ) )
                 tgb.toggle( "{overwrite}",
-                            label="Overwrite", lov="Linux;Windows;MacOS", dropdown=True,
-                            on_change=lambda state, key, value: update_class_instance( file_converter, state, key, value ) )
+                            label="Overwrite", lov="True;False", dropdown=True,
+                            on_change=lambda state : print( state.overwrite ) )
+            
+            # Conversion
             with tgb.expandable( title="Conversion", expanded=False, hover_text="Convert manufacturer files into community formats." ):
                 with tgb.layout( columns="4 1", columns__mobile="1"):
                     with tgb.part():
@@ -246,8 +251,7 @@ with tgb.Page() as root:
             pass
 
 
-pages = { "/": root,
-        }
+pages = { "/": root }
 gui = Gui(pages=pages, css_file="styles.css")
 
 

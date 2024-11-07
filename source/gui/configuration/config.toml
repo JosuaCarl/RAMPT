@@ -2,7 +2,7 @@
 core_version="3.0"
 
 [DATA_NODE.raw_data]
-storage_type = "pickle"
+storage_type = "generic"
 scope = "SCENARIO:SCOPE"
 
 [TASK.convert_files]
@@ -16,7 +16,7 @@ additional_data_nodes = [ ]
 tasks = [
   "convert_files:SECTION",
   "gnps_annotation:SECTION",
-  "process_data:SECTION",
+  "find_features:SECTION",
   "sirius_annotation:SECTION",
   "analysis:SECTION"
 ]
@@ -26,28 +26,50 @@ all_steps = [
   "analysis:SECTION",
   "convert_files:SECTION",
   "gnps_annotation:SECTION",
-  "process_data:SECTION",
+  "find_features:SECTION",
+  "sirius_annotation:SECTION"
+]
+process_to_analysis = [
+  "analysis:SECTION",
+  "gnps_annotation:SECTION",
+  "find_features:SECTION",
+  "sirius_annotation:SECTION"
+]
+annotate_analysis = [
+  "analysis:SECTION",
+  "gnps_annotation:SECTION",
+  "sirius_annotation:SECTION"
+]
+convert_to_annotate = [
+  "convert_files:SECTION",
+  "gnps_annotation:SECTION",
+  "find_features:SECTION",
+  "sirius_annotation:SECTION"
+]
+process_to_annotate = [
+  "gnps_annotation:SECTION",
+  "find_features:SECTION",
   "sirius_annotation:SECTION"
 ]
 
 [DATA_NODE.community_formatted_data]
-storage_type = "pickle"
+storage_type = "generic"
 scope = "SCENARIO:SCOPE"
 
 [DATA_NODE.processed_data]
-storage_type = "pickle"
+storage_type = "generic"
 scope = "SCENARIO:SCOPE"
 
 [DATA_NODE.gnps_annotations]
-storage_type = "pickle"
+storage_type = "generic"
 scope = "SCENARIO:SCOPE"
 
 [DATA_NODE.sirius_anntations]
-storage_type = "pickle"
+storage_type = "generic"
 scope = "SCENARIO:SCOPE"
 
-[TASK.process_data]
-inputs = [ "community_formatted_data:SECTION", "args_process:SECTION" ]
+[TASK.find_features]
+inputs = [ "community_formatted_data:SECTION", "args_feature_finding:SECTION" ]
 outputs = [ "processed_data:SECTION" ]
 function = "source.conversion.msconv_pipe.main:function"
 skippable = "False:bool"
@@ -65,11 +87,11 @@ function = "source.annotation.sirius_pipe.main:function"
 skippable = "False:bool"
 
 [DATA_NODE.args_convert]
-storage_type = "pickle"
+storage_type = "in_memory"
 scope = "SCENARIO:SCOPE"
 
 [DATA_NODE.results]
-storage_type = "pickle"
+storage_type = "csv"
 scope = "SCENARIO:SCOPE"
 
 [TASK.analysis]
@@ -81,20 +103,20 @@ inputs = [
 ]
 outputs = [ "results:SECTION" ]
 function = "source.population_difference_testing.statistics.execute_test:function"
-skippable = "False:bool"
+skippable = "True:bool"
 
-[DATA_NODE.args_process]
-storage_type = "pickle"
+[DATA_NODE.args_feature_finding]
+storage_type = "in_memory"
 scope = "SCENARIO:SCOPE"
 
 [DATA_NODE.args_sirius]
-storage_type = "pickle"
+storage_type = "in_memory"
 scope = "SCENARIO:SCOPE"
 
 [DATA_NODE.args_gnps]
-storage_type = "pickle"
+storage_type = "in_memory"
 scope = "SCENARIO:SCOPE"
 
 [DATA_NODE.args_analysis]
-storage_type = "pickle"
+storage_type = "in_memory"
 scope = "SCENARIO:SCOPE"
