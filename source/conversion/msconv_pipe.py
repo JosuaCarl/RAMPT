@@ -105,18 +105,18 @@ class File_Converter(Pipe_Step):
         self.prefix         = prefix
         self.contains       = contains
 
-        self.patterns["in"] = self.convert_ixes_regex( pattern=pattern, contains=contains, suffix=suffix, prefix=prefix)
+        self.update_regex( pattern=pattern, contains=contains, suffix=suffix, prefix=prefix)
 
 
 
-    def convert_ixes_regex( self, pattern, contains, suffix, prefix):
+    def update_regex( self, pattern, contains, suffix, prefix):
         if contains:
             pattern = rf"({pattern})|(.*{contains}.*)"
         if suffix:
             pattern = rf"{pattern}.*{suffix}$"
         if prefix:
             pattern = rf"^{prefix}.*{pattern}"
-        return pattern
+        self.patterns["in"] =  pattern
 
 
 

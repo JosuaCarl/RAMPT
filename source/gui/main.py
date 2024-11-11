@@ -212,21 +212,35 @@ with tgb.Page() as root:
                         with tgb.layout( columns="1 0.1 1", columns__mobile=1):
                             with tgb.part():
                                 with tgb.layout( columns="1 1", columns__mobile="1"):
-                                    tgb.text( "msconvert command/path: ")
+                                    tgb.text( "msconvert\ncommand|path: ")
                                     tgb.input( "{configuration.file_converter.msconvert_path}", hover_text="You may enter the path to msconvert if it is not accessible via \"msconvert\"" )
                             tgb.part()
                             with tgb.part():
                                 tgb.selector( "{configuration.file_converter.target_format}",
                                             label="Target_format", lov="mzML;mzXML", dropdown=True, hover_text="The target format for the conversion. mzML is recommended.", width="100px")
-                        with tgb.part():
-                            tgb.input( "{configuration.file_converter.suffix}",
-                                        hover_text="Suffix  to filter file (e.g. .mzML)" )
-                            tgb.input( "{configuration.file_converter.prefix}",
-                                        hover_text="Prefix to filter file (e.g. my_experiment)" )
-                            tgb.input( "{configuration.file_converter.contains}",
-                                        hover_text="String that must be contained in file (e.g. experiment)" )
-                            tgb.input( "{configuration.file_converter.pattern}",
-                                        hover_text="Regular expression to filter file (e.g. my_experiment_.*[.]mzML)" )
+                        
+                        # Pattern matching
+                        tgb.text( "**Pattern matching:**", mode="markdown")
+                        with tgb.layout( columns="1 0.1 1", columns__mobile="1"):
+                            with tgb.part():
+                                with tgb.layout( columns="1 1", columns__mobile="1"):
+                                    tgb.text( "Contains:")
+                                    tgb.input( "{configuration.file_converter.contains}",
+                                                hover_text="String that must be contained in file (e.g. experiment)", on_change=configuration.file_converter.update_regex )
+                                with tgb.layout( columns="1 1", columns__mobile="1"):
+                                    tgb.text( "RegEx:")
+                                    tgb.input( "{configuration.file_converter.pattern}",
+                                                hover_text="Regular expression to filter file (e.g. my_experiment_.*[.]mzML)", on_change=configuration.file_converter.update_regex )
+                            tgb.part()
+                            with tgb.part():
+                                with tgb.layout( columns="1 1", columns__mobile="1"):
+                                    tgb.text( "Prefix:")
+                                    tgb.input( "{configuration.file_converter.prefix}",
+                                                hover_text="Prefix to filter file (e.g. my_experiment)", on_change=configuration.file_converter.update_regex )
+                                with tgb.layout( columns="1 1", columns__mobile="1"):
+                                    tgb.text( "Suffix:")
+                                    tgb.input( "{configuration.file_converter.suffix}",
+                                                hover_text="Suffix  to filter file (e.g. .mzML)", on_change=configuration.file_converter.update_regex )
                         tgb.number(  "{configuration.file_converter.redo_threshold}",
                                      hover_text="File size threshold for repeating the conversion." )
                         tgb.input( "{configuration.file_converter.additional_args}",
