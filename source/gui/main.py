@@ -16,9 +16,11 @@ import taipy.gui.builder as tgb
 import source.helpers.general as helpers
 from source.helpers.types import StrPath
 
+# Import of Pipeline Steps
 from source.conversion.msconv_pipe import File_Converter
-
-
+from source.feature_finding.mzmine_pipe import MZmine_Runner
+from source.annotation.sirius_pipe import Sirius_Runner
+from source.annotation.gnps_pipe import GNPS_Runner
 
 # General
 ## Working directory
@@ -76,15 +78,21 @@ def evaluate_dialog( state, payload_pressed, option_list ):
 path_nester = helpers.Path_Nester()
 
 
+# TODO integrate configuration into class
 class MS_Analysis_Configuration:
     def __init__( self ): #, construction_dict:dict=None ):
         #if construction_dict:
         #    self.__dict__ = construction_dict
         #else:
-        self.platform = "Linux"
-        self.overwrite = False
-        self.nested = True
+        self.platform       = "Linux"
+        self.overwrite      = False
+        self.nested         = True
+        self.save_log       = True
+        self.verbosity      = 1
         self.file_converter = File_Converter()
+        self.mzmine_runner  = MZmine_Runner()
+        self.gnps_runner    = GNPS_Runner()
+        self.sirius_runner  = Sirius_Runner()
 
 
     def update( self, dictionary:dict, **kwargs ):
@@ -95,14 +103,11 @@ class MS_Analysis_Configuration:
 
     def save( self, location ):
         with open( location, "w") as f:
-            yaml.safe_dump( self, f)
+            yaml.safe_dump( self, f )
 
 
 # General variables
 configuration = MS_Analysis_Configuration()
-
-
-
 
 def change_global_attibute( state, state_attribute:str ):
     global file_converter
@@ -173,49 +178,75 @@ with tgb.Page() as root:
         
         # Main window
         with tgb.part():
-            tgb.text( "## Manual configuration", mode="markdown" )
+            tgb.text( "## ⚙️Manual configuration", mode="markdown" )
 
             # General settings
             with tgb.expandable( title="General" , expanded=False , hover_text=""):
-                tgb.selector( "{configuration.platform}",
-                              label="Platform", lov="Linux;Windows;MacOS", dropdown=True, hover_text="Operating system / Computational platform where this is operated." )
-                tgb.toggle( "{configuration.overwrite}",
-                            label="Overwrite", hover_text="Whether to overwrite upon re-execution.")
-                tgb.toggle( "{configuration.nested}",
-                            label="Nested execution", hover_text="Whether directories should be executed in a nested fashion.")
-            
+                with tgb.layout( columns="1 1", columns__mobile="1"):
+                    with tgb.part():
+                        tgb.selector( "{configuration.platform}",
+                                    label="Platform", lov="Linux;Windows;MacOS", dropdown=True, hover_text="Operating system / Computational platform where this is operated." )
+                        tgb.slider( "{configuration.verbosity}",
+                                    label="Verbosity", min=0, max=3, hover_text="Level of verbosity during operations." )
+                    with tgb.part():
+                        tgb.toggle( "{configuration.nested}",
+                                    label="Nested execution", hover_text="Whether directories should be executed in a nested fashion.")
+                        tgb.toggle( "{configuration.save_log}",
+                                    label="Save logging to file", hover_text="Whether to save output and errors into a log-file.")
+                        tgb.toggle( "{configuration.overwrite}",
+                                    label="Overwrite", hover_text="Whether to overwrite upon re-execution.")
+
             # Conversion
             with tgb.expandable( title="Conversion", expanded=False, hover_text="Convert manufacturer files into community formats." ):
                 with tgb.layout( columns="4 1", columns__mobile="1"):
                     with tgb.part():                   
                         tgb.text( "#### File selection", mode="markdown" )
                         tgb.file_selector( "{conv_path}",
-                                        label="Select File", extensions="*", drop_message="Drop files for conversion here:", multiple=True,
-                                        on_action=construct_conversion_selection_tree )
+                                            label="Select File", extensions="*", drop_message="Drop files for conversion here:", multiple=True,
+                                            on_action=construct_conversion_selection_tree )
                         tgb.tree( "{conv_selection}", lov="{conv_tree_paths}", label="Select for conversion", filter=True, multiple=True, expanded=True )
-
+                        tgb.input( "{configuration.file_converter.msconvert_path}", hover_text="You may enter the path to msconvert if it is not accessible via \"msconvert\"" )
+                        tgb.selector( "{configuration.file_converter.target_format}",
+                                      label="Target_format", lov="mzML;mzXML", hover_text="The target format for the conversion. mzML is recommended.")
+                        with tgb.part():
+                            tgb.input( "{configuration.file_converter.suffix}",
+                                        hover_text="Suffix  to filter file (e.g. .mzML)" )
+                            tgb.input( "{configuration.file_converter.prefix}",
+                                        hover_text="Prefix to filter file (e.g. my_experiment)" )
+                            tgb.input( "{configuration.file_converter.contains}",
+                                        hover_text="String that must be contained in file (e.g. experiment)" )
+                            tgb.input( "{configuration.file_converter.pattern}",
+                                        hover_text="Regular expression to filter file (e.g. my_experiment_.*[.]mzML)" )
+                        tgb.number(  "{configuration.file_converter.redo_threshold}",
+                                     hover_text="File size threshold for repeating the conversion." )
+                        tgb.input( "{configuration.file_converter.additional_args}",
+                                    hover_text="Additional arguments that can be given to the msconvert (works with command line interface).")
                     with tgb.part():
                         tgb.progress( "{conv_progress}" )
 
+            with tgb.expandable( title="Feature finding"):
+                tgb.text( "LOREM IPSUM" )
+                #mzmine_path:StrPath="mzmine", batch_path:StrPath=".mzbatch", login:str="-login", valid_formats:list=["mzML", "mzXML", "imzML"],
+                #save_log:bool=False, additional_args:list=[], verbosity:int=1
 
-            with tgb.expandable( title="Processing", expanded=False, hover_text="Process the data with mzmine through a batch file."):
+
+            with tgb.expandable( title="Annotation", expanded=False, hover_text="Process the data with mzmine through a batch file."):
                 tgb.text( "LOREM IPSUM" )
             
 
             # Scenario
-            tgb.text( "## Scenario management", mode="markdown" )
+            tgb.text( "## 🎬Scenario management", mode="markdown" )
             tgb.scenario( "{scenario}", show_tags=False, show_properties=False, show_sequences=False )
             tgb.scenario_dag( "{scenario}" )
             
-            tgb.text("## Jobs", mode="markdown")
+            tgb.text("## 🐝Jobs", mode="markdown")
             tgb.job_selector( "{job}" )
 
             tgb.data_node_selector( "{data_node}" )
         with tgb.part():
             pass
 
-
-pages = { "/": root }
+pages = {"/": root}
 gui = Gui(pages=pages, css_file="styles.css")
 
 

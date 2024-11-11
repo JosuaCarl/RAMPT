@@ -64,7 +64,7 @@ class File_Converter(Pipe_Step):
     """
     General class for file conversion along matched patterns.
     """
-    def __init__( self, platform:str="windows", target_format:str="mzML",
+    def __init__( self, msconvert_path:StrPath="msconvert", platform:str="windows", target_format:str="mzML",
                   pattern:str=r"", suffix:str=None, prefix:str=None, contains:str=None,
                   redo_threshold:float=1e8, overwrite:bool=False,
                   save_log = False, additional_args = ..., verbosity = 1 ):
@@ -102,6 +102,7 @@ class File_Converter(Pipe_Step):
         if prefix:
             self.patterns["in"] = rf"^{prefix}.*{pattern}"
         
+        self.msconvert_path    = msconvert_path
         self.redo_threshold = redo_threshold
         self.overwrite      = overwrite
         self.platform       = platform
@@ -144,7 +145,7 @@ class File_Converter(Pipe_Step):
         target_format = self.target_format.replace(".", "")
         target_format = helpers.change_case_str(s=target_format, range=slice(2, len(target_format)), conversion="upper")
 
-        cmd = f'msconvert --{target_format} --64 -o {out_path} {in_path} {" ".join(self.additional_args)}'
+        cmd = f'\"{self.msconvert_path}\" --{target_format} --64 -o {out_path} {in_path} {" ".join(self.additional_args)}'
 
         out, err =  helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
                                                      out_path=join(out_path, "msconv_log.txt") if self.save_log else None)

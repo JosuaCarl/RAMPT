@@ -81,14 +81,14 @@ class MZmine_Runner(Pipe_Step):
     """
     A runner for mzmine operations. Collects processed files and console outputs/errors.
     """
-    def __init__( self, mzmine_path:StrPath, batch_path:StrPath, login:str="-login", valid_formats:list=["mzML", "mzXML", "imzML"],
+    def __init__( self, mzmine_path:StrPath="mzmine", batch_path:StrPath=".mzbatch", login:str="-login", valid_formats:list=["mzML", "mzXML", "imzML"],
                   save_log:bool=False, additional_args:list=[], verbosity:int=1 ):
         """
         Initialize the MZmine_runner.
 
-        :param mzmine_path: Path to mzmine executable
+        :param mzmine_path: Path to mzmine executable, defaults to "mzmine"
         :type mzmine_path: StrPath
-        :param batch_path: Path to mzmine batch file
+        :param batch_path: Path to mzmine batch file, defaults to ".mzbatch"
         :type batch_path: StrPath
         :param login: Login or user command, defaults to "-login"
         :type login: str, optional

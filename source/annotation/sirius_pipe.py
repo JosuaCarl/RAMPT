@@ -58,13 +58,13 @@ class Sirius_Runner(Pipe_Step):
     """
     A runner for SIRIUS annotation.
     """
-    def __init__( self, sirius_path:StrPath=None, config:StrPath=None, save_log:bool=False, additional_args:list=[], verbosity:int=1 ):
+    def __init__( self, sirius_path:StrPath="sirius", config:StrPath="config.txt", save_log:bool=False, additional_args:list=[], verbosity:int=1 ):
         """
         Initialize the GNPS_Runner.
 
-        :param sirius_path: Path to SIRIUS executable
+        :param sirius_path: Path to SIRIUS executable, defaults to "sirius"
         :type sirius_path: StrPath
-        :param config: Path to SIRIS configuration file or direct configuration string
+        :param config: Path to SIRIS configuration file or direct configuration string, defaults to "config.txt"
         :type config: StrPath
         :param save_log: Whether to save the output(s).
         :type save_log: bool, optional
