@@ -182,12 +182,16 @@ with tgb.Page() as root:
 
             # General settings
             with tgb.expandable( title="General" , expanded=False , hover_text=""):
-                with tgb.layout( columns="1 1", columns__mobile="1"):
+                with tgb.layout( columns="1 0.1 1", columns__mobile="1"):
                     with tgb.part():
                         tgb.selector( "{configuration.platform}",
                                     label="Platform", lov="Linux;Windows;MacOS", dropdown=True, hover_text="Operating system / Computational platform where this is operated." )
+                        tgb.text( "Verbosity: ")
                         tgb.slider( "{configuration.verbosity}",
                                     label="Verbosity", min=0, max=3, hover_text="Level of verbosity during operations." )
+
+                    tgb.part()
+
                     with tgb.part():
                         tgb.toggle( "{configuration.nested}",
                                     label="Nested execution", hover_text="Whether directories should be executed in a nested fashion.")
@@ -199,15 +203,21 @@ with tgb.Page() as root:
             # Conversion
             with tgb.expandable( title="Conversion", expanded=False, hover_text="Convert manufacturer files into community formats." ):
                 with tgb.layout( columns="4 1", columns__mobile="1"):
-                    with tgb.part():                   
-                        tgb.text( "#### File selection", mode="markdown" )
-                        tgb.file_selector( "{conv_path}",
-                                            label="Select File", extensions="*", drop_message="Drop files for conversion here:", multiple=True,
-                                            on_action=construct_conversion_selection_tree )
-                        tgb.tree( "{conv_selection}", lov="{conv_tree_paths}", label="Select for conversion", filter=True, multiple=True, expanded=True )
-                        tgb.input( "{configuration.file_converter.msconvert_path}", hover_text="You may enter the path to msconvert if it is not accessible via \"msconvert\"" )
-                        tgb.selector( "{configuration.file_converter.target_format}",
-                                      label="Target_format", lov="mzML;mzXML", hover_text="The target format for the conversion. mzML is recommended.")
+                    with tgb.part():
+                        with tgb.layout( columns="1 1", columns__mobile="1"):
+                            tgb.file_selector( "{conv_path}",
+                                                label="Select File", extensions="*", drop_message="Drop files for conversion here:", multiple=True,
+                                                on_action=construct_conversion_selection_tree )
+                            tgb.tree( "{conv_selection}", lov="{conv_tree_paths}", label="Select for conversion", filter=True, multiple=True, expanded=True )
+                        with tgb.layout( columns="1 0.1 1", columns__mobile=1):
+                            with tgb.part():
+                                with tgb.layout( columns="1 1", columns__mobile="1"):
+                                    tgb.text( "msconvert command/path: ")
+                                    tgb.input( "{configuration.file_converter.msconvert_path}", hover_text="You may enter the path to msconvert if it is not accessible via \"msconvert\"" )
+                            tgb.part()
+                            with tgb.part():
+                                tgb.selector( "{configuration.file_converter.target_format}",
+                                            label="Target_format", lov="mzML;mzXML", dropdown=True, hover_text="The target format for the conversion. mzML is recommended.", width="100px")
                         with tgb.part():
                             tgb.input( "{configuration.file_converter.suffix}",
                                         hover_text="Suffix  to filter file (e.g. .mzML)" )
@@ -224,13 +234,13 @@ with tgb.Page() as root:
                     with tgb.part():
                         tgb.progress( "{conv_progress}" )
 
-            with tgb.expandable( title="Feature finding"):
+            with tgb.expandable( title="Feature finding", expanded=False, hover_text="Find features with MZmine through applying steps via a batch file."):
                 tgb.text( "LOREM IPSUM" )
                 #mzmine_path:StrPath="mzmine", batch_path:StrPath=".mzbatch", login:str="-login", valid_formats:list=["mzML", "mzXML", "imzML"],
                 #save_log:bool=False, additional_args:list=[], verbosity:int=1
 
 
-            with tgb.expandable( title="Annotation", expanded=False, hover_text="Process the data with mzmine through a batch file."):
+            with tgb.expandable( title="Annotation", expanded=False, hover_text=""):
                 tgb.text( "LOREM IPSUM" )
             
 

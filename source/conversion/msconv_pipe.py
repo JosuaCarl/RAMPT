@@ -95,18 +95,28 @@ class File_Converter(Pipe_Step):
         :type verbosity: int, optional
         """
         super().__init__( patterns={"in": pattern}, save_log=save_log, additional_args=additional_args, verbosity=verbosity)
-        if contains:
-            self.patterns["in"] = rf"{pattern}.*{contains}.*"
-        if suffix:
-            self.patterns["in"] = rf"{pattern}.*{suffix}$"
-        if prefix:
-            self.patterns["in"] = rf"^{prefix}.*{pattern}"
-        
-        self.msconvert_path    = msconvert_path
+        self.msconvert_path = msconvert_path
         self.redo_threshold = redo_threshold
         self.overwrite      = overwrite
         self.platform       = platform
         self.target_format  = target_format
+        self.pattern        = pattern
+        self.suffix         = suffix
+        self.prefix         = prefix
+        self.contains       = contains
+
+        self.patterns["in"] = self.convert_ixes_regex( pattern=pattern, contains=contains, suffix=suffix, prefix=prefix)
+
+
+
+    def convert_ixes_regex( self, pattern, contains, suffix, prefix):
+        if contains:
+            pattern = rf"({pattern})|(.*{contains}.*)"
+        if suffix:
+            pattern = rf"{pattern}.*{suffix}$"
+        if prefix:
+            pattern = rf"^{prefix}.*{pattern}"
+        return pattern
 
 
 
