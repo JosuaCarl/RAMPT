@@ -80,20 +80,21 @@ path_nester = helpers.Path_Nester()
 
 # TODO integrate configuration into class
 class MS_Analysis_Configuration:
-    def __init__( self ): #, construction_dict:dict=None ):
-        #if construction_dict:
-        #    self.__dict__ = construction_dict
-        #else:
-        self.platform       = "Linux"
-        self.overwrite      = False
-        self.nested         = True
-        self.save_log       = True
-        self.verbosity      = 1
+    def __init__( self, platform:str="Linux", overwrite:bool=False, nested:bool=False, save_log:bool=True,
+                  verbosity:int=1 ):
+        self.platform       = platform
+        self.overwrite      = overwrite
+        self.nested         = nested
+        self.save_log       = save_log
+        self.verbosity      = verbosity
         self.file_converter = File_Converter()
         self.mzmine_runner  = MZmine_Runner()
         self.gnps_runner    = GNPS_Runner()
         self.sirius_runner  = Sirius_Runner()
 
+    def __iter__( self ):
+        for attribute, value in self.__dict__.iteritems():
+            yield attribute, value
 
     def update( self, dictionary:dict, **kwargs ):
         if not dictionary:
@@ -101,9 +102,13 @@ class MS_Analysis_Configuration:
         for key, value in dictionary:
             setattr( self, key, value )
 
+    def represent_nested_dict( self ):
+        representation = dict( self )
+        return representation
+
     def save( self, location ):
         with open( location, "w") as f:
-            yaml.safe_dump( self, f )
+            yaml.safe_dump( self.represent_nested_dict(), f )
 
 
 # General variables
@@ -166,7 +171,7 @@ job = ""
 data_node = ""
 
     
-
+# PAGE
 with tgb.Page() as root:
     with tgb.layout( columns="1", columns__mobile="1" ):
         tgb.navbar( lov='{[("/", "Application"), ("https://josuacarl.github.io/mine2sirius_pipe", "Documentation")]}' )

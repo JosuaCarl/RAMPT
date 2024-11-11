@@ -67,7 +67,7 @@ class File_Converter(Pipe_Step):
     def __init__( self, msconvert_path:StrPath="msconvert", platform:str="windows", target_format:str="mzML",
                   pattern:str=r"", suffix:str=None, prefix:str=None, contains:str=None,
                   redo_threshold:float=1e8, overwrite:bool=False,
-                  save_log = False, additional_args = ..., verbosity = 1 ):
+                  save_log = False, additional_args:list=[], verbosity = 1 ):
         """
         Initializes the file converter.
 
