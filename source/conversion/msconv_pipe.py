@@ -67,7 +67,7 @@ class File_Converter(Pipe_Step):
     def __init__( self, msconvert_path:StrPath="msconvert", platform:str="windows", target_format:str="mzML",
                   pattern:str=r"", suffix:str=None, prefix:str=None, contains:str=None,
                   redo_threshold:float=1e8, overwrite:bool=False,
-                  save_log = False, additional_args:list=[], verbosity = 1 ):
+                  save_log = False, additional_args:list=[], verbosity = 1, **kwargs ):
         """
         Initializes the file converter.
 
@@ -95,6 +95,8 @@ class File_Converter(Pipe_Step):
         :type verbosity: int, optional
         """
         super().__init__( patterns={"in": pattern}, save_log=save_log, additional_args=additional_args, verbosity=verbosity)
+        if kwargs:
+            self.update(kwargs)
         self.msconvert_path = msconvert_path
         self.redo_threshold = redo_threshold
         self.overwrite      = overwrite
@@ -106,7 +108,6 @@ class File_Converter(Pipe_Step):
         self.contains       = contains
 
         self.update_regex( pattern=pattern, contains=contains, suffix=suffix, prefix=prefix)
-
 
 
     def update_regex( self, pattern, contains, suffix, prefix):

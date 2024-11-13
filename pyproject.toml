@@ -34,6 +34,7 @@ snakemake = "^8.24.1"
 pyqt6 = "^6.7.1"
 multipledispatch = "^1.0.0"
 taipy = "^4.0.0"
+ruamel-yaml = "^0.18.6"
 
 
 [build-system]

@@ -57,7 +57,7 @@ class GNPS_Runner(Pipe_Step):
     """
     A runner for checking on the GNPS process and subsequently saving the results.
     """
-    def __init__( self, save_log:bool=False, additional_args:list=[], verbosity:int=1 ):
+    def __init__( self, save_log:bool=False, additional_args:list=[], verbosity:int=1, **kwargs ):
         """
         Initialize the GNPS_Runner.
 
@@ -69,8 +69,9 @@ class GNPS_Runner(Pipe_Step):
         :type verbosity: int, optional
         """
         super().__init__( save_log=save_log, additional_args=additional_args, verbosity=verbosity)
+        if kwargs:
+            self.update(kwargs)
         self.mzmine_log_query   = "io.github.mzmine.modules.io.export_features_gnps.GNPSUtils submitFbmnJob GNPS FBMN/IIMN response: "
-
 
 
     def extract_task_info( self, query:str, work_path:StrPath=None, mzmine_log:str=None ) -> dict:

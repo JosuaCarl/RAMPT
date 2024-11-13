@@ -58,7 +58,8 @@ class Sirius_Runner(Pipe_Step):
     """
     A runner for SIRIUS annotation.
     """
-    def __init__( self, sirius_path:StrPath="sirius", config:StrPath="config.txt", save_log:bool=False, additional_args:list=[], verbosity:int=1 ):
+    def __init__( self, sirius_path:StrPath="sirius", config:StrPath="config.txt",
+                  save_log:bool=False, additional_args:list=[], verbosity:int=1, **kwargs ):
         """
         Initialize the GNPS_Runner.
 
@@ -75,13 +76,14 @@ class Sirius_Runner(Pipe_Step):
         """
         super().__init__( patterns={"in": r"_sirius.mgf$"},
                           save_log=save_log, additional_args=additional_args, verbosity=verbosity)
+        if kwargs:
+            self.update(kwargs)
         self.sirius_path = sirius_path if sirius_path else "sirius"
         if os.path.isfile(config):
             with open( config, "r") as config_file:
                 config = config_file.read()
         config = config[6:] if config.startswith("config") else config
         self.config = config.strip()
-
 
 
     def run_sirius( self, in_path:StrPath, out_path:StrPath, projectspace:StrPath ) -> bool:

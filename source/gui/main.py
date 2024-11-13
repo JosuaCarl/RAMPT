@@ -5,7 +5,7 @@ GUI creation with Taipy.
 import os
 import tempfile
 import datetime
-import yaml
+from ruamel.yaml import YAML
 
 from werkzeug.utils import secure_filename
 
@@ -78,50 +78,63 @@ def evaluate_dialog( state, payload_pressed, option_list ):
 path_nester = helpers.Path_Nester()
 
 
-# TODO integrate configuration into class
 class MS_Analysis_Configuration:
-    def __init__( self, platform:str="Linux", overwrite:bool=False, nested:bool=False, save_log:bool=True,
-                  verbosity:int=1 ):
+    def __init__( self, platform:str="Linux", overwrite:bool=False, nested:bool=False,
+                  save_log:bool=True, verbosity:int=1,
+                  file_converter:File_Converter|dict=File_Converter(),
+                  mzmine_runner:MZmine_Runner|dict=MZmine_Runner(),
+                  gnps_runner:GNPS_Runner|dict=GNPS_Runner(),
+                  sirius_runner:Sirius_Runner|dict=Sirius_Runner() ):
         self.platform       = platform
         self.overwrite      = overwrite
         self.nested         = nested
         self.save_log       = save_log
         self.verbosity      = verbosity
-        self.file_converter = File_Converter()
-        self.mzmine_runner  = MZmine_Runner()
-        self.gnps_runner    = GNPS_Runner()
-        self.sirius_runner  = Sirius_Runner()
+        self.file_converter = File_Converter(**file_converter)  if isinstance(file_converter, dict) else file_converter
+        self.mzmine_runner  = MZmine_Runner(**mzmine_runner)    if isinstance(mzmine_runner, dict)  else mzmine_runner
+        self.gnps_runner    = GNPS_Runner(**gnps_runner)        if isinstance(gnps_runner, dict)    else gnps_runner
+        self.sirius_runner  = Sirius_Runner(**sirius_runner)    if isinstance(sirius_runner, dict)  else sirius_runner
+                  
 
-    def __iter__( self ):
-        for attribute, value in self.__dict__.iteritems():
-            yield attribute, value
-
-    def update( self, dictionary:dict, **kwargs ):
+    def update( self, dictionary:dict=None, **kwargs ):
         if not dictionary:
             dictionary = kwargs
-        for key, value in dictionary:
+        for key, value in dictionary.items():
             setattr( self, key, value )
 
-    def represent_nested_dict( self ):
-        representation = dict( self )
-        return representation
+    def make_nested_attributes_dict( self, object=None, attributes_dict:dict={}):
+        if not object:
+            object = self
+        for attribute, value in object.__dict__.items():
+            if hasattr(value, "__dict__"):
+                attributes_dict[attribute] = self.make_nested_attributes_dict( object=value, attributes_dict={} )
+            else:
+                attributes_dict[attribute] = value
+        return attributes_dict
 
+    def dict_representation( self, attribute ):
+        attributes_dict = {}
+        for attribute, value in attribute.__dict__.items():
+            if hasattr(value, "__dict__"):
+                attributes_dict[attribute] = self.dict_representation(value)
+            else:
+                attributes_dict[attribute] = value
+        return attributes_dict
+    
     def save( self, location ):
+        yaml = YAML()
         with open( location, "w") as f:
-            yaml.safe_dump( self.represent_nested_dict(), f )
+            yaml.dump( self.dict_representation( self ), f )
+
+    def load( self, location ):
+        yaml = YAML()
+        with open( location, "r") as f:
+            config = yaml.load( f.read() )
+        self.update( **config )
 
 
 # General variables
 configuration = MS_Analysis_Configuration()
-
-def change_global_attibute( state, state_attribute:str ):
-    global file_converter
-
-    value = extract_attribute( state, state_attribute )
-    for pipe_step in [file_converter]:
-        if hasattr( pipe_step, state_attribute):
-            setattr( pipe_step, state_attribute, value)
-    print(value)
 
 
 
@@ -131,15 +144,11 @@ conv_tree_paths = []
 conv_selection = ""
 conv_ask = False
 conv_progress = 0
-file_converter = File_Converter()
 
 def construct_conversion_selection_tree( state ):
     global conv_tree_paths
     conv_tree_paths = add_path_to_tree( conv_tree_paths, state, "conv_path")
     replace_attribute( state, "conv_tree_paths", conv_tree_paths )
-
-
-
 
 
 def download_converted( state ):
@@ -154,13 +163,12 @@ scenario = ""
 
 def add_scenario( state, id ):
     configuration.save( os.path.join(work_dir_root, f"{id}_config.yaml") )
-    configuration.update()
+    print(state.configuration)
+    configuration.update( state.configuration )
 
 
 def change_scenario( state, id ):
-    with open( os.path.join(work_dir_root, f"{id}_config.yaml"), "w") as f:
-        configuration = yaml.safe_load( f ) # MS_Analysis_Configuration( yaml.safe_load( f ) )
-    print( configuration )
+    configuration.load( os.path.join(work_dir_root, f"{id}_config.yaml") )
 
 
 # JOBS
@@ -231,7 +239,8 @@ with tgb.Page() as root:
                                 with tgb.layout( columns="1 1", columns__mobile="1"):
                                     tgb.text( "Contains:")
                                     tgb.input( "{configuration.file_converter.contains}",
-                                                hover_text="String that must be contained in file (e.g. experiment)", on_change=configuration.file_converter.update_regex )
+                                                hover_text="String that must be contained in file (e.g. experiment)",
+                                                on_change=lambda state: configuration.file_converter.update_regex(contains=state.config) )
                                 with tgb.layout( columns="1 1", columns__mobile="1"):
                                     tgb.text( "RegEx:")
                                     tgb.input( "{configuration.file_converter.pattern}",
