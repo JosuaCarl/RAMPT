@@ -107,7 +107,7 @@ class MS_Analysis_Configuration:
     
     def save( self, location ):
         with open( location, "w") as f:
-            json.dump( self.dict_representation( self ), f )
+            json.dump( self.dict_representation( self ), f, indent=2 )
 
     def load( self, location ):
         with open( location, "r") as f:
@@ -175,7 +175,6 @@ with tgb.Page() as root:
         # Main window
         with tgb.part():
             tgb.text( "## ⚙️Manual configuration", mode="markdown" )
-            tgb.text( "{state.configuration}", )
 
             # General settings
             with tgb.expandable( title="General" , expanded=False , hover_text=""):
