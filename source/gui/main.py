@@ -107,7 +107,7 @@ class MS_Analysis_Configuration:
     
     def save( self, location ):
         with open( location, "w") as f:
-            json.dump( self.dict_representation( self ), f, indent=2 )
+            json.dump( self.dict_representation( self ), f, indent=4 )
 
     def load( self, location ):
         with open( location, "r") as f:
