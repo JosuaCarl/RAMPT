@@ -5,7 +5,7 @@ GUI creation with Taipy.
 import os
 import tempfile
 import datetime
-from ruamel.yaml import YAML
+import json
 
 from werkzeug.utils import secure_filename
 
@@ -96,22 +96,6 @@ class MS_Analysis_Configuration:
         self.sirius_runner  = Sirius_Runner(**sirius_runner)    if isinstance(sirius_runner, dict)  else sirius_runner
                   
 
-    def update( self, dictionary:dict=None, **kwargs ):
-        if not dictionary:
-            dictionary = kwargs
-        for key, value in dictionary.items():
-            setattr( self, key, value )
-
-    def make_nested_attributes_dict( self, object=None, attributes_dict:dict={}):
-        if not object:
-            object = self
-        for attribute, value in object.__dict__.items():
-            if hasattr(value, "__dict__"):
-                attributes_dict[attribute] = self.make_nested_attributes_dict( object=value, attributes_dict={} )
-            else:
-                attributes_dict[attribute] = value
-        return attributes_dict
-
     def dict_representation( self, attribute ):
         attributes_dict = {}
         for attribute, value in attribute.__dict__.items():
@@ -122,15 +106,13 @@ class MS_Analysis_Configuration:
         return attributes_dict
     
     def save( self, location ):
-        yaml = YAML()
         with open( location, "w") as f:
-            yaml.dump( self.dict_representation( self ), f )
+            json.dump( self.dict_representation( self ), f )
 
     def load( self, location ):
-        yaml = YAML()
         with open( location, "r") as f:
-            config = yaml.load( f.read() )
-        self.update( **config )
+            config = json.loads( f.read() )
+        self.__init__( **config )
 
 
 # General variables
@@ -161,14 +143,15 @@ def download_converted( state ):
 # SCENARIOS
 scenario = ""
 
-def add_scenario( state, id ):
-    configuration.save( os.path.join(work_dir_root, f"{id}_config.yaml") )
-    print(state.configuration)
-    configuration.update( state.configuration )
+
+def add_scenario( state, id, payload ):
+    global configuration
+    configuration.save( os.path.join(work_dir_root, f"{payload.get("label", "default")}_config.json") )
+    configuration = MS_Analysis_Configuration( **state.configuration.__dict__ )
 
 
-def change_scenario( state, id ):
-    configuration.load( os.path.join(work_dir_root, f"{id}_config.yaml") )
+def change_scenario( state, id, payload ):
+    configuration.load( os.path.join(work_dir_root, f"{payload}_config.json") )
 
 
 # JOBS
@@ -192,6 +175,7 @@ with tgb.Page() as root:
         # Main window
         with tgb.part():
             tgb.text( "## ⚙️Manual configuration", mode="markdown" )
+            tgb.text( "{state.configuration}", )
 
             # General settings
             with tgb.expandable( title="General" , expanded=False , hover_text=""):
@@ -240,11 +224,12 @@ with tgb.Page() as root:
                                     tgb.text( "Contains:")
                                     tgb.input( "{configuration.file_converter.contains}",
                                                 hover_text="String that must be contained in file (e.g. experiment)",
-                                                on_change=lambda state: configuration.file_converter.update_regex(contains=state.config) )
+                                                on_change=lambda state: configuration.file_converter.update_regex(state.configuration.file_converter.contains) )
                                 with tgb.layout( columns="1 1", columns__mobile="1"):
                                     tgb.text( "RegEx:")
                                     tgb.input( "{configuration.file_converter.pattern}",
-                                                hover_text="Regular expression to filter file (e.g. my_experiment_.*[.]mzML)", on_change=configuration.file_converter.update_regex )
+                                                hover_text="Regular expression to filter file (e.g. my_experiment_.*[.]mzML)",
+                                                on_change=lambda state: configuration.file_converter.update_regex(contains=state.configuration.file_converter.pattern) )
                             tgb.part()
                             with tgb.part():
                                 with tgb.layout( columns="1 1", columns__mobile="1"):
