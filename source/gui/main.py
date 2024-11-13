@@ -165,14 +165,21 @@ data_node = ""
 # PAGE
 with tgb.Page() as root:
     with tgb.layout( columns="1", columns__mobile="1" ):
+        tgb.part()
         tgb.navbar( lov='{[("/", "Application"), ("https://josuacarl.github.io/mine2sirius_pipe", "Documentation")]}' )
+        tgb.part()
 
-    with tgb.layout( columns="1 3 1", columns__mobile="1" ):
+    with tgb.layout( columns="1 0.1 3 0.1 1", columns__mobile="1" ):
+
+        # Left pane
         with tgb.part():
             # Scenario selector
             tgb.scenario_selector( "{scenario}", on_creation=add_scenario, on_change=change_scenario )
+            tgb.data_node_selector( "{data_node}" )
         
-        # Main window
+        tgb.part()
+        
+        # Middle window
         with tgb.part():
             tgb.text( "## ⚙️Manual configuration", mode="markdown" )
 
@@ -258,13 +265,18 @@ with tgb.Page() as root:
 
             # Scenario
             tgb.text( "## 🎬Scenario management", mode="markdown" )
-            tgb.scenario( "{scenario}", show_tags=False, show_properties=False, show_sequences=False )
+            tgb.scenario( "{scenario}", show_properties=False, show_tags=False, show_sequences=True )
             tgb.scenario_dag( "{scenario}" )
             
+            tgb.text("## 📊Data", mode="markdown")
+            tgb.data_node( "{data_node}" )
+
             tgb.text("## 🐝Jobs", mode="markdown")
             tgb.job_selector( "{job}" )
 
-            tgb.data_node_selector( "{data_node}" )
+        tgb.part()
+
+        # Right pane
         with tgb.part():
             pass
 
