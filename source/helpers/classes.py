@@ -104,6 +104,8 @@ class Pipe_Step:
         self.additional_args    = additional_args
         self.verbosity          = verbosity
         self.save_log           = save_log
+        self.scheduled_in       = []
+        self.scheduled_out       = []
         self.processed_in       = []
         self.processed_out      = []
         self.outs               = []

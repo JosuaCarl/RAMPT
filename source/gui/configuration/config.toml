@@ -2,7 +2,7 @@
 core_version="3.0"
 
 [DATA_NODE.raw_data]
-storage_type = "in_memory"
+storage_type = "generic"
 scope = "SCENARIO:SCOPE"
 
 [TASK.convert_files]
@@ -53,19 +53,19 @@ process_to_annotate = [
 ]
 
 [DATA_NODE.community_formatted_data]
-storage_type = "in_memory"
+storage_type = "generic"
 scope = "SCENARIO:SCOPE"
 
 [DATA_NODE.processed_data]
-storage_type = "in_memory"
+storage_type = "generic"
 scope = "SCENARIO:SCOPE"
 
 [DATA_NODE.gnps_annotations]
-storage_type = "in_memory"
+storage_type = "csv"
 scope = "SCENARIO:SCOPE"
 
 [DATA_NODE.sirius_anntations]
-storage_type = "in_memory"
+storage_type = "csv"
 scope = "SCENARIO:SCOPE"
 
 [TASK.find_features]
@@ -112,7 +112,7 @@ skippable = "True:bool"
 
 
 [DATA_NODE.ms_analysis_configuration]
-storage_type = "in_memory"
+storage_type = "json"
 scope = "SCENARIO:SCOPE"
 
 

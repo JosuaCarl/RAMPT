@@ -263,7 +263,7 @@ with tgb.Page() as root:
                 tgb.text( "LOREM IPSUM" )
             
 
-            # Scenario
+            # Pipeline showcasing
             tgb.text( "## 🎬Scenario management", mode="markdown" )
             tgb.scenario( "{scenario}", show_properties=False, show_tags=False, show_sequences=True )
             tgb.scenario_dag( "{scenario}" )
