@@ -42,41 +42,42 @@ def test_path_nester():
     path_nester = Path_Nester()
 
     result = path_nester.update_nested_paths( new_paths=["/a/c", "/a/b"] )
-    expected = [{'id': 1, 'label': 'a', 'children': [{'id': 2, 'label': '/a/c', 'children': []}, {'id': 4, 'label': '/a/b', 'children': []}]}]
+    expected = [{'id': 1, 'label': 'a', 'children': [{'id': 2, 'label': os.path.normpath('/a/c'), 'children': []},
+                                                     {'id': 4, 'label': os.path.normpath('/a/b'), 'children': []}]}]
     assert result == expected
 
     path_nester.update_nested_paths( new_paths="/a/d" )
-    expected[0].get("children").append( {'id': 6, 'label': '/a/d', 'children': []} )
+    expected[0].get("children").append( {'id': 6, 'label': os.path.normpath('/a/d'), 'children': []} )
     assert result == expected
 
     path_nester.update_nested_paths( new_paths="/a/c" )
     assert result == expected
 
     path_nester.update_nested_paths( new_paths="/b" )
-    expected.append( {'id': 9, 'label': '/b', 'children': []} )
+    expected.append( {'id': 9, 'label': os.path.normpath('/b'), 'children': []} )
     assert result == expected
     
 
 # CMD
 def test_execute_verbose_command():
     execute_verbose_command(f"echo test4", verbosity=1)
-    assert not os.path.isfile( construct_path(filepath, "..", "out/text.txt") )
+    assert not os.path.isfile( construct_path(filepath, "..", "out", "text.txt") )
 
-    execute_verbose_command(f"echo test > {construct_path(filepath, "..", "out/text.txt")}", verbosity=3)
-    assert os.path.isfile( construct_path(filepath, "..", "out/text.txt") )
-    with open( construct_path(filepath, "..", "out/text.txt"), "r" ) as f:
+    execute_verbose_command(f"echo test > {construct_path(filepath, "..", "out", "text.txt")}", verbosity=3)
+    assert os.path.isfile( construct_path(filepath, "..", "out", "text.txt") )
+    with open( construct_path(filepath, "..", "out", "text.txt"), "r" ) as f:
         text = f.read()
-        assert text == "test\n"
+        assert text.strip() == "test"
 
-    execute_verbose_command(f"echo test2 > {construct_path(filepath, "..", "out/text.txt")}", verbosity=1)
-    with open( construct_path(filepath, "..", "out/text.txt"), "r" ) as f:
+    execute_verbose_command(f"echo test2 > {construct_path(filepath, "..", "out", "text.txt")}", verbosity=1)
+    with open( construct_path(filepath, "..", "out", "text.txt"), "r" ) as f:
         text = f.read()
-        assert text == "test2\n"
+        assert text.strip() == "test2"
 
-    execute_verbose_command(f"echo test3", verbosity=1, out_path=construct_path(filepath, "..", "out/text.txt"))
-    with open( construct_path(filepath, "..", "out/text.txt"), "r" ) as f:
+    execute_verbose_command(f"echo test3", verbosity=1, out_path=construct_path(filepath, "..", "out", "text.txt"))
+    with open( construct_path(filepath, "..", "out", "text.txt"), "r" ) as f:
         text = f.read()
-        assert text == "out:\ntest3\n\n\n\nerr:\nNone"
+        assert text.replace("\n", "") == "out:test3err:None"
 
     shutil.rmtree( construct_path(filepath, "..", "out") )
     make_new_dir( construct_path(filepath, "..", "out") )
@@ -88,3 +89,9 @@ def test_check_for_str_request():
     url = "https://api.openstreetmap.org/api/0.6/relation/10000000/full.json"
     assert check_for_str_request(url=url, query='\"version\":\"0.6\"', retries=2, allowed_fails=1, expected_wait_time=1.0, timeout=5)
     assert not check_for_str_request(url=url, query='\"version\":\"0.sad\"', retries=2, allowed_fails=1, expected_wait_time=1.0, timeout=5)
+
+
+
+def test_clear_out():
+    shutil.rmtree( construct_path(filepath, "..", "out") )
+    make_new_dir( construct_path(filepath, "..", "out") )

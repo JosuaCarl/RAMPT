@@ -172,7 +172,6 @@ class Path_Nester:
     def update_nested_paths( self, new_paths:str|list[str] ):
         if isinstance(new_paths, str):
             new_paths = [ new_paths ]
-        print(new_paths)
         for new_path in new_paths:
             in_path = os.path.normpath( new_path )
             split_path = in_path.split( os.sep )
@@ -252,7 +251,8 @@ def replace_file_ending( path:StrPath, new_ending:str ) -> str:
 
 
 # Command methods
-def execute_verbose_command(cmd:str|list, verbosity:int=1, out_path:StrPath=None, decode_text:StrPath=True) -> bool:
+def execute_verbose_command( cmd:str|list, verbosity:int=1,
+                             out_path:StrPath=None, decode_text:StrPath=True ) -> bool:
     """
     Execute a command with the adequate verbosity.
 
