@@ -41,13 +41,10 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     additional_args = get_value(args, "gnps_args",  unknown_args )
     additional_args = additional_args if additional_args else unknown_args
 
-    gnps_runner = GNPS_Runner( save_log=save_log, additional_args=additional_args)
-
-    if nested:
-        futures = gnps_runner.get_gnps_results_nested( root_dir=in_dir, out_root_dir=out_dir )
-        computation_complete = compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
-    else:
-        gnps_runner.get_gnps_results( in_dir=in_dir, out_dir=out_dir )
+    gnps_runner = GNPS_Runner( save_log=save_log, additional_args=additional_args, verbosity=verbosity,
+                               nested=nested, workers=n_workers,
+                               scheduled_in=in_dir, scheduled_out=out_dir )
+    gnps_runner.run()
 
     return gnps_runner.processed_out
     
@@ -184,14 +181,14 @@ class GNPS_Runner(Pipe_Step):
 
 
 
-    def get_gnps_results( self, in_dir:StrPath=None, out_dir:StrPath=None, mzmine_log:str=None, gnps_response:dict=None) -> dict:
+    def compute( self, in_path:StrPath=None, out_path:StrPath=None, mzmine_log:str=None, gnps_response:dict=None) -> dict:
         """
         Get the GNPS results from a single path, mzmine_log or GNPS response.
 
-        :param in_dir: Input directory, defaults to None
-        :type in_dir: StrPath, optional
-        :param out_dir: Output directory of result
-        :type out_dir: StrPath
+        :param in_path: Input directory, defaults to None
+        :type in_path: StrPath, optional
+        :param out_path: Output directory of result
+        :type out_path: StrPath
         :param mzmine_log: mzmine_log String containing GNPS response, defaults to None
         :type mzmine_log: str, optional
         :param gnps_response: GNPS response to POST request, defaults to None
@@ -200,20 +197,20 @@ class GNPS_Runner(Pipe_Step):
         :return: Resulting anntations dictionary
         :rtype: dict
         """
-        task_id, status = self.check_task_finished( work_path=in_dir,
+        task_id, status = self.check_task_finished( work_path=in_path,
                                                     mzmine_log=mzmine_log,
                                                     gnps_response=gnps_response )
         if status:
-            out_path = join(out_dir, f"{basename(in_dir)}_gnps_all_db_annotations.json") if out_dir else None
+            out_path = join(out_path, f"{basename(in_path)}_gnps_all_db_annotations.json") if out_path else None
             results_dict = self.fetch_results( task_id=task_id,
                                                out_path=out_path )
             self.outs.append( results_dict )
             if self.verbosity >= 3:
-                print(f"GNPS results {basename(in_dir)}:\n")
+                print(f"GNPS results {basename(in_path)}:\n")
                 print(f"task_id:{task_id}\n")
                 print(results_dict)
             
-            self.processed_in.append( gnps_response if gnps_response else mzmine_log if mzmine_log else in_dir )
+            self.processed_in.append( gnps_response if gnps_response else mzmine_log if mzmine_log else in_path )
             self.processed_out.append( out_path )
 
             return results_dict
@@ -222,8 +219,8 @@ class GNPS_Runner(Pipe_Step):
             raise BrokenPipeError(f"Status of {task_id} was not marked DONE.")
 
 
-    def get_gnps_results_nested( self, root_dir:StrPath, out_root_dir:StrPath,
-                                 futures:list=[], recusion_level:int=0) -> list:
+    def compute_nested( self, root_dir:StrPath, out_root_dir:StrPath,
+                        futures:list=[], recusion_level:int=0) -> list:
         """
         Construct a list of necessary computations for getting the GNPS results from a nested scheme of mzmine results.
 
@@ -243,12 +240,12 @@ class GNPS_Runner(Pipe_Step):
             feature_ms2_found, feature_quantification_found = self.check_dir_files(dir=root)
             if feature_ms2_found and feature_quantification_found:
                 os.makedirs(out_root_dir, exist_ok=True)
-                futures.append( dask.delayed(self.get_gnps_results)( in_dir=root_dir, out_dir=out_root_dir ) )
+                futures.append( dask.delayed(self.compute)( in_path=root_dir, out_path=out_root_dir ) )
 
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
-                futures = self.get_gnps_results_nested( root_dir=join(root_dir, dir),
-                                                        out_root_dir=join(out_root_dir, dir),
-                                                        futures=futures, recusion_level=recusion_level+1 )
+                futures = self.compute_nested( root_dir=join(root_dir, dir),
+                                               out_root_dir=join(out_root_dir, dir),
+                                               futures=futures, recusion_level=recusion_level+1 )
                     
         return futures
 

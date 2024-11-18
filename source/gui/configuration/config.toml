@@ -29,28 +29,6 @@ all_steps = [
   "find_features:SECTION",
   "sirius_annotation:SECTION"
 ]
-process_to_analysis = [
-  "analysis:SECTION",
-  "gnps_annotation:SECTION",
-  "find_features:SECTION",
-  "sirius_annotation:SECTION"
-]
-annotate_analysis = [
-  "analysis:SECTION",
-  "gnps_annotation:SECTION",
-  "sirius_annotation:SECTION"
-]
-convert_to_annotate = [
-  "convert_files:SECTION",
-  "gnps_annotation:SECTION",
-  "find_features:SECTION",
-  "sirius_annotation:SECTION"
-]
-process_to_annotate = [
-  "gnps_annotation:SECTION",
-  "find_features:SECTION",
-  "sirius_annotation:SECTION"
-]
 
 [DATA_NODE.community_formatted_data]
 storage_type = "in_memory"

@@ -6,6 +6,8 @@ import regex
 from multipledispatch import dispatch
 
 from source.helpers.types import StrPath
+import source.helpers.general as helpers
+
 
 # Helper methods for classes / namespaces
 @dispatch(object, object)
@@ -86,11 +88,15 @@ class Pipe_Step:
     """
     Class for steps in the pipeline.
     """
-    def __init__( self, patterns:dict[str,str]=None, save_log:bool=False, additional_args:list=[], verbosity:int=1 ):
+    def __init__( self, nested:bool=False, workers:int=1, patterns:dict[str,str]=None, save_log:bool=False, additional_args:list=[], verbosity:int=1 ):
         """
         Initialize the pipeline step. Used for pattern matching.
         Provides additional variables for saving processed input and out_locations, its output, and errors.
         
+        :param nested: Execute step in a nested fashion, defaults to False
+        :type nested: bool, optional
+        :param workers: Number of workers to use for parallel execution, defaults to 1
+        :type workers: int, optional
         :param patterns: Matching patterns for finding appropriate folders, defaults to None
         :type patterns: dict[str,str], optional
         :param save_log: Whether to save the output(s).
@@ -100,6 +106,8 @@ class Pipe_Step:
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
+        self.nested             = nested
+        self.workers            = workers
         self.patterns           = patterns
         self.additional_args    = additional_args
         self.verbosity          = verbosity
@@ -134,5 +142,12 @@ class Pipe_Step:
         :rtype: bool
         """
         return bool( regex.search( pattern=pattern, string=str(file_name) ) )
-            
-    
+
+
+    def run( self, **kwargs ):
+        if self.nested:
+            futures = self.compute_nested( in_root_dir=self.scheduled_in, out_root_dir=self.scheduled_out )
+            helpers.compute_scheduled( futures=futures, num_workers=self.workers, verbose=self.verbosity >= 1)
+        else:
+            self.compute( in_path=self.scheduled_in, out_path=self.scheduled_out, **kwargs )
+        return self.processed_out

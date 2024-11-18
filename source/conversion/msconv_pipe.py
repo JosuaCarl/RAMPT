@@ -49,13 +49,10 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     file_converter = File_Converter( platform=platform, target_format=target_format,
                                      pattern=pattern, suffix=suffix, prefix=prefix, contains=contains, 
                                      redo_threshold=redo_threshold, overwrite=overwrite,
-                                     save_log=save_log, additional_args=additional_args, verbosity=verbosity )
-    if nested:
-        futures = file_converter.convert_files_nested( in_root_dir=in_dir, out_root_dir=out_dir )
-        computation_complete = helpers.compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
-    else:
-        file_converter.convert_file( in_path=in_dir, out_path=out_dir )
-
+                                     save_log=save_log, additional_args=additional_args, verbosity=verbosity,
+                                     nested=nested, workers=n_workers,
+                                     scheduled_in=in_dir, scheduled_out=out_dir )
+    file_converter.run()
     return file_converter.processed_out
 
 
@@ -67,7 +64,8 @@ class File_Converter(Pipe_Step):
     def __init__( self, msconvert_path:StrPath="msconvert", platform:str="windows", target_format:str="mzML",
                   pattern:str=r"", suffix:str=None, prefix:str=None, contains:str=None,
                   redo_threshold:float=1e8, overwrite:bool=False,
-                  save_log = False, additional_args:list=[], verbosity = 1, **kwargs ):
+                  save_log = False, additional_args:list=[], verbosity = 1,
+                  **kwargs ):
         """
         Initializes the file converter.
 
@@ -146,7 +144,7 @@ class File_Converter(Pipe_Step):
         return in_valid, out_valid
             
 
-    def convert_file( self, in_path:str, out_path:str ) -> bool:
+    def compute( self, in_path:str, out_path:str ) -> bool:
         """
         Convert one file with msconvert.
 
@@ -172,8 +170,8 @@ class File_Converter(Pipe_Step):
         return out_path
 
 
-    def convert_files_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
-                              futures:list=[], recusion_level:int=0 ) -> list:
+    def compute_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
+                        futures:list=[], recusion_level:int=0 ) -> list:
         """
         Converts multiple files in multiple folders, found in in_root_dir with msconvert and saves them
         to a location out_root_dir again into their respective folders.
@@ -196,9 +194,9 @@ class File_Converter(Pipe_Step):
             in_valid, out_valid = self.select_for_conversion( in_path=entry_path, out_path=out_path)
 
             if in_valid and out_valid:
-                futures.append( dask.delayed(self.convert_file)( in_path=entry_path, out_path=out_root_dir ) )
+                futures.append( dask.delayed(self.compute)( in_path=entry_path, out_path=out_root_dir ) )
             elif os.path.isdir( entry_path ) and not in_valid:
-                futures = self.convert_files_nested( in_root_dir=entry_path, out_root_dir=join(out_root_dir, entry),
+                futures = self.compute_nested( in_root_dir=entry_path, out_root_dir=join(out_root_dir, entry),
                                                      futures=futures, recusion_level=recusion_level+1 )
             
         if futures:

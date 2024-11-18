@@ -41,13 +41,11 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     additional_args = get_value(args, "sirius_args",    unknown_args)
     additional_args = additional_args if additional_args else unknown_args
 
-    sirius_runner = Sirius_Runner( sirius_path=sirius_path, config=config, save_log=save_log, additional_args=additional_args, verbosity=verbosity )
-
-    if nested:
-        futures = sirius_runner.run_sirius_nested( in_root_dir=in_dir, out_root_dir=out_dir )
-        computation_complete = helpers.compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
-    else:
-        sirius_runner.run_sirius( in_dir=in_dir, out_dir=out_dir, projectspace=projectspace )
+    sirius_runner = Sirius_Runner( sirius_path=sirius_path, config=config, save_log=save_log,
+                                   additional_args=additional_args, verbosity=verbosity,
+                                   nested=nested, workers=n_workers,
+                                   scheduled_in=in_dir, scheduled_out=out_dir )
+    sirius_runner.run( projectspace=projectspace)
 
     return sirius_runner.processed_out
     
@@ -86,7 +84,7 @@ class Sirius_Runner(Pipe_Step):
         self.config = config.strip()
 
 
-    def run_sirius( self, in_path:StrPath, out_path:StrPath, projectspace:StrPath ) -> bool:
+    def compute( self, in_path:StrPath, out_path:StrPath, projectspace:StrPath=None ) -> bool:
         """
         Run a single SIRIUS configuration.
 
@@ -94,11 +92,12 @@ class Sirius_Runner(Pipe_Step):
         :type in_path: StrPath
         :param out_path: Output directory
         :type out_path: StrPath
-        :param out_path: Path to projectspace file / directory
-        :type out_path: StrPath
+        :param projectspace: Path to projectspace file / directory, defaults to out_path
+        :type projectspace: StrPath
         :return: Success of the command
         :rtype: bool
         """
+        projectspace = projectspace if projectspace is not None else out_path
         cmd = rf'"{self.sirius_path}" --project {join(projectspace, "projectspace")} --input {in_path} config {self.config} write-summaries --output {out_path} {" ".join(self.additional_args)}'
               
         out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
@@ -113,7 +112,7 @@ class Sirius_Runner(Pipe_Step):
         return out_path
 
 
-    def run_sirius_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
+    def compute_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
                            futures:list=[], recusion_level:int=0 ) -> list:
         """
         Run SIRIUS Pipeline in nested directories.
@@ -134,11 +133,10 @@ class Sirius_Runner(Pipe_Step):
             entry_path = join(in_root_dir, entry)
 
             if self.match_file_name( pattern=self.patterns["in"], file_name=entry ):
-                futures.append( dask.delayed(self.run_sirius)( in_path=entry_path,
-                                                               out_path=out_root_dir,
-                                                               projectspace=out_root_dir ) )
+                futures.append( dask.delayed(self.compute)( in_path=entry_path,
+                                                               out_path=out_root_dir ) )
             elif os.path.isdir( entry_path ):
-                futures = self.run_sirius_nested( in_root_dir=entry_path,
+                futures = self.compute_nested( in_root_dir=entry_path,
                                                   out_root_dir=join( out_root_dir, entry ),
                                                   futures=futures, recusion_level=recusion_level+1)
         if futures:
@@ -147,6 +145,8 @@ class Sirius_Runner(Pipe_Step):
         return futures
 
 
+    def run(self, projectspace:StrPath=None):
+        return super().run( projectspace=projectspace)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser( prog='sirius_pipe.py',

@@ -68,12 +68,10 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
 
     mzmine_runner = MZmine_Runner( mzmine_path=mzmine_path, batch_path=batch_path, login=login,
                                    valid_formats=valid_formats, save_log=save_log,
-                                   additional_args=additional_args, verbosity=verbosity)
-    if nested:
-        futures = mzmine_runner.run_mzmine_batches_nested( in_root_dir=in_dir, out_root_dir=out_dir )
-        computation_complete = helpers.compute_scheduled( futures=futures, num_workers=1, verbose=verbosity >= 1)
-    else:
-        mzmine_runner.run_mzmine_batch( in_path=in_dir, out_path=out_dir )
+                                   additional_args=additional_args, verbosity=verbosity,
+                                   nested=nested,
+                                   scheduled_in=in_dir, scheduled_out=out_dir )
+    mzmine_runner.run()
 
     return mzmine_runner.processed_out
 
@@ -110,7 +108,7 @@ class MZmine_Runner(Pipe_Step):
         self.batch_path         = batch_path      
 
 
-    def run_mzmine_batch( self, in_path:StrPath, out_path:StrPath ) -> bool:
+    def compute( self, in_path:StrPath, out_path:StrPath ) -> bool:
         """
         Run a single mzmine batch.
 
@@ -134,8 +132,8 @@ class MZmine_Runner(Pipe_Step):
         out_path
 
 
-    def run_mzmine_batches_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
-                                   futures:list=[], recusion_level:int=0 ) -> list:
+    def compute_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
+                        futures:list=[], recusion_level:int=0 ) -> list:
         """
         Run a mzmine batch on a nested structure.
 
@@ -158,7 +156,7 @@ class MZmine_Runner(Pipe_Step):
             if self.match_file_name( pattern=self.patterns["in"], file_name=entry ):
                 found_files.append( entry_path )
             elif os.path.isdir( entry_path ):
-                futures = self.run_mzmine_batches_nested( in_root_dir=entry_path,
+                futures = self.compute_nested( in_root_dir=entry_path,
                                                           out_root_dir=join( out_root_dir, entry ),
                                                           futures=futures, recusion_level=recusion_level+1)
 
@@ -167,7 +165,7 @@ class MZmine_Runner(Pipe_Step):
             os.makedirs(out_root_dir, exist_ok=True)
             with open(source_paths_file , "w", encoding="utf8" ) as f:
                 f.write( "\n".join(found_files) )
-            futures.append( dask.delayed( self.run_mzmine_batch )( in_path=source_paths_file, out_path=out_root_dir ) )
+            futures.append( dask.delayed( self.compute )( in_path=source_paths_file, out_path=out_root_dir ) )
 
         return futures
 

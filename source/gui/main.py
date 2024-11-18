@@ -172,7 +172,7 @@ def add_scenario( state, id, payload ):
 def change_scenario( state, id, payload ):
     state.scenario.data_nodes["ms_analysis_configuration"].write( state.configuration.dict_representation() )
     state.scenario.data_nodes["raw_data"].write( state.configuration.file_converter.scheduled_in )
-    configuration.load( os.path.join(work_dir_root, f"{payload.get("label", "default")}_config.json") )
+    configuration.load( os.path.join(work_dir_root, f"{payload}_config.json") )
 
 
 # JOBS
@@ -182,8 +182,13 @@ job = ""
 # DATA
 data_node = ""
 
+# OTHER
+input_var = ""
+press=""
+def execute_input( state ):
+    os.system(state.input_var)
 
-    
+
 # PAGE
 with tgb.Page() as root:
     with tgb.layout( columns="1", columns__mobile="1" ):
@@ -206,19 +211,18 @@ with tgb.Page() as root:
         # Middle window
         with tgb.part():
             tgb.text( "## ⚙️Manual configuration", mode="markdown" )
-
             # General settings
-            with tgb.expandable( title="General" , expanded=False , hover_text=""):
+            with tgb.expandable( title="General", expanded=False , hover_text=""):
                 with tgb.layout( columns="1 0.1 1", columns__mobile="1"):
                     with tgb.part():
                         tgb.selector( "{configuration.platform}",
                                     label="Platform", lov="Linux;Windows;MacOS", dropdown=True, hover_text="Operating system / Computational platform where this is operated." )
+                        tgb.number( "{configuration.workers}",
+                                    label="Workers", hover_text="The number of workers with which to run the program in parallel.")
                         tgb.text( "Verbosity: ")
                         tgb.slider( "{configuration.verbosity}",
                                     label="Verbosity", min=0, max=3, hover_text="Level of verbosity during operations." )
-
                     tgb.part()
-
                     with tgb.part():
                         tgb.toggle( "{configuration.nested}",
                                     label="Nested execution", hover_text="Whether directories should be executed in a nested fashion.")
@@ -240,7 +244,7 @@ with tgb.Page() as root:
                         with tgb.layout( columns="1 0.1 1", columns__mobile=1):
                             with tgb.part():
                                 with tgb.layout( columns="1 1", columns__mobile="1"):
-                                    tgb.text( "msconvert\ncommand|path: ")
+                                    tgb.text( "`msconvert`\nexecutable: ", multiline=True, mode="markdown")
                                     tgb.input( "{configuration.file_converter.msconvert_path}", hover_text="You may enter the path to msconvert if it is not accessible via \"msconvert\"" )
                             tgb.part()
                             with tgb.part():
@@ -269,10 +273,19 @@ with tgb.Page() as root:
                                     tgb.text( "Suffix:")
                                     tgb.input( "{configuration.file_converter.suffix}",
                                                 hover_text="Suffix  to filter file (e.g. .mzML)" )
-                        tgb.number(  "{configuration.file_converter.redo_threshold}",
-                                     hover_text="File size threshold for repeating the conversion." )
-                        tgb.input( "{configuration.file_converter.additional_args}",
-                                    hover_text="Additional arguments that can be given to the msconvert (works with command line interface).")
+
+                        # Pattern matching
+                        tgb.text( "**Other:**", mode="markdown")
+                        with tgb.layout( columns="1 0.1 1", columns__mobile="1"):
+                            with tgb.part():
+                                tgb.text( "Redo-threshold", multiline=True, mode="markdown")
+                                tgb.number(  "{configuration.file_converter.redo_threshold}",
+                                            hover_text="File size threshold for repeating the conversion." )
+                            tgb.part()
+                            with tgb.part():
+                                tgb.text( "Additional arguments", multiline=True, mode="markdown")
+                                tgb.input( "{configuration.file_converter.additional_args}",
+                                            hover_text="Additional arguments that can be given to the msconvert (works with command line interface).")
                     with tgb.part():
                         tgb.progress( "{conv_progress}" )
 
