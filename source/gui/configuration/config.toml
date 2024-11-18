@@ -2,7 +2,7 @@
 core_version="3.0"
 
 [DATA_NODE.raw_data]
-storage_type = "generic"
+storage_type = "in_memory"
 scope = "SCENARIO:SCOPE"
 
 [TASK.convert_files]
@@ -53,11 +53,11 @@ process_to_annotate = [
 ]
 
 [DATA_NODE.community_formatted_data]
-storage_type = "generic"
+storage_type = "in_memory"
 scope = "SCENARIO:SCOPE"
 
 [DATA_NODE.processed_data]
-storage_type = "generic"
+storage_type = "in_memory"
 scope = "SCENARIO:SCOPE"
 
 [DATA_NODE.gnps_annotations]

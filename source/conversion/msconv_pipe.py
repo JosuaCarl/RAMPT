@@ -110,7 +110,11 @@ class File_Converter(Pipe_Step):
         self.update_regex( pattern=pattern, contains=contains, suffix=suffix, prefix=prefix)
 
 
-    def update_regex( self, pattern, contains, suffix, prefix):
+    def update_regex( self, pattern:str=None, contains:str=None, suffix:str=None, prefix:str=None):
+        pattern     = pattern   if pattern else self.pattern
+        contains    = contains  if contains else self.contains
+        suffix      = suffix    if suffix else self.suffix
+        prefix      = prefix    if prefix else self.prefix
         if contains:
             pattern = rf"({pattern})|(.*{contains}.*)"
         if suffix:

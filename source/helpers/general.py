@@ -172,6 +172,7 @@ class Path_Nester:
     def update_nested_paths( self, new_paths:str|list[str] ):
         if isinstance(new_paths, str):
             new_paths = [ new_paths ]
+        print(new_paths)
         for new_path in new_paths:
             in_path = os.path.normpath( new_path )
             split_path = in_path.split( os.sep )
@@ -179,6 +180,16 @@ class Path_Nester:
                                                        self.nested_paths,
                                                        in_path)
         return self.nested_paths
+
+
+    def prune_lca( self, nested_paths:list=None ):
+        nested_paths = nested_paths if nested_paths is not None else self.nested_paths
+        if len(nested_paths) == 1 and len(nested_paths[0][self.sub_name]) == 1:
+            return self.prune_lca( nested_paths=nested_paths[0][self.sub_name] )
+        else:
+            return nested_paths
+                
+        
 
 
 

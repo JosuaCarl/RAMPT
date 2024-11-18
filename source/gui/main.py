@@ -80,7 +80,7 @@ path_nester = helpers.Path_Nester()
 
 class MS_Analysis_Configuration:
     def __init__( self, platform:str="Linux", overwrite:bool=False, nested:bool=False,
-                  save_log:bool=True, verbosity:int=1,
+                  save_log:bool=True, workers:int=1, verbosity:int=1,
                   file_converter:File_Converter|dict=File_Converter(),
                   mzmine_runner:MZmine_Runner|dict=MZmine_Runner(),
                   gnps_runner:GNPS_Runner|dict=GNPS_Runner(),
@@ -89,6 +89,7 @@ class MS_Analysis_Configuration:
         self.overwrite      = overwrite
         self.nested         = nested
         self.save_log       = save_log
+        self.workers        = workers
         self.verbosity      = verbosity
         self.file_converter = File_Converter(**file_converter)  if isinstance(file_converter, dict) else file_converter
         self.mzmine_runner  = MZmine_Runner(**mzmine_runner)    if isinstance(mzmine_runner, dict)  else mzmine_runner
@@ -96,11 +97,12 @@ class MS_Analysis_Configuration:
         self.sirius_runner  = Sirius_Runner(**sirius_runner)    if isinstance(sirius_runner, dict)  else sirius_runner
                   
 
-    def dict_representation( self, attribute ):
+    def dict_representation( self, attribute=None ):
+        attribute = attribute if attribute is not None else self
         attributes_dict = {}
         for attribute, value in attribute.__dict__.items():
-            if hasattr(value, "__dict__"):
-                attributes_dict[attribute] = self.dict_representation(value)
+            if hasattr( value, "__dict__" ):
+                attributes_dict[attribute] = self.dict_representation( value )
             else:
                 attributes_dict[attribute] = value
         return attributes_dict
@@ -121,7 +123,7 @@ configuration = MS_Analysis_Configuration()
 
 
 # Conversion --------------------------------------------
-conv_path = ""
+conv_path = "."
 conv_tree_paths = []
 conv_selection = ""
 conv_ask = False
@@ -130,7 +132,9 @@ conv_progress = 0
 def construct_conversion_selection_tree( state ):
     global conv_tree_paths
     conv_tree_paths = add_path_to_tree( conv_tree_paths, state, "conv_path")
-    replace_attribute( state, "conv_tree_paths", conv_tree_paths )
+
+    pruned_tree = path_nester.prune_lca( nested_paths=conv_tree_paths )
+    replace_attribute( state, "conv_tree_paths", pruned_tree )
 
 
 def download_converted( state ):
@@ -139,6 +143,18 @@ def download_converted( state ):
     pass
 
 
+def convert_files():
+
+    if configuration.nested:
+        for in_dir in configuration.file_converter.scheduled_in:
+            futures = configuration.file_converter.convert_files_nested( in_root_dir=in_dir, out_root_dir=out_dir )
+            computation_complete = helpers.compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
+    else:
+        configuration.file_converter.convert_file( in_path=in_dir, out_path=out_dir )
+
+    return configuration.file_converter.processed_out
+    
+
 
 # SCENARIOS
 scenario = ""
@@ -146,12 +162,17 @@ scenario = ""
 
 def add_scenario( state, id, payload ):
     global configuration
+
+    state.configuration.file_converter.update_regex()
+
     configuration.save( os.path.join(work_dir_root, f"{payload.get("label", "default")}_config.json") )
     configuration = MS_Analysis_Configuration( **state.configuration.__dict__ )
 
 
 def change_scenario( state, id, payload ):
-    configuration.load( os.path.join(work_dir_root, f"{payload}_config.json") )
+    state.scenario.data_nodes["ms_analysis_configuration"].write( state.configuration.dict_representation() )
+    state.scenario.data_nodes["raw_data"].write( state.configuration.file_converter.scheduled_in )
+    configuration.load( os.path.join(work_dir_root, f"{payload.get("label", "default")}_config.json") )
 
 
 # JOBS
@@ -160,6 +181,7 @@ job = ""
 
 # DATA
 data_node = ""
+
 
     
 # PAGE
@@ -174,7 +196,9 @@ with tgb.Page() as root:
         # Left pane
         with tgb.part():
             # Scenario selector
+            tgb.text( "#### Scenarios", mode="markdown" )
             tgb.scenario_selector( "{scenario}", on_creation=add_scenario, on_change=change_scenario )
+            tgb.text( "#### Data", mode="markdown" )
             tgb.data_node_selector( "{data_node}" )
         
         tgb.part()
@@ -211,7 +235,8 @@ with tgb.Page() as root:
                             tgb.file_selector( "{conv_path}",
                                                 label="Select File", extensions="*", drop_message="Drop files for conversion here:", multiple=True,
                                                 on_action=construct_conversion_selection_tree )
-                            tgb.tree( "{conv_selection}", lov="{conv_tree_paths}", label="Select for conversion", filter=True, multiple=True, expanded=True )
+                            tgb.tree( "{configuration.file_converter.scheduled_in}",
+                                      lov="{conv_tree_paths}", label="Select for conversion", filter=True, multiple=True, expanded=True )
                         with tgb.layout( columns="1 0.1 1", columns__mobile=1):
                             with tgb.part():
                                 with tgb.layout( columns="1 1", columns__mobile="1"):
@@ -229,23 +254,21 @@ with tgb.Page() as root:
                                 with tgb.layout( columns="1 1", columns__mobile="1"):
                                     tgb.text( "Contains:")
                                     tgb.input( "{configuration.file_converter.contains}",
-                                                hover_text="String that must be contained in file (e.g. experiment)",
-                                                on_change=lambda state: configuration.file_converter.update_regex(state.configuration.file_converter.contains) )
+                                                hover_text="String that must be contained in file (e.g. experiment)" )
                                 with tgb.layout( columns="1 1", columns__mobile="1"):
                                     tgb.text( "RegEx:")
                                     tgb.input( "{configuration.file_converter.pattern}",
-                                                hover_text="Regular expression to filter file (e.g. my_experiment_.*[.]mzML)",
-                                                on_change=lambda state: configuration.file_converter.update_regex(contains=state.configuration.file_converter.pattern) )
+                                                hover_text="Regular expression to filter file (e.g. my_experiment_.*[.]mzML)" )
                             tgb.part()
                             with tgb.part():
                                 with tgb.layout( columns="1 1", columns__mobile="1"):
                                     tgb.text( "Prefix:")
                                     tgb.input( "{configuration.file_converter.prefix}",
-                                                hover_text="Prefix to filter file (e.g. my_experiment)", on_change=configuration.file_converter.update_regex )
+                                                hover_text="Prefix to filter file (e.g. my_experiment)" )
                                 with tgb.layout( columns="1 1", columns__mobile="1"):
                                     tgb.text( "Suffix:")
                                     tgb.input( "{configuration.file_converter.suffix}",
-                                                hover_text="Suffix  to filter file (e.g. .mzML)", on_change=configuration.file_converter.update_regex )
+                                                hover_text="Suffix  to filter file (e.g. .mzML)" )
                         tgb.number(  "{configuration.file_converter.redo_threshold}",
                                      hover_text="File size threshold for repeating the conversion." )
                         tgb.input( "{configuration.file_converter.additional_args}",
