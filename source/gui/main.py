@@ -144,14 +144,7 @@ def download_converted( state ):
 
 
 def convert_files():
-
-    if configuration.nested:
-        for in_dir in configuration.file_converter.scheduled_in:
-            futures = configuration.file_converter.convert_files_nested( in_root_dir=in_dir, out_root_dir=out_dir )
-            computation_complete = helpers.compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
-    else:
-        configuration.file_converter.convert_file( in_path=in_dir, out_path=out_dir )
-
+    configuration.file_converter.run()
     return configuration.file_converter.processed_out
     
 

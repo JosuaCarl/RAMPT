@@ -45,12 +45,9 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
                                    additional_args=additional_args, verbosity=verbosity,
                                    nested=nested, workers=n_workers,
                                    scheduled_in=in_dir, scheduled_out=out_dir )
-    sirius_runner.run( projectspace=projectspace)
-
-    return sirius_runner.processed_out
+    return sirius_runner.run( projectspace=projectspace)
     
     
-
 
 class Sirius_Runner(Pipe_Step):
     """

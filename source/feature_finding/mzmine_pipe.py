@@ -71,9 +71,9 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
                                    additional_args=additional_args, verbosity=verbosity,
                                    nested=nested,
                                    scheduled_in=in_dir, scheduled_out=out_dir )
-    mzmine_runner.run()
+    return mzmine_runner.run()
 
-    return mzmine_runner.processed_out
+
 
 class MZmine_Runner(Pipe_Step):
     """

@@ -44,9 +44,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     gnps_runner = GNPS_Runner( save_log=save_log, additional_args=additional_args, verbosity=verbosity,
                                nested=nested, workers=n_workers,
                                scheduled_in=in_dir, scheduled_out=out_dir )
-    gnps_runner.run()
-
-    return gnps_runner.processed_out
+    return gnps_runner.run()
     
 
 

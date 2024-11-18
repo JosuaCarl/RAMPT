@@ -52,8 +52,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
                                      save_log=save_log, additional_args=additional_args, verbosity=verbosity,
                                      nested=nested, workers=n_workers,
                                      scheduled_in=in_dir, scheduled_out=out_dir )
-    file_converter.run()
-    return file_converter.processed_out
+    return file_converter.run()
 
 
 
