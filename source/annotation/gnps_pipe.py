@@ -243,7 +243,7 @@ class GNPS_Runner(Pipe_Step):
                 futures.append( dask.delayed(self.compute)( in_path=in_root_dir, out_path=out_root_dir ) )
 
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
-                futures = self.compute_nested( root_dir=join(in_root_dir, dir),
+                futures = self.compute_nested( in_root_dir=join(in_root_dir, dir),
                                                out_root_dir=join(out_root_dir, dir),
                                                futures=futures, recusion_level=recusion_level+1 )
                     
