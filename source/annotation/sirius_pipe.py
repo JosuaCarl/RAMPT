@@ -95,8 +95,7 @@ class Sirius_Runner(Pipe_Step):
         :rtype: bool
         """
         projectspace = projectspace if projectspace is not None else out_path
-        cmd = rf'"{self.sirius_path}" --project {join(projectspace, "projectspace")} --input {in_path} \
-                  config {self.config} write-summaries --output {out_path} {" ".join(self.additional_args)}'
+        cmd = rf'"{self.sirius_path}" --project {join(projectspace, "projectspace")} --input {in_path} config {self.config} write-summaries --output {out_path} {" ".join(self.additional_args)}'
               
         out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
                                                     out_path=join(out_path, "sirius_log.txt") if self.save_log else None,

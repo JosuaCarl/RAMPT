@@ -21,7 +21,7 @@ def test_msconv_pipe_main():
                               out_dir=helpers.construct_path(filepath, "..", "out"),
                               pattern="", target_format="mzML", suffix=".mzML", prefix=None, contains=None,
                               redo_threshold=0.0, overwrite=None, workers=None, nested=True,
-                              platform=platform, verbosity=2, msconv_arguments=None, save_log=False)
+                              platform=platform, verbosity=3, msconv_arguments=None, save_log=False)
     msconv_pipe_main( args, unknown_args=[] )
     
     assert os.path.isfile( helpers.construct_path(filepath, "..", "out", "minimal_file.mzML") )
