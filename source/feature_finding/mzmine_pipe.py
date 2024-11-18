@@ -47,7 +47,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
             case "linux":
                 mzmine_path = r'/opt/mzmine-linux-installer/bin/mzmine' 
             case "windows":
-                mzmine_path = r'C:\"Program Files"\mzmine\mzmine_console.exe'
+                mzmine_path = r'C:\Program Files\mzmine\mzmine_console.exe'
             case "mac":
                 mzmine_path = r'/Applications/mzmine.app/Contents/MacOS/mzmine'
             case _:
@@ -58,13 +58,13 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
 
     if user:
         if user == "console":
-            login = "--login-console"
+            login = ["--login-console"]
         else:
-            login = f"--user {user}"
+            login = ["--user", user]
     else:
         print("You did not provide a user. You will be prompted to login by mzmine.\
                For future use please find your user file under $USER/.mzmine/users/ after completing the login.")
-        login = "--login"
+        login = ["--login"]
 
     mzmine_runner = MZmine_Runner( mzmine_path=mzmine_path, batch_path=batch_path, login=login,
                                    valid_formats=valid_formats, save_log=save_log,
@@ -119,8 +119,7 @@ class MZmine_Runner(Pipe_Step):
         :return: Success of the command
         :rtype: bool
         """
-        cmd = f'\"{self.mzmine_path}\" {self.login} --batch {self.batch_path} --input {in_path} --output {out_path}\
-                {" ".join(self.additional_args)}'
+        cmd = [self.mzmine_path] + self.login + ["--batch", self.batch_path, "--input", in_path, "--output", out_path] + self.additional_args
               
         out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
                                                     out_path=join(out_path, "mzmine_log.txt") if self.save_log else None )

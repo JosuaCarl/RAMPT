@@ -252,18 +252,20 @@ def replace_file_ending( path:StrPath, new_ending:str ) -> str:
 
 # Command methods
 def execute_verbose_command( cmd:str|list, verbosity:int=1,
-                             out_path:StrPath=None, decode_text:StrPath=True ) -> bool:
+                             out_path:StrPath=None, decode_text:bool=True ) -> tuple[str,str]:
     """
     Execute a command with the adequate verbosity.
 
-    :param cmd: Command as a string
-    :type cmd: str
+    :param cmd: Command as a string or list
+    :type cmd: str|list
     :param verbosity: Verbosity level, defaults to 1
     :type verbosity: int, optional
-    :param out_path: Path to outfile.
+    :param out_path: Path to outfile, defaults to None
     :type out_path: StrPath
-    :return: Success of execution
-    :rtype: bool
+    :param decode_text: Whether to decode the text, defaults to True
+    :type decode_text: bool
+    :return: Stdout, Stderr
+    :rtype: tuple[str,str]
     """
     process = tee_subprocess.run( cmd, 
                                   shell=True, 

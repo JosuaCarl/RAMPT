@@ -26,7 +26,7 @@ def test_sirius_pipe_main():
                                projectspace=helpers.construct_path(filepath, "..", "out"),
                                config=helpers.construct_path(filepath, "..", "batch_files", "config.txt"),
                                nested=True, workers=1, save_log=True,
-                               verbosity=0, sirius_args=None )
+                               verbosity=3, sirius_args=None )
 
     sirius_pipe_main( args, unknown_args=[] )
     
