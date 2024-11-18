@@ -153,8 +153,8 @@ class Pipe_Step:
 
 
     def run( self, **kwargs ):
-        scheduled_in = [self.scheduled_in] if not isinstance(self.scheduled_in, list) else self.scheduled_in
-        scheduled_out = [self.scheduled_out] if not isinstance(self.scheduled_out, list) else self.scheduled_out
+        scheduled_in = self.scheduled_in if isinstance(self.scheduled_in, list) else [self.scheduled_in]
+        scheduled_out = self.scheduled_out if isinstance(self.scheduled_out, list) else [self.scheduled_out]
         size_diff = len(scheduled_in) - len(scheduled_out)
         if size_diff > 0:
             scheduled_out = scheduled_out + [scheduled_out[-1]]*size_diff
@@ -165,5 +165,5 @@ class Pipe_Step:
                 helpers.compute_scheduled( futures=futures, num_workers=self.workers, verbose=self.verbosity >= 1)
             else:
                 self.compute( in_path=in_path, out_path=out_path, **kwargs )
-                
+
         return self.processed_out
