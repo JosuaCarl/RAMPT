@@ -8,8 +8,8 @@ scope = "SCENARIO:SCOPE"
 [TASK.convert_files]
 inputs = [ "raw_data:SECTION", "ms_analysis_configuration:SECTION" ]
 outputs = [ "community_formatted_data:SECTION" ]
-function = "source.conversion.msconv_pipe.main:function"
-skippable = "False:bool"
+function = "source.gui.main.convert_files:function"
+skippable = "True:bool"
 
 [SCENARIO.MS_analysis]
 additional_data_nodes = [ ]

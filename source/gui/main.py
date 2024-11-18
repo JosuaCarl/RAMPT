@@ -143,9 +143,16 @@ def download_converted( state ):
     pass
 
 
-def convert_files():
+def convert_files( *args ):
+    print(args)
     configuration.file_converter.run()
     return configuration.file_converter.processed_out
+
+
+# Feature Finding ---------------------------------------
+def find_features():
+    configuration.mzmine_runner.run()
+    return configuration.mzmine_runner.processed_out
     
 
 
@@ -164,7 +171,8 @@ def add_scenario( state, id, payload ):
 
 def change_scenario( state, id, payload ):
     state.scenario.data_nodes["ms_analysis_configuration"].write( state.configuration.dict_representation() )
-    state.scenario.data_nodes["raw_data"].write( state.configuration.file_converter.scheduled_in )
+    state.scenario.data_nodes["raw_data"].write( [scheduled_path.get("label") for scheduled_path in state.configuration.file_converter.scheduled_in] )
+    # TODO: Set scheduled_out
     configuration.load( os.path.join(work_dir_root, f"{payload}_config.json") )
 
 
