@@ -219,13 +219,13 @@ class GNPS_Runner(Pipe_Step):
             raise BrokenPipeError(f"Status of {task_id} was not marked DONE.")
 
 
-    def compute_nested( self, root_dir:StrPath, out_root_dir:StrPath,
+    def compute_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
                         futures:list=[], recusion_level:int=0) -> list:
         """
         Construct a list of necessary computations for getting the GNPS results from a nested scheme of mzmine results.
 
-        :param root_dir: Root input directory
-        :type root_dir: StrPath
+        :param in_root_dir: Root input directory
+        :type in_root_dir: StrPath
         :param out_root_dir: Root output directory
         :type out_root_dir: StrPath
         :param futures: Future computations for parallelization, defaults to []
@@ -236,14 +236,14 @@ class GNPS_Runner(Pipe_Step):
         :rtype: list
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
-        for root, dirs, files in os.walk(root_dir):
+        for root, dirs, files in os.walk(in_root_dir):
             feature_ms2_found, feature_quantification_found = self.check_dir_files(dir=root)
             if feature_ms2_found and feature_quantification_found:
                 os.makedirs(out_root_dir, exist_ok=True)
-                futures.append( dask.delayed(self.compute)( in_path=root_dir, out_path=out_root_dir ) )
+                futures.append( dask.delayed(self.compute)( in_path=in_root_dir, out_path=out_root_dir ) )
 
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
-                futures = self.compute_nested( root_dir=join(root_dir, dir),
+                futures = self.compute_nested( root_dir=join(in_root_dir, dir),
                                                out_root_dir=join(out_root_dir, dir),
                                                futures=futures, recusion_level=recusion_level+1 )
                     
