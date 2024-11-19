@@ -174,7 +174,7 @@ class Pipe_Step(Step_Configuration):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super.__init__( platform=platform, overwrite=overwrite, nested=nested, workers=workers, patterns=patterns,
+        super().__init__( platform=platform, overwrite=overwrite, nested=nested, workers=workers, patterns=patterns,
                         save_log=save_log, verbosity=verbosity, additional_args=additional_args )
     
         self.scheduled_in       = []

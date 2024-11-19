@@ -125,11 +125,11 @@ def change_scenario( state, id, payload ):
 
 
 # JOBS
-job = ""
+job = None
 
 
 # DATA
-data_node = ""
+data_node = None
 
 # OTHER
 input_var = ""

@@ -62,17 +62,18 @@ def make_new_dir(dir:StrPath) -> bool:
 
 
 # List operations
-def extend_list( array:list, extension) -> list:
+def extend_list( array, extension) -> list:
     """
     Generic method to expand a list or append elements
 
-    :param array: Starting list
-    :type array: list
+    :param array: Starting element/list
+    :type array: any
     :param extension: Element or list to extend with
     :type extension: any
     :return: Expanded list
     :rtype: list
     """
+    array = array if isinstance(array, list) else [array]
     if isinstance(extension, list):
         array.extend( extension )
     else:
