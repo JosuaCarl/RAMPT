@@ -4,16 +4,11 @@ import taipy.gui.builder as tgb
 
 from source.helpers.classes import Step_Configuration
 
-class Global_Configuration(Step_Configuration):
-    """
-    GLobal configuration of MS analysis
-    """
-    def __init__( self, platform:str="Linux", overwrite:bool=False, nested:bool=False,
-                  save_log:bool=True, workers:int=1, verbosity:int=1 ):
-        super().__init__( platform=platform, overwrite=overwrite, nested=nested, save_log=save_log, workers=workers,
-                          verbosity=verbosity )
 
-global_params = Global_Configuration()
+
+global_params = Step_Configuration()
+
+
 
 with tgb.Page() as general:
     with tgb.layout( columns="1 0.1 1", columns__mobile="1"):

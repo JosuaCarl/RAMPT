@@ -24,7 +24,7 @@ from source.helpers.classes import Pipe_Step, get_value, set_value
 
 def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     """
-    Execute the conversion.
+    Execute GNPS annotation.
 
     :param args: Command line arguments
     :type args: argparse.Namespace|dict

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 import taipy.gui.builder as tgb
-
+from taipy.gui import Page
 import source.gui.helpers as helpers
 
 from source.conversion.msconv_pipe import File_Converter
+
 
 
 conv_path = "."
@@ -12,6 +13,9 @@ conv_tree_paths = []
 conv_selection = ""
 conv_ask = False
 conv_progress = 0
+
+conversion_params = File_Converter()
+
 
 
 def construct_conversion_selection_tree( state ):
@@ -26,8 +30,6 @@ def download_converted( state ):
     # GREY OUT, WHEN converted IS NOT PRESENT
     pass
     
-
-conversion_params = File_Converter()
 
 
 with tgb.Page() as conversion:

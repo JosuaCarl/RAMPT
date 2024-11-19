@@ -25,7 +25,7 @@ import source.helpers.general as helpers
 
 def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     """
-    Execute the conversion.
+    Exclude ions.
 
     :param args: Command line arguments
     :type args: argparse.Namespace|dict

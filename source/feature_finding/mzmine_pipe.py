@@ -21,7 +21,7 @@ import regex
 
 def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     """
-    Execute the conversion.
+    Find features with mzmine.
 
     :param args: Command line arguments
     :type args: argparse.Namespace|dict
