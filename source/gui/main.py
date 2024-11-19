@@ -9,6 +9,7 @@ import json
 
 from werkzeug.utils import secure_filename
 
+import taipy as tp
 from taipy.gui import Gui
 from taipy import Config, Orchestrator
 import taipy.gui.builder as tgb
@@ -16,11 +17,10 @@ import taipy.gui.builder as tgb
 import source.helpers.general as helpers
 from source.helpers.types import StrPath
 
-# Import of Pipeline Steps
-from source.conversion.msconv_pipe import File_Converter
-from source.feature_finding.mzmine_pipe import MZmine_Runner
-from source.annotation.sirius_pipe import Sirius_Runner
-from source.annotation.gnps_pipe import GNPS_Runner
+
+# Configuration loader
+from configuration.config import *
+
 
 # General
 ## Working directory
@@ -36,33 +36,13 @@ def change_work_dir_root( new_root:StrPath=None ):
         work_dir_root = gui._get_config("upload_folder", tempfile.gettempdir())
 
 
-## State handling
-def extract_attribute( state, state_attribute:str ):
-    return getattr( state, state_attribute )
-
-def replace_attribute( state, state_attribute:str, replacement ):
-    setattr( state, state_attribute, replacement )
-    state.refresh( state_attribute )
-
-def update_class_instance( class_instance, state, key, value ):
-    class_instance.update( {key: value} )
-
-def extend_local_list( local_list, state, state_attribute ):
-    value = extract_attribute( state, state_attribute )
-    if isinstance( value, list ):
-        local_list.extend( value )
-    else:
-        local_list.append( value )
-    return local_list
-
-
 ### Trees
 def get_selection_labels( state, state_attribute:str ):
-    selection_labels = [ selection.get("label") for selection in extract_attribute( state, state_attribute ) ]
+    selection_labels = [ selection.get("label") for selection in helpers.get_attribute_recursive( state, state_attribute ) ]
     return selection_labels
 
 def add_path_to_tree( local_tree, state, path_state_attribute ):
-    local_tree = path_nester.update_nested_paths( new_paths=extract_attribute( state, path_state_attribute) )
+    local_tree = path_nester.update_nested_paths( new_paths=helpers.get_attribute_recursive( state, path_state_attribute) )
     return local_tree
 
 
@@ -76,45 +56,6 @@ def evaluate_dialog( state, payload_pressed, option_list ):
 
 ## Helpers
 path_nester = helpers.Path_Nester()
-
-
-class MS_Analysis_Configuration:
-    def __init__( self, platform:str="Linux", overwrite:bool=False, nested:bool=False,
-                  save_log:bool=True, workers:int=1, verbosity:int=1,
-                  file_converter:File_Converter|dict=File_Converter(),
-                  mzmine_runner:MZmine_Runner|dict=MZmine_Runner(),
-                  gnps_runner:GNPS_Runner|dict=GNPS_Runner(),
-                  sirius_runner:Sirius_Runner|dict=Sirius_Runner() ):
-        self.platform       = platform
-        self.overwrite      = overwrite
-        self.nested         = nested
-        self.save_log       = save_log
-        self.workers        = workers
-        self.verbosity      = verbosity
-        self.file_converter = File_Converter(**file_converter)  if isinstance(file_converter, dict) else file_converter
-        self.mzmine_runner  = MZmine_Runner(**mzmine_runner)    if isinstance(mzmine_runner, dict)  else mzmine_runner
-        self.gnps_runner    = GNPS_Runner(**gnps_runner)        if isinstance(gnps_runner, dict)    else gnps_runner
-        self.sirius_runner  = Sirius_Runner(**sirius_runner)    if isinstance(sirius_runner, dict)  else sirius_runner
-                  
-
-    def dict_representation( self, attribute=None ):
-        attribute = attribute if attribute is not None else self
-        attributes_dict = {}
-        for attribute, value in attribute.__dict__.items():
-            if hasattr( value, "__dict__" ):
-                attributes_dict[attribute] = self.dict_representation( value )
-            else:
-                attributes_dict[attribute] = value
-        return attributes_dict
-    
-    def save( self, location ):
-        with open( location, "w") as f:
-            json.dump( self.dict_representation( self ), f, indent=4 )
-
-    def load( self, location ):
-        with open( location, "r") as f:
-            config = json.loads( f.read() )
-        self.__init__( **config )
 
 
 # General variables
@@ -134,46 +75,53 @@ def construct_conversion_selection_tree( state ):
     conv_tree_paths = add_path_to_tree( conv_tree_paths, state, "conv_path")
 
     pruned_tree = path_nester.prune_lca( nested_paths=conv_tree_paths )
-    replace_attribute( state, "conv_tree_paths", pruned_tree )
+    helpers.set_attribute_recursive( state, "conv_tree_paths", pruned_tree )
 
 
 def download_converted( state ):
     # GREY OUT, WHEN converted IS NOT PRESENT
-    
     pass
-
-
-def convert_files( *args ):
-    print(args)
-    configuration.file_converter.run()
-    return configuration.file_converter.processed_out
-
-
-# Feature Finding ---------------------------------------
-def find_features():
-    configuration.mzmine_runner.run()
-    return configuration.mzmine_runner.processed_out
     
-
 
 # SCENARIOS
-scenario = ""
+scenario = tp.create_scenario( ms_analysis_config )
 
+def update_global_variables( state ):
+    global configuration
+
+    for attribute in ["nested", "workers", "verbosity", "save_log"]:
+        val = getattr(state.configuration, attribute)
+        setattr( configuration.file_converter, attribute, val )
+        setattr( configuration.mzmine_runner, attribute, val )
+        setattr( configuration.gnps_runner, attribute, val )
+        setattr( configuration.sirius_runner, attribute, val )
+    state.configuration = configuration
+    state.configuration.file_converter.update_regex()
+    state.refresh("configuration")
 
 def add_scenario( state, id, payload ):
     global configuration
 
-    state.configuration.file_converter.update_regex()
-
+    update_global_variables( state )
+    
+    configuration = state.configuration
     configuration.save( os.path.join(work_dir_root, f"{payload.get("label", "default")}_config.json") )
-    configuration = MS_Analysis_Configuration( **state.configuration.__dict__ )
+    
+    print("ADD:")
+    print(configuration.dict_representation())
 
 
 def change_scenario( state, id, payload ):
-    state.scenario.data_nodes["ms_analysis_configuration"].write( state.configuration.dict_representation() )
-    state.scenario.data_nodes["raw_data"].write( [scheduled_path.get("label") for scheduled_path in state.configuration.file_converter.scheduled_in] )
-    # TODO: Set scheduled_out
+    global configuration
+    
     configuration.load( os.path.join(work_dir_root, f"{payload}_config.json") )
+    
+    state.scenario.data_nodes["ms_analysis_configuration"].write( configuration.dict_representation() )
+    state.scenario.data_nodes["raw_data"].write( [scheduled_path.get("label") for scheduled_path in state.configuration.file_converter.scheduled_in] )
+ 
+
+    print("CHANGE:")
+    print(configuration.dict_representation())
 
 
 # JOBS

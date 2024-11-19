@@ -29,6 +29,7 @@ all_steps = [
   "find_features:SECTION",
   "sirius_annotation:SECTION"
 ]
+conv = [ "convert_files:SECTION" ]
 
 [DATA_NODE.community_formatted_data]
 storage_type = "in_memory"

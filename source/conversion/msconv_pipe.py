@@ -61,7 +61,7 @@ class File_Converter(Pipe_Step):
     General class for file conversion along matched patterns.
     """
     def __init__( self, msconvert_path:StrPath="msconvert", platform:str="windows", target_format:str="mzML",
-                  pattern:str=r"", suffix:str=None, prefix:str=None, contains:str=None,
+                  pattern:str=r".*", suffix:str=None, prefix:str=None, contains:str=None,
                   redo_threshold:float=1e8, overwrite:bool=False,
                   save_log = False, additional_args:list=[], verbosity = 1,
                   **kwargs ):
@@ -91,13 +91,13 @@ class File_Converter(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__( patterns={"in": pattern}, save_log=save_log, additional_args=additional_args, verbosity=verbosity)
+        super().__init__( platform=platform, patterns={"in": pattern}, save_log=save_log, 
+                          additional_args=additional_args, verbosity=verbosity )
         if kwargs:
             self.update(kwargs)
         self.msconvert_path = msconvert_path
         self.redo_threshold = redo_threshold
         self.overwrite      = overwrite
-        self.platform       = platform
         self.target_format  = target_format
         self.pattern        = pattern
         self.suffix         = suffix

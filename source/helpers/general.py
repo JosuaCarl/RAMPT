@@ -15,6 +15,8 @@ from tqdm.dask import TqdmCallback
 import chardet
 import tee_subprocess
 
+import functools
+
 from source.helpers.types import *
 
 
@@ -56,6 +58,26 @@ def make_new_dir(dir:StrPath) -> bool:
         os.mkdir( dir )
         return True
     return False
+
+
+
+# List operations
+def extend_list( array:list, extension) -> list:
+    """
+    Generic method to expand a list or append elements
+
+    :param array: Starting list
+    :type array: list
+    :param extension: Element or list to extend with
+    :type extension: any
+    :return: Expanded list
+    :rtype: list
+    """
+    if isinstance(extension, list):
+        array.extend( extension )
+    else:
+        array.append( extension )
+    return array
 
 
 
@@ -340,3 +362,37 @@ def check_for_str_request(url:str | bytes, query:str, retries:int=100, allowed_f
         time.sleep(retry_time)
 
     return False
+
+
+# Class handling
+def get_attribute_recursive(object, attribute:str, *args) -> any:
+    """
+    Recursive retrival of nested attributes.
+
+    :param object: Class/Object with attributes
+    :type object: any
+    :param attribute: Attributes, chained as "attr1.attr2.deep_attr"
+    :type attribute: str
+    :return: Retrieved object
+    :rtype: any
+    """
+    def _getattr(obj, attr):
+        return getattr(obj, attr, *args)
+    return functools.reduce(_getattr, [object] + attribute.split('.'))
+
+
+def set_attribute_recursive(object, attribute:str, value) -> None:
+    """
+    Recursive setting of nested attributes.
+
+    :param object: Class/Object with attributes
+    :type object: any
+    :param attribute: Attribute as a string
+    :type attribute: any
+    :param value: Value to set to attribute
+    :type value: any
+    :return: None
+    :rtype: None
+    """
+    pre, _, post = attribute.rpartition('.')
+    return setattr(get_attribute_recursive(object, pre) if pre else object, post, value)
