@@ -1,4 +1,4 @@
-#
+#!/usr/bin/env python3
 
 import os
 import json
@@ -10,30 +10,11 @@ from taipy import Config, Frequency, Scope
 from source.helpers.types import StrPath
 
 # Import of Pipeline Steps
-from source.helpers.classes import Step_Configuration
-from source.conversion.msconv_pipe import File_Converter
 from source.feature_finding.mzmine_pipe import MZmine_Runner
+from source.conversion.msconv_pipe import File_Converter
 from source.annotation.sirius_pipe import Sirius_Runner
 from source.annotation.gnps_pipe import GNPS_Runner
 
-
-class MS_Analysis_Configuration(Step_Configuration):
-    """
-    GLobal configuration of MS analysis
-    """
-    def __init__( self, platform:str="Linux", overwrite:bool=False, nested:bool=False,
-                  save_log:bool=True, workers:int=1, verbosity:int=1,
-                  file_converter:File_Converter|dict=File_Converter(),
-                  mzmine_runner:MZmine_Runner|dict=MZmine_Runner(),
-                  gnps_runner:GNPS_Runner|dict=GNPS_Runner(),
-                  sirius_runner:Sirius_Runner|dict=Sirius_Runner() ):
-        super().__init__( platform=platform, overwrite=overwrite, nested=nested, save_log=save_log, workers=workers,
-                          verbosity=verbosity )
-        self.file_converter = File_Converter(**file_converter)  if isinstance(file_converter, dict) else file_converter
-        self.mzmine_runner  = MZmine_Runner(**mzmine_runner)    if isinstance(mzmine_runner, dict)  else mzmine_runner
-        self.gnps_runner    = GNPS_Runner(**gnps_runner)        if isinstance(gnps_runner, dict)    else gnps_runner
-        self.sirius_runner  = Sirius_Runner(**sirius_runner)    if isinstance(sirius_runner, dict)  else sirius_runner
-                  
 
 
 # Data nodes
@@ -66,11 +47,14 @@ conversion_params_config = Config.configure_json_data_node( id="conversion_param
 feature_finding_params_config = Config.configure_json_data_node( id="feature_finding_params",
                                                                    scope=Scope.SCENARIO )
 
-conversion_params_config = Config.configure_json_data_node( id="conversion_params",
-                                                                   scope=Scope.SCENARIO )
+gnps_params_config = Config.configure_json_data_node( id="gnps_params",
+                                                      scope=Scope.SCENARIO )
 
-conversion_params_config = Config.configure_json_data_node( id="conversion_params",
-                                                                   scope=Scope.SCENARIO )
+sirius_params_config = Config.configure_json_data_node( id="sirius_params",
+                                                        scope=Scope.SCENARIO )
+
+analysis_params_config = Config.configure_json_data_node( id="analysis_params",
+                                                        scope=Scope.SCENARIO )
 
 
 # Task methods
@@ -132,25 +116,25 @@ convert_files_config = Config.configure_task( "convert_files",
 
 find_features_config = Config.configure_task( "find_features",
                                               function=find_features,
-                                              input=[community_formatted_data_config, conversion_params_config, global_params_config],
+                                              input=[community_formatted_data_config, feature_finding_params_config, global_params_config],
                                               output=processed_data_config,
                                               skippable=False)
 
 annotate_gnps_config = Config.configure_task( "annotate_gnps",
                                               function=annotate_gnps,
-                                              input=[processed_data_config, conversion_params_config, global_params_config],
+                                              input=[processed_data_config, gnps_params_config, global_params_config],
                                               output=gnps_annotations_config,
                                               skippable=False)
 
 annotate_sirius_config = Config.configure_task( "annotate_sirius",
                                               function=annotate_sirius,
-                                              input=[processed_data_config, conversion_params_config, global_params_config],
+                                              input=[processed_data_config, sirius_params_config, global_params_config],
                                               output=sirius_anntations_config,
                                               skippable=False)
 
 analyze_difference_config = Config.configure_task( "analyze_difference",
                                               function=analyze_difference,
-                                              input=[gnps_annotations_config, sirius_anntations_config, conversion_params_config, global_params_config],
+                                              input=[gnps_annotations_config, sirius_anntations_config, analysis_params_config, global_params_config],
                                               output=results_config,
                                               skippable=False)
 
@@ -167,6 +151,7 @@ ms_analysis_config = Config.configure_scenario( id="MS_analysis",
 
 
 # CORE
+"""
 core_config = Config.configure_core(
                                     root_folder=".process/",
                                     storage_folder=".out/",
@@ -175,3 +160,4 @@ core_config = Config.configure_core(
                                     version_number="1.0.0",
                                     application_name="mine2sirius",
                                 )
+"""
