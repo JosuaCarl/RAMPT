@@ -10,7 +10,7 @@ from .pages import *
 
 
 
-pages = { "/": "<|toggle|theme|><center><|navbar|></center>",
+pages = { "/": '<|toggle|theme|><center><|navbar|lov={[("/", "Application"), ("https://josuacarl.github.io/mine2sirius_pipe", "Documentation")]}|></center>',
           "configuration": root,
           "general": general,
           "conversion": conversion,
