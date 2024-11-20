@@ -2,7 +2,7 @@
 
 import taipy.gui.builder as tgb
 from taipy.gui import Page
-import source.gui.helpers as helpers
+from source.gui.helpers import *
 
 from source.conversion.msconv_pipe import File_Converter
 
@@ -20,10 +20,10 @@ conversion_params = File_Converter()
 
 def construct_conversion_selection_tree( state ):
     global conv_tree_paths
-    conv_tree_paths = helpers.add_path_to_tree( conv_tree_paths, state, "conv_path")
+    conv_tree_paths = add_path_to_tree( conv_tree_paths, state, "conv_path")
 
-    pruned_tree = helpers.path_nester.prune_lca( nested_paths=conv_tree_paths )
-    helpers.set_attribute_recursive( state, "conv_tree_paths", pruned_tree )
+    pruned_tree = path_nester.prune_lca( nested_paths=conv_tree_paths )
+    set_attribute_recursive( state, "conv_tree_paths", pruned_tree )
 
 
 def download_converted( state ):
@@ -36,6 +36,7 @@ with tgb.Page() as conversion:
     with tgb.layout( columns="4 1", columns__mobile="1"):
         with tgb.part():
             with tgb.layout( columns="1 1", columns__mobile="1"):
+                tgb.button("Select file", on_action=open_file_folder)
                 tgb.file_selector( "{conv_path}",
                                     label="Select File", extensions="*", drop_message="Drop files for conversion here:", multiple=True,
                                     on_action=construct_conversion_selection_tree )

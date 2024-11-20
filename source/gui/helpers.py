@@ -3,6 +3,8 @@
 import os 
 import tempfile
 
+import tkinter.filedialog as fd
+
 from source.helpers.general import *
 from source.helpers.types import StrPath
 
@@ -35,3 +37,11 @@ def change_work_dir_root( gui, new_root:StrPath=None ):
             raise( ValueError(f"{new_root} is not a valid directory") )
     else:
         work_dir_root = gui._get_config("upload_folder", tempfile.gettempdir())
+
+
+# File selection
+def open_file_folder( select_folder:bool=False, **kwargs ):
+    if select_folder:
+        return fd.askdirectory( **kwargs )
+    else:
+        return fd.askopenfilenames( **kwargs )

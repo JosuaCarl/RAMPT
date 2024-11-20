@@ -2,60 +2,81 @@
 
 import os
 import tempfile
-import datetime
 import json
-from werkzeug.utils import secure_filename
+
 
 import taipy as tp
 import taipy.gui.builder as tgb
+
+from source.gui.helpers import *
+
+# Configuration
+from source.gui.configuration.config import *
 
 
 # Working directory
 work_dir_root = tempfile.gettempdir()
 
 
-# Configuration
-from source.gui.configuration.config import *
 
-# SCENARIOS
+# PARAMETERS
+param_segment_names = [ "global", "conversion", "feature_finding", "gnps", "sirius", "analysis" ]
+
+def save_params( state, scenario_name:str, param_segment_names:list=param_segment_names):
+    params = {}
+    for segment_name in param_segment_names:
+        segment_params = get_attribute_recursive(state, f"{segment_name}_params")
+        params[segment_name] = segment_params.dict_representation()
+    
+    with open(os.path.join(work_dir_root, f"{scenario_name}_config.json"), "w") as file:
+        json.dump( params, file )
+
+
+def load_params( state, scenario_name:str):
+    with open( os.path.join(work_dir_root, f"{scenario_name}_config.json"), "w" ) as file:
+       params = json.loads( file.read() )
+
+    for segment_name, segment_params in params.items():
+        for attribute, param in segment_params.items():
+            set_attribute_recursive(state, f"{segment_name}_params.{attribute}", param)
+
+
+def sync_params( state, sub_classes:str=["scenario", "data_nodes"], param_segment_names:list=param_segment_names ):
+    sub_classes = ".".join(sub_classes) + "." if sub_classes else ""
+    for segment_name in param_segment_names:
+        segment_params = get_attribute_recursive(state, f"{segment_name}_params")
+        for attribute, param in segment_params.items():
+            set_attribute_recursive(state, f"{sub_classes}{segment_name}_params.{attribute}", param)
+    print( state.scenario.data_nodes )
+
+
+
+# SCENARIO
 scenario = tp.create_scenario( ms_analysis_config )
 
-def update_global_variables( state ):
-    global configuration
+def write_param_data_nodes():
+    pass
 
-    for attribute in ["nested", "workers", "verbosity", "save_log"]:
-        val = getattr(state.configuration, attribute)
-        setattr( configuration.file_converter, attribute, val )
-        setattr( configuration.mzmine_runner, attribute, val )
-        setattr( configuration.gnps_runner, attribute, val )
-        setattr( configuration.sirius_runner, attribute, val )
-    state.configuration = configuration
-    state.configuration.file_converter.update_regex()
-    state.refresh("configuration")
+
+def write_input_data_nodes( state ):
+    # TODO: Fix
+    print( state.scenario.data_nodes )
+    print( state.scenario.data_nodes["raw_data"] )
+    for data_node in state.scenario.data_nodes:
+        data_node.write( [scheduled_path.get("label") for scheduled_path in state.file_converter.scheduled_in] )
+    pass
+
 
 def add_scenario( state, id, payload ):
-    global configuration
-
-    update_global_variables( state )
-    
-    configuration = state.configuration
-    configuration.save( os.path.join(work_dir_root, f"{payload.get("label", "default")}_config.json") )
-    
-    print("ADD:")
-    print(configuration.dict_representation())
+    save_params( state, payload.get("label", "default"), param_segment_names=param_segment_names )
 
 
-def change_scenario( state, id, payload ):
-    global configuration
+def change_scenario( state, id, scenario_name ):    
+    load_params( state, scenario_name=scenario_name )
+    sync_params( state, sub_class="scenario", param_segment_names=param_segment_names)
     
-    configuration.load( os.path.join(work_dir_root, f"{payload}_config.json") )
-    
-    state.scenario.data_nodes["ms_analysis_configuration"].write( configuration.dict_representation() )
-    state.scenario.data_nodes["raw_data"].write( [scheduled_path.get("label") for scheduled_path in state.configuration.file_converter.scheduled_in] )
- 
-
-    print("CHANGE:")
-    print(configuration.dict_representation())
+    write_param_data_nodes( state )
+    write_input_data_nodes( state )
 
 
 # JOBS
