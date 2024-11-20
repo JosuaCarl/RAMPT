@@ -8,6 +8,7 @@ from source.helpers.classes import Step_Configuration
 
 global_params = Step_Configuration()
 
+local = True
 
 
 with tgb.Page() as general:

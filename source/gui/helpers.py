@@ -15,8 +15,8 @@ def get_selection_labels( state, state_attribute:str ):
     selection_labels = [ selection.get("label") for selection in get_attribute_recursive( state, state_attribute ) ]
     return selection_labels
 
-def add_path_to_tree( local_tree, state, path_state_attribute ):
-    local_tree = path_nester.update_nested_paths( new_paths=get_attribute_recursive( state, path_state_attribute) )
+def add_path_to_tree( local_tree, paths ):
+    local_tree = path_nester.update_nested_paths( new_paths=paths )
     return local_tree
 
 
@@ -40,8 +40,10 @@ def change_work_dir_root( gui, new_root:StrPath=None ):
 
 
 # File selection
-def open_file_folder( select_folder:bool=False, **kwargs ):
+def open_file_folder( select_folder:bool=False, multiple:bool=True, **kwargs ):
     if select_folder:
         return fd.askdirectory( **kwargs )
-    else:
+    elif multiple:
         return fd.askopenfilenames( **kwargs )
+    else:
+        return fd.askopenfilename( **kwargs )

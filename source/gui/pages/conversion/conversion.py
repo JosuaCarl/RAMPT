@@ -7,7 +7,6 @@ from source.gui.helpers import *
 from source.conversion.msconv_pipe import File_Converter
 
 
-
 conv_path = "."
 conv_tree_paths = []
 conv_selection = ""
@@ -16,44 +15,89 @@ conv_progress = 0
 
 conversion_params = File_Converter()
 
+local = True
+select_folder = False
 
 
-def construct_conversion_selection_tree( state ):
-    global conv_tree_paths
-    conv_tree_paths = add_path_to_tree( conv_tree_paths, state, "conv_path")
+def construct_conversion_selection_tree( state, path:StrPath=None ):
+    path = path if path else get_attribute_recursive( state, "conv_path")
 
-    pruned_tree = path_nester.prune_lca( nested_paths=conv_tree_paths )
-    set_attribute_recursive( state, "conv_tree_paths", pruned_tree )
+    if path != ".":   
+        global conv_tree_paths
+        conv_tree_paths = add_path_to_tree( conv_tree_paths, path )
+
+        pruned_tree = path_nester.prune_lca( nested_paths=conv_tree_paths )
+        set_attribute_recursive( state, "conv_tree_paths", pruned_tree )
 
 
 def download_converted( state ):
     # GREY OUT, WHEN converted IS NOT PRESENT
     pass
-    
 
 
 with tgb.Page() as conversion:
     with tgb.layout( columns="4 1", columns__mobile="1"):
+        # File Selection
         with tgb.part():
-            with tgb.layout( columns="1 1", columns__mobile="1"):
-                tgb.button("Select file", on_action=open_file_folder)
-                tgb.file_selector( "{conv_path}",
-                                    label="Select File", extensions="*", drop_message="Drop files for conversion here:", multiple=True,
-                                    on_action=construct_conversion_selection_tree )
+            tgb.toggle( "{local}",
+                        label="Process locally", hover_text="Whether to use the server functionality of taipy to upload files and process them,\
+                                                                    or to use files that are present on the local machine.")
+            tgb.html("br")
+            with tgb.layout( columns="1 0.1 2 0.2 2.1", columns__mobile="1"):
+                with tgb.part():
+                    with tgb.part( render="{local}" ):
+                        tgb.button( "Select in",
+                                    on_action=lambda state: construct_conversion_selection_tree(state, open_file_folder( select_folder=state.select_folder)) )
+                    with tgb.part( render="{not local}"):
+                        tgb.file_selector( "{conv_path}",
+                                            label="Select in", extensions="*", drop_message="Drop files/folders for conversion here:", multiple=True,
+                                            on_action=construct_conversion_selection_tree )
+                    tgb.toggle( "{select_folder}", label="Select folder")
+                
+                tgb.part()
+
                 tgb.tree( "{conversion_params.scheduled_in}",
                             lov="{conv_tree_paths}", label="Select for conversion", filter=True, multiple=True, expanded=True )
-            with tgb.layout( columns="1 0.1 1", columns__mobile=1):
-                with tgb.part():
-                    with tgb.layout( columns="1 1", columns__mobile="1"):
-                        tgb.text( "`msconvert`\nexecutable: ", multiline=True, mode="markdown")
-                        tgb.input( "{conversion_params.msconvert_path}", hover_text="You may enter the path to msconvert if it is not accessible via \"msconvert\"" )
+                
                 tgb.part()
+
                 with tgb.part():
-                    tgb.selector( "{conversion_params.target_format}",
+                    with tgb.layout(columns="1 0.1 1", columns__mobile="1"):
+                        with tgb.part():
+                            with tgb.part( render="{local}" ):
+                                tgb.button( "Select out",
+                                            on_action=lambda state: construct_conversion_selection_tree(state, open_file_folder( select_folder=state.select_folder)) )
+                            with tgb.part( render="{not local}"):
+                                tgb.file_selector( "{conv_path}",
+                                                    label="Select out", extensions="*", drop_message="Drop files/folders as targets here:", multiple=True )
+                            tgb.toggle( "{select_folder}", label="Select folder")
+                        
+                        tgb.part()
+
+                        tgb.selector( "{conversion_params.target_format}",
                                 label="Target_format", lov="mzML;mzXML", dropdown=True, hover_text="The target format for the conversion. mzML is recommended.", width="100px")
+                
             
+            tgb.html("br")
+            tgb.html("hr")
+            tgb.text( "##### Advanced settings", mode="markdown")
+            with tgb.layout( columns="1 0.1 1 0.1 1", columns__mobile="1"):
+                tgb.text( "`msconvert`\nexecutable: ", multiline=True, mode="markdown")
+                tgb.part()
+                tgb.input( "{conversion_params.msconvert_path}", active="{local}",
+                            hover_text="You may enter the path to msconvert if it is not accessible via \"msconvert\"" )
+                tgb.part()
+                tgb.button( "Select executable", active="{local}",
+                            on_action=lambda state: set_attribute_recursive( state,
+                                                                             "conversion_params.msconvert_path",
+                                                                             open_file_folder( multiple=False ),
+                                                                             refresh=True ) )
+                
+            
+                
             # Pattern matching
-            tgb.text( "**Pattern matching:**", mode="markdown")
+            tgb.html("br")
+            tgb.text( "###### Pattern matching:", mode="markdown")
             with tgb.layout( columns="1 0.1 1", columns__mobile="1"):
                 with tgb.part():
                     with tgb.layout( columns="1 1", columns__mobile="1"):
@@ -75,8 +119,9 @@ with tgb.Page() as conversion:
                         tgb.input( "{conversion_params.suffix}",
                                     hover_text="Suffix  to filter file (e.g. .mzML)" )
 
-            # Pattern matching
-            tgb.text( "**Other:**", mode="markdown")
+            # Other
+            tgb.html("br")
+            tgb.text( "###### Other:", mode="markdown")
             with tgb.layout( columns="1 0.1 1", columns__mobile="1"):
                 with tgb.part():
                     tgb.text( "Redo-threshold", multiline=True, mode="markdown")

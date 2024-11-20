@@ -382,7 +382,7 @@ def get_attribute_recursive(object, attribute:str, *args) -> any:
     return functools.reduce(_getattr, [object] + attribute.split('.'))
 
 
-def set_attribute_recursive(object, attribute:str, value) -> None:
+def set_attribute_recursive(object, attribute:str, value, refresh:bool=False) -> None:
     """
     Recursive setting of nested attributes.
 
@@ -392,8 +392,14 @@ def set_attribute_recursive(object, attribute:str, value) -> None:
     :type attribute: any
     :param value: Value to set to attribute
     :type value: any
+    :param refresh: Refresh object
+    :type refresh: bool
     :return: None
     :rtype: None
     """
     pre, _, post = attribute.rpartition('.')
-    return setattr(get_attribute_recursive(object, pre) if pre else object, post, value)
+    setattr(get_attribute_recursive(object, pre) if pre else object, post, value)
+    if refresh:
+        object.refresh( attribute )
+        object.refresh( pre )
+    return object
