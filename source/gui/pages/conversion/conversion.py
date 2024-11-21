@@ -35,7 +35,7 @@ def download_converted( state ):
     pass
 
 
-with tgb.Page() as conversion:
+def create_conversion():
     # File Selection
     with tgb.part():
         tgb.toggle( "{local}",
@@ -60,9 +60,9 @@ with tgb.Page() as conversion:
                         with tgb.part( render="{local}" ):
                             tgb.button( "Select out",
                                         on_action=lambda state: set_attribute_recursive( state,
-                                                                                            "conversion_params.scheduled_out",
-                                                                                            open_file_folder( select_folder=state.select_folder),
-                                                                                            refresh=True) )
+                                                                                        "conversion_params.scheduled_out",
+                                                                                        open_file_folder( select_folder=state.select_folder),
+                                                                                        refresh=True) )
                         with tgb.part( render="{not local}"):
                             tgb.file_selector( "{conv_path}",
                                                 label="Select out", extensions="*", drop_message="Drop files/folders as targets here:", multiple=True )

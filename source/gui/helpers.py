@@ -40,7 +40,9 @@ def change_work_dir_root( gui, new_root:StrPath=None ):
 
 
 # File selection
-def open_file_folder( select_folder:bool=False, multiple:bool=True, **kwargs ):
+def open_file_folder( save:bool=False, select_folder:bool=False, multiple:bool=True, **kwargs ):
+    if save:
+        return fd.asksaveasfilename( **kwargs )
     if select_folder:
         return fd.askdirectory( **kwargs )
     elif multiple:

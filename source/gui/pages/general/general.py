@@ -8,10 +8,8 @@ from source.helpers.classes import Step_Configuration
 
 global_params = Step_Configuration()
 
-local = True
 
-
-with tgb.Page() as general:
+def create_general():
     with tgb.layout( columns="1 0.1 1", columns__mobile="1"):
         with tgb.part():
             tgb.selector( "{global_params.platform}",

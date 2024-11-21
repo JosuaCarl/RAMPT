@@ -6,5 +6,5 @@ from source.annotation.sirius_pipe import Sirius_Runner
 
 sirius_params = Sirius_Runner()
 
-with tgb.Page() as sirius:
+def create_sirius():
     tgb.part()

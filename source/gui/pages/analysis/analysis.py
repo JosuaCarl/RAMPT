@@ -2,11 +2,12 @@
 
 import taipy.gui.builder as tgb
 
+from source.helpers.classes import Pipe_Step
 
-class Analysis_Runner:
+class Analysis_Runner(Pipe_Step):
     pass
 
 analysis_params = Analysis_Runner()
 
-with tgb.Page() as analysis:
+def create_analysis():
     tgb.part()

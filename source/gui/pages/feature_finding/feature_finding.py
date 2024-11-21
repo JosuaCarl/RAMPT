@@ -6,5 +6,5 @@ from source.feature_finding.mzmine_pipe import MZmine_Runner
 
 feature_finding_params = MZmine_Runner()
 
-with tgb.Page() as feature_finding:
+def create_feature_finding():
     tgb.part()
