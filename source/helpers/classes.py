@@ -238,8 +238,8 @@ class Pipe_Step(Step_Configuration):
             print(f"Started {self.__class__.__name__} step")
 
         # Extend scheduled paths
-        self.scheduled_in   = helpers.extend_list(self.scheduled_in, in_paths )
-        self.scheduled_out  = helpers.extend_list(self.scheduled_out, out_paths )
+        self.scheduled_in   = helpers.extend_list( self.scheduled_in, in_paths )
+        self.scheduled_out  = helpers.extend_list( self.scheduled_out, out_paths )
 
         # Handle empty output paths by choosing input direcotory as base
         self.scheduled_out = self.scheduled_out if self.scheduled_out\
@@ -253,6 +253,8 @@ class Pipe_Step(Step_Configuration):
         
         # Loop over all in/out combinations
         for in_path, out_path in zip(self.scheduled_in, self.scheduled_out):
+            in_path = in_path["label"] if isinstance(in_path, dict) else in_path
+            out_path = out_path["label"] if isinstance(out_path, dict) else out_path
             if self.verbosity >= 3:
                 print(f"Processing {in_path} -> {out_path}")
 

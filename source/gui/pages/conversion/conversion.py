@@ -16,7 +16,8 @@ conv_progress = 0
 conversion_params = File_Converter()
 
 local = True
-select_folder = False
+select_folder_in = False
+select_folder_out = False
 
 
 def construct_conversion_selection_tree( state, path:StrPath=None ):
@@ -34,7 +35,6 @@ def download_converted( state ):
     # GREY OUT, WHEN converted IS NOT PRESENT
     pass
 
-
 def create_conversion():
     # File Selection
     with tgb.part():
@@ -46,14 +46,15 @@ def create_conversion():
             with tgb.part():
                 with tgb.part( render="{local}" ):
                     tgb.button( "Select in",
-                                on_action=lambda state: construct_conversion_selection_tree(state, open_file_folder( select_folder=state.select_folder)) )
+                                on_action=lambda state: construct_conversion_selection_tree(state, open_file_folder( select_folder=state.select_folder_in)) )
                 with tgb.part( render="{not local}"):
                     tgb.file_selector( "{conv_path}",
                                         label="Select in", extensions="*", drop_message="Drop files/folders for conversion here:", multiple=True,
                                         on_action=construct_conversion_selection_tree )
-                tgb.toggle( "{select_folder}", label="Select folder")
+                tgb.toggle( "{select_folder_in}", label="Select folder")
             tgb.tree( "{conversion_params.scheduled_in}",
-                        lov="{conv_tree_paths}", label="Select for conversion", mode="check", filter=True, multiple=True, expanded=True )
+                        lov="{conv_tree_paths}", label="Select for conversion", filter=True, multiple=True, expanded=True, mode="check", 
+                        on_change=lambda state, var, val: print(val) )
             with tgb.part():
                 with tgb.layout(columns="1 1", columns__mobile="1", gap="5%"):
                     with tgb.part():
@@ -61,12 +62,12 @@ def create_conversion():
                             tgb.button( "Select out",
                                         on_action=lambda state: set_attribute_recursive( state,
                                                                                         "conversion_params.scheduled_out",
-                                                                                        open_file_folder( select_folder=state.select_folder),
+                                                                                        open_file_folder( select_folder=state.select_folder_out),
                                                                                         refresh=True) )
                         with tgb.part( render="{not local}"):
                             tgb.file_selector( "{conv_path}",
                                                 label="Select out", extensions="*", drop_message="Drop files/folders as targets here:", multiple=True )
-                        tgb.toggle( "{select_folder}", label="Select folder")
+                        tgb.toggle( "{select_folder_out}", label="Select folder")
                     tgb.selector( "{conversion_params.target_format}",
                             label="Target_format", lov="mzML;mzXML", dropdown=True, hover_text="The target format for the conversion. mzML is recommended.", width="100px")
             

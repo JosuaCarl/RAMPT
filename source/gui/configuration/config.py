@@ -62,7 +62,8 @@ def generic_step( step_class, in_paths:list, out_path_target:StrPath, step_param
     step_params.update( global_params )
     step_instance = step_class( **step_params )
 
-    out_paths = [os.path.join(in_path, out_path_target) for in_path in in_paths]
+    in_paths = [ in_path["label"] for in_path in in_paths if isinstance(in_path, dict) ]
+    out_paths = [os.path.join(in_path, out_path_target) for in_path in in_paths] 
 
     print(f"\nParameters:\n{step_params}\nInput:\n{in_paths}\n Output:\n{out_paths}\n")
     step_instance.run( in_paths=in_paths, out_paths=out_paths)
@@ -114,31 +115,42 @@ def analyze_difference( gnps_annotated_data, sirius_annotated_data, conversion_p
 # Tasks
 convert_files_config = Config.configure_task( "convert_files",
                                               function=convert_files,
-                                              input=[raw_data_config, conversion_params_config, global_params_config],
+                                              input=[ raw_data_config,
+                                                      conversion_params_config,
+                                                      global_params_config ],
                                               output=community_formatted_data_config,
                                               skippable=False)
 
 find_features_config = Config.configure_task( "find_features",
                                               function=find_features,
-                                              input=[community_formatted_data_config, feature_finding_params_config, global_params_config],
+                                              input=[ community_formatted_data_config,
+                                                      feature_finding_params_config,
+                                                      global_params_config ],
                                               output=processed_data_config,
                                               skippable=False)
 
 annotate_gnps_config = Config.configure_task( "annotate_gnps",
                                               function=annotate_gnps,
-                                              input=[processed_data_config, gnps_params_config, global_params_config],
+                                              input=[ processed_data_config,
+                                                      gnps_params_config,
+                                                      global_params_config ],
                                               output=gnps_annotations_config,
                                               skippable=False)
 
 annotate_sirius_config = Config.configure_task( "annotate_sirius",
                                               function=annotate_sirius,
-                                              input=[processed_data_config, sirius_params_config, global_params_config],
+                                              input=[ processed_data_config,
+                                                      sirius_params_config,
+                                                      global_params_config ],
                                               output=sirius_anntations_config,
                                               skippable=False)
 
 analyze_difference_config = Config.configure_task( "analyze_difference",
                                               function=analyze_difference,
-                                              input=[gnps_annotations_config, sirius_anntations_config, analysis_params_config, global_params_config],
+                                              input=[ gnps_annotations_config,
+                                                      sirius_anntations_config,
+                                                      analysis_params_config, 
+                                                      global_params_config],
                                               output=results_config,
                                               skippable=False)
 
