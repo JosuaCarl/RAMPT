@@ -72,25 +72,29 @@ def generic_step( step_class, in_paths:list, out_path_target:StrPath, step_param
 
 def convert_files( raw_data, conversion_params:dict, global_params:dict ):
     return generic_step( step_class=File_Converter,
-                         input=raw_data, output="../converted",
+                         in_paths=raw_data,
+                         out_path_target="../converted",
                          step_params=conversion_params,
                          global_params=global_params )
 
 def find_features( community_formatted_data, conversion_params:dict, global_params:dict ):
     return generic_step( step_class=MZmine_Runner,
-                         input=community_formatted_data, output="../processed",
+                         in_paths=community_formatted_data,
+                         out_path_target="../processed",
                          step_params=conversion_params,
                          global_params=global_params )
 
 def annotate_gnps( processed_data, conversion_params:dict, global_params:dict ):
     return generic_step( step_class=GNPS_Runner,
-                         input=processed_data, output="../annotated",
+                         in_paths=processed_data,
+                         out_path_target="../annotated",
                          step_params=conversion_params,
                          global_params=global_params )
 
 def annotate_sirius( processed_data, conversion_params:dict, global_params:dict ):
     return generic_step( step_class=Sirius_Runner,
-                         input=processed_data, output="../annotated",
+                         in_paths=processed_data,
+                         out_path_target="../annotated",
                          step_params=conversion_params,
                          global_params=global_params )
 

@@ -107,7 +107,7 @@ class File_Converter(Pipe_Step):
         self.update_regex( pattern=pattern, contains=contains, suffix=suffix, prefix=prefix)
 
 
-    def update_regex( self, pattern:str=None, contains:str=None, suffix:str=None, prefix:str=None):
+    def update_regex( self, pattern:str=".*", contains:str=None, suffix:str=None, prefix:str=None):
         pattern     = pattern   if pattern else self.pattern
         contains    = contains  if contains else self.contains
         suffix      = suffix    if suffix else self.suffix
@@ -118,7 +118,7 @@ class File_Converter(Pipe_Step):
             pattern = rf"{pattern}.*{suffix}$"
         if prefix:
             pattern = rf"^{prefix}.*{pattern}"
-        self.patterns["in"] =  pattern
+        self.patterns["in"] = pattern
 
 
 

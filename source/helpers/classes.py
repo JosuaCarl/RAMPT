@@ -90,7 +90,7 @@ class Step_Configuration:
     Class configuration of pipeline steps in the pipeline.
     """
     def __init__( self, platform:str="Linux", overwrite:bool=True, nested:bool=False, workers:int=1,
-                  patterns:dict[str,str]=None, save_log:bool=False, verbosity:int=1, additional_args:list=[] ):
+                  patterns:dict[str,str]={"in": ".*"}, save_log:bool=False, verbosity:int=1, additional_args:list=[] ):
         """
         Initialize the pipeline step configuration. Used for pattern matching.
         Provides additional variables for saving processed input and out_locations, its output, and errors.
@@ -156,7 +156,7 @@ class Pipe_Step(Step_Configuration):
     Class for steps in the pipeline.
     """
     def __init__( self, platform:str="Linux", overwrite:bool=True, nested:bool=False, workers:int=1,
-                  patterns:dict[str,str]=None, save_log:bool=False, verbosity:int=1, additional_args:list=[] ):
+                  patterns:dict[str,str]={"in": ".*"}, save_log:bool=False, verbosity:int=1, additional_args:list=[] ):
         """
         Initialize the pipeline step. Used for pattern matching.
         Provides additional variables for saving processed input and out_locations, its output, and errors.

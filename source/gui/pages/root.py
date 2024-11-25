@@ -31,7 +31,7 @@ def construct_params_dict( state, param_segment_names:list=param_segment_names )
     params = {}
     for segment_name in param_segment_names:
         segment_params = get_attribute_recursive(state, f"{segment_name}_params")
-        params[segment_name] = segment_params.dict_representation()
+        params[f"{segment_name}_params"] = segment_params.dict_representation()
     return params
 
 
@@ -84,16 +84,19 @@ match_in_out = { "conversion_params.scheduled_in": "raw_data",
 
 def lock_scenario( state ):
     global scenario
+    scenario = state.scenario
 
     params = construct_params_dict( state )
-
-    scenario.data_nodes.update( params )
-
+    
+    data_nodes = params.copy()
     for segment_name, segment_dict in params.items():
-        for scheduled in ["scheduled_in", "scheduled_out"]:
-            attribute = f"{segment_name}.{scheduled}"
+        for in_out in ["scheduled_in", "processed_out"]:
+            attribute = f"{segment_name}.{in_out}"
             if attribute in match_in_out:
-                scenario.data_nodes.update( {match_in_out.get(attribute): segment_dict.get(scheduled)} )
+                data_nodes.update( {match_in_out.get(attribute): segment_dict.get(in_out)} )
+
+    for key, data_node in scenario.data_nodes.items():
+        data_node.write( data_nodes.get(key) )
 
     state.scenario = scenario
     state.refresh( "scenario" )
@@ -111,9 +114,10 @@ def add_scenario( state, id, payload ):
 
 
 def change_scenario( state, id, scenario_name ):
-    # TODO: FIX LOADING SAVED PARAMETERS (If not previously saved)
-    print(f"Changed scenario: {scenario_name}")
+    # Load parameters into Gui
     load_params( state, scenario_name=scenario_name )
+
+    # Push gui parameters into scenario
     lock_scenario( state )
 
 
@@ -126,11 +130,10 @@ job = None
 data_node = None
 
 
-
 style = { ".sticky-part": 
-          { "position": "sticky",
+        { "position": "sticky",
             "align-self": "flex-start",
-             "top": "10px" } }
+            "top": "10px" } }
 
 with tgb.Page( style=style ) as root:
     with tgb.layout( columns="1 3 1", columns__mobile="1", gap="2.5%" ):
@@ -141,9 +144,9 @@ with tgb.Page( style=style ) as root:
             with tgb.layout(columns="1 1.2 1", gap="2%"):
                 tgb.button( "💾 Save", on_action=lambda state, id, payload: save_params( state ) )
                 tgb.button( "💾 Save as", on_action=lambda state, id, payload: save_params( state, path=open_file_folder( save=True, multiple=False,
-                                                                                                                           filetypes=save_file_types ) ) )
+                                                                                                                        filetypes=save_file_types ) ) )
                 tgb.button( "📋 Load", on_action=lambda state, id, payload: load_params( state, path=open_file_folder( multiple=False,
-                                                                                                                       filetypes=save_file_types ) ) )
+                                                                                                                    filetypes=save_file_types ) ) )
             tgb.button( "◀️ Lock scenario", on_action=lambda state, id, payload: lock_scenario( state ) )
 
             # Scenario selector

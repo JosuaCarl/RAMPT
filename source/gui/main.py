@@ -6,7 +6,7 @@ GUI creation with Taipy.
 from taipy.gui import Gui
 from taipy import Orchestrator
 
-from .pages.root import *
+from source.gui.pages.root import *
 
 
 
