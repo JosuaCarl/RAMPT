@@ -165,11 +165,11 @@ class Path_Nester:
             if isinstance(nested_paths, list):
                 entry_present = [True for nested_path in nested_paths if nested_path.get(self.dir_name) == complete_path]
                 if not entry_present:
-                    nested_paths.append( { self.id_name: self.id_counter,
+                    nested_paths.append( { self.id_name: str(self.id_counter),
                                             self.dir_name: complete_path,
                                             self.sub_name: [] } )
             else:
-                nested_paths = [{ self.id_name: self.id_counter,
+                nested_paths = [{ self.id_name: str(self.id_counter),
                                   self.dir_name: step,
                                   self.sub_name: [complete_path]}]
             return nested_paths
@@ -183,7 +183,7 @@ class Path_Nester:
                 split_found = True
 
         if not split_found:
-            nested_paths.append( { self.id_name: self.id_counter,
+            nested_paths.append( { self.id_name: str(self.id_counter),
                                    self.dir_name: step,
                                    self.sub_name: self.add_nested_lists( split_steps[1:],
                                                                          [],

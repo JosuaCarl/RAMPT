@@ -53,7 +53,7 @@ def create_conversion():
                                         on_action=construct_conversion_selection_tree )
                 tgb.toggle( "{select_folder}", label="Select folder")
             tgb.tree( "{conversion_params.scheduled_in}",
-                        lov="{conv_tree_paths}", label="Select for conversion", filter=True, multiple=True, expanded=True )
+                        lov="{conv_tree_paths}", label="Select for conversion", mode="check", filter=True, multiple=True, expanded=True )
             with tgb.part():
                 with tgb.layout(columns="1 1", columns__mobile="1", gap="5%"):
                     with tgb.part():
