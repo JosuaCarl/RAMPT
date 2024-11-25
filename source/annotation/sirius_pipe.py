@@ -142,8 +142,8 @@ class Sirius_Runner(Pipe_Step):
         return futures
 
 
-    def run(self, projectspace:StrPath=None):
-        return super().run( projectspace=projectspace)
+    def run(self, in_paths:list=[], out_paths:list=[], projectspace:StrPath=None):
+        return super().run( in_paths=in_paths, out_paths=out_paths, projectspace=projectspace )
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser( prog='sirius_pipe.py',

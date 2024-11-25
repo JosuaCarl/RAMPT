@@ -58,15 +58,19 @@ analysis_params_config = Config.configure_json_data_node( id="analysis_params",
 
 
 # Task methods
-def generic_step( step_class, in_paths:list, out_path_target:StrPath, step_params:dict, global_params:dict):
+def generic_step( step_class, step_params:dict, global_params:dict, in_paths:list=None, out_path_target:StrPath=None):
     step_params.update( global_params )
     step_instance = step_class( **step_params )
 
-    in_paths = [ in_path["label"] for in_path in in_paths if isinstance(in_path, dict) ]
-    out_paths = [os.path.join(in_path, out_path_target) for in_path in in_paths] 
+    if in_paths:
+        step_instance.scheduled_in = []
+    if out_path_target:
+        step_instance.scheduled_out = []
 
-    print(f"\nParameters:\n{step_params}\nInput:\n{in_paths}\n Output:\n{out_paths}\n")
-    step_instance.run( in_paths=in_paths, out_paths=out_paths)
+    in_paths = [ in_path["label"] if isinstance(in_path, dict) else in_path for in_path in in_paths ]
+    out_paths = [ os.path.abspath(os.path.join(in_path, out_path_target)) for in_path in in_paths] 
+
+    step_instance.run( in_paths=in_paths, out_paths=out_paths )
 
     return step_instance.processed_out
 
@@ -74,28 +78,28 @@ def generic_step( step_class, in_paths:list, out_path_target:StrPath, step_param
 def convert_files( raw_data, conversion_params:dict, global_params:dict ):
     return generic_step( step_class=File_Converter,
                          in_paths=raw_data,
-                         out_path_target="../converted",
+                         out_path_target=os.path.join("..", "converted"),
                          step_params=conversion_params,
                          global_params=global_params )
 
 def find_features( community_formatted_data, conversion_params:dict, global_params:dict ):
     return generic_step( step_class=MZmine_Runner,
                          in_paths=community_formatted_data,
-                         out_path_target="../processed",
+                         out_path_target=os.path.join("..", "processed"),
                          step_params=conversion_params,
                          global_params=global_params )
 
 def annotate_gnps( processed_data, conversion_params:dict, global_params:dict ):
     return generic_step( step_class=GNPS_Runner,
                          in_paths=processed_data,
-                         out_path_target="../annotated",
+                         out_path_target=os.path.join("..", "annotated"),
                          step_params=conversion_params,
                          global_params=global_params )
 
 def annotate_sirius( processed_data, conversion_params:dict, global_params:dict ):
     return generic_step( step_class=Sirius_Runner,
                          in_paths=processed_data,
-                         out_path_target="../annotated",
+                         out_path_target=os.path.join("..", "annotated"),
                          step_params=conversion_params,
                          global_params=global_params )
 
@@ -105,7 +109,7 @@ def analyze_difference( gnps_annotated_data, sirius_annotated_data, conversion_p
     pass
     """
     return generic_step( step_class="",
-                         input=annotated_data, output="../results",
+                         input=annotated_data, output=os.path.join("..", "results"),
                          step_params=conversion_params,
                          global_params=global_params )
     """
@@ -163,7 +167,11 @@ ms_analysis_config = Config.configure_scenario( id="MS_analysis",
                                                                annotate_gnps_config,
                                                                annotate_sirius_config,
                                                                analyze_difference_config],
-                                                sequences={ "convert": [ convert_files_config ]} )
+                                                sequences={ "convert": [ convert_files_config ],
+                                                            "find_features": [ find_features_config ],
+                                                            "gnps": [ annotate_gnps_config ],
+                                                            "sirius": [ annotate_sirius_config ],
+                                                            "analysis": [ analyze_difference_config ] } )
 
 
 # CORE
