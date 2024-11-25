@@ -60,7 +60,7 @@ def load_params( state, path:StrPath=None, scenario_name:str="Default" ):
 
     for segment_name, segment_params in params.items():
         for attribute, param in segment_params.items():
-            set_attribute_recursive(state, f"{segment_name}_params.{attribute}", param, refresh=True)
+            set_attribute_recursive(state, f"{segment_name}.{attribute}", param, refresh=True)
 
 
 # SCENARIO
@@ -115,7 +115,8 @@ def add_scenario( state, id, payload ):
 
 def change_scenario( state, id, scenario_name ):
     # Load parameters into Gui
-    load_params( state, scenario_name=scenario_name )
+    if scenario_name:
+        load_params( state, scenario_name=scenario_name )
 
     # Push gui parameters into scenario
     lock_scenario( state )
