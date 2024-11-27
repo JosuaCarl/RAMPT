@@ -107,12 +107,11 @@ class MZmine_Runner(Pipe_Step):
         self.login              = login
         self.batch_path         = batch_path      
 
-        self.check_class_integrity()
 
-
-    def check_class_integrity( self ):
+    def check_attributes( self ):
         if not os.path.isfile(self.batch_path):
             raise( ValueError(f"Batch path {self.batch_path} is no file. Please point to a valid mzbatch file."))
+
 
 
     def compute( self, in_path:StrPath, out_path:StrPath ) -> bool:

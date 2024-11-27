@@ -18,6 +18,7 @@ from source.gui.configuration.config import *
 
 
 # Working directory
+local = True
 work_dir_root = tempfile.gettempdir()
 
 
@@ -96,7 +97,8 @@ def lock_scenario( state ):
                 data_nodes.update( {match_in_out.get(attribute): segment_dict.get(in_out)} )
 
     for key, data_node in scenario.data_nodes.items():
-        data_node.write( data_nodes.get(key) )
+        if data_nodes.get(key):
+            data_node.write( data_nodes.get(key) )
 
     state.scenario = scenario
     state.refresh( "scenario" )
