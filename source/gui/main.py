@@ -13,7 +13,7 @@ from source.gui.pages.root import *
 pages = { "/": '<|toggle|theme|><center><|navbar|lov={[("/", "Application"), ("https://josuacarl.github.io/mine2sirius_pipe", "Documentation")]}|></center>',
           "configuration": root }
 
-gui = Gui(pages=pages)
+gui = Gui(pages=pages, css_file="main.css")
 
 
 

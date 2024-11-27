@@ -24,6 +24,9 @@ selections.update( { "feature_finding_in": [],
 
 def create_feature_finding( process="feature_finding" ):
     create_file_selection( process="feature_finding", out_node="" )
+
+    tgb.html("br")
+
     create_batch_selection( process="feature_finding", extensions=".mzbatch,.xml" )
 
     # Advanced settings
