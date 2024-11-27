@@ -22,21 +22,20 @@ selections.update( { "feature_finding_in": [],
                      "feature_finding_batch": [] })
 
 
-def create_feature_finding( process="feature_finding" ):
-    create_local_switch()
-
-    tgb.html("br")
-    
+def create_feature_finding( process="feature_finding" ):  
+    tgb.text( "###### File selection", mode="markdown")
     create_file_selection( process="feature_finding", out_node="processed_data" )
 
     tgb.html("br")
 
+    tgb.text( "###### Batch selection", mode="markdown")
     create_batch_selection( process="feature_finding", extensions=".mzbatch,.xml" )
 
     # Advanced settings
     tgb.html("br")
     tgb.html("hr")
     tgb.text( "##### Advanced settings", mode="markdown")
+
     with tgb.layout( columns="1 1 1 1", columns__mobile="1",gap="5%"):
         tgb.button( "Select executable", active="{local}",
                     on_action=lambda state: set_attribute_recursive( state,

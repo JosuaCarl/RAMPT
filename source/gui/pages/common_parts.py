@@ -6,14 +6,6 @@ from source.gui.helpers import *
 
 selections = {}
 
-def create_local_switch():
-    with tgb.layout(columns="1 1 1", columns__mobile="1"):
-        tgb.part()
-        tgb.toggle( "{local}",
-                    label="Process locally", hover_text="Whether to use the server functionality of taipy to upload files and process them,\
-                                                        or to use files that are present on the local machine.")
-        tgb.part()
-
 
 
 def create_file_selection( process:str, out_node:str="" ):

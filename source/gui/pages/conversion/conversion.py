@@ -19,24 +19,23 @@ selections.update( { "conversion_in": [] })
 
 
 def create_conversion():
-    create_local_switch()
-
-    tgb.html("br")
-
+    tgb.text( "###### File selection", mode="markdown")
     create_file_selection( process="conversion", out_node="community_formatted_data" )        
     
     # Advanced settings
     tgb.html("br")
     tgb.html("hr")
     tgb.text( "##### Advanced settings", mode="markdown")
+    
+
     tgb.selector( "{conversion_params.target_format}",
             label="Target format", lov="mzML;mzXML", dropdown=True, hover_text="The target format for the conversion. mzML is recommended.", width="100px")
     with tgb.layout( columns="1 1 1 1", columns__mobile="1",gap="5%"):
         tgb.button( "Select executable", active="{local}",
                     on_action=lambda state: set_attribute_recursive( state,
-                                                                        "conversion_params.msconvert_path",
-                                                                        open_file_folder( multiple=False ),
-                                                                        refresh=True ) )
+                                                                     "conversion_params.msconvert_path",
+                                                                     open_file_folder( multiple=False ),
+                                                                     refresh=True ) )
         tgb.input( "{conversion_params.msconvert_path}", active="{local}",
                     label="`msconvert` executable",
                     hover_text="You may enter the path to msconvert if it is not accessible via \"msconvert\"" )

@@ -1,3 +1,14 @@
+/* Header styling */
+h6{
+    margin-top: 1%;
+    margin-bottom: 1%;
+}
+
+.MuiAccordionSummary-content{
+    font-size: large;
+}
+
+/* Animation hover text */
 @keyframes appearDelayed {
     0% {
         opacity: 0;
