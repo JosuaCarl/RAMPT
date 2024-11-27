@@ -23,7 +23,11 @@ selections.update( { "feature_finding_in": [],
 
 
 def create_feature_finding( process="feature_finding" ):
-    create_file_selection( process="feature_finding", out_node="" )
+    create_local_switch()
+
+    tgb.html("br")
+    
+    create_file_selection( process="feature_finding", out_node="processed_data" )
 
     tgb.html("br")
 
@@ -33,40 +37,38 @@ def create_feature_finding( process="feature_finding" ):
     tgb.html("br")
     tgb.html("hr")
     tgb.text( "##### Advanced settings", mode="markdown")
-    with tgb.layout( columns="1 1 1", columns__mobile="1",gap="5%"):
-        tgb.text( "`mzmine`\nexecutable: ", multiline=True, mode="markdown")
-        tgb.input( "{feature_finding_params.mzmine_path}", active="{local}",
-                    hover_text="You may enter the path to mzmine if it is not accessible via \"mzmine\"" )
+    with tgb.layout( columns="1 1 1 1", columns__mobile="1",gap="5%"):
         tgb.button( "Select executable", active="{local}",
                     on_action=lambda state: set_attribute_recursive( state,
                                                                      "feature_finding_params.mzmine_path",
                                                                      open_file_folder( multiple=False ),
                                                                      refresh=True ) )
+        tgb.input( "{feature_finding_params.mzmine_path}", active="{local}",
+                   label="`mzmine` executable",
+                    hover_text="You may enter the path to mzmine if it is not accessible via \"mzmine\"" )
+        tgb.part()
+        tgb.part()
         
     
-    ## Login
-    with tgb.part():
-        tgb.text( "Login/user command:")
+    with tgb.layout( columns="1 1", columns__mobile="1", gap="5%"):
+        ## Login
         tgb.input( "{feature_finding_params.login}",
-                   label="Login/user command",
-                   hover_text="User command for online login" )
+                    label="Login/user command",
+                    hover_text="User command for online login" )
 
 
-    ## Formats
-    with tgb.part():
-        tgb.text( "Valid formats:")
+        ## Formats
         tgb.input( "{feature_finding_params.valid_formats}",
-                   label="Valid formats",
-                   hover_text="List of valid formats, separated by ','",
-                   on_change=lambda state, var, val: set_attribute_recursive( state,
-                                                                              "feature_finding_params.valid_formats",
-                                                                              val.split(","),
-                                                                              refresh=True ) )
+                    label="Valid formats",
+                    hover_text="List of valid formats, separated by ','",
+                    on_change=lambda state, var, val: set_attribute_recursive( state,
+                                                                                "feature_finding_params.valid_formats",
+                                                                                val.split(","),
+                                                                                refresh=True ) )
 
     # Other
-    tgb.html("br")
     tgb.text( "###### Other:", mode="markdown")
     with tgb.part():
-        tgb.text( "Additional arguments", multiline=True, mode="markdown")
         tgb.input( "{feature_finding_params.additional_args}",
-                    hover_text="Additional arguments that can be given to the mzmine (works with command line interface).")
+                   label="Additional arguments",
+                   hover_text="Additional arguments that can be given to the mzmine (works with command line interface).")

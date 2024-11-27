@@ -6,6 +6,15 @@ from source.gui.helpers import *
 
 selections = {}
 
+def create_local_switch():
+    with tgb.layout(columns="1 1 1", columns__mobile="1"):
+        tgb.part()
+        tgb.toggle( "{local}",
+                    label="Process locally", hover_text="Whether to use the server functionality of taipy to upload files and process them,\
+                                                        or to use files that are present on the local machine.")
+        tgb.part()
+
+
 
 def create_file_selection( process:str, out_node:str="" ):
     
@@ -18,12 +27,8 @@ def create_file_selection( process:str, out_node:str="" ):
             pruned_tree = path_nester.prune_lca( nested_paths=selections[tree_id] )
             set_attribute_recursive( state, f"{process}_selection_tree_in", pruned_tree )
 
-    # File Selection
-    tgb.toggle( "{local}",
-                label="Process locally", hover_text="Whether to use the server functionality of taipy to upload files and process them,\
-                                                      or to use files that are present on the local machine.")
-    tgb.html("br")
     with tgb.layout( columns="1 2 2", columns__mobile="1", gap="5%"):
+        # In
         with tgb.part():
             with tgb.part( render="{local}" ):
                 tgb.button( "Select in",
@@ -40,6 +45,8 @@ def create_file_selection( process:str, out_node:str="" ):
                     lov=f"{{{process}_selection_tree_in}}",
                     label=f"Select in for {process}",
                     filter=True, multiple=True, expanded=True, mode="check" )
+        
+        # Out
         with tgb.part():
             with tgb.part():
                 with tgb.part( render="{local}" ):
