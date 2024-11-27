@@ -105,7 +105,8 @@ class MZmine_Runner(Pipe_Step):
             self.update(kwargs)
         self.mzmine_path        = mzmine_path
         self.login              = login
-        self.batch_path         = batch_path      
+        self.batch_path         = batch_path
+        self.valid_formats      = valid_formats
 
 
     def check_attributes( self ):

@@ -8,14 +8,13 @@ from source.conversion.msconv_pipe import File_Converter
 
 conversion_params = File_Converter()
 
-conv_path = "."
+conv_path_in = "."
 conv_select_tree_paths = []
-conv_selection = ""
 conv_select_folder_in = False
 
 
 def construct_selection_tree( state, path:StrPath=None ):
-    path = path if path else get_attribute_recursive( state, "conv_path")
+    path = path if path else get_attribute_recursive( state, "conv_path_in")
 
     if path != ".":
         global conv_select_tree_paths
@@ -39,7 +38,7 @@ def create_conversion():
                     tgb.button( "Select in",
                                 on_action=lambda state: construct_selection_tree(state, open_file_folder( select_folder=state.conv_select_folder_in)) )
                 with tgb.part( render="{not local}"):
-                    tgb.file_selector( "{conv_path}",
+                    tgb.file_selector( "{conv_path_in}",
                                         label="Select in", extensions="*", drop_message="Drop files/folders for conversion here:", multiple=True,
                                         on_action=construct_selection_tree )
                 tgb.toggle( "{conv_select_folder_in}", label="Select folder")

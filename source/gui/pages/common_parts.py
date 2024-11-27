@@ -4,18 +4,19 @@ import taipy.gui.builder as tgb
 
 from source.gui.helpers import *
 
+selections = {}
 
 
 def create_file_selection( process:str, out_node:str="" ):
     
-    def construct_selection_tree( state, path:StrPath=None ):
-        path = path if path else get_attribute_recursive( state, f"{process}_path")
+    def construct_selection_tree( state, path:StrPath=None, tree_id:str=f"{process}_in" ):
+        path = path if path else get_attribute_recursive( state, f"{process}_path_in")
 
         if path != ".":
-            globals()[f"{process}_select_tree_paths"] = add_path_to_tree( globals()[f"{process}_select_tree_paths"], path )
+            selections[tree_id] = add_path_to_tree( selections[tree_id] , path)
 
-            pruned_tree = path_nester.prune_lca( nested_paths=globals()[f"{process}_select_tree_paths"] )
-            set_attribute_recursive( state, f"{process}_select_tree_paths", pruned_tree )
+            pruned_tree = path_nester.prune_lca( nested_paths=selections[tree_id] )
+            set_attribute_recursive( state, f"{process}_selection_tree_in", pruned_tree )
 
     # File Selection
     tgb.toggle( "{local}",
@@ -31,12 +32,14 @@ def create_file_selection( process:str, out_node:str="" ):
                                                                                                 get_attribute_recursive(state, f"{process}_select_folder_in") )
                                                                             ) )
             with tgb.part( render="{not local}"):
-                tgb.file_selector( f"{{{process}_path}}",
+                tgb.file_selector( f"{{{process}_path_in}}",
                                     label="Select in", extensions="*", drop_message=f"Drop files/folders for {process} here:", multiple=True,
                                     on_action=construct_selection_tree )
             tgb.toggle( f"{{{process}_select_folder_in}}", label="Select folder")
         tgb.tree( f"{{{process}_params.scheduled_in}}",
-                    lov=f"{{{process}_select_tree_paths}}", label=f"Select for {process}", filter=True, multiple=True, expanded=True, mode="check" )
+                    lov=f"{{{process}_selection_tree_in}}",
+                    label=f"Select in for {process}",
+                    filter=True, multiple=True, expanded=True, mode="check" )
         with tgb.part():
             with tgb.part():
                 with tgb.part( render="{local}" ):
@@ -50,3 +53,30 @@ def create_file_selection( process:str, out_node:str="" ):
                                         label="Download results",
                                         on_action=lambda state, id, payload: download_data_node_files( state,
                                                                                                         out_node) )
+
+
+
+def create_batch_selection( process:str, extensions:str="*" ):
+    def construct_selection_list( state, path:StrPath=None, list_id:str=f"{process}_batch" ):
+        path = path if path else get_attribute_recursive( state, f"{process}_path_batch")
+
+        if path != ".":
+            selections[list_id].append(path)
+            set_attribute_recursive( state, f"{process}_selection_list_batch", selections[list_id]  )
+
+    with tgb.layout( columns="1 1", columns__mobile="1", gap="5%"):
+        with tgb.part( render="{local}" ):
+            tgb.button( "Select batch file",
+                        on_action=lambda state: construct_selection_list( state, open_file_folder( multiple=False ) ) )
+        with tgb.part( render="{not local}"):
+            tgb.file_selector( f"{{{process}_path_batch}}",
+                                label="Select batch file", extensions=extensions,
+                                drop_message=f"Drop batch file for {process} here:",
+                                multiple=False,
+                                on_action=construct_selection_list )
+            
+        tgb.selector( f"{{{process}_params.batch_path}}",
+                        lov=f"{{{process}_selection_list_batch}}",
+                        label=f"Select a batch file for {process}",
+                        filter=True, multiple=False, mode="radio" )
+        
