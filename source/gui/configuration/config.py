@@ -79,7 +79,12 @@ def generic_step( step_class, step_params:dict, global_params:dict, in_paths:lis
 
     in_paths = [ in_path["label"] if isinstance(in_path, dict) else in_path for in_path in in_paths ]
     if not step_instance.scheduled_out:
-        out_paths = [ os.path.abspath(os.path.join(in_path, out_path_target)) for in_path in in_paths ]
+        out_paths = []
+        for in_path in in_paths:
+            if os.path.isfile(in_path):
+                out_paths.append( os.path.abspath(os.path.join(os.path.dirname(in_path), out_path_target)) )
+            else:
+                out_paths.append( os.path.abspath(os.path.join(in_path, out_path_target)) )
 
     step_instance.run( in_paths=in_paths, out_paths=out_paths, **kwargs )
 

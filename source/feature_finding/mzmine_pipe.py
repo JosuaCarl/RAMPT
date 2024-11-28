@@ -130,8 +130,7 @@ class MZmine_Runner(Pipe_Step):
         :rtype: bool
         """
         batch_path = batch_path if batch_path else self.batch_path
-        cmd = rf'"{self.exec_path}" {self.login} --batch {batch_path} --input {in_path} --output {out_path}\
-                {" ".join(self.additional_args)}'
+        cmd = rf'"{self.exec_path}" {self.login} --batch {batch_path} --input {in_path} --output {out_path} {" ".join(self.additional_args)}'
         
         log_path = join(out_path, "mzmine_log.txt") if self.save_log else None
         out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
@@ -142,7 +141,7 @@ class MZmine_Runner(Pipe_Step):
         self.errs.append( err )
         self.log_paths.append( log_path )
 
-        out_path
+        return out_path
 
 
     def compute_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
@@ -173,8 +172,8 @@ class MZmine_Runner(Pipe_Step):
                 batch_path = entry_path if not self.batch_path else None
             elif os.path.isdir( entry_path ):
                 futures = self.compute_nested( in_root_dir=entry_path,
-                                                          out_root_dir=join( out_root_dir, entry ),
-                                                          futures=futures, recusion_level=recusion_level+1)
+                                               out_root_dir=join( out_root_dir, entry ),
+                                               futures=futures, recusion_level=recusion_level+1)
 
         source_paths_file = join( out_root_dir, "source_files.txt" )
         if found_files:

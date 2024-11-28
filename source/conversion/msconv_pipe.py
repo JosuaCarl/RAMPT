@@ -160,12 +160,17 @@ class File_Converter(Pipe_Step):
 
         cmd = rf'"{self.exec_path}" --{target_format} --64 -o {out_path} {in_path} {" ".join(self.additional_args)}'
 
+        log_path = join(out_path, "msconv_log.txt") if self.save_log else None
         out, err =  helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
-                                                     out_path=join(out_path, "msconv_log.txt") if self.save_log else None)
+                                                     out_path=log_path)
+        if not os.path.isfile(out_path):
+            out_path = os.path.join( out_path, f"{'.'.join(os.path.basename(in_path).split(".")[:-1])}.{target_format}" )
+
         self.processed_in.append( in_path )
         self.processed_out.append( out_path )
         self.outs.append( out )
         self.errs.append( err )
+        self.log_paths.append( log_path )
 
         return out_path
 

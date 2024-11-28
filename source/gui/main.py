@@ -20,4 +20,4 @@ gui = Gui(pages=pages, css_file="main.css")
 if __name__ == "__main__":
     Orchestrator().run()
 
-    gui.run(title="mine2sirius", use_reloader=True, port=5000, propagate=True, run_browser=False)
+    gui.run(title="mine2sirius", use_reloader=False, port=5000, run_browser=False)
