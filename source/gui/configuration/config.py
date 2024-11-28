@@ -30,7 +30,7 @@ processed_data_config = Config.configure_in_memory_data_node( id="processed_data
 gnps_annotations_config = Config.configure_csv_data_node( id="gnps_annotations",
                                                           scope=Scope.SCENARIO )
 
-sirius_anntations_config = Config.configure_csv_data_node( id="sirius_anntations",
+sirius_annotations_config = Config.configure_csv_data_node( id="sirius_annotations",
                                                            scope=Scope.SCENARIO )
 
 results_config = Config.configure_csv_data_node( id="results",
@@ -67,12 +67,10 @@ mzmine_log_config = Config.configure_in_memory_data_node( id="mzmine_log",
 sirius_config_config = Config.configure_in_memory_data_node( id="sirius_config",
                                                             scope=Scope.SCENARIO )
 
-sirius_projectspace_config = Config.configure_in_memory_data_node( id="sirius_projectspace",
-                                                                   scope=Scope.SCENARIO )
-
 
 # Task methods
-def generic_step( step_class, step_params:dict, global_params:dict, in_paths:list=None, out_path_target:StrPath=None, **kwargs):
+def generic_step( step_class, step_params:dict, global_params:dict, in_paths:list=None,
+                  out_path_target:StrPath=None, return_attributes:list=["processed_out"], **kwargs):
     step_params.update( global_params )
     step_instance = step_class( **step_params )
 
@@ -81,11 +79,11 @@ def generic_step( step_class, step_params:dict, global_params:dict, in_paths:lis
 
     in_paths = [ in_path["label"] if isinstance(in_path, dict) else in_path for in_path in in_paths ]
     if not step_instance.scheduled_out:
-        out_paths = [ os.path.abspath(os.path.join(in_path, out_path_target)) for in_path in in_paths]
+        out_paths = [ os.path.abspath(os.path.join(in_path, out_path_target)) for in_path in in_paths ]
 
     step_instance.run( in_paths=in_paths, out_paths=out_paths, **kwargs )
 
-    return step_instance.processed_out
+    return ( getattr(step_instance, attr) for attr in return_attributes )
 
 
 def convert_files( raw_data:StrPath, step_params:dict, global_params:dict ):
@@ -95,13 +93,14 @@ def convert_files( raw_data:StrPath, step_params:dict, global_params:dict ):
                          step_params=step_params,
                          global_params=global_params )
 
-def find_features( community_formatted_data:StrPath, mzmine_batch_file:StrPath, step_params:dict, global_params:dict ):
+def find_features( community_formatted_data:StrPath, mzmine_batch_path:StrPath, step_params:dict, global_params:dict ):
     return generic_step( step_class=MZmine_Runner,
                          in_paths=community_formatted_data,
                          out_path_target=os.path.join("..", "processed"),
                          step_params=step_params,
                          global_params=global_params,
-                         batch_file=mzmine_batch_file )
+                         return_attributes=["processed_out", "log_paths"],
+                         batch_path=mzmine_batch_path )
 
 def annotate_gnps( processed_data:StrPath, mzmine_log:StrPath, step_params:dict, global_params:dict ):
     return generic_step( step_class=GNPS_Runner,
@@ -139,7 +138,7 @@ convert_files_config = Config.configure_task( "convert_files",
                                                       conversion_params_config,
                                                       global_params_config ],
                                               output=community_formatted_data_config,
-                                              skippable=False)
+                                              skippable=False )
 
 find_features_config = Config.configure_task( "find_features",
                                               function=find_features,
@@ -147,8 +146,9 @@ find_features_config = Config.configure_task( "find_features",
                                                       mzmine_batch_config,
                                                       feature_finding_params_config,
                                                       global_params_config ],
-                                              output=processed_data_config,
-                                              skippable=False)
+                                              output=[ processed_data_config,
+                                                       mzmine_log_config ],
+                                              skippable=False )
 
 annotate_gnps_config = Config.configure_task( "annotate_gnps",
                                               function=annotate_gnps,
@@ -157,25 +157,24 @@ annotate_gnps_config = Config.configure_task( "annotate_gnps",
                                                       gnps_params_config,
                                                       global_params_config ],
                                               output=gnps_annotations_config,
-                                              skippable=False)
+                                              skippable=False )
 
 annotate_sirius_config = Config.configure_task( "annotate_sirius",
                                               function=annotate_sirius,
                                               input=[ processed_data_config,
-                                                      sirius_projectspace_config,
                                                       sirius_params_config,
                                                       global_params_config ],
-                                              output=sirius_anntations_config,
-                                              skippable=False)
+                                              output=sirius_annotations_config,
+                                              skippable=False )
 
 analyze_difference_config = Config.configure_task( "analyze_difference",
                                               function=analyze_difference,
                                               input=[ gnps_annotations_config,
-                                                      sirius_anntations_config,
+                                                      sirius_annotations_config,
                                                       analysis_params_config, 
                                                       global_params_config],
                                               output=results_config,
-                                              skippable=False)
+                                              skippable=False )
 
 
 

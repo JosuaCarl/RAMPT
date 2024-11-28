@@ -18,9 +18,6 @@ feature_finding_batch_path = ".mzbatch"
 feature_finding_selection_list_batch = []
 
 
-selections.update( { "feature_finding_in": [],
-                     "feature_finding_batch": [] })
-
 
 def create_feature_finding( process="feature_finding" ):  
     tgb.text( "###### File selection", mode="markdown")
@@ -36,17 +33,7 @@ def create_feature_finding( process="feature_finding" ):
     tgb.html("hr")
     tgb.text( "##### Advanced settings", mode="markdown")
 
-    with tgb.layout( columns="1 1 1 1", columns__mobile="1",gap="5%"):
-        tgb.button( "Select executable", active="{local}",
-                    on_action=lambda state: set_attribute_recursive( state,
-                                                                     "feature_finding_params.mzmine_path",
-                                                                     open_file_folder( multiple=False ),
-                                                                     refresh=True ) )
-        tgb.input( "{feature_finding_params.mzmine_path}", active="{local}",
-                   label="`mzmine` executable",
-                    hover_text="You may enter the path to mzmine if it is not accessible via \"mzmine\"" )
-        tgb.part()
-        tgb.part()
+    create_exec_selection( process="feature_finding", exec_name="mzmine_console" )
         
     tgb.html("br")
     with tgb.layout( columns="1 1", columns__mobile="1", gap="5%"):

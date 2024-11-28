@@ -13,9 +13,6 @@ conversion_path_in = "."
 conversion_selection_tree_in = []
 conversion_select_folder_in = False
 
-selections.update( { "conversion_in": [] })
-
-
 
 
 def create_conversion():
@@ -27,17 +24,8 @@ def create_conversion():
     tgb.html("hr")
     tgb.text( "##### Advanced settings", mode="markdown")
     
-    with tgb.layout( columns="1 1 1 1", columns__mobile="1",gap="5%"):
-        tgb.button( "Select executable", active="{local}",
-                    on_action=lambda state: set_attribute_recursive( state,
-                                                                     "conversion_params.msconvert_path",
-                                                                     open_file_folder( multiple=False ),
-                                                                     refresh=True ) )
-        tgb.input( "{conversion_params.msconvert_path}", active="{local}",
-                    label="`msconvert` executable",
-                    hover_text="You may enter the path to msconvert if it is not accessible via \"msconvert\"" )
-        tgb.part()
-        tgb.part()
+    create_exec_selection( process="conversion", exec_name="msconvert" )
+
     tgb.html("br")
     tgb.selector( "{conversion_params.target_format}",
             label="Target format", lov="mzML;mzXML", dropdown=True, hover_text="The target format for the conversion. mzML is recommended.", width="100px")

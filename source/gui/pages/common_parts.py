@@ -15,11 +15,13 @@ def create_expandable_setting( create_methods:list, title:str, hover_text:str=""
             with tgb.part():
                 for create_method in create_methods:
                     create_method()
+                    tgb.html("br")
             tgb.part()
 
 
 
 def create_file_selection( process:str, out_node:str="" ):
+    selections.update( { f"{process}_in": [] })
     def construct_selection_tree( state, path:StrPath=None, tree_id:str=f"{process}_in" ):
         path = path if path else get_attribute_recursive( state, f"{process}_path_in")
 
@@ -65,8 +67,9 @@ def create_file_selection( process:str, out_node:str="" ):
 
 
 
-def create_batch_selection( process:str, batch_attribute:str="batch_path", extensions:str="*" ):
-    def construct_selection_list( state, path:StrPath=None, list_id:str=f"{process}_batch" ):
+def create_batch_selection( process:str, batch_attribute:str="batch_path", extensions:str="*", batch_name:str="batch_file"  ):
+    selections.update( { f"{process}_{batch_name}": [] })
+    def construct_selection_list( state, path:StrPath=None, list_id:str=f"{process}_{batch_name}" ):
         path = path if path else get_attribute_recursive( state, f"{process}_path_batch")
 
         if path != ".":
@@ -75,16 +78,30 @@ def create_batch_selection( process:str, batch_attribute:str="batch_path", exten
 
     with tgb.layout( columns="1 1", columns__mobile="1", gap="5%"):
         with tgb.part( render="{local}" ):
-            tgb.button( "Select batch file",
+            tgb.button( f"Select {batch_name}",
                         on_action=lambda state: construct_selection_list( state, open_file_folder( multiple=False ) ) )
         with tgb.part( render="{not local}"):
             tgb.file_selector( f"{{{process}_path_batch}}",
-                                label="Select batch file", extensions=extensions,
-                                drop_message=f"Drop batch file for {process} here:",
+                                label=f"Select {batch_name}", extensions=extensions,
+                                drop_message=f"Drop {batch_name} for {process} here:",
                                 multiple=False,
                                 on_action=lambda state: construct_selection_list( state ) )
             
         tgb.selector( f"{{{process}_params.{batch_attribute}}}",
                         lov=f"{{{process}_selection_list_batch}}",
-                        label=f"Select a batch file for {process}",
+                        label=f"Select a {batch_name} for {process}",
                         filter=True, multiple=False, mode="radio" )
+
+
+def create_exec_selection( process:str, exec_name:str, exec_attribute="exec_path"):
+    with tgb.layout( columns="1 1 1 1", columns__mobile="1",gap="5%"):
+        tgb.button( "Select executable", active="{local}",
+                    on_action=lambda state: set_attribute_recursive( state,
+                                                                     f"{process}_params.exec_path",
+                                                                     open_file_folder( multiple=False ),
+                                                                     refresh=True ) )
+        tgb.input( f"{{{process}_params.{exec_attribute}}}", active="{local}",
+                   label=f"`{exec_name}` executable",
+                    hover_text=f"You may enter the path to {exec_name}." )
+        tgb.part()
+        tgb.part()

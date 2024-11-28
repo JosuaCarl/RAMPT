@@ -8,14 +8,13 @@ from source.annotation.sirius_pipe import Sirius_Runner
 sirius_params = Sirius_Runner()
 
 sirius_path_in = "."
+sirius_selection_tree_in = []
 sirius_select_folder_in = False
 
 sirius_path_batch = "."
 sirius_batch_path = "config.txt"
 sirius_selection_list_batch = []
 
-selections.update( { "sirius_in": [],
-                     "sirius_batch": [] })
 
 
 def create_sirius():
@@ -32,15 +31,8 @@ def create_sirius():
     tgb.html("hr")
     tgb.text( "##### Advanced settings", mode="markdown")
 
-    with tgb.layout( columns="1 1 1 1", columns__mobile="1",gap="5%"):
-        tgb.button( "Select executable", active="{local}",
-                    on_action=lambda state: set_attribute_recursive( state,
-                                                                     "sirius_params.mzmine_path",
-                                                                     open_file_folder( multiple=False ),
-                                                                     refresh=True ) )
-        tgb.input( "{feature_finding_params.mzmine_path}", active="{local}",
-                   label="`mzmine` executable",
-                    hover_text="You may enter the path to mzmine if it is not accessible via \"mzmine\"" )
-        tgb.part()
-        tgb.part()
-    sirius_path:StrPath="sirius",  projectspace:StrPath=None
+    create_exec_selection( process="sirius", exec_name="sirius" )
+   
+    tgb.html("br")
+
+    create_batch_selection( process="sirius", batch_attribute="projectspace", batch_name="projectspace" )

@@ -83,13 +83,13 @@ match_data_node = { # IO Data
                     "analysis_params.scheduled_in": "gnps_annotations",
                     "gnps_params.processed_out":    "gnps_annotations",
 
-                    "analysis_params.scheduled_in": "sirius_anntations",
-                    "sirius_params.processed_out":  "sirius_anntations",
+                    "analysis_params.scheduled_in": "sirius_annotations",
+                    "sirius_params.processed_out":  "sirius_annotations",
 
                     "analysis_params.processed_out": "results",
 
                     # Batches and more
-                    "feature_finding_params.batch_file": "mzmine_batch",
+                    "feature_finding_params.batch_path": "mzmine_batch",
 
                     "feature_finding_params.log_paths":  "mzmine_log",
                     "gnps_params.mzmine_log":  "mzmine_log",
@@ -105,11 +105,10 @@ def lock_scenario( state ):
     params = construct_params_dict( state )
     
     data_nodes = params.copy()
-    for segment_name, segment_dict in params.items():
-        for in_out in ["scheduled_in", "processed_out"]:
-            attribute = f"{segment_name}.{in_out}"
-            if attribute in match_data_node:
-                data_nodes.update( {match_data_node.get(attribute): segment_dict.get(in_out)} )
+
+    for attribute_key, data_node_key in match_data_node.items():
+        attribute_split = attribute_key.split(".")
+        data_nodes.update( {data_node_key: params.get(attribute_split[0]).get(attribute_split[1])} )
 
     for key, data_node in scenario.data_nodes.items():
         if data_nodes.get(key):
