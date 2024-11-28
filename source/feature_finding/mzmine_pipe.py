@@ -29,7 +29,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     :type unknown_args: list[str]
     """
     # Extract arguments
-    exec_path       = get_value(args, "exec_path",        None )
+    exec_path       = get_value(args, "exec_path",          None )
     in_dir          = get_value(args, "in_dir" )
     out_dir         = get_value(args, "out_dir" )
     batch_path      = get_value(args, "batch_path" )
@@ -66,6 +66,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
                For future use please find your user file under $USER/.mzmine/users/ after completing the login.")
         login = "--login"
 
+    print(valid_formats)
     mzmine_runner = MZmine_Runner( exec_path=exec_path, batch_path=batch_path, login=login,
                                    valid_formats=valid_formats, save_log=save_log,
                                    additional_args=additional_args, verbosity=verbosity,

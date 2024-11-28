@@ -49,7 +49,11 @@ def get_value( instance:object|dict, key, default ):
             return instance.get( key, default )
     else:
         if hasattr( instance, key ):
-            return getattr( instance, key )
+            value = getattr( instance, key, default )
+            if value is None:
+                return default
+            else:
+                return value
         else:
             return default
 

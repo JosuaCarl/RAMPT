@@ -91,6 +91,8 @@ class GNPS_Runner(Pipe_Step):
                 response_json = re.search(r"{.*}", line.replace(query, ""))[0]
                 return json.loads(response_json)
 
+        raise(ValueError(f"Query <{query}> was not found in mzmine_log: Please provide a valid string or path."))
+
     def extract_task_info( self, query:str, mzmine_log:StrPath=None ) -> dict:
         """
         Extract the information about the started GNPS task from the mzmin_log.
@@ -108,9 +110,6 @@ class GNPS_Runner(Pipe_Step):
                 return self.query_response_iterator( query=query, iterator=f.readlines())
         else:
             return self.query_response_iterator( query=query, iterator=mzmine_log.split("\n"))
-                
-        raise(ValueError(f"Query <{query}> was not found in mzmine_log: Please provide a valid string or path."))
-
 
 
     def check_task_finished( self, mzmine_log:str=None, gnps_response:dict=None ) -> tuple[str, bool]:
