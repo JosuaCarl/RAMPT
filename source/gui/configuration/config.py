@@ -57,6 +57,17 @@ analysis_params_config = Config.configure_json_data_node( id="analysis_params",
                                                         scope=Scope.SCENARIO )
 
 
+# Batch file nodes
+mzmine_batch_config = Config.configure_in_memory_data_node( id="mzmine_batch",
+                                                            scope=Scope.SCENARIO )
+
+mzmine_log_config = Config.configure_in_memory_data_node( id="mzmine_log",
+                                                          scope=Scope.SCENARIO )
+
+sirius_batch_config = Config.configure_in_memory_data_node( id="sirius_batch",
+                                                          scope=Scope.SCENARIO )
+
+
 # Task methods
 def generic_step( step_class, step_params:dict, global_params:dict, in_paths:list=None, out_path_target:StrPath=None):
     step_params.update( global_params )
@@ -64,11 +75,10 @@ def generic_step( step_class, step_params:dict, global_params:dict, in_paths:lis
 
     if in_paths:
         step_instance.scheduled_in = []
-    if out_path_target:
-        step_instance.scheduled_out = []
 
     in_paths = [ in_path["label"] if isinstance(in_path, dict) else in_path for in_path in in_paths ]
-    out_paths = [ os.path.abspath(os.path.join(in_path, out_path_target)) for in_path in in_paths] 
+    if not step_instance.scheduled_out:
+        out_paths = [ os.path.abspath(os.path.join(in_path, out_path_target)) for in_path in in_paths]
 
     step_instance.run( in_paths=in_paths, out_paths=out_paths )
 
@@ -128,6 +138,7 @@ convert_files_config = Config.configure_task( "convert_files",
 find_features_config = Config.configure_task( "find_features",
                                               function=find_features,
                                               input=[ community_formatted_data_config,
+                                                      mzmine_batch_config,
                                                       feature_finding_params_config,
                                                       global_params_config ],
                                               output=processed_data_config,
@@ -136,6 +147,7 @@ find_features_config = Config.configure_task( "find_features",
 annotate_gnps_config = Config.configure_task( "annotate_gnps",
                                               function=annotate_gnps,
                                               input=[ processed_data_config,
+                                                      mzmine_log_config,
                                                       gnps_params_config,
                                                       global_params_config ],
                                               output=gnps_annotations_config,

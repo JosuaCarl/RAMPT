@@ -17,9 +17,9 @@ from tqdm.dask import TqdmCallback
 import dask.multiprocessing
 
 
-from source.helpers.general import check_for_str_request, compute_scheduled
+from source.helpers.general import check_for_str_request
 from source.helpers.types import StrPath
-from source.helpers.classes import Pipe_Step, get_value, set_value
+from source.helpers.classes import Pipe_Step, get_value
 
 
 def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
@@ -67,55 +67,43 @@ class GNPS_Runner(Pipe_Step):
         if kwargs:
             self.update(kwargs)
         self.mzmine_log_query   = "io.github.mzmine.modules.io.export_features_gnps.GNPSUtils submitFbmnJob GNPS FBMN/IIMN response: "
+        self.gnps_response
 
 
-    def extract_task_info( self, query:str, work_path:StrPath=None, mzmine_log:str=None ) -> dict:
+
+    def query_response_iterator( self, query:str, iterator ) -> dict:
+        for line in iterator:
+            if query in line:
+                response_json = line.split(query)[-1]
+                return json.loads(response_json)
+
+
+    def extract_task_info( self, query:str, mzmine_log:StrPath=None ) -> dict:
         """
         Extract the information about the started GNPS task from the mzmin_log.
 
         :param query: Query to match the info against.
         :type query: str
-        :param work_path: Path where mzmine.log can be found (only needed if no mzmin_log is provided).
-        :type work_path: StrPath
-        :param mzmine_log: Output of mzmine including GNPS POST request, defaults to None
+        :param mzmine_log: Output of mzmine including GNPS POST request, or path to the file/including folder with standard naming (mzmine_log.txt), defaults to None
         :type mzmine_log: str, optional
         :return: Response from GNPS as a dictionary.
         :rtype: dict
         """
-        if mzmine_log:
-            for line in mzmine_log.split("\n"):
-                if query in line:
-                    response_json = line.split(query)[-1]
-                    return json.loads(response_json) 
-        elif work_path:
-            log_path = work_path if os.path.isfile(work_path) else join(work_path, "mzmine_log.txt")
-            with open( log_path, "r") as f:
-                for line in f.readlines():
-                    if query in line:
-                        response_json = line.split(query)[-1]
-                        return json.loads(response_json)
+        mzmine_log = join(mzmine_log, "mzmine_log.txt") if os.path.isdir(mzmine_log) else mzmine_log
+        if os.path.isfile( mzmine_log ):
+            with open( mzmine_log, "r") as f:
+                return self.query_response_iterator( query=query, iterator=f.readlines())
         else:
-            raise(ValueError("You must provide either a work_path with mzmine_log.txt or mzmine_log as a string."))
-        
-        raise(ValueError(f"Query <{query}> was not found at the path {work_path} or in mzmine_log"))
-
-
-    def post_gnps_request( self, work_path:StrPath ):
-        # TODO: Add own version of POST request to GNPS
-        # print("The job will be resubmitted to https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking")
-        # requests.post( "https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking",
-        #             data={ "featurems2": join(out_path, f"{os.path.basename(out_path)}_iimn_fbmn.mgf"),
-        #                     "featurequantification": join(out_path, f"{os.path.basename(out_path)}_iimn_fbmn_quant.csv")})
-        pass
+            return self.query_response_iterator( query=query, iterator=mzmine_log.split("\n"))
+                
+        raise(ValueError(f"Query <{query}> was not found in mzmine_log: Please provide a valid string or path."))
 
 
 
-    def check_task_finished( self, work_path:StrPath, mzmine_log:str=None, gnps_response:dict=None ) -> tuple[str, bool]:
+    def check_task_finished( self, mzmine_log:str=None, gnps_response:dict=None ) -> tuple[str, bool]:
         """
         Check GNPS API for the status of the task.
 
-        :param work_path: Path where mzmine.log can be found (only needed if no mzmin_log is provided)
-        :type work_path: StrPath
         :param mzmine_log: Output of mzmine including GNPS POST request, defaults to None
         :type mzmine_log: str, optional
         :param gnps_response: Resonse from GNPS, defaults to None
@@ -124,20 +112,18 @@ class GNPS_Runner(Pipe_Step):
         :rtype: tuple[str, bool]
         """
         if not gnps_response:
-            gnps_response = self.extract_task_info( work_path=work_path,
-                                                    query=self.mzmine_log_query, 
+            gnps_response = self.extract_task_info( query=self.mzmine_log_query, 
                                                     mzmine_log=mzmine_log )
             
         if gnps_response["status"] == "Success":
             task_id = gnps_response["task_id"]
         else:
-            warnings.warn(f"{join(work_path, 'mzmine_log.txt')} reports an unsuccessful job submission to GNPS by mzmine.", UserWarning)
-            self.post_gnps_request(work_path=work_path)
-            
+            raise(ValueError("mzmine_log reports an unsuccessful job submission to GNPS by mzmine."))
+
         url = f"https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={task_id}"
         return task_id, check_for_str_request( url=url, query='\"status\":\"DONE\"',
                                                retries=100, allowed_fails=10, expected_wait_time=600.0,
-                                               timeout=5)
+                                               timeout=5 )
 
 
     def fetch_results( self, task_id:str, out_path:StrPath=None ) -> dict:
@@ -179,7 +165,7 @@ class GNPS_Runner(Pipe_Step):
 
 
 
-    def compute( self, in_path:StrPath=None, out_path:StrPath=None, mzmine_log:str=None, gnps_response:dict=None) -> dict:
+    def compute( self, in_path:StrPath=None, out_path:StrPath=None, mzmine_log:str=None, gnps_response:dict=None ) -> dict:
         """
         Get the GNPS results from a single path, mzmine_log or GNPS response.
 
@@ -195,8 +181,9 @@ class GNPS_Runner(Pipe_Step):
         :return: Resulting anntations dictionary
         :rtype: dict
         """
-        task_id, status = self.check_task_finished( work_path=in_path,
-                                                    mzmine_log=mzmine_log,
+        if not mzmine_log:
+            mzmine_log = os.path.dirname(in_path) if os.path.isfile(in_path) else in_path
+        task_id, status = self.check_task_finished( mzmine_log=mzmine_log,
                                                     gnps_response=gnps_response )
         if status:
             out_path = join(out_path, f"{basename(in_path)}_gnps_all_db_annotations.json") if out_path else None

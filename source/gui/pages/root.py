@@ -164,7 +164,7 @@ with tgb.Page( style=style ) as root:
         
         # Middle part
         with tgb.part():
-            tgb.text( "## ⚙️Manual configuration", mode="markdown" )
+            tgb.text( "## ⚙️ Configuration", mode="markdown" )
             create_expandable_setting( create_methods=[create_general],
                                        title="🌐 General",
                                        hover_text="General settings, that are applied globally." )
@@ -186,14 +186,14 @@ with tgb.Page( style=style ) as root:
                                        hover_text="Statistical analysis of annotated features." )
 
             # Pipeline showcasing
-            tgb.text( "## 🎬Scenario management", mode="markdown" )
+            tgb.text( "## 🎬 Scenario management", mode="markdown" )
             tgb.scenario( "{scenario}", show_properties=False, show_tags=False, show_sequences=True )
             tgb.scenario_dag( "{scenario}" )
             
-            tgb.text("## 📊Data", mode="markdown")
+            tgb.text("## 📊 Data", mode="markdown")
             tgb.data_node( "{data_node}" )
 
-            tgb.text("## 🐝Jobs", mode="markdown")
+            tgb.text("## 🐝 Jobs", mode="markdown")
             tgb.job_selector( "{job}" )
 
         # Right part

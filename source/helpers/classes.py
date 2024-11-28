@@ -90,7 +90,7 @@ class Step_Configuration:
     Class configuration of pipeline steps in the pipeline.
     """
     def __init__( self, platform:str="Linux", overwrite:bool=True, nested:bool=False, workers:int=1,
-                  patterns:dict[str,str]={"in": ".*"}, save_log:bool=False, verbosity:int=1, additional_args:list=[] ):
+                  patterns:dict[str,str]={"in": ".*"}, save_log:bool=True, verbosity:int=1, additional_args:list=[] ):
         """
         Initialize the pipeline step configuration. Used for pattern matching.
         Provides additional variables for saving processed input and out_locations, its output, and errors.
@@ -101,7 +101,7 @@ class Step_Configuration:
         :type workers: int, optional
         :param patterns: Matching patterns for finding appropriate folders, defaults to None
         :type patterns: dict[str,str], optional
-        :param save_log: Whether to save the output(s).
+        :param save_log: Whether to save the output(s), defaults to True.
         :type save_log: bool, optional
         :param additional_args: Additional arguments for mzmine, defaults to []
         :type additional_args: list, optional
