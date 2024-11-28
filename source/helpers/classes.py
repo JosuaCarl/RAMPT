@@ -260,7 +260,7 @@ class Pipe_Step(Step_Configuration):
 
         
         # Loop over all in/out combinations
-        for in_path, out_path in zip(self.scheduled_in, self.scheduled_out):
+        for i, (in_path, out_path) in enumerate(zip(self.scheduled_in, self.scheduled_out)):
             in_path = in_path["label"] if isinstance(in_path, dict) else in_path
             out_path = out_path["label"] if isinstance(out_path, dict) else out_path
             if self.verbosity >= 3:
@@ -268,11 +268,20 @@ class Pipe_Step(Step_Configuration):
 
             os.makedirs( out_path, exist_ok=True )
 
+            # Ensure that further passed down lists are processed in parallel with in_path
+            additional_arguments = { }
+            for argument, value in kwargs.items():
+                if isinstance(value, list) and len(value) == len(in_paths):
+                    additional_arguments[argument] = value[i]
+                else:
+                    additional_arguments[argument] = value
+            
+
             if self.nested:
                 futures = self.compute_nested( in_root_dir=in_path, out_root_dir=out_path )
                 helpers.compute_scheduled( futures=futures, num_workers=self.workers, verbose=self.verbosity >= 1)
             else:
-                self.compute( in_path=in_path, out_path=out_path, **kwargs )
+                self.compute( in_path=in_path, out_path=out_path, **additional_arguments )
 
             if self.verbosity >= 3:
                 print(f"Processed {in_path} -> {out_path}")

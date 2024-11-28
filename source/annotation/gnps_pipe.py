@@ -54,12 +54,12 @@ class GNPS_Runner(Pipe_Step):
     """
     A runner for checking on the GNPS process and subsequently saving the results.
     """
-    def __init__( self, mzmine_log:StrPath=None, save_log:bool=False, additional_args:list=[], verbosity:int=1, **kwargs ):
+    def __init__( self, mzmine_log:list[StrPath]=None, save_log:bool=False, additional_args:list=[], verbosity:int=1, **kwargs ):
         """
         Initialize the GNPS_Runner.
 
         :param mzmine_log: Logfile from mzmine, defaults to None.
-        :type mzmine_log: StrPath, optional
+        :type mzmine_log: list[StrPath], optional
         :param save_log: Whether to save the output(s), defaults to False.
         :type save_log: bool, optional
         :param additional_args: Additional arguments for mzmine, defaults to []
@@ -127,7 +127,7 @@ class GNPS_Runner(Pipe_Step):
         if not gnps_response:
             gnps_response = self.extract_task_info( query=self.mzmine_log_query, 
                                                     mzmine_log=mzmine_log )
-            
+
         if gnps_response["status"] == "Success":
             task_id = gnps_response["task_id"]
         else:
@@ -248,8 +248,8 @@ class GNPS_Runner(Pipe_Step):
         return futures
 
 
-    def run(self, in_paths:list=[], out_paths:list=[], mzmine_log:str=None, gnps_response:dict=None, **kwargs ):
-        return super().run( in_paths=in_paths, out_paths=out_paths, mzmine_log=mzmine_log, gnps_response=gnps_response, **kwargs )
+    def run(self, in_paths:list=[], out_paths:list=[], mzmine_log:list=[], **kwargs ):
+        return super().run( in_paths=in_paths, out_paths=out_paths, mzmine_log=mzmine_log, **kwargs )
 
 
 

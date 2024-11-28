@@ -89,7 +89,10 @@ def create_batch_selection( process:str, batch_attribute:str="batch_path", exten
     with tgb.layout( columns="1 1", columns__mobile="1", gap="5%"):
         with tgb.part( render="{local}" ):
             tgb.button( f"Select {batch_name}",
-                        on_action=lambda state: construct_selection_list( state, open_file_folder( multiple=False ) ) )
+                        on_action=lambda state: construct_selection_list( state,
+                                                                          open_file_folder( multiple=False,
+                                                                                            filetypes=[ (f"{ext[1:]} files", f"*{ext}")
+                                                                                                        for ext in extensions.split(",")]  ) ) )
         with tgb.part( render="{not local}"):
             tgb.file_selector( f"{{{process}_path_batch}}",
                                 label=f"Select {batch_name}", extensions=extensions,
