@@ -64,12 +64,15 @@ mzmine_batch_config = Config.configure_in_memory_data_node( id="mzmine_batch",
 mzmine_log_config = Config.configure_in_memory_data_node( id="mzmine_log",
                                                           scope=Scope.SCENARIO )
 
-sirius_batch_config = Config.configure_in_memory_data_node( id="sirius_batch",
-                                                          scope=Scope.SCENARIO )
+sirius_config_config = Config.configure_in_memory_data_node( id="sirius_config",
+                                                            scope=Scope.SCENARIO )
+
+sirius_projectspace_config = Config.configure_in_memory_data_node( id="sirius_projectspace",
+                                                                   scope=Scope.SCENARIO )
 
 
 # Task methods
-def generic_step( step_class, step_params:dict, global_params:dict, in_paths:list=None, out_path_target:StrPath=None):
+def generic_step( step_class, step_params:dict, global_params:dict, in_paths:list=None, out_path_target:StrPath=None, **kwargs):
     step_params.update( global_params )
     step_instance = step_class( **step_params )
 
@@ -80,47 +83,50 @@ def generic_step( step_class, step_params:dict, global_params:dict, in_paths:lis
     if not step_instance.scheduled_out:
         out_paths = [ os.path.abspath(os.path.join(in_path, out_path_target)) for in_path in in_paths]
 
-    step_instance.run( in_paths=in_paths, out_paths=out_paths )
+    step_instance.run( in_paths=in_paths, out_paths=out_paths, **kwargs )
 
     return step_instance.processed_out
 
 
-def convert_files( raw_data, conversion_params:dict, global_params:dict ):
+def convert_files( raw_data:StrPath, step_params:dict, global_params:dict ):
     return generic_step( step_class=File_Converter,
                          in_paths=raw_data,
                          out_path_target=os.path.join("..", "converted"),
-                         step_params=conversion_params,
+                         step_params=step_params,
                          global_params=global_params )
 
-def find_features( community_formatted_data, conversion_params:dict, global_params:dict ):
+def find_features( community_formatted_data:StrPath, mzmine_batch_file:StrPath, step_params:dict, global_params:dict ):
     return generic_step( step_class=MZmine_Runner,
                          in_paths=community_formatted_data,
                          out_path_target=os.path.join("..", "processed"),
-                         step_params=conversion_params,
-                         global_params=global_params )
+                         step_params=step_params,
+                         global_params=global_params,
+                         batch_file=mzmine_batch_file )
 
-def annotate_gnps( processed_data, conversion_params:dict, global_params:dict ):
+def annotate_gnps( processed_data:StrPath, mzmine_log:StrPath, step_params:dict, global_params:dict ):
     return generic_step( step_class=GNPS_Runner,
                          in_paths=processed_data,
                          out_path_target=os.path.join("..", "annotated"),
-                         step_params=conversion_params,
-                         global_params=global_params )
+                         step_params=step_params,
+                         global_params=global_params,
+                         mzmine_log=mzmine_log )
 
-def annotate_sirius( processed_data, conversion_params:dict, global_params:dict ):
+def annotate_sirius( processed_data:StrPath, projectspace:StrPath, step_params:dict, global_params:dict ):
     return generic_step( step_class=Sirius_Runner,
                          in_paths=processed_data,
                          out_path_target=os.path.join("..", "annotated"),
-                         step_params=conversion_params,
-                         global_params=global_params )
+                         step_params=step_params,
+                         global_params=global_params,
+                         projectspace=projectspace )
 
 
-def analyze_difference( gnps_annotated_data, sirius_annotated_data, conversion_params:dict, global_params:dict ):
+def analyze_difference( gnps_annotated_data:StrPath, sirius_annotated_data:StrPath, step_params:dict, global_params:dict ):
     print("Analyze difference not implemented yet.")
     pass
     """
     return generic_step( step_class="",
                          input=annotated_data, output=os.path.join("..", "results"),
-                         step_params=conversion_params,
+                         step_params=step_params,
                          global_params=global_params )
     """
 
@@ -156,6 +162,7 @@ annotate_gnps_config = Config.configure_task( "annotate_gnps",
 annotate_sirius_config = Config.configure_task( "annotate_sirius",
                                               function=annotate_sirius,
                                               input=[ processed_data_config,
+                                                      sirius_projectspace_config,
                                                       sirius_params_config,
                                                       global_params_config ],
                                               output=sirius_anntations_config,

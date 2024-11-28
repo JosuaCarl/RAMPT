@@ -29,7 +29,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     :type unknown_args: list[str]
     """
     # Extract arguments
-    sirius_path     = get_value(args, "sirius_path", "sirius")
+    exec_path       = get_value(args, "exec_path", "sirius")
     in_dir          = get_value(args, "in_dir")
     out_dir         = get_value(args, "out_dir",        in_dir)
     projectspace    = get_value(args, "projectspace",   out_dir)
@@ -41,7 +41,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     additional_args = get_value(args, "sirius_args",    unknown_args)
     additional_args = additional_args if additional_args else unknown_args
 
-    sirius_runner = Sirius_Runner( sirius_path=sirius_path, config=config, save_log=save_log,
+    sirius_runner = Sirius_Runner( exec_path=exec_path, config=config, save_log=save_log,
                                    additional_args=additional_args, verbosity=verbosity,
                                    nested=nested, workers=n_workers,
                                    scheduled_in=in_dir, scheduled_out=out_dir )
@@ -53,15 +53,17 @@ class Sirius_Runner(Pipe_Step):
     """
     A runner for SIRIUS annotation.
     """
-    def __init__( self, sirius_path:StrPath="sirius", config:StrPath="config.txt",
+    def __init__( self, exec_path:StrPath="sirius", config:StrPath="config.txt", projectspace:StrPath=None,
                   save_log:bool=False, additional_args:list=[], verbosity:int=1, **kwargs ):
         """
         Initialize the GNPS_Runner.
 
-        :param sirius_path: Path to SIRIUS executable, defaults to "sirius"
-        :type sirius_path: StrPath
+        :param exec_path: Path to SIRIUS executable, defaults to "sirius"
+        :type exec_path: StrPath
         :param config: Path to SIRIS configuration file or direct configuration string, defaults to "config.txt"
         :type config: StrPath
+        :param projectspace: Path to SIRIUS projectspace, defaults to None
+        :type projectspace: StrPath
         :param save_log: Whether to save the output(s).
         :type save_log: bool, optional
         :param additional_args: Additional arguments for mzmine, defaults to []
@@ -73,12 +75,14 @@ class Sirius_Runner(Pipe_Step):
                           save_log=save_log, additional_args=additional_args, verbosity=verbosity)
         if kwargs:
             self.update(kwargs)
-        self.sirius_path = sirius_path if sirius_path else "sirius"
+        self.exec_path = exec_path if exec_path else "sirius"
         if os.path.isfile(config):
             with open( config, "r") as config_file:
                 config = config_file.read()
         config = config[6:] if config.startswith("config") else config
         self.config = config.strip()
+        self.projectspace = projectspace
+
 
 
     def compute( self, in_path:StrPath, out_path:StrPath, projectspace:StrPath=None ) -> bool:
@@ -94,8 +98,9 @@ class Sirius_Runner(Pipe_Step):
         :return: Success of the command
         :rtype: bool
         """
-        projectspace = projectspace if projectspace is not None else out_path
-        cmd = rf'"{self.sirius_path}" --project {join(projectspace, "projectspace")} --input {in_path} config {self.config} write-summaries --output {out_path} {" ".join(self.additional_args)}'
+        if projectspace is None:
+            projectspace = self.projectspace if self.projectspace else out_path
+        cmd = rf'"{self.exec_path}" --project {join(projectspace, "projectspace")} --input {in_path} config {self.config} write-summaries --output {out_path} {" ".join(self.additional_args)}'
               
         out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
                                                     out_path=join(out_path, "sirius_log.txt") if self.save_log else None,
@@ -110,7 +115,7 @@ class Sirius_Runner(Pipe_Step):
 
 
     def compute_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
-                           futures:list=[], recusion_level:int=0 ) -> list:
+                        futures:list=[], recusion_level:int=0 ) -> list:
         """
         Run SIRIUS Pipeline in nested directories.
 
@@ -131,7 +136,7 @@ class Sirius_Runner(Pipe_Step):
 
             if self.match_file_name( pattern=self.patterns["in"], file_name=entry ):
                 futures.append( dask.delayed(self.compute)( in_path=entry_path,
-                                                               out_path=out_root_dir ) )
+                                                            out_path=out_root_dir ) )
             elif os.path.isdir( entry_path ):
                 futures = self.compute_nested( in_root_dir=entry_path,
                                                   out_root_dir=join( out_root_dir, entry ),
@@ -142,13 +147,15 @@ class Sirius_Runner(Pipe_Step):
         return futures
 
 
-    def run(self, in_paths:list=[], out_paths:list=[], projectspace:StrPath=None):
-        return super().run( in_paths=in_paths, out_paths=out_paths, projectspace=projectspace )
+    def run(self, in_paths:list=[], out_paths:list=[], projectspace:StrPath=None, **kwargs ):
+        return super().run( in_paths=in_paths, out_paths=out_paths, projectspace=projectspace, **kwargs )
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser( prog='sirius_pipe.py',
                                       description='Obtain anntations from MS1 & MS2 feature annotation by SIRIUS.')
-    parser.add_argument('-si',      '--sirius_path',        required=False)
+    parser.add_argument('-si',      '--exec_path',          required=False)
     parser.add_argument('-in',      '--in_dir',             required=True)
     parser.add_argument('-out',     '--out_dir',            required=False)
     parser.add_argument('-p',       '--projectspace',       required=True)

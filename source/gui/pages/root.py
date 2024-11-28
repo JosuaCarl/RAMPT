@@ -70,17 +70,32 @@ scenario = tp.create_scenario( ms_analysis_config,
 
 
 ## Synchronisation of Scenario
-match_in_out = { "conversion_params.scheduled_in": "raw_data",
-                 "feature_finding_params.scheduled_in": "community_formatted_data",
-                 "gnps_params.scheduled_in":    "processed_data",
-                 "sirius_params.scheduled_in":  "processed_data",
-                 "analysis_params.scheduled_in": "gnps_annotations",
-                 "analysis_params.scheduled_in": "sirius_anntations",
-                 "conversion_params.processed_out": "community_formatted_data",
-                 "feature_finding_params.processed_out": "processed_data",
-                 "gnps_params.processed_out":    "gnps_annotations",
-                 "sirius_params.processed_out":  "sirius_anntations",
-                 "analysis_params.processed_out": "results" }
+match_data_node = { # IO Data
+                    "conversion_params.scheduled_in": "raw_data",
+                   
+                    "feature_finding_params.scheduled_in": "community_formatted_data",
+                    "conversion_params.processed_out": "community_formatted_data",
+
+                    "gnps_params.scheduled_in":    "processed_data",
+                    "sirius_params.scheduled_in":  "processed_data",
+                    "feature_finding_params.processed_out": "processed_data",
+
+                    "analysis_params.scheduled_in": "gnps_annotations",
+                    "gnps_params.processed_out":    "gnps_annotations",
+
+                    "analysis_params.scheduled_in": "sirius_anntations",
+                    "sirius_params.processed_out":  "sirius_anntations",
+
+                    "analysis_params.processed_out": "results",
+
+                    # Batches and more
+                    "feature_finding_params.batch_file": "mzmine_batch",
+
+                    "feature_finding_params.log_paths":  "mzmine_log",
+                    "gnps_params.mzmine_log":  "mzmine_log",
+
+                    "sirius_params.config": "sirius_config",
+                    "sirius_params.projectspace": "sirius_projectspace" }
 
 
 def lock_scenario( state ):
@@ -93,8 +108,8 @@ def lock_scenario( state ):
     for segment_name, segment_dict in params.items():
         for in_out in ["scheduled_in", "processed_out"]:
             attribute = f"{segment_name}.{in_out}"
-            if attribute in match_in_out:
-                data_nodes.update( {match_in_out.get(attribute): segment_dict.get(in_out)} )
+            if attribute in match_data_node:
+                data_nodes.update( {match_data_node.get(attribute): segment_dict.get(in_out)} )
 
     for key, data_node in scenario.data_nodes.items():
         if data_nodes.get(key):

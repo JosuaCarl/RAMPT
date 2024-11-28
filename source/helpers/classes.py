@@ -155,12 +155,18 @@ class Pipe_Step(Step_Configuration):
     """
     Class for steps in the pipeline.
     """
-    def __init__( self, platform:str="Linux", overwrite:bool=True, nested:bool=False, workers:int=1,
+    def __init__( self, exec_path:StrPath=None, platform:str="Linux", overwrite:bool=True, nested:bool=False, workers:int=1,
                   patterns:dict[str,str]={"in": ".*"}, save_log:bool=False, verbosity:int=1, additional_args:list=[] ):
         """
         Initialize the pipeline step. Used for pattern matching.
         Provides additional variables for saving processed input and out_locations, its output, and errors.
         
+        :param exec_path: Path of executive
+        :type exec_path: StrPath
+        :param platform: Computational platform/OS, defaults to Linux
+        :type platform: str, optional
+        :param overwrite: Whether to overwrite previous runs, defaults to True
+        :type overwrite: bool, optional
         :param nested: Execute step in a nested fashion, defaults to False
         :type nested: bool, optional
         :param workers: Number of workers to use for parallel execution, defaults to 1
@@ -176,13 +182,15 @@ class Pipe_Step(Step_Configuration):
         """
         super().__init__( platform=platform, overwrite=overwrite, nested=nested, workers=workers, patterns=patterns,
                         save_log=save_log, verbosity=verbosity, additional_args=additional_args )
-    
+
+        self.exec_path          = exec_path
         self.scheduled_in       = []
         self.scheduled_out      = []
         self.processed_in       = []
         self.processed_out      = []
         self.outs               = []
         self.errs               = []
+        self.log_paths          = []
 
 
     def update( self, attributions:dict ):

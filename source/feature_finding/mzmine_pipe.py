@@ -29,7 +29,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     :type unknown_args: list[str]
     """
     # Extract arguments
-    mzmine_path     = get_value(args, "mzmine_path",        None )
+    exec_path       = get_value(args, "exec_path",        None )
     in_dir          = get_value(args, "in_dir" )
     out_dir         = get_value(args, "out_dir" )
     batch_path      = get_value(args, "batch_path" )
@@ -42,16 +42,16 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     additional_args = get_value(args, "mzmine_arguments",   unknown_args )
     additional_args = additional_args if additional_args else unknown_args
     
-    if not mzmine_path:
+    if not exec_path:
         match helpers.Substring(platform.lower()):
             case "linux":
-                mzmine_path = r'/opt/mzmine-linux-installer/bin/mzmine' 
+                exec_path = r'/opt/mzmine-linux-installer/bin/mzmine' 
             case "windows":
-                mzmine_path = r'C:\Program Files\mzmine\mzmine_console.exe'
+                exec_path = r'C:\Program Files\mzmine\mzmine_console.exe'
             case "mac":
-                mzmine_path = r'/Applications/mzmine.app/Contents/MacOS/mzmine'
+                exec_path = r'/Applications/mzmine.app/Contents/MacOS/mzmine'
             case _:
-                mzmine_path = r"mzmine"
+                exec_path = r"mzmine"
     
     if platform.lower() == "windows":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -66,7 +66,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
                For future use please find your user file under $USER/.mzmine/users/ after completing the login.")
         login = "--login"
 
-    mzmine_runner = MZmine_Runner( mzmine_path=mzmine_path, batch_path=batch_path, login=login,
+    mzmine_runner = MZmine_Runner( exec_path=exec_path, batch_path=batch_path, login=login,
                                    valid_formats=valid_formats, save_log=save_log,
                                    additional_args=additional_args, verbosity=verbosity,
                                    nested=nested,
@@ -79,14 +79,14 @@ class MZmine_Runner(Pipe_Step):
     """
     A runner for mzmine operations. Collects processed files and console outputs/errors.
     """
-    def __init__( self, mzmine_path:StrPath="mzmine_console", batch_path:StrPath=".mzbatch", login:str="-login", valid_formats:list=["mzML", "mzXML", "imzML"],
+    def __init__( self, exec_path:StrPath="mzmine_console", batch_path:StrPath="", login:str="-login", valid_formats:list=["mzML", "mzXML", "imzML"],
                   save_log:bool=False, additional_args:list=[], verbosity:int=1, **kwargs):
         """
         Initialize the MZmine_runner.
 
-        :param mzmine_path: Path to mzmine executable, defaults to "mzmine"
-        :type mzmine_path: StrPath
-        :param batch_path: Path to mzmine batch file, defaults to ".mzbatch"
+        :param exec_path: Path to mzmine executable, defaults to "mzmine"
+        :type exec_path: StrPath
+        :param batch_path: Path to mzmine batch file, defaults to ""
         :type batch_path: StrPath
         :param login: Login or user command, defaults to "-login"
         :type login: str, optional
@@ -103,7 +103,7 @@ class MZmine_Runner(Pipe_Step):
                           save_log=save_log, additional_args=additional_args, verbosity=verbosity )
         if kwargs:
             self.update(kwargs)
-        self.mzmine_path        = mzmine_path
+        self.exec_path          = exec_path
         self.login              = login
         self.batch_path         = batch_path
         self.valid_formats      = valid_formats
@@ -115,7 +115,7 @@ class MZmine_Runner(Pipe_Step):
 
 
 
-    def compute( self, in_path:StrPath, out_path:StrPath ) -> bool:
+    def compute( self, in_path:StrPath, out_path:StrPath, batch_path:StrPath=None ) -> bool:
         """
         Run a single mzmine batch.
 
@@ -123,18 +123,23 @@ class MZmine_Runner(Pipe_Step):
         :type in_path: StrPath
         :param out_path: Output directory
         :type out_path: StrPath
+        :param out_path: Batch file
+        :type out_path: StrPath
         :return: Success of the command
         :rtype: bool
         """
-        cmd = rf'"{self.mzmine_path}" {self.login} --batch {self.batch_path} --input {in_path} --output {out_path}\
+        batch_path = batch_path if batch_path else self.batch_path
+        cmd = rf'"{self.exec_path}" {self.login} --batch {batch_path} --input {in_path} --output {out_path}\
                 {" ".join(self.additional_args)}'
-              
+        
+        log_path = join(out_path, "mzmine_log.txt") if self.save_log else None
         out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
-                                                    out_path=join(out_path, "mzmine_log.txt") if self.save_log else None )
+                                                    out_path=log_path )
         self.processed_in.append( in_path )
         self.processed_out.append( out_path )
         self.outs.append( out )
         self.errs.append( err )
+        self.log_paths.append( log_path )
 
         out_path
 
@@ -157,11 +162,14 @@ class MZmine_Runner(Pipe_Step):
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
         found_files = []
+        batch_path = None
         for entry in tqdm( os.listdir(in_root_dir), disable=verbose_tqdm, desc="Schedule feature_finding" ):
             entry_path = join(in_root_dir, entry)
 
             if self.match_file_name( pattern=self.patterns["in"], file_name=entry ):
                 found_files.append( entry_path )
+            elif self.match_file_name( pattern=r".*mzbatch$", file_name=entry):
+                batch_path = entry_path if not self.batch_path else None
             elif os.path.isdir( entry_path ):
                 futures = self.compute_nested( in_root_dir=entry_path,
                                                           out_root_dir=join( out_root_dir, entry ),
@@ -172,17 +180,20 @@ class MZmine_Runner(Pipe_Step):
             os.makedirs(out_root_dir, exist_ok=True)
             with open(source_paths_file , "w", encoding="utf8" ) as f:
                 f.write( "\n".join(found_files) )
-            futures.append( dask.delayed( self.compute )( in_path=source_paths_file, out_path=out_root_dir ) )
+            futures.append( dask.delayed( self.compute )( in_path=source_paths_file, out_path=out_root_dir, batch_path=batch_path ) )
 
         return futures
 
+    
+    def run(self, in_paths:list=[], out_paths:list=[], batch_path:StrPath=None, **kwargs ):
+        return super().run( in_paths=in_paths, out_paths=out_paths, batch_path=batch_path, **kwargs )
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser( prog='mzmine_pipe.py',
                                       description='Use MZmine batch to process the given spectra.\
                                                    A batch file can be created via the MZmine GUI.')
-    parser.add_argument('-mz',      '--mzmine_path',        required=False)
+    parser.add_argument('-mz',      '--exec_path',        required=False)
     parser.add_argument('-in',      '--in_dir',             required=True)
     parser.add_argument('-out',     '--out_dir',            required=True)
     parser.add_argument('-batch',   '--batch_path',         required=True)

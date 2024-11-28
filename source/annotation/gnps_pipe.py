@@ -7,7 +7,7 @@ Use GNPS for anntating compounds.
 # Imports
 import os
 import argparse
-import warnings
+import re
 import json
 import requests
 
@@ -34,6 +34,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     # Extract arguments
     in_dir          = get_value(args, "in_dir")
     out_dir         = get_value(args, "out_dir",    in_dir)
+    mzmine_log      = get_value(args, "mzmine_log", in_dir)
     nested          = get_value(args, "nested",     False) 
     n_workers       = get_value(args, "workers",    1 )
     save_log        = get_value(args, "save_log",   False )
@@ -41,7 +42,8 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     additional_args = get_value(args, "gnps_args",  unknown_args )
     additional_args = additional_args if additional_args else unknown_args
 
-    gnps_runner = GNPS_Runner( save_log=save_log, additional_args=additional_args, verbosity=verbosity,
+    gnps_runner = GNPS_Runner( mzmine_log=mzmine_log,
+                               save_log=save_log, additional_args=additional_args, verbosity=verbosity,
                                nested=nested, workers=n_workers,
                                scheduled_in=in_dir, scheduled_out=out_dir )
     return gnps_runner.run()
@@ -52,11 +54,13 @@ class GNPS_Runner(Pipe_Step):
     """
     A runner for checking on the GNPS process and subsequently saving the results.
     """
-    def __init__( self, save_log:bool=False, additional_args:list=[], verbosity:int=1, **kwargs ):
+    def __init__( self, mzmine_log:StrPath=None, save_log:bool=False, additional_args:list=[], verbosity:int=1, **kwargs ):
         """
         Initialize the GNPS_Runner.
 
-        :param save_log: Whether to save the output(s).
+        :param mzmine_log: Logfile from mzmine, defaults to None.
+        :type mzmine_log: StrPath, optional
+        :param save_log: Whether to save the output(s), defaults to False.
         :type save_log: bool, optional
         :param additional_args: Additional arguments for mzmine, defaults to []
         :type additional_args: list, optional
@@ -67,16 +71,25 @@ class GNPS_Runner(Pipe_Step):
         if kwargs:
             self.update(kwargs)
         self.mzmine_log_query   = "io.github.mzmine.modules.io.export_features_gnps.GNPSUtils submitFbmnJob GNPS FBMN/IIMN response: "
-        self.gnps_response
+        self.mzmine_log         = mzmine_log
 
 
 
     def query_response_iterator( self, query:str, iterator ) -> dict:
+        """
+        Query a response iterator for a query.
+
+        :param query: Query to search for
+        :type query: str
+        :param iterator: Iterator to iterate through
+        :type iterator: any
+        :return: Loaded json of hit without query and filtered for first {} group
+        :rtype: dict
+        """
         for line in iterator:
             if query in line:
-                response_json = line.split(query)[-1]
+                response_json = re.search(r"{.*}", line.replace(query, ""))[0]
                 return json.loads(response_json)
-
 
     def extract_task_info( self, query:str, mzmine_log:StrPath=None ) -> dict:
         """
@@ -165,11 +178,11 @@ class GNPS_Runner(Pipe_Step):
 
 
 
-    def compute( self, in_path:StrPath=None, out_path:StrPath=None, mzmine_log:str=None, gnps_response:dict=None ) -> dict:
+    def compute( self, in_path:StrPath, out_path:StrPath=None, mzmine_log:str=None, gnps_response:dict=None ) -> dict:
         """
         Get the GNPS results from a single path, mzmine_log or GNPS response.
 
-        :param in_path: Input directory, defaults to None
+        :param in_path: Input directory
         :type in_path: StrPath, optional
         :param out_path: Output directory of result
         :type out_path: StrPath
@@ -182,7 +195,7 @@ class GNPS_Runner(Pipe_Step):
         :rtype: dict
         """
         if not mzmine_log:
-            mzmine_log = os.path.dirname(in_path) if os.path.isfile(in_path) else in_path
+            mzmine_log = self.mzmine_log if self.mzmine_log else in_path
         task_id, status = self.check_task_finished( mzmine_log=mzmine_log,
                                                     gnps_response=gnps_response )
         if status:
@@ -235,12 +248,18 @@ class GNPS_Runner(Pipe_Step):
         return futures
 
 
+    def run(self, in_paths:list=[], out_paths:list=[], mzmine_log:str=None, gnps_response:dict=None, **kwargs ):
+        return super().run( in_paths=in_paths, out_paths=out_paths, mzmine_log=mzmine_log, gnps_response=gnps_response, **kwargs )
+
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser( prog='gnps_pipe.py',
                                       description='Obtain anntations from MS2 feature networking by GNPS.')
     parser.add_argument('-in',      '--in_dir',             required=True)
     parser.add_argument('-out',     '--out_dir',            required=False)
+    parser.add_argument('-log',     '--mzmine_log',         required=False)
     parser.add_argument('-n',       '--nested',             required=False,     action="store_true")
     parser.add_argument('-s',       '--save_log',           required=False,     action="store_true")
     parser.add_argument('-w',       '--workers',            required=False,     type=int)

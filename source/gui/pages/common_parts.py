@@ -65,7 +65,7 @@ def create_file_selection( process:str, out_node:str="" ):
 
 
 
-def create_batch_selection( process:str, extensions:str="*" ):
+def create_batch_selection( process:str, batch_attribute:str="batch_path", extensions:str="*" ):
     def construct_selection_list( state, path:StrPath=None, list_id:str=f"{process}_batch" ):
         path = path if path else get_attribute_recursive( state, f"{process}_path_batch")
 
@@ -84,7 +84,7 @@ def create_batch_selection( process:str, extensions:str="*" ):
                                 multiple=False,
                                 on_action=lambda state: construct_selection_list( state ) )
             
-        tgb.selector( f"{{{process}_params.batch_path}}",
+        tgb.selector( f"{{{process}_params.{batch_attribute}}}",
                         lov=f"{{{process}_selection_list_batch}}",
                         label=f"Select a batch file for {process}",
                         filter=True, multiple=False, mode="radio" )

@@ -24,4 +24,4 @@ def create_gnps():
     tgb.html("br")
 
     tgb.text( "###### MZmine log selection", mode="markdown")
-    create_batch_selection( process="gnps", extensions="*" )
+    create_batch_selection( process="gnps", batch_attribute="mzmine_log", extensions="*" )

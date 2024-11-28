@@ -60,7 +60,7 @@ class File_Converter(Pipe_Step):
     """
     General class for file conversion along matched patterns.
     """
-    def __init__( self, msconvert_path:StrPath="msconvert", platform:str="windows", target_format:str="mzML",
+    def __init__( self, exec_path:StrPath="msconvert", platform:str="windows", target_format:str="mzML",
                   pattern:str=r".*", suffix:str=None, prefix:str=None, contains:str=None,
                   redo_threshold:float=1e8, overwrite:bool=False,
                   save_log = False, additional_args:list=[], verbosity = 1,
@@ -68,6 +68,8 @@ class File_Converter(Pipe_Step):
         """
         Initializes the file converter.
 
+        :param exec_path: Path of executive
+        :type exec_path: StrPath
         :param platform: Operational system/platform of computation, defaults to "windows"
         :type platform: str, optional
         :param target_format: _description_, defaults to "mzML"
@@ -91,11 +93,10 @@ class File_Converter(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__( platform=platform, patterns={"in": pattern}, save_log=save_log, 
+        super().__init__( exec_path=exec_path, platform=platform, patterns={"in": pattern}, save_log=save_log, 
                           additional_args=additional_args, verbosity=verbosity )
         if kwargs:
             self.update(kwargs)
-        self.msconvert_path = msconvert_path
         self.redo_threshold = redo_threshold
         self.overwrite      = overwrite
         self.target_format  = target_format
@@ -157,7 +158,7 @@ class File_Converter(Pipe_Step):
         target_format = self.target_format.replace(".", "")
         target_format = helpers.change_case_str(s=target_format, range=slice(2, len(target_format)), conversion="upper")
 
-        cmd = rf'"{self.msconvert_path}" --{target_format} --64 -o {out_path} {in_path} {" ".join(self.additional_args)}'
+        cmd = rf'"{self.exec_path}" --{target_format} --64 -o {out_path} {in_path} {" ".join(self.additional_args)}'
 
         out, err =  helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
                                                      out_path=join(out_path, "msconv_log.txt") if self.save_log else None)
