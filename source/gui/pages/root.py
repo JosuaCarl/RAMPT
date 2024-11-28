@@ -179,23 +179,23 @@ with tgb.Page( style=style ) as root:
         # Middle part
         with tgb.part():
             tgb.text( "## ⚙️ Configuration", mode="markdown" )
-            create_expandable_setting( create_methods=[create_general],
+            create_expandable_setting( create_methods={"": create_general},
                                        title="🌐 General",
                                        hover_text="General settings, that are applied globally." )
 
-            create_expandable_setting( create_methods=[create_conversion],
+            create_expandable_setting( create_methods={"": create_conversion},
                                        title="↔️ Conversion",
                                        hover_text="Convert manufacturer files into community formats." )
 
-            create_expandable_setting( create_methods=[create_feature_finding],
+            create_expandable_setting( create_methods={"": create_feature_finding},
                                        title="🔍 Feature finding",
                                        hover_text="Find features with MZmine through applying steps via a batch file." )
 
-            create_expandable_setting( create_methods=[create_gnps, create_sirius],
+            create_expandable_setting( create_methods={"GNPS": create_gnps, "Sirius": create_sirius},
                                        title="✒️ Annotation",
                                        hover_text="Annotation of data with GNPS and Sirius." )
             
-            create_expandable_setting( create_methods=[create_analysis],
+            create_expandable_setting( create_methods={"": create_analysis},
                                        title="📈 Analysis",
                                        hover_text="Statistical analysis of annotated features." )
 

@@ -8,15 +8,25 @@ selections = {}
 
 
 
-def create_expandable_setting( create_methods:list, title:str, hover_text:str="", expanded=False, **kwargs ):
+def create_expandable_setting( create_methods:dict, title:str, hover_text:str="", expanded=False, **kwargs ):
     with tgb.expandable( title=title, hover_text=hover_text, expanded=expanded, **kwargs):
         with tgb.layout( columns="0.02 1 0.02", gap="2%"):
             tgb.part()
             with tgb.part():
-                for create_method in create_methods:
-                    create_method()
+                for title, create_method in create_methods.items():
+                    with tgb.part( class_name="segment-box" ):
+                        if title:
+                            tgb.text( f"##### {title}", mode="markdown")
+                        create_method()
                     tgb.html("br")
             tgb.part()
+
+
+
+def create_advanced_settings():
+    tgb.html("br")
+    tgb.html("hr")
+    tgb.text( "###### Advanced settings", mode="markdown")
 
 
 

@@ -1,7 +1,19 @@
 /* Header styling */
+h5{
+    margin-top: 1%;
+    text-decoration-line: underline;
+}
+
 h6{
     margin-top: 1%;
     margin-bottom: 1%;
+}
+
+.segment-box{
+    padding: 5px;
+    border-radius: 5px;
+    filter: brightness(110%);
+    box-shadow: 0 0 5px 1px;
 }
 
 .MuiAccordionSummary-content{

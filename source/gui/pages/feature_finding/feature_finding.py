@@ -28,10 +28,7 @@ def create_feature_finding( process="feature_finding" ):
     tgb.text( "###### Batch selection", mode="markdown")
     create_batch_selection( process="feature_finding", extensions=".mzbatch,.xml" )
 
-    # Advanced settings
-    tgb.html("br")
-    tgb.html("hr")
-    tgb.text( "##### Advanced settings", mode="markdown")
+    create_advanced_settings()
 
     create_exec_selection( process="feature_finding", exec_name="mzmine_console" )
         

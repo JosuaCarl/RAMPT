@@ -19,10 +19,7 @@ def create_conversion():
     tgb.text( "###### File selection", mode="markdown")
     create_file_selection( process="conversion", out_node="community_formatted_data" )        
     
-    # Advanced settings
-    tgb.html("br")
-    tgb.html("hr")
-    tgb.text( "##### Advanced settings", mode="markdown")
+    create_advanced_settings()
     
     create_exec_selection( process="conversion", exec_name="msconvert" )
 

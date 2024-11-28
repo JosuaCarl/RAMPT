@@ -23,13 +23,13 @@ def create_sirius():
 
     tgb.html("br")
 
-    tgb.text( "###### MZmine log selection", mode="markdown")
-    create_batch_selection( process="sirius", batch_attribute="config", extensions="*" )
+    tgb.text( "###### Config selection", mode="markdown")
+    create_batch_selection( process="sirius", batch_attribute="config", extensions="*",  )
+    tgb.input( "{sirius_params.config}",
+               label="Sirius config",
+               hover_text="You can paste a config or a path to a config here.")
 
-    # Advanced settings
-    tgb.html("br")
-    tgb.html("hr")
-    tgb.text( "##### Advanced settings", mode="markdown")
+    create_advanced_settings()
 
     create_exec_selection( process="sirius", exec_name="sirius" )
    
