@@ -145,12 +145,16 @@ with tgb.Page( style=style ) as root:
         with tgb.part( class_name="sticky-part"):
             # Save button
             with tgb.layout(columns="1 1.2 1", gap="2%"):
-                tgb.button( "💾 Save", on_action=lambda state, id, payload: save_params( state ) )
-                tgb.button( "💾 Save as", on_action=lambda state, id, payload: save_params( state, path=open_file_folder( save=True, multiple=False,
-                                                                                                                        filetypes=save_file_types ) ) )
-                tgb.button( "📋 Load", on_action=lambda state, id, payload: load_params( state, path=open_file_folder( multiple=False,
-                                                                                                                    filetypes=save_file_types ) ) )
-            tgb.button( "◀️ Lock scenario", on_action=lambda state, id, payload: lock_scenario( state ) )
+                tgb.button( "💾 Save",
+                            on_action=lambda state, id, payload: save_params( state ) )
+                tgb.button( "💾 Save as",
+                            on_action=lambda state, id, payload: save_params( state, path=open_file_folder( save=True, multiple=False,
+                                                                                                            filetypes=save_file_types ) ) )
+                tgb.button( "📋 Load",
+                            on_action=lambda state, id, payload: load_params( state, path=open_file_folder( multiple=False,
+                                                                                                            filetypes=save_file_types ) ) )
+            tgb.button( "◀️ Lock scenario",
+                        on_action=lambda state, id, payload: lock_scenario( state ) )
 
             # Scenario selector
             tgb.text( "#### Scenarios", mode="markdown" )

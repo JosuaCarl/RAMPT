@@ -17,8 +17,9 @@ def create_expandable_setting( create_methods:list, title:str, hover_text:str=""
                     create_method()
             tgb.part()
 
+
+
 def create_file_selection( process:str, out_node:str="" ):
-    
     def construct_selection_tree( state, path:StrPath=None, tree_id:str=f"{process}_in" ):
         path = path if path else get_attribute_recursive( state, f"{process}_path_in")
 
@@ -40,7 +41,7 @@ def create_file_selection( process:str, out_node:str="" ):
             with tgb.part( render="{not local}"):
                 tgb.file_selector( f"{{{process}_path_in}}",
                                     label="Select in", extensions="*", drop_message=f"Drop files/folders for {process} here:", multiple=True,
-                                    on_action=construct_selection_tree )
+                                    on_action=lambda state: construct_selection_tree( state ) )
             tgb.toggle( f"{{{process}_select_folder_in}}", label="Select folder")
         tgb.tree( f"{{{process}_params.scheduled_in}}",
                     lov=f"{{{process}_selection_tree_in}}",
@@ -81,10 +82,9 @@ def create_batch_selection( process:str, extensions:str="*" ):
                                 label="Select batch file", extensions=extensions,
                                 drop_message=f"Drop batch file for {process} here:",
                                 multiple=False,
-                                on_action=construct_selection_list )
+                                on_action=lambda state: construct_selection_list( state ) )
             
         tgb.selector( f"{{{process}_params.batch_path}}",
                         lov=f"{{{process}_selection_list_batch}}",
                         label=f"Select a batch file for {process}",
                         filter=True, multiple=False, mode="radio" )
-        
