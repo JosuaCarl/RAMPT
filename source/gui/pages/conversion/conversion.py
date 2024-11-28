@@ -27,9 +27,6 @@ def create_conversion():
     tgb.html("hr")
     tgb.text( "##### Advanced settings", mode="markdown")
     
-
-    tgb.selector( "{conversion_params.target_format}",
-            label="Target format", lov="mzML;mzXML", dropdown=True, hover_text="The target format for the conversion. mzML is recommended.", width="100px")
     with tgb.layout( columns="1 1 1 1", columns__mobile="1",gap="5%"):
         tgb.button( "Select executable", active="{local}",
                     on_action=lambda state: set_attribute_recursive( state,
@@ -41,9 +38,13 @@ def create_conversion():
                     hover_text="You may enter the path to msconvert if it is not accessible via \"msconvert\"" )
         tgb.part()
         tgb.part()
-        
-    
-        
+    tgb.html("br")
+    tgb.selector( "{conversion_params.target_format}",
+            label="Target format", lov="mzML;mzXML", dropdown=True, hover_text="The target format for the conversion. mzML is recommended.", width="100px")
+
+
+
+
     # Pattern matching
     tgb.html("br")
     tgb.text( "###### Pattern matching:", mode="markdown")

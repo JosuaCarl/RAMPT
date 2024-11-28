@@ -161,21 +161,25 @@ with tgb.Page( style=style ) as root:
         # Middle part
         with tgb.part():
             tgb.text( "## ⚙️Manual configuration", mode="markdown" )
-            with tgb.expandable( title="General", expanded=False , hover_text=""):
-                create_general()
+            create_expandable_setting( create_methods=[create_general],
+                                       title="🌐 General",
+                                       hover_text="General settings, that are applied globally." )
 
-            with tgb.expandable( title="Conversion", expanded=False, hover_text="Convert manufacturer files into community formats." ):
-                create_conversion()
+            create_expandable_setting( create_methods=[create_conversion],
+                                       title="↔️ Conversion",
+                                       hover_text="Convert manufacturer files into community formats." )
 
-            with tgb.expandable( title="Feature finding", expanded=False, hover_text="Find features with MZmine through applying steps via a batch file."):
-                create_feature_finding()
+            create_expandable_setting( create_methods=[create_feature_finding],
+                                       title="🔍 Feature finding",
+                                       hover_text="Find features with MZmine through applying steps via a batch file." )
 
-            with tgb.expandable( title="Annotation", expanded=False, hover_text=""):
-                create_gnps()
-                create_sirius()
-
-            with tgb.expandable( title="Analysis", expanded=False, hover_text=""):
-                create_analysis()
+            create_expandable_setting( create_methods=[create_gnps, create_sirius],
+                                       title="✒️ Annotation",
+                                       hover_text="Annotation of data with GNPS and Sirius." )
+            
+            create_expandable_setting( create_methods=[create_analysis],
+                                       title="📈 Analysis",
+                                       hover_text="Statistical analysis of annotated features." )
 
             # Pipeline showcasing
             tgb.text( "## 🎬Scenario management", mode="markdown" )

@@ -8,6 +8,15 @@ selections = {}
 
 
 
+def create_expandable_setting( create_methods:list, title:str, hover_text:str="", expanded=False, **kwargs ):
+    with tgb.expandable( title=title, hover_text=hover_text, expanded=expanded, **kwargs):
+        with tgb.layout( columns="0.02 1 0.02", gap="2%"):
+            tgb.part()
+            with tgb.part():
+                for create_method in create_methods:
+                    create_method()
+            tgb.part()
+
 def create_file_selection( process:str, out_node:str="" ):
     
     def construct_selection_tree( state, path:StrPath=None, tree_id:str=f"{process}_in" ):
