@@ -86,7 +86,7 @@ def generic_step( step_class, step_params:dict, global_params:dict, in_paths:lis
 
     step_instance.run( in_paths=in_paths, out_paths=out_paths, **kwargs )
 
-    results = [ getattr(step_instance, attr) for attr in return_attributes ]
+    results = list(set([ getattr(step_instance, attr) for attr in return_attributes ]))
 
     return tuple(results) if len(results) > 1 else results[0]
 
