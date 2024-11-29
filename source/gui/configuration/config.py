@@ -16,6 +16,7 @@ from source.annotation.gnps_pipe import GNPS_Runner
 
 
 # Data nodes
+## Data
 raw_data_config = Config.configure_in_memory_data_node( id="raw_data",
                                                         scope=Scope.SCENARIO )
 
@@ -35,7 +36,7 @@ results_config = Config.configure_csv_data_node( id="results",
                                                  scope=Scope.SCENARIO )
 
 
-# Parameter nodes
+## Parameters
 global_params_config = Config.configure_json_data_node( id="global_params",
                                                         scope=Scope.SCENARIO )
 
@@ -68,7 +69,10 @@ sirius_config_config = Config.configure_in_memory_data_node( id="sirius_config",
 
 # Task methods
 def generic_step( step_class, step_params:dict, global_params:dict, in_paths:list=None,
-                  out_path_target:StrPath=None, return_attributes:list=["processed_out"], **kwargs):
+                  out_path_target:StrPath=None, return_attributes:list=["processed_out"],
+                  additional_arguments:dict=None, **kwargs):
+    if kwargs:
+        additional_arguments.update( kwargs )
     step_params.update( global_params )
     step_instance = step_class( **step_params )
 
@@ -84,15 +88,16 @@ def generic_step( step_class, step_params:dict, global_params:dict, in_paths:lis
             else:
                 out_paths.append( os.path.abspath(os.path.join(in_path, out_path_target)) )
 
-    step_instance.run( in_paths=in_paths, out_paths=out_paths, **kwargs )
+    step_instance.run( in_paths=in_paths, out_paths=out_paths, **additional_arguments )
 
     results =  [ getattr(step_instance, attr) for attr in return_attributes ] 
 
     return tuple(results) if len(results) > 1 else results[0]
 
 
+
 def convert_files( raw_data:StrPath, step_params:dict, global_params:dict ):
-    return generic_step( 
+    return generic_step(
         step_class=File_Converter,
         in_paths=raw_data,
         out_path_target=os.path.join("..", "converted"),
@@ -100,7 +105,7 @@ def convert_files( raw_data:StrPath, step_params:dict, global_params:dict ):
         global_params=global_params )
 
 def find_features( community_formatted_data:StrPath, mzmine_batch:StrPath, step_params:dict, global_params:dict ):
-    return generic_step( 
+    return generic_step(
         step_class=MZmine_Runner,
         in_paths=community_formatted_data,
         out_path_target=os.path.join("..", "processed"),
@@ -111,7 +116,7 @@ def find_features( community_formatted_data:StrPath, mzmine_batch:StrPath, step_
     )
 
 def annotate_gnps( processed_data:StrPath, mzmine_log:StrPath, step_params:dict, global_params:dict ):
-    return generic_step( 
+    return generic_step(
         step_class=GNPS_Runner,
         in_paths=processed_data,
         out_path_target=os.path.join("..", "annotated"),
@@ -136,6 +141,7 @@ def analyze_difference( gnps_annotated_data:StrPath, sirius_annotated_data:StrPa
     pass
     """
     return generic_step( step_class="",
+        
                          input=annotated_data, output=os.path.join("..", "results"),
                          step_params=step_params,
                          global_params=global_params )

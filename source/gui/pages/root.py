@@ -120,8 +120,11 @@ def lock_scenario( state ):
         if data_nodes.get(key):
             data_node.write( data_nodes.get(key) )
 
+    scenario.data_nodes["state"].write(state)
+
     state.scenario = scenario
     state.refresh( "scenario" )
+
 
 
 
