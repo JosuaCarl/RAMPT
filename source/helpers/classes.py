@@ -31,7 +31,7 @@ def get_value( instance:object|dict, key ):
         return getattr( instance, key )
 
 @dispatch(object, object, object)
-def get_value( instance:object|dict, key, default ):
+def get_value( instance:object|dict, key, default ):  # noqa: F811
     """
     Extract an attribute of a class or dictionary. If none is present, return default.
 

@@ -3,8 +3,8 @@
 GUI creation with Taipy.
 """
 
+import taipy as tp
 from taipy.gui import Gui
-from taipy import Orchestrator
 
 from source.gui.pages.root import *
 
@@ -19,10 +19,8 @@ stylekit={
 }
 
 gui = Gui(pages=pages, css_file="main.css")
-
+orchestrator = tp.Orchestrator()
 
 
 if __name__ == "__main__":
-    Orchestrator().run()
-
-    gui.run(title="mine2sirius", use_reloader=True, port=5000, run_browser=False, stylekit=stylekit)
+    tp.run( gui, orchestrator, title="mine2sirius", port=5000, stylekit=stylekit )

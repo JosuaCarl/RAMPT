@@ -13,7 +13,6 @@ import requests
 
 from os.path import join, basename
 from tqdm.auto import tqdm
-from tqdm.dask import TqdmCallback
 import dask.multiprocessing
 
 

@@ -15,9 +15,8 @@ import dask.multiprocessing
 
 import source.helpers.general as helpers
 from source.helpers.types import StrPath
-from source.helpers.classes import Pipe_Step, get_value, set_value
+from source.helpers.classes import Pipe_Step, get_value
 
-import regex
 
 def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     """
@@ -135,6 +134,7 @@ class MZmine_Runner(Pipe_Step):
         log_path = join(out_path, "mzmine_log.txt") if self.save_log else None
         out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
                                                     out_path=log_path )
+        
         self.processed_in.append( in_path )
         self.processed_out.append( out_path )
         self.outs.append( out )
