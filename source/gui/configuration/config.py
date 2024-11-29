@@ -115,12 +115,13 @@ def annotate_gnps( processed_data:StrPath, mzmine_log:StrPath, step_params:dict,
                          global_params=global_params,
                          mzmine_log=mzmine_log )
 
-def annotate_sirius( processed_data:StrPath, step_params:dict, global_params:dict ):
+def annotate_sirius( processed_data:StrPath, config:StrPath, step_params:dict, global_params:dict ):
     return generic_step( step_class=Sirius_Runner,
                          in_paths=processed_data,
                          out_path_target=os.path.join("..", "annotated"),
                          step_params=step_params,
-                         global_params=global_params )
+                         global_params=global_params,
+                         config=config )
 
 
 def analyze_difference( gnps_annotated_data:StrPath, sirius_annotated_data:StrPath, step_params:dict, global_params:dict ):
@@ -166,6 +167,7 @@ annotate_gnps_config = Config.configure_task( "annotate_gnps",
 annotate_sirius_config = Config.configure_task( "annotate_sirius",
                                               function=annotate_sirius,
                                               input=[ processed_data_config,
+                                                      sirius_config_config,
                                                       sirius_params_config,
                                                       global_params_config ],
                                               output=sirius_annotations_config,

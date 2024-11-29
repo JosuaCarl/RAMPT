@@ -24,7 +24,7 @@ def create_sirius():
     tgb.html("br")
 
     tgb.text( "###### Config selection", mode="markdown")
-    create_batch_selection( process="sirius", batch_attribute="config", extensions="*",  )
+    create_batch_selection( process="sirius", batch_attribute="config", extensions="*", batch_name="configuration" )
     tgb.input( "{sirius_params.config}",
                label="Sirius config",
                hover_text="You can paste a config or a path to a config here.")

@@ -85,7 +85,7 @@ class Sirius_Runner(Pipe_Step):
         if os.path.isfile(config):
             with open( config, "r" ) as config_file:
                 config = config_file.read()
-        config = config[6:] if config.startswith("config") else config
+            config = config[6:] if config.startswith("config") else config
         return config.strip()
 
 
