@@ -71,31 +71,32 @@ scenario = tp.create_scenario( ms_analysis_config,
 
 ## Synchronisation of Scenario
 match_data_node = { # IO Data
-                    "conversion_params.scheduled_in": "raw_data",
+                    "raw_data": [ "conversion_params.scheduled_in" ],
                    
-                    "feature_finding_params.scheduled_in": "community_formatted_data",
-                    "conversion_params.processed_out": "community_formatted_data",
+                    "community_formatted_data": [ "feature_finding_params.scheduled_in",
+                                                  "conversion_params.processed_out" ],
 
-                    "gnps_params.scheduled_in":    "processed_data",
-                    "sirius_params.scheduled_in":  "processed_data",
-                    "feature_finding_params.processed_out": "processed_data",
+                    "processed_data": [ "gnps_params.scheduled_in",
+                                        "sirius_params.scheduled_in",
+                                        "feature_finding_params.processed_out" ],
 
-                    "analysis_params.scheduled_in": "gnps_annotations",
-                    "gnps_params.processed_out":    "gnps_annotations",
+                    "gnps_annotations": [ "analysis_params.scheduled_in",
+                                          "gnps_params.processed_out" ],
 
-                    "analysis_params.scheduled_in": "sirius_annotations",
-                    "sirius_params.processed_out":  "sirius_annotations",
+                    "sirius_annotations": [ "analysis_params.scheduled_in",
+                                            "sirius_params.processed_out" ],
 
-                    "analysis_params.processed_out": "results",
+                    "results": [ "analysis_params.processed_out" ],
 
                     # Batches and more
-                    "feature_finding_params.batch_path": "mzmine_batch",
+                    "mzmine_batch": [ "feature_finding_params.batch_path" ],
 
-                    "feature_finding_params.log_paths":  "mzmine_log",
-                    "gnps_params.mzmine_log":  "mzmine_log",
+                    "mzmine_log": [ "feature_finding_params.log_paths",
+                                    "gnps_params.mzmine_log" ] ,
 
-                    "sirius_params.config": "sirius_config",
-                    "sirius_params.projectspace": "sirius_projectspace" }
+                    "sirius_config": [ "sirius_params.config" ],
+
+                    "sirius_projectspace": [ "sirius_params.projectspace" ],  }
 
 
 def lock_scenario( state ):
@@ -106,9 +107,14 @@ def lock_scenario( state ):
     
     data_nodes = params.copy()
 
-    for attribute_key, data_node_key in match_data_node.items():
-        attribute_split = attribute_key.split(".")
-        data_nodes.update( {data_node_key: params.get(attribute_split[0]).get(attribute_split[1])} )
+    for data_node_key, attribute_keys in match_data_node.items():
+        for state_attribute in attribute_keys:
+            attribute_split = state_attribute.split(".")
+            value = params.get(attribute_split[0]).get(attribute_split[1])
+            if value:
+                for state_attribute in attribute_keys:
+                    set_attribute_recursive( state, state_attribute, value, refresh=True)
+                data_nodes[data_node_key] = value
 
     for key, data_node in scenario.data_nodes.items():
         if data_nodes.get(key):
