@@ -144,6 +144,27 @@ class MZmine_Runner(Pipe_Step):
         return out_path
 
 
+    def compute_folder( self, in_path:StrPath, out_path:StrPath, batch_path:StrPath=None ):
+        """
+        Compute a single mzmine batch on a folder.
+
+        :param in_path: Path to in folder
+        :type in_path: StrPath
+        :param out_path: Output directory
+        :type out_path: StrPath
+        :param batch_path: Batch file, defaults to None
+        :type batch_path: StrPath, optional
+        """
+        if not batch_path:
+            for entry in os.listdir(in_path):
+                if self.match_file_name( pattern=r".*\.mzbatch$", file_name=entry):
+                    batch_path = join(in_path, entry) if not self.batch_path else None
+
+        for entry in os.listdir(in_path):
+            if self.match_file_name( pattern=self.patterns["in"], file_name=entry ):
+                self.compute( in_path=join(in_path, entry), out_path=out_path, batch_path=batch_path )
+            
+
     def compute_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
                         futures:list=[], recusion_level:int=0 ) -> list:
         """

@@ -76,16 +76,20 @@ class Sirius_Runner(Pipe_Step):
         if kwargs:
             self.update(kwargs)
         self.exec_path = exec_path if exec_path else "sirius"
-        if os.path.isfile(config):
-            with open( config, "r") as config_file:
-                config = config_file.read()
-        config = config[6:] if config.startswith("config") else config
-        self.config = config.strip()
+        self.config = self.extract_config(config)
         self.projectspace = projectspace
 
+    
+    
+    def extract_config( self, config:StrPath ):
+        if os.path.isfile(config):
+            with open( config, "r" ) as config_file:
+                config = config_file.read()
+        config = config[6:] if config.startswith("config") else config
+        return config.strip()
 
 
-    def compute( self, in_path:StrPath, out_path:StrPath, projectspace:StrPath=None ) -> bool:
+    def compute( self, in_path:StrPath, out_path:StrPath, projectspace:StrPath=None, config:StrPath=None ) -> bool:
         """
         Run a single SIRIUS configuration.
 
@@ -95,12 +99,18 @@ class Sirius_Runner(Pipe_Step):
         :type out_path: StrPath
         :param projectspace: Path to projectspace file / directory, defaults to out_path
         :type projectspace: StrPath
+        :param config: Path to configuration file / directory or configuration as string, defaults to None
+        :type config: StrPath, optional
         :return: Success of the command
         :rtype: bool
         """
         if projectspace is None:
             projectspace = self.projectspace if self.projectspace else out_path
-        cmd = rf'"{self.exec_path}" --project {join(projectspace, "projectspace")} --input {in_path} config {self.config} write-summaries --output {out_path} {" ".join(self.additional_args)}'
+        if config is None:
+            config = self.config
+        config = self.extract_config( config=config )
+
+        cmd = rf'"{self.exec_path}" --project {join(projectspace, "projectspace")} --input {in_path} config {config} write-summaries --output {out_path} {" ".join(self.additional_args)}'
               
         out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
                                                     out_path=join(out_path, "sirius_log.txt") if self.save_log else None,
@@ -112,6 +122,29 @@ class Sirius_Runner(Pipe_Step):
         self.errs.append( err )
 
         return out_path
+
+
+    def compute_folder( self, in_path:StrPath, out_path:StrPath, projectspace:StrPath=None, config:str=None  ):
+        """
+        Compute a single mzmine batch on a folder. When no config is defined, it will search in the folder for config.txt.
+
+        :param in_dir: Path to in folder
+        :type in_dir: StrPath
+        :param out_dir: Output directory
+        :type out_dir: StrPath
+        :param projectspace: Path to projectspace file / directory, defaults to out_path
+        :type projectspace: StrPath
+        :param config: Configuration (file), defaults to None
+        :type config: StrPath, optional
+        """
+        if config is None and self.config is None:
+            for entry in os.listdir(in_path):
+                if self.match_file_name( pattern=r"config\.txt$", file_name=entry):
+                    config = join(in_path, entry)
+
+        for entry in os.listdir(in_path):
+            if self.match_file_name( pattern=self.patterns["in"], file_name=entry ):
+                self.compute( in_path=join(in_path, entry), out_path=out_path, projectspace=projectspace, config=config )
 
 
     def compute_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,

@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
 import os
-import json
 
-from werkzeug.utils import secure_filename
 
-from taipy import Config, Frequency, Scope
+from taipy import Config, Scope
 
 from source.helpers.types import StrPath
 
@@ -27,8 +25,8 @@ community_formatted_data_config = Config.configure_in_memory_data_node( id="comm
 processed_data_config = Config.configure_in_memory_data_node( id="processed_data",
                                                               scope=Scope.SCENARIO )
 
-gnps_annotations_config = Config.configure_csv_data_node( id="gnps_annotations",
-                                                          scope=Scope.SCENARIO )
+gnps_annotations_config = Config.configure_json_data_node( id="gnps_annotations",
+                                                           scope=Scope.SCENARIO )
 
 sirius_annotations_config = Config.configure_csv_data_node( id="sirius_annotations",
                                                            scope=Scope.SCENARIO )

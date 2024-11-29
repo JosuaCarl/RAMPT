@@ -223,14 +223,21 @@ class Pipe_Step(Step_Configuration):
 
 
 
-    def compute( self ):
+    def compute( self, **kwargs ):
         """
         Compute a single instance of the runner
         """
         raise(NotImplementedError("The compute function seems to be missing in local implementation"))
     
 
-    def compute_nested( self ):
+    def compute_folder( self, **kwargs ):
+        """
+        Compute a folder with the runner
+        """
+        self.compute( **kwargs )
+    
+
+    def compute_nested( self, **kwargs ):
         """
         Schedule the computation of files in nested folders
         """
@@ -284,6 +291,8 @@ class Pipe_Step(Step_Configuration):
             if self.nested:
                 futures = self.compute_nested( in_root_dir=in_path, out_root_dir=out_path )
                 helpers.compute_scheduled( futures=futures, num_workers=self.workers, verbose=self.verbosity >= 1)
+            elif os.path.isdir( in_path ):
+                self.compute_folder( in_path=in_path, out_path=out_path, **additional_arguments )
             else:
                 self.compute( in_path=in_path, out_path=out_path, **additional_arguments )
 
