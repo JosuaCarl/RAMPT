@@ -83,7 +83,8 @@ def create_list_selection( process:str, attribute:str="batch", extensions:str="*
         path = path if path else get_attribute_recursive( state, f"{process}_{attribute}_selected")
 
         if path != ".":
-            selections[list_id].append(path)
+            if path not in selections:
+                selections[list_id].append(path)
             set_attribute_recursive( state, f"{process}_{attribute}_selection_list", selections[list_id]  )
 
     with tgb.layout( columns="1 1", columns__mobile="1", gap="5%"):

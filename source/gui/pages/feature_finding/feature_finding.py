@@ -13,7 +13,7 @@ feature_finding_path_in = "."
 feature_finding_selection_tree_in = []
 feature_finding_select_folder_in = False
 
-feature_finding_batch_selection = "."
+feature_finding_batch_selected = "."
 feature_finding_batch_path = ".mzbatch"
 feature_finding_batch_selection_list = []
 

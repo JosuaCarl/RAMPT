@@ -11,9 +11,9 @@ gnps_path_in = "."
 gnps_selection_tree_in = []
 gnps_select_folder_in = False
 
-gnps_batch_selection = "."
-gnps_batch_path = "mzmine_log.txt"
-gnps_batch_selection_list = []
+gnps_mzmine_log_selected = "."
+gnps_mzmine_log_path = "mzmine_log.txt"
+gnps_mzmine_log_selection_list = []
 
 
 
