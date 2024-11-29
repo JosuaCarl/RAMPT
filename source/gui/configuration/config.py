@@ -64,7 +64,7 @@ mzmine_log_config = Config.configure_in_memory_data_node( id="mzmine_log",
                                                           scope=Scope.SCENARIO )
 
 sirius_config_config = Config.configure_in_memory_data_node( id="sirius_config",
-                                                            scope=Scope.SCENARIO )
+                                                             scope=Scope.SCENARIO )
 
 
 # Task methods
@@ -87,7 +87,7 @@ def generic_step( step_class, step_params:dict, global_params:dict, in_paths:lis
 
     step_instance.run( in_paths=in_paths, out_paths=out_paths, **kwargs )
 
-    results = list(set([ getattr(step_instance, attr) for attr in return_attributes ]))
+    results =  [ getattr(step_instance, attr) for attr in return_attributes ] 
 
     return tuple(results) if len(results) > 1 else results[0]
 

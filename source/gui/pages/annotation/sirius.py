@@ -12,7 +12,7 @@ sirius_selection_tree_in = []
 sirius_select_folder_in = False
 
 sirius_config_selected = "."
-sirius_config_path = "config.txt"
+sirius_config_path = ""
 sirius_config_selection_list = []
 
 sirius_projectspace_selected = "."
@@ -29,9 +29,6 @@ def create_sirius():
 
     tgb.text( "###### Config selection", mode="markdown")
     create_list_selection( process="sirius", attribute="config", extensions="*", name="configuration" )
-    tgb.input( "{sirius_params.config}",
-               label="Sirius config",
-               hover_text="You can paste a config or a path to a config here.")
 
     create_advanced_settings()
 

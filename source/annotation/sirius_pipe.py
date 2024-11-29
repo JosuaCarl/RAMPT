@@ -53,7 +53,7 @@ class Sirius_Runner(Pipe_Step):
     """
     A runner for SIRIUS annotation.
     """
-    def __init__( self, exec_path:StrPath="sirius", config:StrPath="config.txt", projectspace:StrPath=None,
+    def __init__( self, exec_path:StrPath="sirius", config:StrPath="", projectspace:StrPath=None,
                   save_log:bool=False, additional_args:list=[], verbosity:int=1, **kwargs ):
         """
         Initialize the GNPS_Runner.

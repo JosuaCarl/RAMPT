@@ -226,6 +226,9 @@ class Pipe_Step(Step_Configuration):
     def compute( self, **kwargs ):
         """
         Compute a single instance of the runner
+
+        :param kwargs: Dictionary of additional arguments for computation
+        :type kwargs: ...
         """
         raise(NotImplementedError("The compute function seems to be missing in local implementation"))
     
@@ -233,13 +236,19 @@ class Pipe_Step(Step_Configuration):
     def compute_directory( self, **kwargs ):
         """
         Compute a folder with the runner
+
+        :param kwargs: Dictionary of additional arguments for computation
+        :type kwargs: ...
         """
-        self.compute( **kwargs )
+        return self.compute( **kwargs )
     
 
     def compute_nested( self, **kwargs ):
         """
         Schedule the computation of files in nested folders
+
+        :param kwargs: Dictionary of additional arguments for computation
+        :type kwargs: ...
         """
         raise(NotImplementedError("The compute_nested function seems to be missing in local implementation"))
 
@@ -248,7 +257,11 @@ class Pipe_Step(Step_Configuration):
         """
         Run the instance step with the given in_paths and out_paths. Constructs a new out_target_folder for each directory, if given.
 
-        :param kwargs: Dictionary of additional arguments for single computes
+        :param in_paths: Input paths
+        :type in_paths: list|StrPath
+        :param out_paths: Output paths
+        :type out_paths: list|StrPath
+        :param kwargs: Dictionary of additional arguments for computation
         :type kwargs: ...
         :return: Output that was processed
         :rtype: list
@@ -274,10 +287,17 @@ class Pipe_Step(Step_Configuration):
         for i, (in_path, out_path) in enumerate(zip(self.scheduled_in, self.scheduled_out)):
             in_path = in_path["label"] if isinstance(in_path, dict) else in_path
             out_path = out_path["label"] if isinstance(out_path, dict) else out_path
+
+            # Skip already processed files/folders
+            if in_path in self.processed_in:
+                continue
+            
+            # Construct out directory if not existent
+            os.makedirs( out_path, exist_ok=True )
+
+            # Verbose output
             if self.verbosity >= 3:
                 print(f"Processing {in_path} -> {out_path}")
-
-            os.makedirs( out_path, exist_ok=True )
 
             # Ensure that further passed down lists are processed in parallel with in_path
             additional_arguments = { }
@@ -287,7 +307,7 @@ class Pipe_Step(Step_Configuration):
                 else:
                     additional_arguments[argument] = value
             
-
+            # Activate right computation function
             if self.nested:
                 futures = self.compute_nested( in_root_dir=in_path, out_root_dir=out_path )
                 helpers.compute_scheduled( futures=futures, num_workers=self.workers, verbose=self.verbosity >= 1)
@@ -299,6 +319,7 @@ class Pipe_Step(Step_Configuration):
             if self.verbosity >= 3:
                 print(f"Processed {in_path} -> {out_path}")
 
+        # Clear schedules
         self.scheduled_in  = []
         self.scheduled_out = []
 
