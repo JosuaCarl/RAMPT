@@ -11,9 +11,13 @@ sirius_path_in = "."
 sirius_selection_tree_in = []
 sirius_select_folder_in = False
 
-sirius_path_batch = "."
-sirius_batch_path = "config.txt"
-sirius_selection_list_batch = []
+sirius_config_selected = "."
+sirius_config_path = "config.txt"
+sirius_config_selection_list = []
+
+sirius_projectspace_selected = "."
+sirius_projectspace_path = "projectspace"
+sirius_projectspace_selection_list = []
 
 
 
@@ -24,7 +28,7 @@ def create_sirius():
     tgb.html("br")
 
     tgb.text( "###### Config selection", mode="markdown")
-    create_batch_selection( process="sirius", batch_attribute="config", extensions="*", batch_name="configuration" )
+    create_list_selection( process="sirius", attribute="config", extensions="*", name="configuration" )
     tgb.input( "{sirius_params.config}",
                label="Sirius config",
                hover_text="You can paste a config or a path to a config here.")
@@ -35,4 +39,4 @@ def create_sirius():
    
     tgb.html("br")
 
-    create_batch_selection( process="sirius", batch_attribute="projectspace", batch_name="projectspace" )
+    create_list_selection( process="sirius", attribute="projectspace", name="projectspace" )

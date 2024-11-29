@@ -11,9 +11,9 @@ gnps_path_in = "."
 gnps_selection_tree_in = []
 gnps_select_folder_in = False
 
-gnps_path_batch = "."
+gnps_batch_selection = "."
 gnps_batch_path = "mzmine_log.txt"
-gnps_selection_list_batch = []
+gnps_batch_selection_list = []
 
 
 
@@ -24,4 +24,4 @@ def create_gnps():
     tgb.html("br")
 
     tgb.text( "###### MZmine log selection", mode="markdown")
-    create_batch_selection( process="gnps", batch_attribute="mzmine_log", extensions="*", batch_name="MZmine log file" )
+    create_list_selection( process="gnps", attribute="mzmine_log", extensions="*", name="MZmine log file" )

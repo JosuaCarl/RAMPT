@@ -77,32 +77,32 @@ def create_file_selection( process:str, out_node:str="" ):
 
 
 
-def create_batch_selection( process:str, batch_attribute:str="batch_path", extensions:str="*", batch_name:str="batch_file"  ):
-    selections.update( { f"{process}_{batch_name}": [] })
-    def construct_selection_list( state, path:StrPath=None, list_id:str=f"{process}_{batch_name}" ):
-        path = path if path else get_attribute_recursive( state, f"{process}_path_batch")
+def create_list_selection( process:str, attribute:str="batch", extensions:str="*", name:str="batch file" ):
+    selections.update( { f"{process}_{attribute}": [] })
+    def construct_selection_list( state, path:StrPath=None, list_id:str=f"{process}_{attribute}" ):
+        path = path if path else get_attribute_recursive( state, f"{process}_{attribute}_selected")
 
         if path != ".":
             selections[list_id].append(path)
-            set_attribute_recursive( state, f"{process}_selection_list_batch", selections[list_id]  )
+            set_attribute_recursive( state, f"{process}_{attribute}_selection_list", selections[list_id]  )
 
     with tgb.layout( columns="1 1", columns__mobile="1", gap="5%"):
         with tgb.part( render="{local}" ):
-            tgb.button( f"Select {batch_name}",
+            tgb.button( f"Select {name}",
                         on_action=lambda state: construct_selection_list( state,
                                                                           open_file_folder( multiple=False,
                                                                                             filetypes=[ (f"{ext[1:]} files", f"*{ext}")
-                                                                                                        for ext in extensions.split(",")]  ) ) )
+                                                                                                        for ext in extensions.split(",") ]  ) ) )
         with tgb.part( render="{not local}"):
-            tgb.file_selector( f"{{{process}_path_batch}}",
-                                label=f"Select {batch_name}", extensions=extensions,
-                                drop_message=f"Drop {batch_name} for {process} here:",
+            tgb.file_selector( f"{{{process}_{attribute}_selected}}",
+                                label=f"Select {name}", extensions=extensions,
+                                drop_message=f"Drop {name} for {process} here:",
                                 multiple=False,
                                 on_action=lambda state: construct_selection_list( state ) )
             
-        tgb.selector( f"{{{process}_params.{batch_attribute}}}",
-                        lov=f"{{{process}_selection_list_batch}}",
-                        label=f"Select a {batch_name} for {process}",
+        tgb.selector( f"{{{process}_params.{attribute}}}",
+                        lov=f"{{{process}_{attribute}_selection_list}}",
+                        label=f"Select a {name} for {process}",
                         filter=True, multiple=False, mode="radio" )
 
 

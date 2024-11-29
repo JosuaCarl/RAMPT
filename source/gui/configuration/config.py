@@ -4,6 +4,7 @@ import os
 
 
 from taipy import Config, Scope
+from taipy.gui import invoke_long_callback
 
 from source.helpers.types import StrPath
 
@@ -90,45 +91,48 @@ def generic_step( step_class, step_params:dict, global_params:dict, in_paths:lis
 
     return tuple(results) if len(results) > 1 else results[0]
 
+def run_generic_step( **kwargs ):
+    return invoke_long_callback( generic_step( **kwargs ) )
+
 
 def convert_files( raw_data:StrPath, step_params:dict, global_params:dict ):
-    return generic_step( step_class=File_Converter,
-                         in_paths=raw_data,
-                         out_path_target=os.path.join("..", "converted"),
-                         step_params=step_params,
-                         global_params=global_params )
+    return run_generic_step( step_class=File_Converter,
+                             in_paths=raw_data,
+                             out_path_target=os.path.join("..", "converted"),
+                             step_params=step_params,
+                             global_params=global_params )
 
 def find_features( community_formatted_data:StrPath, mzmine_batch_path:StrPath, step_params:dict, global_params:dict ):
-    return generic_step( step_class=MZmine_Runner,
-                         in_paths=community_formatted_data,
-                         out_path_target=os.path.join("..", "processed"),
-                         step_params=step_params,
-                         global_params=global_params,
-                         return_attributes=["processed_out", "log_paths"],
-                         batch_path=mzmine_batch_path )
+    return run_generic_step( step_class=MZmine_Runner,
+                             in_paths=community_formatted_data,
+                             out_path_target=os.path.join("..", "processed"),
+                             step_params=step_params,
+                             global_params=global_params,
+                             return_attributes=["processed_out", "log_paths"],
+                             batch_path=mzmine_batch_path )
 
 def annotate_gnps( processed_data:StrPath, mzmine_log:StrPath, step_params:dict, global_params:dict ):
-    return generic_step( step_class=GNPS_Runner,
-                         in_paths=processed_data,
-                         out_path_target=os.path.join("..", "annotated"),
-                         step_params=step_params,
-                         global_params=global_params,
-                         mzmine_log=mzmine_log )
+    return run_generic_step( step_class=GNPS_Runner,
+                             in_paths=processed_data,
+                             out_path_target=os.path.join("..", "annotated"),
+                             step_params=step_params,
+                             global_params=global_params,
+                             mzmine_log=mzmine_log )
 
 def annotate_sirius( processed_data:StrPath, config:StrPath, step_params:dict, global_params:dict ):
-    return generic_step( step_class=Sirius_Runner,
-                         in_paths=processed_data,
-                         out_path_target=os.path.join("..", "annotated"),
-                         step_params=step_params,
-                         global_params=global_params,
-                         config=config )
+    return run_generic_step( step_class=Sirius_Runner,
+                             in_paths=processed_data,
+                             out_path_target=os.path.join("..", "annotated"),
+                             step_params=step_params,
+                             global_params=global_params,
+                             config=config )
 
 
 def analyze_difference( gnps_annotated_data:StrPath, sirius_annotated_data:StrPath, step_params:dict, global_params:dict ):
     print("Analyze difference not implemented yet.")
     pass
     """
-    return generic_step( step_class="",
+    return run_generic_step( step_class="",
                          input=annotated_data, output=os.path.join("..", "results"),
                          step_params=step_params,
                          global_params=global_params )

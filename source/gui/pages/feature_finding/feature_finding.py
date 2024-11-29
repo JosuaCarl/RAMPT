@@ -13,9 +13,9 @@ feature_finding_path_in = "."
 feature_finding_selection_tree_in = []
 feature_finding_select_folder_in = False
 
-feature_finding_path_batch = "."
+feature_finding_batch_selection = "."
 feature_finding_batch_path = ".mzbatch"
-feature_finding_selection_list_batch = []
+feature_finding_batch_selection_list = []
 
 
 
@@ -26,7 +26,7 @@ def create_feature_finding( process="feature_finding" ):
     tgb.html("br")
 
     tgb.text( "###### Batch selection", mode="markdown")
-    create_batch_selection( process="feature_finding", extensions=".mzbatch,.xml" )
+    create_list_selection( process="feature_finding", extensions=".mzbatch,.xml" )
 
     create_advanced_settings()
 

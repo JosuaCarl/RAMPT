@@ -18,9 +18,10 @@ stylekit={
     "color_background_light": "#EBE5EC",
 }
 
-gui = Gui(pages=pages, css_file="main.css")
-orchestrator = tp.Orchestrator()
-
 
 if __name__ == "__main__":
-    tp.run( gui, orchestrator, title="mine2sirius", port=5000, stylekit=stylekit )
+    gui = Gui(pages=pages, css_file="main.css")
+    orchestrator = tp.Orchestrator()
+    
+    orchestrator.run()
+    gui.run(title="mine2sirius", port=5000, stylekit=stylekit)
