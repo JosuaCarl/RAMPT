@@ -124,7 +124,7 @@ class Sirius_Runner(Pipe_Step):
         return out_path
 
 
-    def compute_folder( self, in_path:StrPath, out_path:StrPath, projectspace:StrPath=None, config:str=None  ):
+    def compute_directory( self, in_path:StrPath, out_path:StrPath, projectspace:StrPath=None, config:str=None  ):
         """
         Compute a single mzmine batch on a folder. When no config is defined, it will search in the folder for config.txt.
 

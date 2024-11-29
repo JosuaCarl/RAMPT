@@ -144,7 +144,7 @@ class MZmine_Runner(Pipe_Step):
         return out_path
 
 
-    def compute_folder( self, in_path:StrPath, out_path:StrPath, batch_path:StrPath=None ):
+    def compute_directory( self, in_path:StrPath, out_path:StrPath, batch_path:StrPath=None ):
         """
         Compute a single mzmine batch on a folder.
 
