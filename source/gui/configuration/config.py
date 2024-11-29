@@ -102,14 +102,14 @@ def convert_files( raw_data:StrPath, step_params:dict, global_params:dict ):
                              step_params=step_params,
                              global_params=global_params )
 
-def find_features( community_formatted_data:StrPath, mzmine_batch_path:StrPath, step_params:dict, global_params:dict ):
+def find_features( community_formatted_data:StrPath, mzmine_batch:StrPath, step_params:dict, global_params:dict ):
     return run_generic_step( step_class=MZmine_Runner,
                              in_paths=community_formatted_data,
                              out_path_target=os.path.join("..", "processed"),
                              step_params=step_params,
                              global_params=global_params,
                              return_attributes=["processed_out", "log_paths"],
-                             batch_path=mzmine_batch_path )
+                             batch=mzmine_batch )
 
 def annotate_gnps( processed_data:StrPath, mzmine_log:StrPath, step_params:dict, global_params:dict ):
     return run_generic_step( step_class=GNPS_Runner,

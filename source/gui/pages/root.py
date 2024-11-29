@@ -89,7 +89,7 @@ match_data_node = { # IO Data
                     "results": [ "analysis_params.processed_out" ],
 
                     # Batches and more
-                    "mzmine_batch": [ "feature_finding_params.batch_path" ],
+                    "mzmine_batch": [ "feature_finding_params.batch" ],
 
                     "mzmine_log": [ "feature_finding_params.log_paths",
                                     "gnps_params.mzmine_log" ] ,

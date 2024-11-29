@@ -22,7 +22,7 @@ def test_mzmine_pipe_main():
     args = argparse.Namespace( mzmine_path=None,
                                in_dir=helpers.construct_path(filepath, "..", "example_files"),
                                out_dir=helpers.construct_path(filepath, "..", "out"),
-                               batch_path=helpers.construct_path(filepath, "..", "batch_files", "minimal.mzbatch"),
+                               batch=helpers.construct_path(filepath, "..", "batch_files", "minimal.mzbatch"),
                                valid_formats=["mzML"],
                                user="joca", nested=True, platform=platform, save_log=False,
                                verbosity=3, mzmine_arguments=None)
