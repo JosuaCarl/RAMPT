@@ -46,10 +46,13 @@ def create_file_selection( process:str, out_node:str="" ):
         with tgb.part():
             with tgb.part( render="{local}" ):
                 tgb.button( "Select in",
-                            on_action=lambda state: construct_selection_tree( state,
-                                                                              open_file_folder( select_folder=
-                                                                                                get_attribute_recursive(state, f"{process}_select_folder_in") )
-                                                                            ) )
+                            on_action=lambda state: construct_selection_tree( 
+                                                        state,
+                                                        open_file_folder( 
+                                                            select_folder=
+                                                            get_attribute_recursive(state, f"{process}_select_folder_in") )
+                                                    )
+                        )
             with tgb.part( render="{not local}"):
                 tgb.file_selector( f"{{{process}_path_in}}",
                                     label="Select in", extensions="*", drop_message=f"Drop files/folders for {process} here:", multiple=True,
@@ -90,10 +93,15 @@ def create_list_selection( process:str, attribute:str="batch", extensions:str="*
     with tgb.layout( columns="1 1", columns__mobile="1", gap="5%"):
         with tgb.part( render="{local}" ):
             tgb.button( f"Select {name}",
-                        on_action=lambda state: construct_selection_list( state,
-                                                                          open_file_folder( multiple=False,
-                                                                                            filetypes=[ (f"{ext[1:]} files", f"*{ext}")
-                                                                                                        for ext in extensions.split(",") ]  ) ) )
+                        on_action=lambda state: construct_selection_list( 
+                                                    state,
+                                                    open_file_folder( 
+                                                        multiple=False,
+                                                        filetypes=[ (f"{ext[1:]} files", f"*{ext}")
+                                                                    for ext in extensions.split(",") ] 
+                                                    )
+                                                )
+                    )
         with tgb.part( render="{not local}"):
             tgb.file_selector( f"{{{process}_{attribute}_selected}}",
                                 label=f"Select {name}", extensions=extensions,
