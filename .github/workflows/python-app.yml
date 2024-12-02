@@ -31,6 +31,7 @@ jobs:
         poetry cache clear --all pypi
         poetry lock --no-update
         poetry install --no-root
+        ruff --version
     - name: Lint with ruff
       run: |
         ruff check --fix  
