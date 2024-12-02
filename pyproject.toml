@@ -39,7 +39,7 @@ statsmodels = "^0.14.4"
 seaborn = "^0.13.2"
 plotly = "^5.24.1"
 requests = "^2.32.3"
-tee-subprocess = "^1.1.0"
+tee-subprocess = "^1.2.0"
 pyopenms = "3.2.0"
 chardet = "^5.2.0"
 multipledispatch = "^1.0.0"
@@ -49,7 +49,7 @@ ruamel-yaml = "^0.18.6"
 [tool.poetry.dev-dependencies]
 pytest = "^8.3.3"
 icecream = "^2.1.3" 
-
+ruff = "^0.8.1"
 
 # Ruff rules
 [tool.ruff.lint]

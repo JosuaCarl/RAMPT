@@ -30,6 +30,7 @@ jobs:
       run: |
         poetry env info
         poetry cache clear --all pypi
+        poetry config installer.max-workers 1
         poetry lock --no-update
         poetry install
     - name: Lint with ruff
