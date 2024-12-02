@@ -60,7 +60,7 @@ def test_path_nester():
 
 # CMD
 def test_execute_verbose_command():
-    execute_verbose_command(f"echo test4", verbosity=1)
+    execute_verbose_command("echo test4", verbosity=1)
     assert not os.path.isfile( construct_path(filepath, "..", "out", "text.txt") )
 
     execute_verbose_command(f"echo test > {construct_path(filepath, "..", "out", "text.txt")}", verbosity=3)
@@ -74,7 +74,7 @@ def test_execute_verbose_command():
         text = f.read()
         assert text.strip() == "test2"
 
-    execute_verbose_command(f"echo test3", verbosity=1, out_path=construct_path(filepath, "..", "out", "text.txt"))
+    execute_verbose_command("echo test3", verbosity=1, out_path=construct_path(filepath, "..", "out", "text.txt"))
     with open( construct_path(filepath, "..", "out", "text.txt"), "r" ) as f:
         text = f.read()
         assert text.replace("\n", "") == "out:test3err:None"

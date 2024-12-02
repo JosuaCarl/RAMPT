@@ -5,8 +5,6 @@ Analyze the statistical significance of a population.
 """
 
 # Imports
-from typing import Callable
-import pandas as pd
 from scipy import stats
 from statsmodels.sandbox.stats.multicomp import multipletests
 import warnings
@@ -47,11 +45,11 @@ def execute_test( x:Array, y:Array=None, test:str=None, axis:int=0,
             p_values = stats.ttest_ind(x, y, equal_var=False, axis=axis, alternative=alternative_hypothesis, *args)
         case "One-sample t-test":
             if y:
-                warnings.warn(f"Passed y vector for a one-sample test.", UserWarning)
+                warnings.warn("Passed y vector for a one-sample test.", UserWarning)
             p_values = stats.ttest_1samp(x, axis=axis, alternative=alternative_hypothesis)
         case "Wilcoxon matched pairs test":
             if y:
-                warnings.warn(f"Passed y vector for a one-sample test.", UserWarning)
+                warnings.warn("Passed y vector for a one-sample test.", UserWarning)
             p_values = stats.wilcoxon(x, axis=axis, alternative=alternative_hypothesis, *args)
 
     if multiple_testing_correction:

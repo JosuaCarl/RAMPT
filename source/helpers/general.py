@@ -2,7 +2,6 @@
 """
 Methods that are helpful for general processing.
 """
-import sys
 import os
 import subprocess
 import time
@@ -12,7 +11,6 @@ import regex
 import requests
 import dask
 from tqdm.dask import TqdmCallback
-import chardet
 import tee_subprocess
 
 import functools

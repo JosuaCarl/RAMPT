@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 
 from source.helpers.types import StrPath
-from source.helpers.classes import Pipe_Step, get_value, set_value
+from source.helpers.classes import Pipe_Step, get_value
 import source.helpers.general as helpers
 
 
@@ -52,7 +52,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
 
     if nested:
         futures = ion_exclusion_runner.check_ms2_presences_nested( in_root_dir=in_dir, out_root_dir=out_dir, data_root_dir=data_dir )
-        computation_complete = helpers.compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
+        helpers.compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
     else:
         ion_exclusion_runner.check_ms2_presence( in_dir=in_dir, out_dir=out_dir, data_dir=data_dir )
 
@@ -174,7 +174,7 @@ class OpenMS_File_Handler:
             elif alt_name:
                 return alt_name
             else:
-                raise ValueError(f"No file path found in experiment. Please provide alt_name.")
+                raise ValueError("No file path found in experiment. Please provide alt_name.")
 
 
     def load_names_batch( self, experiments:Union[Sequence[Union[oms.MSExperiment,str]], str], file_ending:str=".mzML") -> List[str]:

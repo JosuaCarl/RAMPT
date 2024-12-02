@@ -9,7 +9,6 @@ import shutil
 import source.helpers.general as helpers
 from source.annotation.gnps_pipe import *
 from source.annotation.gnps_pipe import main as gnps_pipe_main
-import pandas as pd
 
 import platform as pf
 
