@@ -34,7 +34,7 @@ jobs:
         ruff --version
     - name: Lint with ruff
       run: |
-        ruff check --fix  
+        ruff check --fix --output-format=github .
     - name: Test with pytest
       run: |
         pytest .\tests
