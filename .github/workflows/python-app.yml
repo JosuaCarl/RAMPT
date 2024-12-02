@@ -36,10 +36,10 @@ jobs:
         poetry install --no-root
 
     - uses: astral-sh/ruff-action@v1
-    - name: Lint with ruff
-      run: |
-        ruff check --fix --output-format=github .
-
+      with:
+        args: "check --fix --output-format=github"
+        src: "."
+        
     - name: Test with pytest
       run: |
         pytest .\tests
