@@ -37,9 +37,9 @@ jobs:
 
     - uses: astral-sh/ruff-action@v1
       with:
-        args: "check --fix --output-format=github"
+        args: "check --output-format=github"
         src: "."
-        
+
     - name: Test with pytest
       run: |
         pytest .\tests
