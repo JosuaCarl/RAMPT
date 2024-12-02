@@ -1,14 +1,27 @@
+[build-system]
+requires = [ "poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "mine2sirius-pipe"
+description = "An integrated workflow to extract (novel) outlier metabolites from MS data."
+requires-python = ">=3.12"
+dependencies = []
+authors = [ { name = "Josua Carl", email = "josua.carl@uni-tuebingen.de" } ]
+readme = {file = "README.txt", content-type = "text/markdown"}
+license = {file = "LICENSE" }
+keywords = ["mass-spectrometry", "workflow", "pipeline", "gui", "sirius", "mzmine" ]
+
 [tool.poetry]
 name = "mine2sirius-pipe"
-version = "0.1.0"
+version = "2024.2.1"
 description = "mzMine to SIRIUS pipeline"
-authors = ["JosuaCarl <josua.carl@student.uni-tuebingen.de>"]
+authors = ["JosuaCarl <josua.carl@uni-tuebingen.de>"]
 license = "GPL-3.0 license"
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-polars = "^1.8.2"
 numpy = "^1.26.4"
 scipy = "^1.14.1"
 pyarrow = "^17.0.0"
@@ -16,7 +29,6 @@ jupyter = "^1.1.1"
 tqdm = "^4.66.5"
 dask = "^2024.9.1"
 argparse = "^1.4.0"
-pytest = "^8.3.3"
 sphinx = "^7"
 regex = "^2024.9.11"
 beautifulsoup4 = "^4.12.3"
@@ -30,16 +42,13 @@ requests = "^2.32.3"
 tee-subprocess = "^1.1.0"
 pyopenms = "^3.2.0"
 chardet = "^5.2.0"
-snakemake = "^8.24.1"
-pyqt6 = "^6.7.1"
 multipledispatch = "^1.0.0"
 taipy = "^4.0.1"
 ruamel-yaml = "^0.18.6"
 
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.poetry.dev-dependencies]
+pytest = "^8.3.3"
+icecream = "^2.1.3" 
 
 
 # Ruff rules

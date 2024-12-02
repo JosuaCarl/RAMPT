@@ -1,0 +1,18 @@
+# Folders
+.conda/
+.github/
+.out/
+.pytest_cache/
+.taipy/
+.vscode/
+backup/
+data/
+databases/
+docs/
+docsource/
+presentation/
+substep_batches/
+tests/
+
+# Files
+Nodes.md
