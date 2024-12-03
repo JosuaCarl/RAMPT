@@ -1,0 +1,153 @@
+out:
+Export successful!
+
+
+
+
+err:
+
+2024-10-21 14:22:05 FINEST io.github.mzmine.modules.dataprocessing.id_ion_identity_networking.ionidnetworking.IonNetworkLibrary createAllAdducts Adding modification: [M+H-H2O]+
+
+2024-10-21 14:22:05 FINEST io.github.mzmine.modules.dataprocessing.id_ion_identity_networking.ionidnetworking.IonNetworkLibrary createAllAdducts Adding modification: [2M+H-H2O]+
+
+2024-10-21 14:22:05 FINEST io.github.mzmine.modules.dataprocessing.id_ion_identity_networking.ionidnetworking.IonNetworkLibrary createAllAdducts Adding modification: [M+H]+
+
+2024-10-21 14:22:05 FINEST io.github.mzmine.modules.dataprocessing.id_ion_identity_networking.ionidnetworking.IonNetworkLibrary createAllAdducts Adding modification: [2M+H]+
+
+2024-10-21 14:22:05 FINEST io.github.mzmine.modules.dataprocessing.id_ion_identity_networking.ionidnetworking.IonNetworkLibrary createAllAdducts Adding modification: [M-H]-
+
+2024-10-21 14:22:05 FINEST io.github.mzmine.modules.dataprocessing.id_ion_identity_networking.ionidnetworking.IonNetworkLibrary createAllAdducts Adding modification: [2M-H]-
+
+2024-10-21 14:22:05 INFO   io.github.mzmine.taskcontrol.impl.WrappedTask run Processing of task Local CSV identification using database D:\mine2sirius_pipe\databases\iML1515\iML1515_metabolites.tsv done, status FINISHED
+
+2024-10-21 14:22:05 INFO   io.github.mzmine.modules.batchmode.BatchTask processQueueStep Starting step # 16
+
+2024-10-21 14:22:05 FINEST io.github.mzmine.modules.batchmode.BatchTask processQueueStep Module Lipid Annotation called at 2024-10-21T12:22:05.202105700Z
+
+2024-10-21 14:22:05 INFO   io.github.mzmine.taskcontrol.impl.WrappedTask run Starting processing of task Annotate lipids in Aligned feature list peak gaps dup corr PEARSON r greq 0.85 dp greq 5
+
+2024-10-21 14:22:05 INFO   io.github.mzmine.modules.dataprocessing.id_lipidid.annotation_modules.LipidAnnotationTask run Starting lipid annotation in Aligned feature list peak gaps dup corr PEARSON r greq 0.85 dp greq 5
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.modules.dataprocessing.id_lipidid.annotation_modules.LipidAnnotationTask run Finished lipid annotation task for Aligned feature list peak gaps dup corr PEARSON r greq 0.85 dp greq 5
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.taskcontrol.impl.WrappedTask run Processing of task Annotate lipids in Aligned feature list peak gaps dup corr PEARSON r greq 0.85 dp greq 5 done, status FINISHED
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.modules.batchmode.BatchTask processQueueStep Starting step # 17
+
+2024-10-21 14:22:08 FINEST io.github.mzmine.modules.batchmode.BatchTask processQueueStep Module Spectral / Molecular Networking called at 2024-10-21T12:22:08.200203600Z
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.taskcontrol.impl.WrappedTask run Starting processing of task Check similarity of MSMS scans (mass lists)
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.modules.dataprocessing.group_spectral_networking.modified_cosine.ModifiedCosineSpectralNetworkingTask checkRowsBestMs2 Checking MS2 similarity on 277 rows
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.modules.dataprocessing.group_spectral_networking.modified_cosine.ModifiedCosineSpectralNetworkingTask checkRowsBestMs2 Spectral networking: Performed 28600 pairwise comparisons.
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.modules.dataprocessing.group_spectral_networking.modified_cosine.ModifiedCosineSpectralNetworkingTask process MS2 similarity check on rows done. MS2 modified cosine similarity edges=115, MS2 neutral loss edges=0
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.modules.visualization.networking.visual.FeatureNetworkGenerator createNewGraph Adding all annotations to a network
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.modules.visualization.networking.visual.FeatureNetworkGenerator addGNPSLibraryMatchesToNodes Added 0 GNPS library matches to their respective nodes
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.modules.visualization.networking.visual.FeatureNetworkGenerator createNewGraph Added 0 connections
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.modules.dataprocessing.group_spectral_networking.modified_cosine.ModifiedCosineSpectralNetworkingTask process Added 115 edges for MS2 mod-cosine
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.taskcontrol.impl.WrappedTask run Processing of task Check similarity of MSMS scans (mass lists) done, status FINISHED
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.modules.batchmode.BatchTask processQueueStep Starting step # 18
+
+2024-10-21 14:22:08 FINEST io.github.mzmine.modules.batchmode.BatchTask processQueueStep Module Export spectral networks to graphml (FBMN/IIMN) called at 2024-10-21T12:22:08.652745100Z
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.taskcontrol.impl.WrappedTask run Starting processing of task Exporting molecular networks to graphml. feature list(s) [Aligned feature list peak gaps dup corr PEARSON r greq 0.85 dp greq 5]
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.modules.visualization.networking.visual.FeatureNetworkGenerator createNewGraph Adding all annotations to a network
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.modules.visualization.networking.visual.FeatureNetworkGenerator addGNPSLibraryMatchesToNodes Added 0 GNPS library matches to their respective nodes
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.modules.visualization.networking.visual.FeatureNetworkGenerator createNewGraph Added 0 connections
+
+2024-10-21 14:22:08 INFO   io.github.mzmine.modules.visualization.networking.visual.FeatureNetworkGenerator createNewGraph Adding all annotations to a network
+
+2024-10-21 14:22:09 INFO   io.github.mzmine.modules.visualization.networking.visual.FeatureNetworkGenerator addGNPSLibraryMatchesToNodes Added 0 GNPS library matches to their respective nodes
+
+2024-10-21 14:22:09 INFO   io.github.mzmine.modules.visualization.networking.visual.FeatureNetworkGenerator createNewGraph Added 12 connections
+
+2024-10-21 14:22:09 INFO   io.github.mzmine.taskcontrol.impl.WrappedTask run Processing of task Exporting molecular networks to graphml. feature list(s) [Aligned feature list peak gaps dup corr PEARSON r greq 0.85 dp greq 5] done, status FINISHED
+
+2024-10-21 14:22:09 INFO   io.github.mzmine.modules.batchmode.BatchTask processQueueStep Starting step # 19
+
+2024-10-21 14:22:09 FINEST io.github.mzmine.modules.batchmode.BatchTask processQueueStep Module Export molecular networking files (e.g., GNPS, FBMN, IIMN, MetGem) called at 2024-10-21T12:22:09.201743900Z
+
+2024-10-21 14:22:09 INFO   io.github.mzmine.taskcontrol.impl.WrappedTask run Starting processing of task Export to GNPS FBMN and IIMN
+
+2024-10-21 14:22:09 INFO   io.github.mzmine.modules.io.export_features_gnps.fbmn.GnpsFbmnMgfExportTask export Total of 279 feature rows (MS/MS mass lists) were exported (Aligned feature list peak gaps dup corr PEARSON r greq 0.85 dp greq 5)
+
+2024-10-21 14:22:09 FINER  io.github.mzmine.modules.io.export_features_gnps.fbmn.GnpsFbmnMgfExportTask checkConcurrentModification flist=Aligned feature list peak gaps dup corr PEARSON r greq 0.85 dp greq 5    MS2=279    newMS2=279    features=1976    newF=1976   filtered=281   fitleredEnd=281
+
+2024-10-21 14:22:09 FINER  io.github.mzmine.modules.io.export_features_csv_legacy.LegacyCSVExportTask checkConcurrentModification flist=Aligned feature list peak gaps dup corr PEARSON r greq 0.85 dp greq 5    MS2=279    newMS2=279    features=1976    newF=1976   filtered=281   fitleredEnd=281
+
+2024-10-21 14:22:09 FINE   io.github.mzmine.modules.dataprocessing.group_metacorrelate.export.ExportCorrAnnotationTask exportLists Starting export of adduct and correlation networks Aligned feature list peak gaps dup corr PEARSON r greq 0.85 dp greq 5
+
+2024-10-21 14:22:09 INFO   io.github.mzmine.modules.dataprocessing.group_metacorrelate.export.ExportCorrAnnotationTask exportIonIdentityEdges Export ion identity networking edges file
+
+2024-10-21 14:22:09 INFO   io.github.mzmine.modules.dataprocessing.group_metacorrelate.export.ExportCorrAnnotationTask exportIonIdentityEdges Annotation edges exported 4
+
+2024-10-21 14:22:09 INFO   io.github.mzmine.modules.dataprocessing.group_metacorrelate.export.ExportCorrAnnotationTask writeToFile File created: D:\mine2sirius_pipe\data\processed\test\20240919_Ex0014_LC-MSMS_DDA_pHILIC_AV171_R1_msAV775\20240919_Ex0014_LC-MSMS_DDA_pHILIC_AV171_R1_msAV775_iimn_fbmn_edges_msannotation.csv
+
+2024-10-21 14:22:09 INFO   io.github.mzmine.modules.io.export_features_gnps.fbmn.GnpsFbmnExportAndSubmitTask run GNPS export succeeded. mgf MS2=279;  csv rows=281
+
+2024-10-21 14:22:09 INFO   io.github.mzmine.modules.io.export_features_gnps.GNPSUtils submitFbmnJob Submitting GNPS job POST https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking HTTP/1.1
+
+2024-10-21 14:25:16 INFO   io.github.mzmine.modules.io.export_features_gnps.GNPSUtils submitFbmnJob GNPS submit response status: HTTP/1.1 200 OK
+
+2024-10-21 14:25:16 INFO   io.github.mzmine.modules.io.export_features_gnps.GNPSUtils submitFbmnJob GNPS FBMN/IIMN response: {"status": "Success", "task_id": "ac81e2251a07495e888a2e5a355b17d9", "url": "https://gnps.ucsd.edu/ProteoSAFe/status.jsp?task=ac81e2251a07495e888a2e5a355b17d9"}
+
+2024-10-21 14:25:16 WARNING io.github.mzmine.modules.io.export_features_gnps.fbmn.GnpsFbmnExportAndSubmitTask submit GNPS submit failed (response url empty)
+
+2024-10-21 14:25:16 INFO   io.github.mzmine.taskcontrol.impl.WrappedTask run Processing of task Submitting job to GNPS done, status FINISHED
+
+2024-10-21 14:25:16 INFO   io.github.mzmine.modules.batchmode.BatchTask processQueueStep Starting step # 20
+
+2024-10-21 14:25:16 FINEST io.github.mzmine.modules.batchmode.BatchTask processQueueStep Module Export for SIRIUS called at 2024-10-21T12:25:16.369927600Z
+
+2024-10-21 14:25:16 INFO   io.github.mzmine.taskcontrol.impl.WrappedTask run Starting processing of task Running sirius export for feature list(s) Aligned feature list peak gaps dup corr PEARSON r greq 0.85 dp greq 5.
+
+2024-10-21 14:25:16 FINE   io.github.mzmine.modules.io.export_features_sirius.SiriusExportTask run Exporting SIRIUS mgf for feature list: Aligned feature list peak gaps dup corr PEARSON r greq 0.85 dp greq 5 to file D:\mine2sirius_pipe\data\processed\test\20240919_Ex0014_LC-MSMS_DDA_pHILIC_AV171_R1_msAV775\20240919_Ex0014_LC-MSMS_DDA_pHILIC_AV171_R1_msAV775_sirius.mgf
+
+2024-10-21 14:25:21 INFO   io.github.mzmine.modules.io.export_features_sirius.SiriusExportTask run Processed 1976 rows, exported 279 rows.
+
+2024-10-21 14:25:21 INFO   io.github.mzmine.taskcontrol.impl.WrappedTask run Processing of task Running sirius export for feature list(s) Aligned feature list peak gaps dup corr PEARSON r greq 0.85 dp greq 5. done, status FINISHED
+
+2024-10-21 14:25:21 INFO   io.github.mzmine.modules.batchmode.BatchTask processQueueStep Starting step # 21
+
+2024-10-21 14:25:21 FINEST io.github.mzmine.modules.batchmode.BatchTask processQueueStep Module Export all annotations to CSV file called at 2024-10-21T12:25:21.322371600Z
+
+2024-10-21 14:25:21 INFO   io.github.mzmine.taskcontrol.impl.WrappedTask run Starting processing of task Exporting annotations of feature list(s) [Aligned feature list peak gaps dup corr PEARSON r greq 0.85 dp greq 5] to CSV file(s) 
+
+2024-10-21 14:25:21 INFO   io.github.mzmine.taskcontrol.impl.WrappedTask run Processing of task Exporting annotations of feature list(s) [Aligned feature list peak gaps dup corr PEARSON r greq 0.85 dp greq 5] to CSV file(s)  done, status FINISHED
+
+2024-10-21 14:25:21 INFO   io.github.mzmine.modules.batchmode.BatchTask run Finished a batch of 21 steps
+
+2024-10-21 14:25:21 INFO   io.github.mzmine.modules.batchmode.BatchTask printBatchTimes Timing: Whole batch took PT3M47.8368318S to finish
+Step 1: Import MS data took PT4.918143S to finish
+Step 2: Mass detection took PT0.8147534S to finish
+Step 3: Mass detection took PT0.2425564S to finish
+Step 4: Chromatogram builder took PT6.7280316S to finish
+Step 5: Smoothing took PT1.6787445S to finish
+Step 6: Local minimum feature resolver took PT0.6310205S to finish
+Step 7: 13C isotope filter (formerly: isotope grouper) took PT0.1712091S to finish
+Step 8: Isotopic peaks finder took PT0.6216024S to finish
+Step 9: Join aligner took PT0.511195S to finish
+Step 10: Feature list rows filter took PT0.5358547S to finish
+Step 11: Peak finder (multithreaded) took PT1.2327241S to finish
+Step 12: Duplicate peak filter took PT4.8410255S to finish
+Step 13: Correlation grouping (metaCorrelate) took PT8.0059694S to finish
+Step 14: Ion identity networking took PT0.6591927S to finish
+Step 15: Local compound database search took PT0.1035323S to finish
+Step 16: Lipid Annotation took PT2.9980979S to finish
+Step 17: Spectral / Molecular Networking took PT0.4525415S to finish
+Step 18: Export spectral networks to graphml (FBMN/IIMN) took PT0.5489988S to finish
+Step 19: Export molecular networking files (e.g., GNPS, FBMN, IIMN, MetGem) took PT3M7.1681837S to finish
+Step 20: Export for SIRIUS took PT4.952444S to finish
+Step 21: Export all annotations to CSV file took PT0.0210113S to finish
+
