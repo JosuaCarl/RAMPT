@@ -81,7 +81,7 @@ def extend_list( array, extension) -> list:
 
 
 # String operations
-def change_case_str(s:str, range:SupportsIndex, conversion:str) -> str:
+def change_case_str(s:str, range, conversion:str) -> str:
     """
     Change the case of part of a string.
 
