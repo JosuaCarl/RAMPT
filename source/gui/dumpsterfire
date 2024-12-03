@@ -1,0 +1,166 @@
+## Projects 
+project_counter = 0
+project_name = f"{datetime.date.today()}_{project_counter}"
+project_path = os.path.join( work_dir_root, project_name )
+projects = [ {"name": project_name, "path": project_path} ]
+
+def update_projects( project_id, project_name:str, project_path:StrPath ):
+    global projects
+    projects.append( {"id": project_id, "name": project_name, "path": project_path} )
+
+
+def add_project( new_project_name:str=None ):
+    global project_name
+    global project_path
+    global project_counter
+
+    project_counter += 1
+    
+    if new_project_name:
+        if os.path.isdir( new_project_name ):
+            directory, name = os.path.split( new_project_name )
+            project_name = name
+            change_work_dir_root( new_root=directory )
+        else:
+            project_name = new_project_name
+    else:
+        project_name = f"{datetime.date.today()}_{project_counter}"
+    project_path = os.path.join( work_dir_root, secure_filename( project_name ) )
+    update_projects( project_name, project_path )
+
+
+def change_project( path:StrPath ):
+    global project_name
+    global project_path
+    global projects
+
+    for project in projects:
+        if projects.get("path") == path:
+            project_path = project.get("path")
+            project_name = project.get("name")
+    
+
+
+# --------------
+
+def evaluate_ask_overwrite( state, _, payload_pressed, option_list ):
+    state.overwrite = evaluate_dialog( state, payload_pressed, option_list)
+
+def ask_overwrite( state ):
+    state.show_ask_overwrite = True
+    return state
+
+
+
+
+def evaluate_ask_overwrite( state, _, payload_pressed, option_list ):
+    state.overwrite = evaluate_dialog( state, payload_pressed, option_list)
+
+tgb.dialog( "{show_ask_overwrite}", labels="Yes;No", title="This project was already converted.\nShould it be done again ?", on_action=evaluate_ask_overwrite)
+                        
+
+# ----------------
+
+
+
+
+def convert_selected( state ):
+    global project_path
+    conv_out_path = os.path.join( project_path, "converted" )
+
+    selected_for_conversion = extract_attribute( state, "conv_selection" )
+    if os.path.isdir( conv_out_path ) and not state.conv_overwrite:
+        state = ask_overwrite( state )
+        if not state.overwrite:
+            return False
+    else:
+        os.makedirs( conv_out_path , exist_ok=True )
+
+    for i, in_path in enumerate(selected_for_conversion):
+        file_converter.convert_file( in_path=in_path, out_path=conv_out_path )
+        state.conv_progress = i + 1 / len( selected_for_conversion )
+    
+    return True
+
+
+
+
+                  file_converter:File_Converter|dict=File_Converter(),
+                  mzmine_runner:MZmine_Runner|dict=MZmine_Runner(),
+                  gnps_runner:GNPS_Runner|dict=GNPS_Runner(),
+                  sirius_runner:Sirius_Runner|dict=Sirius_Runner()
+    
+
+        self.file_converter = File_Converter(**file_converter)  if isinstance(file_converter, dict) else file_converter
+        self.mzmine_runner  = MZmine_Runner(**mzmine_runner)    if isinstance(mzmine_runner, dict)  else mzmine_runner
+        self.gnps_runner    = GNPS_Runner(**gnps_runner)        if isinstance(gnps_runner, dict)    else gnps_runner
+        self.sirius_runner  = Sirius_Runner(**sirius_runner)    if isinstance(sirius_runner, dict)  else sirius_runner
+
+
+
+def construct_selection_tree( state, path:StrPath=None ):
+    path = path if path else get_attribute_recursive( state, "conv_path_in")
+
+    if path != ".":
+        global conv_select_tree_paths
+        conv_select_tree_paths = add_path_to_tree( conv_select_tree_paths, path )
+
+        pruned_tree = path_nester.prune_lca( nested_paths=conv_select_tree_paths )
+        set_attribute_recursive( state, "conv_select_tree_paths", pruned_tree )
+
+
+# File Selection
+    with tgb.part():
+        tgb.toggle( "{local}",
+                    label="Process locally", hover_text="Whether to use the server functionality of taipy to upload files and process them,\
+                                                                or to use files that are present on the local machine.")
+        tgb.html("br")
+        with tgb.layout( columns="1 2 2", columns__mobile="1", gap="5%"):
+            with tgb.part():
+                with tgb.part( render="{local}" ):
+                    tgb.button( "Select in",
+                                on_action=lambda state: construct_selection_tree(state, open_file_folder( select_folder=state.conv_select_folder_in)) )
+                with tgb.part( render="{not local}"):
+                    tgb.file_selector( "{conv_path_in}",
+                                        label="Select in", extensions="*", drop_message="Drop files/folders for conversion here:", multiple=True,
+                                        on_action=construct_selection_tree )
+                tgb.toggle( "{conv_select_folder_in}", label="Select folder")
+            tgb.tree( "{conversion_params.scheduled_in}",
+                        lov="{conv_select_tree_paths}", label="Select for conversion", filter=True, multiple=True, expanded=True, mode="check" )
+            with tgb.part():
+                with tgb.layout(columns="1 1", columns__mobile="1", gap="5%"):
+                    with tgb.part():
+                        with tgb.part( render="{local}" ):
+                            tgb.button( "Select out",
+                                        on_action=lambda state: set_attribute_recursive( state,
+                                                                                        "conversion_params.scheduled_out",
+                                                                                        open_file_folder( select_folder=True ),
+                                                                                        refresh=True) )
+                        with tgb.part( render="{not local}"):
+                            tgb.file_download( "{None}", active="{scenario.data_nodes['community_formatted_data'].is_ready_for_reading}",
+                                               label="Download results",
+                                               on_action=lambda state, id, payload: download_data_node_files( state,
+                                                                                                              "community_formatted_data") )
+                            
+
+def post_gnps_request( self, work_path:StrPath ):
+    # TODO: Add own version of POST request to GNPS
+    # print("The job will be resubmitted to https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking")
+    # requests.post( "https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking",
+    #             data={ "featurems2": join(out_path, f"{os.path.basename(out_path)}_iimn_fbmn.mgf"),
+    #                     "featurequantification": join(out_path, f"{os.path.basename(out_path)}_iimn_fbmn_quant.csv")})
+    pass
+
+print(json.dumps(data_nodes, indent=4))
+
+
+def run_generic_step( state, **kwargs ):
+    generic_step_args = [ kwargs.pop("step_class"),
+                          kwargs.pop("step_params"),
+                          kwargs.pop("global_params"),
+                          kwargs.pop("in_paths", None),
+                          kwargs.pop("out_path_target", None),
+                          kwargs.pop("return_attributes", ["processed_out"]),
+                          kwargs
+                          ]
+    return invoke_long_callback( state, user_function=generic_step, user_function_args=generic_step_args )
