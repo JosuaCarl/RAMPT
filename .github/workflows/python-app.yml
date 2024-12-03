@@ -37,6 +37,11 @@ jobs:
       run: |
         poetry run ruff check --output-format=github
 
+    - name: Explore tree
+      run: |
+        ls -la .
+        tree .
+        
     - name: Test with pytest
       run: |
         poetry run pytest .\tests
