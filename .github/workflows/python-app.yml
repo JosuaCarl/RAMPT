@@ -24,6 +24,7 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: "3.12.7"
+        cache: "poetry"
 
     - name: Install and configure Poetry
       uses: snok/install-poetry@v1
@@ -34,11 +35,10 @@ jobs:
       run: |
         poetry lock --no-update
         poetry install
-
-    - uses: astral-sh/ruff-action@v1
-      with:
-        args: "check --output-format=github"
-        src: "."
+    
+    - name: Ruff checking
+      run: |
+        poetry run ruff check --output-format=github
 
     - name: Test with pytest
       run: |
