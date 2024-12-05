@@ -1,8 +1,0 @@
-version: "2024.0.2"
-services:
-  pwiz:
-    image: chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:3.0.24284-bc93c28
-    stdin_open: true
-    tty: true
-    environment:
-      - WINEDEBUG=-all

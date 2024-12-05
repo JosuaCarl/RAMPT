@@ -157,7 +157,7 @@ class File_Converter(Pipe_Step):
         target_format = self.target_format.replace(".", "")
         target_format = helpers.change_case_str(s=target_format, range=slice(2, len(target_format)), conversion="upper")
 
-        cmd = rf'"{self.exec_path}" --{target_format} --64 -o {out_path} {in_path} {" ".join(self.additional_args)}'
+        cmd = rf'"{self.exec_path}" --{target_format} --64 -o "{out_path}" "{in_path}" {" ".join(self.additional_args)}'
 
         log_path = join(out_path, "msconv_log.txt") if self.save_log else None
         out, err =  helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,

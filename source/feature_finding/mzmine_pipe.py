@@ -129,7 +129,7 @@ class MZmine_Runner(Pipe_Step):
         :rtype: bool
         """
         batch = batch if batch else self.batch
-        cmd = rf'"{self.exec_path}" {self.login} --batch {batch} --input {in_path} --output {out_path} {" ".join(self.additional_args)}'
+        cmd = rf'"{self.exec_path}" {self.login} --batch "{batch}" --input "{in_path}" --output "{out_path}" {" ".join(self.additional_args)}'
         
         log_path = join(out_path, "mzmine_log.txt") if self.save_log else None
         out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,

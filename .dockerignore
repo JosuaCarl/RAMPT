@@ -1,8 +1,10 @@
 # Folders
 .conda/
 .github/
+.git/
 .out/
 .pytest_cache/
+.ruff_cache/
 .taipy/
 .vscode/
 backup/
@@ -16,3 +18,4 @@ tests/
 
 # Files
 Nodes.md
+.gitignore

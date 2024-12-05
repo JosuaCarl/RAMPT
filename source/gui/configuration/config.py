@@ -70,9 +70,8 @@ sirius_config_config = Config.configure_in_memory_data_node( id="sirius_config",
 # Task methods
 def generic_step( step_class, step_params:dict, global_params:dict, in_paths:list=None,
                   out_path_target:StrPath=None, return_attributes:list=["processed_out"],
-                  additional_arguments:dict=None, **kwargs):
-    if kwargs:
-        additional_arguments.update( kwargs )
+                  **kwargs):
+
     step_params.update( global_params )
     step_instance = step_class( **step_params )
 
@@ -87,8 +86,7 @@ def generic_step( step_class, step_params:dict, global_params:dict, in_paths:lis
                 out_paths.append( os.path.abspath(os.path.join(os.path.dirname(in_path), out_path_target)) )
             else:
                 out_paths.append( os.path.abspath(os.path.join(in_path, out_path_target)) )
-
-    step_instance.run( in_paths=in_paths, out_paths=out_paths, **additional_arguments )
+    step_instance.run( in_paths=in_paths, out_paths=out_paths, **kwargs )
 
     results =  [ getattr(step_instance, attr) for attr in return_attributes ] 
 
