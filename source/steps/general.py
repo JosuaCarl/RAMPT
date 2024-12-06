@@ -240,7 +240,7 @@ class Pipe_Step(Step_Configuration):
         :param kwargs: Dictionary of additional arguments for computation
         :type kwargs: ...
         """
-        return self.compute( **kwargs )
+        raise(NotImplementedError("The compute_nested function seems to be missing in local implementation"))
     
 
     def compute_nested( self, **kwargs ):

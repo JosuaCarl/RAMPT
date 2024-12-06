@@ -7,8 +7,8 @@ import os
 import shutil
 
 import source.helpers.general as helpers
-from source.annotation.gnps_pipe import *
-from source.annotation.gnps_pipe import main as gnps_pipe_main
+from source.steps.annotation.gnps_pipe import *
+from source.steps.annotation.gnps_pipe import main as gnps_pipe_main
 
 import platform as pf
 

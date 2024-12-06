@@ -3,8 +3,8 @@
 Testing the conversion functions.
 """
 from tests.common import *
-from source.conversion.msconv_pipe import *
-from source.conversion.msconv_pipe import main as msconv_pipe_main
+from source.steps.conversion.msconv_pipe import *
+from source.steps.conversion.msconv_pipe import main as msconv_pipe_main
 from bs4 import BeautifulSoup
 
 platform = get_platform()
@@ -14,9 +14,11 @@ out_path, test_path, example_path = contruct_common_paths( filepath )
 
 
 def test_msconv_pipe_compute():
+    clean_out( out_path )
+
     # Superficial testing of compute
     file_converter = File_Converter( platform=platform, target_format=".mzML",
-                                     pattern=".*", save_log=False, verbosity=3,
+                                     suffix=".mzXML", save_log=False, verbosity=3,
                                      nested=False, workers=1 )
     
     file_converter.compute( in_path=join(test_path, "minimal_file.mzML"),
@@ -25,18 +27,11 @@ def test_msconv_pipe_compute():
     assert os.path.isfile( join(out_path, "minimal_file.mzML") )
     assert not os.path.exists( join(out_path, "nested_test_folder") )
 
-    clean_out( out_path )
-
-    # Second test with concrete path
-    file_converter.compute( in_path=join(test_path, "minimal_file.mzML"),
-                            out_path=join(out_path, "minimal_file.mzML") )
-    
-    assert os.path.isfile( join(out_path, "minimal_file.mzML") )
-
-    clean_out( out_path )
 
 
 def test_msconv_pipe_compute_directory():
+    clean_out( out_path )
+
     # Superficial testing of compute_directory
     file_converter = File_Converter( platform=platform, target_format=".mzML",
                                      pattern=".*", save_log=False, verbosity=3,
@@ -48,10 +43,10 @@ def test_msconv_pipe_compute_directory():
     assert os.path.isfile( join(out_path, "minimal_file.mzML") )
     assert not os.path.exists( join(out_path, "nested_test_folder") )
 
-    clean_out( out_path )
 
 
 def test_msconv_pipe_compute_nested():
+    clean_out( out_path )
     # Superficial testing of compute_nested
     file_converter = File_Converter( platform=platform, target_format=".mzML",
                                      pattern=".*", save_log=False, verbosity=3,
@@ -64,10 +59,11 @@ def test_msconv_pipe_compute_nested():
     assert os.path.exists( join(out_path, "nested_test_folder") )
     assert os.path.isfile( join(out_path, "nested_test_folder", "minimal_file.mzML") )
 
-    clean_out( out_path )
 
 
 def test_msconv_pipe_run():
+    clean_out( out_path )
+
     # Superficial testing of run
     file_converter = File_Converter( platform=platform, target_format=".mzML",
                                      pattern=".*", save_log=False, verbosity=3,
@@ -82,44 +78,36 @@ def test_msconv_pipe_run():
 
     clean_out( out_path )
 
-
-    file_converter.run( in_path=[test_path],
-                        out_path=[out_path] )
+    # Specific run
+    file_converter.run( in_path=[join(test_path, "minimal_file.mzML")],
+                        out_path=[join(out_path, "minimal_file.mzML")] )
     
-    assert file_converter.processed_in == [test_path]
-    assert file_converter.processed_out == [out_path]
+    assert file_converter.processed_in == [join(test_path, "minimal_file.mzML")]
+    assert file_converter.processed_out == [join(out_path, "minimal_file.mzML")]
     assert os.path.isfile( join(out_path, "minimal_file.mzML") )
 
-    clean_out( out_path )
 
 
 def test_msconv_pipe_run_nested():
-    # Superficial testing of run
+    clean_out( out_path )
+
+    # Superficial testing of nested run
     file_converter = File_Converter( platform=platform, target_format=".mzML",
                                      pattern=".*", save_log=False, verbosity=3,
-                                     nested=False, workers=1 )
+                                     nested=True, workers=1 )
     
     file_converter.run( in_path=[test_path],
                         out_path=[out_path] )
     
     assert file_converter.processed_in == [test_path]
-    assert file_converter.processed_out == [out_path]
+    assert file_converter.processed_out == [out_path, join(out_path, "nested_test_folder")]
     assert os.path.isfile( join(out_path, "minimal_file.mzML") )
+    assert os.path.isfile( join(out_path, "nested_test_folder", "minimal_file.mzML") )
 
-    clean_out( out_path )
-
-
-    file_converter.run( in_path=[test_path],
-                        out_path=[out_path] )
-    
-    assert file_converter.processed_in == [test_path]
-    assert file_converter.processed_out == [out_path]
-    assert os.path.isfile( join(out_path, "minimal_file.mzML") )
-
-    clean_out( out_path )
 
 
 def test_msconv_pipe_main():
+    clean_out( out_path )
     # Exact testing of main method
     args = argparse.Namespace(in_dir=test_path,
                               out_dir=out_path,
@@ -151,4 +139,7 @@ def test_msconv_pipe_main():
         print( helpers.construct_path(filepath, "..", "test_files/minimal_file.mzXML") )
         assert file.get('fileName') ==  "file:///" + test_path + "/" + "minimal_file.mzXML" # <- mzXML path is wrong for windows
 
+
+def test_clean_out():
+    # clean out leftovers
     clean_out( out_path )

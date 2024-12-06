@@ -2,7 +2,7 @@
 
 import taipy.gui.builder as tgb
 
-from source.helpers.classes import Pipe_Step
+from source.steps.general import Pipe_Step
 
 class Analysis_Runner(Pipe_Step):
     pass

@@ -16,7 +16,7 @@ import dask.multiprocessing
 
 import source.helpers.general as helpers
 from source.helpers.types import StrPath
-from source.helpers.classes import Pipe_Step, get_value
+from source.steps.general import Pipe_Step, get_value
 
 
 def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):

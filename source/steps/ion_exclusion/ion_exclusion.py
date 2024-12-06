@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 
 from source.helpers.types import StrPath
-from source.helpers.classes import Pipe_Step, get_value
+from source.steps.general import Pipe_Step, get_value
 import source.helpers.general as helpers
 
 

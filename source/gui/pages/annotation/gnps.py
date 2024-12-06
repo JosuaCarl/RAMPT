@@ -3,7 +3,7 @@
 import taipy.gui.builder as tgb
 from source.gui.pages.common_parts import *
 
-from source.annotation.gnps_pipe import GNPS_Runner
+from source.steps.annotation.gnps_pipe import GNPS_Runner
 
 gnps_params = GNPS_Runner()
 

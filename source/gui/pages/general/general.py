@@ -2,7 +2,7 @@
 
 import taipy.gui.builder as tgb
 
-from source.helpers.classes import Step_Configuration
+from source.steps.general import Step_Configuration
 
 
 

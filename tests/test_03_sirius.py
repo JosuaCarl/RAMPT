@@ -9,8 +9,8 @@ import shutil
 import pandas as pd 
 
 import source.helpers.general as helpers
-from source.annotation.sirius_pipe import *
-from source.annotation.sirius_pipe import main as sirius_pipe_main
+from source.steps.annotation.sirius_pipe import *
+from source.steps.annotation.sirius_pipe import main as sirius_pipe_main
 
 import platform as pf
 

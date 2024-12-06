@@ -7,8 +7,8 @@ import os
 import shutil
 
 import source.helpers.general as helpers
-from source.feature_finding.mzmine_pipe import *
-from source.feature_finding.mzmine_pipe import main as mzmine_pipe_main
+from source.steps.feature_finding.mzmine_pipe import *
+from source.steps.feature_finding.mzmine_pipe import main as mzmine_pipe_main
 import pandas as pd
 
 import platform as pf
