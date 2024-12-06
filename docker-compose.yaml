@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  msconvert:
+    image: chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:3.0.24284-bc93c28
+    volumes:
+      - shared-data:/shared
+    command: >
+      wine msconvert
+  app:
+    depends_on:
+      - msconvert
+    image: python:3.12-slim
+    volumes:
+      - shared-data:/shared
+    command: >
+      bash msconvert
+
+volumes:
+  shared-data:

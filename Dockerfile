@@ -1,17 +1,5 @@
-# Python BASE
-FROM python:3.12-slim AS base-image
-
-# Install on Debian
-RUN apt-get update && apt-get install -y \
-    curl \
-    build-essential \
-    unzip && \
-    apt-get clean
-
-# Install poetry
-RUN curl -sSL https://install.python-poetry.org | python - && \
-    ln -s /root/.local/bin/poetry /usr/local/bin/poetry
-
+# Import Proteowizard
+FROM chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:3.0.24284-bc93c28 AS converter
 
 # Set the working directory in the container
 WORKDIR /app
@@ -19,16 +7,57 @@ WORKDIR /app
 # Copy the application files into the container
 COPY . .
 
-ENV PYTHON_VENV="/app/mine2sirius_venv"
-RUN python -m venv $PYTHON_VENV
+
+# Define alias for msconvert
+RUN echo '#!/bin/bash\nwine msconvert' > /usr/bin/msconvert && \
+    chmod +x /usr/bin/msconvert
+
+
+# Install dependencies on Ubuntu
+RUN apt-get update && apt-get install -y \
+    software-properties-common\
+    tree \
+    curl
+
+# Install python dependencies
+RUN add-apt-repository ppa:deadsnakes/ppa && apt-get update && apt-get install -y \
+    build-essential \
+    libffi-dev \
+    libssl-dev \
+    zlib1g-dev \
+    libbz2-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    libncurses5-dev \
+    libgdbm-dev \
+    libnss3-dev \
+    liblzma-dev \
+    --no-install-recommends && \
+    apt-get clean
+
+# Install python
+ENV PYTHON_VERSION="3.12.8"
+RUN curl -L https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz -o Python-$PYTHON_VERSION.tgz && \
+    tar -xf Python-$PYTHON_VERSION.tgz && \
+    cd Python-$PYTHON_VERSION && \
+    ./configure --enable-optimizations && \
+    make -j$(nproc) && \
+    make altinstall && \
+    rm -rf Python-$PYTHON_VERSION Python-$PYTHON_VERSION.tgz
+
+# Define alias for python
+RUN echo '#!/bin/bash\npython3.12' > /usr/bin/python && \
+    chmod +x /usr/bin/python
+
+# Install poetry
+RUN curl -sSL https://install.python-poetry.org | python - && \
+    ln -s /root/.local/bin/poetry /usr/local/bin/poetry
+
 
 # Install Python dependencies listed in pyproject.toml
-RUN poetry env use $PYTHON_VENV/bin/python && \
-    poetry lock --no-update && \
-    poetry install
+RUN poetry lock --no-update && \
+    poetry install --no-root
 
-
-# INSTALL external dependencies
 # Install MZmine
 ENV MZMINE_DIR=/app/mzmine
 
@@ -54,31 +83,6 @@ RUN mkdir -p $SIRIUS_DIR  && chmod -R +w $MZMINE_DIR &&  \
 ENV PATH="$PATH:$SIRIUS_DIR/bin"
 
 
-# Import Proteowizard
-FROM chambm/pwiz-skyline-i-agree-to-the-vendor-licenses:3.0.24284-bc93c28 AS converter
-
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy the application files into the container
-COPY --from=base-image /app /app
-
-# Define alias for msconvert
-RUN echo '#!/bin/bash\nwine msconvert' > /usr/bin/msconvert && \
-    chmod +x /usr/bin/msconvert
-
-# Define aliases for other programs
-ENV PATH="$PATH:/app/sirius/bin"
-ENV PATH="$PATH:/app/mzmine/bin"
-
-# Expose a port if needed (e.g., for a web server)
-# EXPOSE 5000
-RUN . /app/mine2sirius_venv/bin/activate
-RUN echo '#!/bin/bash\n/app/mine2sirius_venv/bin/python' > /usr/bin/python && \
-    chmod +x /usr/bin/python
-RUN python --version && sleep 2
-
-RUN tree /app && sleep 5
 
 # Specify the command to run when the container starts
 CMD ["python", "-m", "source.gui.main"]
