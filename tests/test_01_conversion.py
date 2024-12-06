@@ -18,7 +18,7 @@ def test_msconv_pipe_compute():
 
     # Superficial testing of compute
     file_converter = File_Converter( platform=platform, target_format=".mzML",
-                                     suffix=".mzXML", save_log=False, verbosity=3,
+                                     save_log=False, verbosity=3,
                                      nested=False, workers=1 )
     
     file_converter.compute( in_path=join(test_path, "minimal_file.mzML"),
@@ -49,11 +49,12 @@ def test_msconv_pipe_compute_nested():
     clean_out( out_path )
     # Superficial testing of compute_nested
     file_converter = File_Converter( platform=platform, target_format=".mzML",
-                                     pattern=".*", save_log=False, verbosity=3,
-                                     nested=False, workers=1 )
+                                     suffix=".mzML", save_log=False, verbosity=3,
+                                     nested=True, workers=1 )
     
-    file_converter.compute_nested( in_path=test_path,
-                                   out_path=out_path )
+    futures = file_converter.compute_nested( in_root_dir=test_path,
+                                               out_root_dir=out_path )
+    helpers.compute_scheduled( futures=futures, num_workers=file_converter.workers, verbose=file_converter.verbosity >= 1)
     
     assert os.path.isfile( join(out_path, "minimal_file.mzML") )
     assert os.path.exists( join(out_path, "nested_test_folder") )
@@ -66,43 +67,48 @@ def test_msconv_pipe_run():
 
     # Superficial testing of run
     file_converter = File_Converter( platform=platform, target_format=".mzML",
-                                     pattern=".*", save_log=False, verbosity=3,
-                                     nested=False, workers=1 )
+                                     suffix=".mzML", save_log=False, verbosity=3,
+                                     overwrite=True, nested=False, workers=1 )
     
-    file_converter.run( in_path=[test_path],
-                        out_path=[out_path] )
+    file_converter.run( in_paths=[test_path],
+                        out_paths=[out_path] )
     
-    assert file_converter.processed_in == [test_path]
-    assert file_converter.processed_out == [out_path]
+    assert file_converter.processed_in == [join(test_path, "minimal_file.mzML")]
+    assert file_converter.processed_out == [join(out_path, "minimal_file.mzML")]
     assert os.path.isfile( join(out_path, "minimal_file.mzML") )
 
     clean_out( out_path )
 
+    print("specific RUN")
     # Specific run
-    file_converter.run( in_path=[join(test_path, "minimal_file.mzML")],
-                        out_path=[join(out_path, "minimal_file.mzML")] )
+    file_converter.run( in_paths=[join(test_path, "minimal_file.mzML")],
+                        out_paths=[out_path] )
     
     assert file_converter.processed_in == [join(test_path, "minimal_file.mzML")]
     assert file_converter.processed_out == [join(out_path, "minimal_file.mzML")]
     assert os.path.isfile( join(out_path, "minimal_file.mzML") )
 
 
-
 def test_msconv_pipe_run_nested():
     clean_out( out_path )
-
     # Superficial testing of nested run
     file_converter = File_Converter( platform=platform, target_format=".mzML",
-                                     pattern=".*", save_log=False, verbosity=3,
+                                     pattern=r".*\.mzML$", save_log=False, verbosity=1,
                                      nested=True, workers=1 )
     
-    file_converter.run( in_path=[test_path],
-                        out_path=[out_path] )
+    # TODO: Why does .mzXML target format also convert to mzML ?
     
-    assert file_converter.processed_in == [test_path]
-    assert file_converter.processed_out == [out_path, join(out_path, "nested_test_folder")]
+    file_converter.run( in_paths=[test_path],
+                        out_paths=[out_path] )
+    
+    
+    ic(file_converter.patterns)
+    
+    assert file_converter.processed_in == [join(test_path, "minimal_file.mzML"), join(test_path, "nested_test_folder", "minimal_file.mzML")]
+    assert file_converter.processed_out == [join(out_path, "minimal_file.mzXML"), join(out_path, "nested_test_folder", "minimal_file.mzXML")]
     assert os.path.isfile( join(out_path, "minimal_file.mzML") )
     assert os.path.isfile( join(out_path, "nested_test_folder", "minimal_file.mzML") )
+    assert not os.path.exists( join(out_path, "empty_nested_test_folder") )
 
 
 

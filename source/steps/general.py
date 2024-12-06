@@ -222,6 +222,35 @@ class Pipe_Step(Step_Configuration):
         return bool( regex.search( pattern=pattern, string=str(file_name) ) )
 
 
+    def store_progress( self, in_path:StrPath, out_path:StrPath, out:str="", err:str="", log_path:str="" ):
+        """
+        Store progress in PipeStep variables. Ensures a match between reprocessed in_paths and out_paths.
+
+        :param in_path: Path to scheduled file.
+        :type in_path: StrPath
+        :param out_path: Path to output directory.
+        :type out_path: StrPath
+        :param out: Output of run, defaults to ""
+        :type out: str, optional
+        :param err: Error messages of run, defaults to ""
+        :type err: str, optional
+        :param log_path: Path to log file, defaults to ""
+        :type log_path: str, optional
+        """
+        if in_path in self.processed_in:
+            i = self.processed_in.index(in_path)
+            self.processed_out[i] = out_path
+            self.outs[i] = out
+            self.errs[i] = err
+            self.log_paths[i] = log_path
+        else:
+            self.processed_in.append( in_path )
+            self.processed_out.append( out_path )
+            self.outs.append( out )
+            self.errs.append( err )
+            self.log_paths.append( log_path )
+
+
 
     def compute( self, **kwargs ):
         """
@@ -282,19 +311,20 @@ class Pipe_Step(Step_Configuration):
         if size_diff > 0:
             self.scheduled_out += [self.scheduled_out[-1]]*size_diff
 
-        
+
         # Loop over all in/out combinations
         for i, (in_path, out_path) in enumerate(zip(self.scheduled_in, self.scheduled_out)):
             in_path = in_path["label"] if isinstance(in_path, dict) else in_path
             out_path = out_path["label"] if isinstance(out_path, dict) else out_path
 
             # Skip already processed files/folders
-            if in_path in self.processed_in:
+            if in_path in self.processed_in and not self.overwrite:
                 continue
             
             # Construct out directory if not existent
             os.makedirs( out_path, exist_ok=True )
 
+            print(self.verbosity)
             # Verbose output
             if self.verbosity >= 3:
                 print(f"Processing {in_path} -> {out_path}")

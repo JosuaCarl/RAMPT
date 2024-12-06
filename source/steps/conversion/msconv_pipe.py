@@ -135,6 +135,8 @@ class File_Converter(Pipe_Step):
         """
         # Check origin
         in_valid =  super().match_file_name( pattern=self.patterns["in"], file_name=in_path )
+        if in_valid:
+            helpers.ic(in_path)
         # Check target
         out_valid = self.overwrite or ( not os.path.isfile(out_path) )       or \
                     os.path.getsize( out_path ) < float(self.redo_threshold) or \
@@ -143,7 +145,7 @@ class File_Converter(Pipe_Step):
         return in_valid, out_valid
             
 
-    def compute( self, in_path:str, out_path:str ) -> bool:
+    def compute( self, in_path:str, out_path:str ) -> str:
         """
         Convert one file with msconvert.
 
@@ -151,8 +153,8 @@ class File_Converter(Pipe_Step):
         :type in_path: str
         :param out_path: Path to output directory.
         :type out_path: str
-        :return: Whether the file was converted
-        :rtype: bool
+        :return: out_path
+        :rtype: str
         """
         target_format = self.target_format.replace(".", "")
         target_format = helpers.change_case_str(s=target_format, range=slice(2, len(target_format)), conversion="upper")
@@ -165,13 +167,32 @@ class File_Converter(Pipe_Step):
         if not os.path.isfile(out_path):
             out_path = os.path.join( out_path, f"{'.'.join(os.path.basename(in_path).split(".")[:-1])}.{target_format}" )
 
-        self.processed_in.append( in_path )
-        self.processed_out.append( out_path )
-        self.outs.append( out )
-        self.errs.append( err )
-        self.log_paths.append( log_path )
-
+        self.store_progress(in_path=in_path, out_path=out_path, out=out, err=err, log_path=log_path)
         return out_path
+
+
+    def compute_directory( self, in_path:str, out_path:str ) -> list[str]:
+        """
+        Convert all matching files in a folder.
+
+        :param in_path: Path to scheduled file.
+        :type in_path: str
+        :param out_path: Path to output directory.
+        :type out_path: str
+        :return: out_path
+        :rtype: str
+        """
+        verbose_tqdm = self.verbosity >= 2
+        out_paths = []
+        for entry in tqdm(os.listdir(in_path), disable=verbose_tqdm, desc="Converting folder"):
+            entry_path = join( in_path, entry )
+            hypothetical_out_path= join( out_path, helpers.replace_file_ending( entry, self.target_format ) )
+            in_valid, out_valid = self.select_for_conversion( in_path=entry_path, out_path=hypothetical_out_path)
+
+            if in_valid and out_valid:
+                out_paths.append( self.compute( in_path=entry_path, out_path=out_path ) )
+        
+        return out_paths
 
 
     def compute_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
@@ -192,19 +213,21 @@ class File_Converter(Pipe_Step):
         :rtype: list
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
+        made_out_root_dir = False
+
         for entry in tqdm(os.listdir(in_root_dir), disable=verbose_tqdm, desc="Schedule conversions"):
             entry_path = join( in_root_dir, entry )
             out_path = join( out_root_dir, helpers.replace_file_ending( entry, self.target_format ) )
             in_valid, out_valid = self.select_for_conversion( in_path=entry_path, out_path=out_path)
 
             if in_valid and out_valid:
+                if made_out_root_dir:
+                    helpers.make_new_dir( out_root_dir )
+                    made_out_root_dir = True
                 futures.append( dask.delayed(self.compute)( in_path=entry_path, out_path=out_root_dir ) )
             elif os.path.isdir( entry_path ) and not in_valid:
                 futures = self.compute_nested( in_root_dir=entry_path, out_root_dir=join(out_root_dir, entry),
-                                                     futures=futures, recusion_level=recusion_level+1 )
-            
-        if futures:
-            helpers.make_new_dir( out_root_dir )
+                                                     futures=futures, recusion_level=recusion_level+1 )            
 
         return futures
 
