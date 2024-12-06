@@ -82,7 +82,12 @@ RUN mkdir -p $SIRIUS_DIR  && chmod -R +w $MZMINE_DIR &&  \
 
 ENV PATH="$PATH:$SIRIUS_DIR/bin"
 
+# Clean apt-get
+RUN apt-get purge -y build-essential \
+    && apt-get autoremove -y \
+    && apt-get clean
 
+# Expose 5000 to host
+EXPOSE 5000
 
-# Specify the command to run when the container starts
-CMD ["python", "-m", "source.gui.main"]
+CMD [ "python", "-m", "source.gui.main" "-H" "0.0.0.0" "--debug" ]

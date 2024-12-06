@@ -83,10 +83,9 @@ RUN echo '#!/bin/bash\nwine msconvert' > /usr/bin/msconvert && \
     chmod +x /usr/bin/msconvert
 
 # Define aliases for other programs
-ENV PATH="$PATH:/app/sirius/bin"
-ENV PATH="$PATH:/app/mzmine/bin"
-ENV PATH="$PATH:/app/mine2sirius_venv/bin"
-    
+ENV PATH="$PATH:$MZMINE_DIR/bin:$SIRIUS_DIR/bin"
+
+
 RUN python --version
 
 
