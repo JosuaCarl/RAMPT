@@ -188,6 +188,7 @@ class Pipe_Step(Step_Configuration):
                         save_log=save_log, verbosity=verbosity, additional_args=additional_args )
 
         self.exec_path          = exec_path
+        self.futures            = []
         self.scheduled_in       = []
         self.scheduled_out      = []
         self.processed_in       = []
@@ -197,15 +198,14 @@ class Pipe_Step(Step_Configuration):
         self.log_paths          = []
 
 
-    def update( self, attributions:dict ):
+    def update( self, attributes:dict ):
         """
         Update an attribute of this object.
 
-        :param attributions: Key value pair of attribute name and value
-        :type attributions: str
+        :param attributes: Key value pair of attribute name and value
+        :type attributes: str
         """
-        self.__dict__.update( attributions )
-
+        self.__dict__.update( attributes )
 
 
     def match_file_name( self, pattern:str, file_name:StrPath ) -> bool:
@@ -220,6 +220,7 @@ class Pipe_Step(Step_Configuration):
         :rtype: bool
         """
         return bool( regex.search( pattern=pattern, string=str(file_name) ) )
+
 
 
     def store_progress( self, in_path:StrPath, out_path:StrPath, out:str="", err:str="", log_path:str="" ):
@@ -251,6 +252,15 @@ class Pipe_Step(Step_Configuration):
             self.log_paths.append( log_path )
 
 
+    def merge_progress( self, pipe_steps:list[Step_Configuration] ):
+        for pipe_step in pipe_steps:
+            self.processed_in.extend( pipe_step.processed_in )
+            self.processed_out.extend( pipe_step.processed_out )
+            self.outs.extend( pipe_step.outs )
+            self.errs.extend( pipe_step.errs )
+            self.log_paths.extend( pipe_step.log_paths )
+
+
 
     def compute( self, **kwargs ):
         """
@@ -280,6 +290,14 @@ class Pipe_Step(Step_Configuration):
         :type kwargs: ...
         """
         raise(NotImplementedError("The compute_nested function seems to be missing in local implementation"))
+    
+
+
+    def compute_futures( self ):
+        results = helpers.compute_scheduled( futures=self.futures, num_workers=self.workers, verbose=self.verbosity >= 1)
+        helpers.ic(results)
+        self.outs.append( results[0] )
+        self.errs.append( results[1] )
 
 
     def run( self, in_paths:list|StrPath=[], out_paths:list|StrPath=[], **kwargs ) -> list:
@@ -339,8 +357,7 @@ class Pipe_Step(Step_Configuration):
             
             # Activate right computation function
             if self.nested:
-                futures = self.compute_nested( in_root_dir=in_path, out_root_dir=out_path )
-                helpers.compute_scheduled( futures=futures, num_workers=self.workers, verbose=self.verbosity >= 1)
+                self.compute_nested( in_root_dir=in_path, out_root_dir=out_path )
             elif os.path.isdir( in_path ):
                 self.compute_directory( in_path=in_path, out_path=out_path, **additional_arguments )
             else:
@@ -348,6 +365,10 @@ class Pipe_Step(Step_Configuration):
 
             if self.verbosity >= 3:
                 print(f"Processed {in_path} -> {out_path}")
+
+        # Compute futures
+        if self.futures:
+            self.compute_futures()
 
         # Clear schedules
         self.scheduled_in  = []

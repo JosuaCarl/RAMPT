@@ -300,21 +300,34 @@ def execute_verbose_command( cmd:str|list, verbosity:int=1,
     if out_path:
         with open(out_path, "w") as out_file:
             out_file.write(f"out:\n{process.stdout}\n\n\nerr:\n{process.stderr}")
-
     return process.stdout, process.stderr
 
 
 
 # Parallel processing
-def compute_scheduled( futures:list, num_workers:int=1, verbose:bool=False ) -> bool:
-        dask.config.set(scheduler='processes', num_workers=num_workers)
+def compute_scheduled( futures:list, num_workers:int=1, scheduler="threads", verbose:bool=False ):
+    """
+    Compute scheduled operations in parallel.
+
+    :param futures: Scheduled computations
+    :type futures: list
+    :param num_workers: Number of parallel processes, defaults to 1
+    :type num_workers: int, optional
+    :param scheduler: Scheduler ('threads', 'processes', 'synchronous'), defaults to "threads"
+    :type scheduler: str, optional
+    :param verbose: Print the output ?, defaults to False
+    :type verbose: bool, optional
+    :return: Returns of function
+    :rtype: any
+    """
+    with dask.config.set(scheduler=scheduler, num_workers=num_workers):
         if verbose:
             with TqdmCallback(desc="Compute"):
-                dask.compute(futures)
+                results = dask.compute( futures )
         else:
-            dask.compute(futures)
-        
-        return True
+            results = dask.compute( futures )
+
+    return results
 
 
 
