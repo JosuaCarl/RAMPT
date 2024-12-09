@@ -159,13 +159,16 @@ class File_Converter(Pipe_Step):
 
         cmd = rf'"{self.exec_path}" --{self.target_format[1:]} -e {self.target_format} --64 -o "{out_path}" "{in_path}" {" ".join(self.additional_args)}'
 
+        out = ""
+        err = ""
+
         if self.workers > 1:
             self.futures.append( dask.delayed(helpers.execute_verbose_command) (cmd=cmd, verbosity=self.verbosity, out_path=log_path) )
         else:
             out, err =  helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity, out_path=log_path )
 
-        if not os.path.isfile(out_path):
-            out_path = os.path.join( out_path, f"{'.'.join(os.path.basename(in_path).split(".")[:-1])}{self.target_format}" )
+        if os.path.isdir(out_path):
+            out_path = os.path.join( out_path, '.'.join(os.path.basename(in_path).split(".")[:-1]) + self.target_format )
 
         self.store_progress(in_path=in_path, out_path=out_path, out=out, err=err, log_path=log_path)
 

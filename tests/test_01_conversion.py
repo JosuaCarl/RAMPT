@@ -94,15 +94,11 @@ def test_msconv_pipe_run_nested():
     clean_out( out_path )
     # Superficial testing of nested run
     file_converter = File_Converter( platform=platform, target_format=".mzXML",
-                                     pattern=r".*\.mzML$", save_log=False, verbosity=1,
+                                     pattern=r".*\.mzML$", save_log=False, verbosity=3,
                                      nested=True, workers=1 )
     
-    ic(file_converter.processed_in)
-    ic(file_converter.processed_out)
     file_converter.run( in_paths=[test_path],
                         out_paths=[out_path] )
-    ic(file_converter.processed_in)
-    ic(file_converter.processed_out)
 
     assert file_converter.processed_in == [join(test_path, "minimal_file.mzML"), join(test_path, "nested_test_folder", "minimal_file.mzML")]
     assert file_converter.processed_out == [join(out_path, "minimal_file.mzXML"), join(out_path, "nested_test_folder", "minimal_file.mzXML")]
@@ -115,11 +111,10 @@ def test_msconv_pipe_run_nested():
 def test_msconv_pipe_main():
     clean_out( out_path )
     # Exact testing of main method
-    args = argparse.Namespace(in_dir=test_path,
-                              out_dir=out_path,
+    args = argparse.Namespace(in_dir=test_path, out_dir=out_path,
                               pattern="", target_format="mzML", suffix=".mzML", prefix=None, contains=None,
-                              redo_threshold=0.0, overwrite=None, workers=None, nested=True,
-                              platform=platform, verbosity=3, msconv_arguments=None, save_log=False)
+                              redo_threshold=0.0, overwrite=None, workers=4, nested=True,
+                              platform=platform, verbosity=1, msconv_arguments=None, save_log=False)
     msconv_pipe_main( args, unknown_args=[] )
     
     assert os.path.isfile( join(out_path, "minimal_file.mzML") )
@@ -132,7 +127,7 @@ def test_msconv_pipe_main():
         assert os.path.join( file.get('location'),  file.get('name') ) ==  "file:///" + helpers.construct_path(filepath, "..", "test_files", "minimal_file.mzML")
     
     args.target_format = "mzXML"
-    args.suffix = ".mzXML"
+    args.suffix = ".mzX?ML"
     msconv_pipe_main(args, unknown_args=[])
     
     assert os.path.isfile( join(out_path, "minimal_file.mzXML") )
@@ -142,10 +137,11 @@ def test_msconv_pipe_main():
         data = f.read()
         data = BeautifulSoup(data, "xml")
         file = data.find("parentFile")
-        print( helpers.construct_path(filepath, "..", "test_files/minimal_file.mzXML") )
-        assert file.get('fileName') ==  "file:///" + test_path + "/" + "minimal_file.mzXML" # <- mzXML path is wrong for windows
+        assert file.get('fileName') ==  "file:///" + test_path + "/" + "minimal_file.mzXML" # <- mzXML path is wrong for windows (fault with msconvert)
 
 
 def test_clean_out():
-    # clean out leftovers
+    """
+    Clean out leftover data in output folder.
+    """
     clean_out( out_path )

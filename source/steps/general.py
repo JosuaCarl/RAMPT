@@ -241,9 +241,11 @@ class Pipe_Step(Step_Configuration):
         if in_path in self.processed_in:
             i = self.processed_in.index(in_path)
             self.processed_out[i] = out_path
-            self.outs[i] = out
-            self.errs[i] = err
             self.log_paths[i] = log_path
+            if out is not None:
+                self.outs[i] = out
+            if err is not None:
+                self.errs[i] = err
         else:
             self.processed_in.append( in_path )
             self.processed_out.append( out_path )
@@ -294,10 +296,16 @@ class Pipe_Step(Step_Configuration):
 
 
     def compute_futures( self ):
+        """
+        Compute scheduled operations (futures).
+        """
         results = helpers.compute_scheduled( futures=self.futures, num_workers=self.workers, verbose=self.verbosity >= 1)
-        helpers.ic(results)
-        self.outs.append( results[0] )
-        self.errs.append( results[1] )
+        outs, errs = [], []
+        for out, err in results[0]:
+            outs.append( out )
+            errs.append( err )
+        self.outs.extend( outs )
+        self.errs.extend( errs )
 
 
     def run( self, in_paths:list|StrPath=[], out_paths:list|StrPath=[], **kwargs ) -> list:
@@ -342,7 +350,6 @@ class Pipe_Step(Step_Configuration):
             # Construct out directory if not existent
             os.makedirs( out_path, exist_ok=True )
 
-            print(self.verbosity)
             # Verbose output
             if self.verbosity >= 3:
                 print(f"Processing {in_path} -> {out_path}")

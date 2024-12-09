@@ -65,7 +65,6 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
                For future use please find your user file under $USER/.mzmine/users/ after completing the login.")
         login = "--login"
 
-    print(valid_formats)
     mzmine_runner = MZmine_Runner( exec_path=exec_path, batch=batch, login=login,
                                    valid_formats=valid_formats, save_log=save_log,
                                    additional_args=additional_args, verbosity=verbosity,
