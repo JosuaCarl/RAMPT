@@ -2,8 +2,8 @@
 <mzXML xmlns="http://sashimi.sourceforge.net/schema_revision/mzXML_3.2"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://sashimi.sourceforge.net/schema_revision/mzXML_3.2 http://sashimi.sourceforge.net/schema_revision/mzXML_3.2/mzXML_idx_3.2.xsd">
-  <msRun scanCount="1" startTime="PT2.103S" endTime="PT899.749S">
-    <parentFile fileName="file:///C:/Users/SomeUser/somefile.RAW"
+  <msRun scanCount="0" startTime="PT0.0S" endTime="PT0.1S">
+    <parentFile fileName="file:///C:/Users/SomeUser/minimal file.RAW"
                 fileType="RAWData"
                 fileSha1="Cool_SHA_1"/>
     <msInstrument msInstrumentID="1">
@@ -23,28 +23,8 @@
       <processingOperation name="peak picking"/>
       <comment>Agilent/MassHunter peak picking</comment>
     </dataProcessing>
-    <scan num="1"
-          scanType="Full"
-          centroided="1"
-          msLevel="1"
-          peaksCount="6000"
-          polarity="+"
-          retentionTime="PT2.103S"
-          lowMz="50.32331251836"
-          highMz="1698.926096096909"
-          basePeakMz="166.08898838709"
-          basePeakIntensity="1.26685e05"
-          totIonCurrent="6.82165e07"
-          msInstrumentID="1">
-      <peaks compressionType="none"
-             compressedLen="0"
-             precision="64"
-             byteOrder="network"
-             contentType="m/z-int">X</peaks>
-    </scan>
   </msRun>
   <index name="scan">
-    <offset id="1">1</offset>
   </index>
   <indexOffset>1</indexOffset>
   <sha1>Cooler_SHA_1</sha1>
