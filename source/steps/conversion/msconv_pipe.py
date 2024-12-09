@@ -9,7 +9,6 @@ import regex
 
 from os.path import join
 from tqdm.auto import tqdm
-import dask.multiprocessing
 
 import source.helpers.general as helpers
 from source.helpers.types import StrPath
@@ -45,17 +44,17 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     additional_args = additional_args if additional_args else unknown_args
     
     # Conversion
-    file_converter = File_Converter( platform=platform, target_format=target_format,
+    msconvert_runner = MSconvert_Runner( platform=platform, target_format=target_format,
                                      pattern=pattern, suffix=suffix, prefix=prefix, contains=contains, 
                                      redo_threshold=redo_threshold, overwrite=overwrite,
                                      save_log=save_log, additional_args=additional_args, verbosity=verbosity,
                                      nested=nested, workers=n_workers,
                                      scheduled_in=in_dir, scheduled_out=out_dir )
-    return file_converter.run()
+    return msconvert_runner.run()
 
 
 
-class File_Converter(Pipe_Step):
+class MSconvert_Runner(Pipe_Step):
     """
     General class for file conversion along matched patterns.
     """
@@ -92,7 +91,7 @@ class File_Converter(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__( exec_path=exec_path, platform=platform, patterns={"in": pattern}, save_log=save_log, 
+        super().__init__( name="msconvert", exec_path=exec_path, platform=platform, patterns={"in": pattern}, save_log=save_log, 
                           additional_args=additional_args, verbosity=verbosity )
         if kwargs:
             self.update(kwargs)
@@ -144,7 +143,7 @@ class File_Converter(Pipe_Step):
         return in_valid, out_valid
             
 
-    def compute( self, in_path:str, out_path:str ) -> str:
+    def run_single( self, in_path:str, out_path:str ):
         """
         Convert one file with msconvert.
 
@@ -152,28 +151,20 @@ class File_Converter(Pipe_Step):
         :type in_path: str
         :param out_path: Path to output directory.
         :type out_path: str
-        :return: out_path
-        :rtype: str
         """
-        log_path = join(out_path, "msconv_log.txt") if self.save_log else None
-
         cmd = rf'"{self.exec_path}" --{self.target_format[1:]} -e {self.target_format} --64 -o "{out_path}" "{in_path}" {" ".join(self.additional_args)}'
 
-        out = ""
-        err = ""
-
-        if self.workers > 1:
-            self.futures.append( dask.delayed(helpers.execute_verbose_command) (cmd=cmd, verbosity=self.verbosity, out_path=log_path) )
-        else:
-            out, err =  helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity, out_path=log_path )
-
-        if os.path.isdir(out_path):
+        if not os.path.isfile(out_path):
             out_path = os.path.join( out_path, '.'.join(os.path.basename(in_path).split(".")[:-1]) + self.target_format )
 
-        self.store_progress(in_path=in_path, out_path=out_path, out=out, err=err, log_path=log_path)
+        helpers.ic(out_path)
+        super().compute( cmd=cmd, in_path=in_path, out_path=out_path )
+
+        
 
 
-    def compute_directory( self, in_path:str, out_path:str ):
+
+    def run_directory( self, in_path:str, out_path:str ):
         """
         Convert all matching files in a folder.
 
@@ -181,8 +172,6 @@ class File_Converter(Pipe_Step):
         :type in_path: str
         :param out_path: Path to output directory.
         :type out_path: str
-        :return: Out paths
-        :rtype: Iterator
         """
         verbose_tqdm = self.verbosity >= 2
         for entry in tqdm(os.listdir(in_path), disable=verbose_tqdm, desc="Converting folder"):
@@ -191,10 +180,10 @@ class File_Converter(Pipe_Step):
             in_valid, out_valid = self.select_for_conversion( in_path=entry_path, out_path=hypothetical_out_path)
 
             if in_valid and out_valid:
-                self.compute( in_path=entry_path, out_path=out_path )
+                self.run_single( in_path=entry_path, out_path=out_path )
 
 
-    def compute_nested( self, in_root_dir:StrPath, out_root_dir:StrPath, recusion_level:int=0 ) -> list:
+    def run_nested( self, in_root_dir:StrPath, out_root_dir:StrPath, recusion_level:int=0 ):
         """
         Converts multiple files in multiple folders, found in in_root_dir with msconvert and saves them
         to a location out_root_dir again into their respective folders.
@@ -205,8 +194,6 @@ class File_Converter(Pipe_Step):
         :type out_root_dir: StrPath
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
-        :return: List of future computations
-        :rtype: list
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
         made_out_root_dir = False
@@ -218,11 +205,11 @@ class File_Converter(Pipe_Step):
 
             if in_valid and out_valid:
                 if made_out_root_dir:
-                    helpers.make_new_dir( out_root_dir )
+                    os.makedirs( out_root_dir, exist_ok=True )
                     made_out_root_dir = True
-                self.compute( in_path=entry_path, out_path=out_root_dir )
+                self.run_single( in_path=entry_path, out_path=out_root_dir )
             elif os.path.isdir( entry_path ) and not in_valid:
-                self.compute_nested( in_root_dir=entry_path, out_root_dir=join(out_root_dir, entry),
+                self.run_nested( in_root_dir=entry_path, out_root_dir=join(out_root_dir, entry),
                                      recusion_level=recusion_level+1 )
 
 

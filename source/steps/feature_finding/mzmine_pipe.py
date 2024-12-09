@@ -11,7 +11,6 @@ import argparse
 
 from os.path import join
 from tqdm.auto import tqdm
-import dask.multiprocessing
 
 import source.helpers.general as helpers
 from source.helpers.types import StrPath
@@ -98,7 +97,7 @@ class MZmine_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__( patterns={"in": rf".*({r'|'.join(valid_formats)})$"}, 
+        super().__init__( name="mzmine", patterns={"in": rf".*({r'|'.join(valid_formats)})$"}, 
                           save_log=save_log, additional_args=additional_args, verbosity=verbosity )
         if kwargs:
             self.update(kwargs)
@@ -114,7 +113,7 @@ class MZmine_Runner(Pipe_Step):
 
 
 
-    def compute( self, in_path:StrPath, out_path:StrPath, batch:StrPath=None ) -> bool:
+    def run_single( self, in_path:StrPath, out_path:StrPath, batch:StrPath=None ) -> bool:
         """
         Run a single mzmine batch.
 
@@ -128,22 +127,13 @@ class MZmine_Runner(Pipe_Step):
         :rtype: bool
         """
         batch = batch if batch else self.batch
+        
         cmd = rf'"{self.exec_path}" {self.login} --batch "{batch}" --input "{in_path}" --output "{out_path}" {" ".join(self.additional_args)}'
         
-        log_path = join(out_path, "mzmine_log.txt") if self.save_log else None
-        out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
-                                                    out_path=log_path )
-        
-        self.processed_in.append( in_path )
-        self.processed_out.append( out_path )
-        self.outs.append( out )
-        self.errs.append( err )
-        self.log_paths.append( log_path )
-
-        return out_path
+        super().compute( cmd=cmd, in_path=in_path, out_path=out_path )
 
 
-    def compute_directory( self, in_path:StrPath, out_path:StrPath, batch:StrPath=None ):
+    def run_directory( self, in_path:StrPath, out_path:StrPath, batch:StrPath=None ):
         """
         Compute a single mzmine batch on a folder.
 
@@ -161,11 +151,10 @@ class MZmine_Runner(Pipe_Step):
 
         for entry in os.listdir(in_path):
             if self.match_file_name( pattern=self.patterns["in"], file_name=entry ):
-                self.compute( in_path=join(in_path, entry), out_path=out_path, batch=batch )
+                self.run_single( in_path=join(in_path, entry), out_path=out_path, batch=batch )
             
 
-    def compute_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
-                        futures:list=[], recusion_level:int=0 ) -> list:
+    def run_nested( self, in_root_dir:StrPath, out_root_dir:StrPath, recusion_level:int=0 ):
         """
         Run a mzmine batch on a nested structure.
 
@@ -173,16 +162,14 @@ class MZmine_Runner(Pipe_Step):
         :type in_root_dir: StrPath
         :param out_root_dir: Root directory for output
         :type out_root_dir: StrPath
-        :param futures: Future computations for parallelization, defaults to []
-        :type futures: list, optional
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
-        :return: Open computations from found valid files
-        :rtype: list
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
+        made_out_root_dir = False
         found_files = []
         batch = None
+
         for entry in tqdm( os.listdir(in_root_dir), disable=verbose_tqdm, desc="Schedule feature_finding" ):
             entry_path = join(in_root_dir, entry)
 
@@ -191,18 +178,19 @@ class MZmine_Runner(Pipe_Step):
             elif self.match_file_name( pattern=r".*mzbatch$", file_name=entry):
                 batch = entry_path if not self.batch else None
             elif os.path.isdir( entry_path ):
-                futures = self.compute_nested( in_root_dir=entry_path,
-                                               out_root_dir=join( out_root_dir, entry ),
-                                               futures=futures, recusion_level=recusion_level+1)
+                self.run_nested( in_root_dir=entry_path,
+                                 out_root_dir=join( out_root_dir, entry ),
+                                 recusion_level=recusion_level+1)
 
         source_paths_file = join( out_root_dir, "source_files.txt" )
         if found_files:
-            os.makedirs(out_root_dir, exist_ok=True)
+            if made_out_root_dir:
+                    os.makedirs( out_root_dir, exist_ok=True )
+                    made_out_root_dir = True
             with open(source_paths_file , "w", encoding="utf8" ) as f:
                 f.write( "\n".join(found_files) )
-            futures.append( dask.delayed( self.compute )( in_path=source_paths_file, out_path=out_root_dir, batch=batch ) )
+            self.run_single( in_path=source_paths_file, out_path=out_root_dir, batch=batch )
 
-        return futures
 
     
     def run(self, in_paths:list=[], out_paths:list=[], batch:StrPath=None, **kwargs ):

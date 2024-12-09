@@ -11,11 +11,9 @@ import argparse
 
 from os.path import join
 from tqdm.auto import tqdm
-import dask.multiprocessing
 
-
-import source.helpers.general as helpers
 from source.helpers.types import StrPath
+
 from source.steps.general import Pipe_Step, get_value
 
 
@@ -71,7 +69,7 @@ class Sirius_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__( patterns={"in": r"_sirius.mgf$"},
+        super().__init__( name="sirius", patterns={"in": r"_sirius.mgf$"},
                           save_log=save_log, additional_args=additional_args, verbosity=verbosity)
         if kwargs:
             self.update(kwargs)
@@ -89,7 +87,7 @@ class Sirius_Runner(Pipe_Step):
         return config.strip()
 
 
-    def compute( self, in_path:StrPath, out_path:StrPath, projectspace:StrPath=None, config:StrPath=None ) -> bool:
+    def run_single( self, in_path:StrPath, out_path:StrPath, projectspace:StrPath=None, config:StrPath=None ) -> bool:
         """
         Run a single SIRIUS configuration.
 
@@ -111,20 +109,11 @@ class Sirius_Runner(Pipe_Step):
         config = self.extract_config( config=config )
 
         cmd = rf'"{self.exec_path}" --project {join(projectspace, "projectspace")} --input {in_path} config {config} write-summaries --output {out_path} {" ".join(self.additional_args)}'
-              
-        out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity,
-                                                    out_path=join(out_path, "sirius_log.txt") if self.save_log else None,
-                                                    decode_text=False )
         
-        self.processed_in.append( in_path )
-        self.processed_out.append( out_path )
-        self.outs.append( out )
-        self.errs.append( err )
-
-        return out_path
+        super().compute( cmd=cmd, in_path=in_path, out_path=out_path, results=None, log_path=None, decode_text=False )
 
 
-    def compute_directory( self, in_path:StrPath, out_path:StrPath, projectspace:StrPath=None, config:str=None  ):
+    def run_directory( self, in_path:StrPath, out_path:StrPath, projectspace:StrPath=None, config:str=None  ):
         """
         Compute a sirius run on a folder. When no config is defined, it will search in the folder for config.txt.
 
@@ -144,11 +133,10 @@ class Sirius_Runner(Pipe_Step):
 
         for entry in os.listdir(in_path):
             if self.match_file_name( pattern=self.patterns["in"], file_name=entry ):
-                self.compute( in_path=join(in_path, entry), out_path=out_path, projectspace=projectspace, config=config )
+                self.run_single( in_path=join(in_path, entry), out_path=out_path, projectspace=projectspace, config=config )
 
 
-    def compute_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
-                        futures:list=[], recusion_level:int=0 ) -> list:
+    def run_nested( self, in_root_dir:StrPath, out_root_dir:StrPath, recusion_level:int=0 ):
         """
         Run SIRIUS Pipeline in nested directories.
 
@@ -156,28 +144,25 @@ class Sirius_Runner(Pipe_Step):
         :type in_root_dir: StrPath
         :param out_root_dir: Root output directory
         :type out_root_dir: StrPath
-        :param futures: Future computations for parallelization, defaults to []
-        :type futures: list, optional
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
-        :return: Future computations
-        :rtype: list
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
+        made_out_root_dir = False
+        
         for entry in tqdm( os.listdir(in_root_dir), disable=verbose_tqdm, desc="Schedule Sirius annotation" ):
             entry_path = join(in_root_dir, entry)
 
             if self.match_file_name( pattern=self.patterns["in"], file_name=entry ):
-                futures.append( dask.delayed(self.compute)( in_path=entry_path,
-                                                            out_path=out_root_dir ) )
+                if made_out_root_dir:
+                    os.makedirs( out_root_dir, exist_ok=True )
+                    made_out_root_dir = True
+                self.compute( in_path=entry_path, out_path=out_root_dir )
             elif os.path.isdir( entry_path ):
-                futures = self.compute_nested( in_root_dir=entry_path,
-                                                  out_root_dir=join( out_root_dir, entry ),
-                                                  futures=futures, recusion_level=recusion_level+1)
-        if futures:
-            os.makedirs(out_root_dir, exist_ok=True)
+                self.run_nested( in_root_dir=entry_path,
+                                 out_root_dir=join( out_root_dir, entry ),
+                                 recusion_level=recusion_level+1 )
 
-        return futures
 
 
     def run(self, in_paths:list=[], out_paths:list=[], projectspace:StrPath=None, **kwargs ):

@@ -13,10 +13,8 @@ import requests
 
 from os.path import join, basename
 from tqdm.auto import tqdm
-import dask.multiprocessing
 
-
-from source.helpers.general import check_for_str_request
+import source.helpers.general as helpers
 from source.helpers.types import StrPath
 from source.steps.general import Pipe_Step, get_value
 
@@ -66,7 +64,7 @@ class GNPS_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__( save_log=save_log, additional_args=additional_args, verbosity=verbosity)
+        super().__init__( name="gnps", save_log=save_log, additional_args=additional_args, verbosity=verbosity)
         if kwargs:
             self.update(kwargs)
         self.mzmine_log_query   = "io.github.mzmine.modules.io.export_features_gnps.GNPSUtils submitFbmnJob GNPS FBMN/IIMN response: "
@@ -132,9 +130,9 @@ class GNPS_Runner(Pipe_Step):
             raise(ValueError("mzmine_log reports an unsuccessful job submission to GNPS by mzmine."))
 
         url = f"https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={task_id}"
-        return task_id, check_for_str_request( url=url, query='\"status\":\"DONE\"',
-                                               retries=100, allowed_fails=10, expected_wait_time=600.0,
-                                               timeout=5 )
+        return task_id, helpers.check_for_str_request( url=url, query='\"status\":\"DONE\"',
+                                                       retries=100, allowed_fails=10, expected_wait_time=600.0,
+                                                       timeout=5 )
 
 
     def fetch_results( self, task_id:str, out_path:StrPath=None ) -> dict:
@@ -176,7 +174,7 @@ class GNPS_Runner(Pipe_Step):
 
 
 
-    def compute( self, in_path:StrPath, out_path:StrPath=None, mzmine_log:str=None, gnps_response:dict=None ) -> dict:
+    def run_single( self, in_path:StrPath, out_path:StrPath=None, mzmine_log:str=None, gnps_response:dict=None ):
         """
         Get the GNPS results from a single path, mzmine_log or GNPS response.
 
@@ -189,34 +187,37 @@ class GNPS_Runner(Pipe_Step):
         :param gnps_response: GNPS response to POST request, defaults to None
         :type gnps_response: dict, optional
         :raises BrokenPipeError: When the task does not complete in the expected time
-        :return: Resulting anntations dictionary
-        :rtype: dict
         """
         if not mzmine_log:
             mzmine_log = self.mzmine_log if self.mzmine_log else in_path
         task_id, status = self.check_task_finished( mzmine_log=mzmine_log,
                                                     gnps_response=gnps_response )
+        
         if status:
             out_path = join(out_path, f"{basename(in_path)}_gnps_all_db_annotations.json") if out_path else None
-            results_dict = self.fetch_results( task_id=task_id,
-                                               out_path=out_path )
-            self.outs.append( results_dict )
+            results_dict = self.fetch_results( task_id=task_id, out_path=out_path )
             if self.verbosity >= 3:
                 print(f"GNPS results {basename(in_path)}:\n")
                 print(f"task_id:{task_id}\n")
                 print(results_dict)
             
-            self.processed_in.append( gnps_response if gnps_response else mzmine_log if mzmine_log else in_path )
-            self.processed_out.append( out_path )
+            in_path = gnps_response if gnps_response else mzmine_log if mzmine_log else in_path
 
-            return results_dict
+            cmd = f"echo 'fetched gnps results from {in_path}'"
+            super().compute( cmd=cmd, in_path=in_path, out_path=out_path, results=results_dict )
 
         else:
             raise BrokenPipeError(f"Status of {task_id} was not marked DONE.")
 
 
-    def compute_nested( self, in_root_dir:StrPath, out_root_dir:StrPath,
-                        futures:list=[], recusion_level:int=0) -> list:
+    def run_directory(self, **kwargs):
+        """
+        Pass on the directory to single case.
+        """
+        self.run_single( **kwargs )
+    
+
+    def run_nested( self, in_root_dir:StrPath, out_root_dir:StrPath, recusion_level:int=0):
         """
         Construct a list of necessary computations for getting the GNPS results from a nested scheme of mzmine results.
 
@@ -224,26 +225,27 @@ class GNPS_Runner(Pipe_Step):
         :type in_root_dir: StrPath
         :param out_root_dir: Root output directory
         :type out_root_dir: StrPath
-        :param futures: Future computations for parallelization, defaults to []
-        :type futures: list, optional
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
         :return: Future computations
         :rtype: list
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
+        made_out_root_dir = False
+
         for root, dirs, files in os.walk(in_root_dir):
             feature_ms2_found, feature_quantification_found = self.check_dir_files(dir=root)
             if feature_ms2_found and feature_quantification_found:
-                os.makedirs(out_root_dir, exist_ok=True)
-                futures.append( dask.delayed(self.compute)( in_path=in_root_dir, out_path=out_root_dir ) )
+                if made_out_root_dir:
+                    os.makedirs( out_root_dir, exist_ok=True )
+                    made_out_root_dir = True
+                self.compute( in_path=in_root_dir, out_path=out_root_dir )
 
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
-                futures = self.compute_nested( in_root_dir=join(in_root_dir, dir),
-                                               out_root_dir=join(out_root_dir, dir),
-                                               futures=futures, recusion_level=recusion_level+1 )
-                    
-        return futures
+                self.run_nested( in_root_dir=join(in_root_dir, dir),
+                                 out_root_dir=join(out_root_dir, dir),
+                                 recusion_level=recusion_level+1 )
+
 
 
     def run(self, in_paths:list=[], out_paths:list=[], mzmine_log:list=[], **kwargs ):

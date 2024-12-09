@@ -7,6 +7,8 @@ import regex
 import json
 from multipledispatch import dispatch
 
+import dask.multiprocessing
+
 from source.helpers.types import StrPath
 import source.helpers.general as helpers
 
@@ -93,14 +95,18 @@ class Step_Configuration:
     """
     Class configuration of pipeline steps in the pipeline.
     """
-    def __init__( self, platform:str="Linux", overwrite:bool=True, nested:bool=False, workers:int=1,
+    def __init__( self, name:str=None, platform:str="Linux", overwrite:bool=True, nested:bool=False, workers:int=1,
                   patterns:dict[str,str]={"in": ".*"}, save_log:bool=True, verbosity:int=1, additional_args:list=[] ):
         """
         Initialize the pipeline step configuration. Used for pattern matching.
         Provides additional variables for saving processed input and out_locations, its output, and errors.
         
-        :param nested: Execute step in a nested fashion, defaults to False
-        :type nested: bool, optional
+        :param name: Name of the step, defaults to None
+        :type name: str, optional
+        :param platform: Computation platform, defaults to "Linux"
+        :type platform: str, optional
+        :param overwrite: overwrite previous results, defaults to True
+        :type overwrite: bool, optional
         :param workers: Number of workers to use for parallel execution, defaults to 1
         :type workers: int, optional
         :param patterns: Matching patterns for finding appropriate folders, defaults to None
@@ -112,6 +118,7 @@ class Step_Configuration:
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
+        self.name               = name
         self.platform           = platform
         self.overwrite          = overwrite
         self.nested             = nested
@@ -159,12 +166,14 @@ class Pipe_Step(Step_Configuration):
     """
     Class for steps in the pipeline.
     """
-    def __init__( self, exec_path:StrPath=None, platform:str="Linux", overwrite:bool=True, nested:bool=False, workers:int=1,
+    def __init__( self, name:str=None, exec_path:StrPath=None, platform:str="Linux", overwrite:bool=True, nested:bool=False, workers:int=1,
                   patterns:dict[str,str]={"in": ".*"}, save_log:bool=False, verbosity:int=1, additional_args:list=[] ):
         """
         Initialize the pipeline step. Used for pattern matching.
         Provides additional variables for saving processed input and out_locations, its output, and errors.
         
+        :param name: Name of the step, defaults to None
+        :type name: str, optional
         :param exec_path: Path of executive
         :type exec_path: StrPath
         :param platform: Computational platform/OS, defaults to Linux
@@ -184,7 +193,7 @@ class Pipe_Step(Step_Configuration):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__( platform=platform, overwrite=overwrite, nested=nested, workers=workers, patterns=patterns,
+        super().__init__( name=name, platform=platform, overwrite=overwrite, nested=nested, workers=workers, patterns=patterns,
                         save_log=save_log, verbosity=verbosity, additional_args=additional_args )
 
         self.exec_path          = exec_path
@@ -196,6 +205,7 @@ class Pipe_Step(Step_Configuration):
         self.outs               = []
         self.errs               = []
         self.log_paths          = []
+        self.results            = []
 
 
     def update( self, attributes:dict ):
@@ -223,7 +233,7 @@ class Pipe_Step(Step_Configuration):
 
 
 
-    def store_progress( self, in_path:StrPath, out_path:StrPath, out:str="", err:str="", log_path:str="" ):
+    def store_progress( self, in_path:StrPath, out_path:StrPath, results=None, out:str="", err:str="", log_path:str="" ):
         """
         Store progress in PipeStep variables. Ensures a match between reprocessed in_paths and out_paths.
 
@@ -231,6 +241,8 @@ class Pipe_Step(Step_Configuration):
         :type in_path: StrPath
         :param out_path: Path to output directory.
         :type out_path: StrPath
+        :param results: Results of computation in pythonic form.
+        :type results: any
         :param out: Output of run, defaults to ""
         :type out: str, optional
         :param err: Error messages of run, defaults to ""
@@ -246,53 +258,43 @@ class Pipe_Step(Step_Configuration):
                 self.outs[i] = out
             if err is not None:
                 self.errs[i] = err
+            self.results = results
         else:
             self.processed_in.append( in_path )
             self.processed_out.append( out_path )
-            self.outs.append( out )
-            self.errs.append( err )
+            if out is not None:
+                self.outs.append( out )
+            if err is not None:
+                self.errs.append( err )
             self.log_paths.append( log_path )
-
-
-    def merge_progress( self, pipe_steps:list[Step_Configuration] ):
-        for pipe_step in pipe_steps:
-            self.processed_in.extend( pipe_step.processed_in )
-            self.processed_out.extend( pipe_step.processed_out )
-            self.outs.extend( pipe_step.outs )
-            self.errs.extend( pipe_step.errs )
-            self.log_paths.extend( pipe_step.log_paths )
+            self.results.append( results )
 
 
 
-    def compute( self, **kwargs ):
+    def compute( self, cmd:str|list, in_path:StrPath, out_path:StrPath, results=None, log_path:StrPath=None, **kwargs ):
         """
-        Compute a single instance of the runner
+        Execute a computation of a command with or without parallelization.
 
-        :param kwargs: Dictionary of additional arguments for computation
-        :type kwargs: ...
+        :param cmd: Command
+        :type cmd: str | list
+        :param in_path: Path to in files
+        :type in_path: StrPath
+        :param out_path: Output path
+        :type out_path: StrPath
+        :param results: Results of computation
+        :type results: any
+        :param log_path: Path to logfile, defaults to None
+        :type log_path: StrPath, optional
         """
-        raise(NotImplementedError("The compute function seems to be missing in local implementation"))
-    
-
-    def compute_directory( self, **kwargs ):
-        """
-        Compute a folder with the runner
-
-        :param kwargs: Dictionary of additional arguments for computation
-        :type kwargs: ...
-        """
-        raise(NotImplementedError("The compute_nested function seems to be missing in local implementation"))
-    
-
-    def compute_nested( self, **kwargs ):
-        """
-        Schedule the computation of files in nested folders
-
-        :param kwargs: Dictionary of additional arguments for computation
-        :type kwargs: ...
-        """
-        raise(NotImplementedError("The compute_nested function seems to be missing in local implementation"))
-    
+        if not log_path:
+            log_path = os.path.join(out_path, f"{self.name}_log.txt") if self.save_log else None
+        if self.workers > 1:
+            out, err = None, None
+            self.futures.append( dask.delayed(helpers.execute_verbose_command) (cmd=cmd, verbosity=self.verbosity, out_path=log_path, **kwargs) )
+        else:
+            out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity, out_path=log_path, **kwargs )
+        
+        self.store_progress(in_path=in_path, out_path=out_path, results=results, out=out, err=err, log_path=log_path)
 
 
     def compute_futures( self ):
@@ -306,6 +308,38 @@ class Pipe_Step(Step_Configuration):
             errs.append( err )
         self.outs.extend( outs )
         self.errs.extend( errs )
+
+
+
+    def run_single( self, **kwargs ):
+        """
+        Compute a single instance of the runner
+
+        :param kwargs: Dictionary of additional arguments for computation
+        :type kwargs: ...
+        """
+        raise(NotImplementedError("The compute function seems to be missing in local implementation"))
+    
+
+    def run_directory( self, **kwargs ):
+        """
+        Compute a folder with the runner
+
+        :param kwargs: Dictionary of additional arguments for computation
+        :type kwargs: ...
+        """
+        raise(NotImplementedError("The run_nested function seems to be missing in local implementation"))
+    
+
+    def run_nested( self, **kwargs ):
+        """
+        Schedule the computation of files in nested folders
+
+        :param kwargs: Dictionary of additional arguments for computation
+        :type kwargs: ...
+        """
+        raise(NotImplementedError("The run_nested function seems to be missing in local implementation"))
+    
 
 
     def run( self, in_paths:list|StrPath=[], out_paths:list|StrPath=[], **kwargs ) -> list:
@@ -364,11 +398,11 @@ class Pipe_Step(Step_Configuration):
             
             # Activate right computation function
             if self.nested:
-                self.compute_nested( in_root_dir=in_path, out_root_dir=out_path )
+                self.run_nested( in_root_dir=in_path, out_root_dir=out_path )
             elif os.path.isdir( in_path ):
-                self.compute_directory( in_path=in_path, out_path=out_path, **additional_arguments )
+                self.run_directory( in_path=in_path, out_path=out_path, **additional_arguments )
             else:
-                self.compute( in_path=in_path, out_path=out_path, **additional_arguments )
+                self.run_single( in_path=in_path, out_path=out_path, **additional_arguments )
 
             if self.verbosity >= 3:
                 print(f"Processed {in_path} -> {out_path}")

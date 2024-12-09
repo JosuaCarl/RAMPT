@@ -4,10 +4,10 @@ import taipy.gui.builder as tgb
 from source.gui.helpers import *
 from source.gui.pages.common_parts import *
 
-from source.conversion.msconv_pipe import File_Converter
+from source.conversion.msconv_pipe import MSconvert_Runner
 
 
-conversion_params = File_Converter()
+conversion_params = MSconvert_Runner()
 
 conversion_path_in = "."
 conversion_selection_tree_in = []

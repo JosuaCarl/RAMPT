@@ -9,7 +9,7 @@ from source.helpers.types import StrPath
 
 # Import of Pipeline Steps
 from source.feature_finding.mzmine_pipe import MZmine_Runner
-from source.conversion.msconv_pipe import File_Converter
+from source.conversion.msconv_pipe import MSconvert_Runner
 from source.annotation.sirius_pipe import Sirius_Runner
 from source.annotation.gnps_pipe import GNPS_Runner
 
@@ -96,7 +96,7 @@ def generic_step( step_class, step_params:dict, global_params:dict, in_paths:lis
 
 def convert_files( raw_data:StrPath, step_params:dict, global_params:dict ):
     return generic_step(
-        step_class=File_Converter,
+        step_class=MSconvert_Runner,
         in_paths=raw_data,
         out_path_target=os.path.join("..", "converted"),
         step_params=step_params,

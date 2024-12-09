@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
 """
-Use Sirius to annotate compounds and extract matching formulae and chemical classes.
+Write an exclusion list from MS2 precursors.
 """
-
 
 # Imports
 import os

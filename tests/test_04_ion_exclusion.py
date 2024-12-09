@@ -7,8 +7,8 @@ import os
 import shutil
 
 import source.helpers.general as helpers
-from source.ion_exclusion.ion_exclusion import *
-from source.ion_exclusion.ion_exclusion import main as ion_exclusion_pipe_main
+from source.steps.ion_exclusion.ion_exclusion import *
+from source.steps.ion_exclusion.ion_exclusion import main as ion_exclusion_pipe_main
 import pandas as pd
 
 import platform as pf
