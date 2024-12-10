@@ -23,7 +23,7 @@ def test_taipy_simple_scenario():
     gui = Gui( pages=pages )
     ic(gui)
     ic(gui.state)
-    gui.run(title="test", design=False, run_browser=False, port=5009)
+    gui.run(title="test", design=False, run_browser=False, port=5009 )
     
     ic(gui)
     ic(gui.state)
@@ -53,7 +53,7 @@ def test_taipy_simple_scenario():
 
 def test_taipy_nested_parallel_scenario():
     gui = Gui( pages=pages )
-    gui.run(title="test", design=False, run_browser=False, port=5009)
+    gui.run(title="test", design=False, run_browser=False, port=5009 )
 
     load_params(state=gui.state, path=os.path.join(batch_path, "Example_parameters_nested_parallel.json") )
     lock_scenario( state=gui.state )

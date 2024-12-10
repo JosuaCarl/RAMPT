@@ -24,4 +24,4 @@ if __name__ == "__main__":
     orchestrator = tp.Orchestrator()
     
     orchestrator.run()
-    gui.run( title="mine2sirius", port=5000, stylekit=stylekit, run_browser=False )
+    gui.run( title="mine2sirius", port=5001, stylekit=stylekit, async_mode="threading", run_browser=False )
