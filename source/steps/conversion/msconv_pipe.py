@@ -204,7 +204,7 @@ class MSconvert_Runner(Pipe_Step):
             in_valid, out_valid = self.select_for_conversion( in_path=entry_path, out_path=hypothetical_out_path)
 
             if in_valid and out_valid:
-                if made_out_root_dir:
+                if not made_out_root_dir:
                     os.makedirs( out_root_dir, exist_ok=True )
                     made_out_root_dir = True
                 self.run_single( in_path=entry_path, out_path=out_root_dir )

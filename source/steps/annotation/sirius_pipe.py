@@ -154,7 +154,7 @@ class Sirius_Runner(Pipe_Step):
             entry_path = join(in_root_dir, entry)
 
             if self.match_file_name( pattern=self.patterns["in"], file_name=entry ):
-                if made_out_root_dir:
+                if not made_out_root_dir:
                     os.makedirs( out_root_dir, exist_ok=True )
                     made_out_root_dir = True
                 self.compute( in_path=entry_path, out_path=out_root_dir )

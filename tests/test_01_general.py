@@ -7,7 +7,7 @@ from source.steps.general import *
 
 platform = get_platform()
 filepath = helpers.get_internal_filepath(__file__)
-out_path, test_path, example_path = contruct_common_paths( filepath )
+out_path, test_path, example_path, batch_path = contruct_common_paths( filepath )
 
 
 
@@ -44,9 +44,36 @@ def test_pipe_step():
     pipe_step = Pipe_Step( "test", exec_path="echo" )
     assert pipe_step.name == "test"
 
+    # Test matching
     assert not pipe_step.match_file_name(r"\.XML", "a.mzXML")
+    assert pipe_step.match_file_name(r"\.mzXML$", "a.mzXML")
 
+    # Test storing
+    pipe_step.store_progress( "/mnt/x/bar", "/mnt/y/bar", results={"hello": "all"} )
+    assert pipe_step.processed_in == [ "/mnt/x/bar" ]
+    assert pipe_step.processed_out == [ "/mnt/y/bar" ]
+    assert pipe_step.results == [ {"hello": "all"} ]
 
+    # Test computation with same input
+    pipe_step.compute( 'echo Hello!', "/mnt/x/bar", "/mnt/y/foo" )
+    assert pipe_step.processed_in == [ "/mnt/x/bar" ]
+    assert pipe_step.processed_out == [ "/mnt/y/foo" ]
+    assert pipe_step.results == [ None ]
+    assert pipe_step.outs[0].startswith("Hello!")
+
+    # Test parallel execution
+    pipe_step.workers = 2
+    pipe_step.compute( 'echo Hello', "/mnt/x/bar", "/mnt/y/foo" )
+    pipe_step.compute( "echo all!", "/mnt/x/foo", "/mnt/y/foo" )
+    pipe_step.compute_futures()
+    assert pipe_step.processed_in == [ "/mnt/x/bar", "/mnt/x/foo" ]
+    assert pipe_step.processed_out == [ "/mnt/y/foo", "/mnt/y/foo" ]
+    assert pipe_step.results == [ None, None ]
+    ic(pipe_step.processed_in)
+    ic(pipe_step.outs)
+    assert pipe_step.outs[0].startswith( "Hello" ) and  pipe_step.outs[1].startswith( "all!" )
+
+    # Run is tested for each individual step
 
 
 clean_out( out_path )

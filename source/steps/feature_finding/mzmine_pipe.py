@@ -6,7 +6,6 @@ Use mzmine for feature finding.
 
 # Imports
 import os
-import asyncio
 import argparse
 
 from os.path import join
@@ -50,9 +49,6 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
                 exec_path = r'/Applications/mzmine.app/Contents/MacOS/mzmine'
             case _:
                 exec_path = r"mzmine"
-    
-    if platform.lower() == "windows":
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     if user:
         if user == "console":
@@ -69,7 +65,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
                                    additional_args=additional_args, verbosity=verbosity,
                                    nested=nested,
                                    scheduled_in=in_dir, scheduled_out=out_dir )
-    return mzmine_runner.run()
+    mzmine_runner.run()
 
 
 
@@ -184,9 +180,9 @@ class MZmine_Runner(Pipe_Step):
 
         source_paths_file = join( out_root_dir, "source_files.txt" )
         if found_files:
-            if made_out_root_dir:
-                    os.makedirs( out_root_dir, exist_ok=True )
-                    made_out_root_dir = True
+            if not made_out_root_dir:
+                os.makedirs( out_root_dir, exist_ok=True )
+                made_out_root_dir = True
             with open(source_paths_file , "w", encoding="utf8" ) as f:
                 f.write( "\n".join(found_files) )
             self.run_single( in_path=source_paths_file, out_path=out_root_dir, batch=batch )

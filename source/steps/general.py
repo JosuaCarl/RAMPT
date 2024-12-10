@@ -208,15 +208,6 @@ class Pipe_Step(Step_Configuration):
         self.results            = []
 
 
-    def update( self, attributes:dict ):
-        """
-        Update an attribute of this object.
-
-        :param attributes: Key value pair of attribute name and value
-        :type attributes: str
-        """
-        self.__dict__.update( attributes )
-
 
     def match_file_name( self, pattern:str, file_name:StrPath ) -> bool:
         """
@@ -233,7 +224,7 @@ class Pipe_Step(Step_Configuration):
 
 
 
-    def store_progress( self, in_path:StrPath, out_path:StrPath, results=None, out:str="", err:str="", log_path:str="" ):
+    def store_progress( self, in_path:StrPath, out_path:StrPath, results=None, future=None, out:str="", err:str="", log_path:str="" ):
         """
         Store progress in PipeStep variables. Ensures a match between reprocessed in_paths and out_paths.
 
@@ -251,23 +242,21 @@ class Pipe_Step(Step_Configuration):
         :type log_path: str, optional
         """
         if in_path in self.processed_in:
-            i = self.processed_in.index(in_path)
+            i = self.processed_in.index( in_path )
             self.processed_out[i] = out_path
             self.log_paths[i] = log_path
-            if out is not None:
-                self.outs[i] = out
-            if err is not None:
-                self.errs[i] = err
-            self.results = results
+            self.outs[i] = out
+            self.errs[i] = err
+            self.results[i] = results
+            self.futures[i] = future
         else:
             self.processed_in.append( in_path )
             self.processed_out.append( out_path )
-            if out is not None:
-                self.outs.append( out )
-            if err is not None:
-                self.errs.append( err )
+            self.outs.append( out )
+            self.errs.append( err )
             self.log_paths.append( log_path )
             self.results.append( results )
+            self.futures.append( future )
 
 
 
@@ -289,25 +278,32 @@ class Pipe_Step(Step_Configuration):
         if not log_path:
             log_path = os.path.join(out_path, f"{self.name}_log.txt") if self.save_log else None
         if self.workers > 1:
-            out, err = None, None
-            self.futures.append( dask.delayed(helpers.execute_verbose_command) (cmd=cmd, verbosity=self.verbosity, out_path=log_path, **kwargs) )
+            out, err = (None, None)
+            future =  dask.delayed(helpers.execute_verbose_command)(cmd=cmd, verbosity=self.verbosity, out_path=log_path, in_path=in_path, **kwargs)
         else:
             out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity, out_path=log_path, **kwargs )
+            future = None
         
-        self.store_progress(in_path=in_path, out_path=out_path, results=results, out=out, err=err, log_path=log_path)
+        self.store_progress(in_path=in_path, out_path=out_path, results=results, future=future, out=out, err=err, log_path=log_path)
 
 
     def compute_futures( self ):
         """
         Compute scheduled operations (futures).
         """
-        results = helpers.compute_scheduled( futures=self.futures, num_workers=self.workers, verbose=self.verbosity >= 1)
-        outs, errs = [], []
-        for out, err in results[0]:
-            outs.append( out )
-            errs.append( err )
-        self.outs.extend( outs )
-        self.errs.extend( errs )
+        futures = []
+        in_paths = []
+        for in_path, future in zip(self.processed_in, self.futures):
+            if future is not None:
+                in_paths.append( in_path )
+                futures.append( future )
+
+        results = helpers.compute_scheduled( futures=futures, num_workers=self.workers, verbose=self.verbosity >= 1)
+
+        for in_path, (out, err) in zip(in_paths, results[0]):
+            i = self.processed_in.index( in_path )
+            self.outs[i] = out
+            self.errs[i] = err
 
 
 

@@ -236,7 +236,7 @@ class GNPS_Runner(Pipe_Step):
         for root, dirs, files in os.walk(in_root_dir):
             feature_ms2_found, feature_quantification_found = self.check_dir_files(dir=root)
             if feature_ms2_found and feature_quantification_found:
-                if made_out_root_dir:
+                if not made_out_root_dir:
                     os.makedirs( out_root_dir, exist_ok=True )
                     made_out_root_dir = True
                 self.compute( in_path=in_root_dir, out_path=out_root_dir )

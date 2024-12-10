@@ -275,7 +275,8 @@ def replace_file_ending( path:StrPath, new_ending:str ) -> str:
 
 # Command methods
 def execute_verbose_command( cmd:str|list, verbosity:int=1,
-                             out_path:StrPath=None, decode_text:bool=True ) -> tuple[str,str]:
+                             out_path:StrPath=None, decode_text:bool=True,
+                             **kwargs ) -> tuple[str,str]:
     """
     Execute a command with the adequate verbosity.
 

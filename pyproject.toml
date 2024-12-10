@@ -19,6 +19,7 @@ description = "mzMine to SIRIUS pipeline"
 authors = ["JosuaCarl <josua.carl@uni-tuebingen.de>"]
 license = "GPL-3.0 license"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"

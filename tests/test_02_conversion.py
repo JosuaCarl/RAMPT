@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 
 platform = get_platform()
 filepath = helpers.get_internal_filepath(__file__)
-out_path, test_path, example_path = contruct_common_paths( filepath )
+out_path, test_path, example_path, batch_path = contruct_common_paths( filepath )
 
 
 
@@ -71,8 +71,7 @@ def test_msconv_pipe_run():
                                      suffix=".mzML", save_log=False, verbosity=3,
                                      overwrite=True, nested=False, workers=1 )
     
-    msconvert_runner.run( in_paths=[test_path],
-                        out_paths=[out_path] )
+    msconvert_runner.run( in_paths=[test_path], out_paths=[out_path] )
     
     assert msconvert_runner.processed_in == [join(test_path, "minimal_file.mzML")]
     assert msconvert_runner.processed_out == [join(out_path, "minimal_file.mzML")]
