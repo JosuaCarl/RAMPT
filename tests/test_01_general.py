@@ -69,8 +69,6 @@ def test_pipe_step():
     assert pipe_step.processed_in == [ "/mnt/x/bar", "/mnt/x/foo" ]
     assert pipe_step.processed_out == [ "/mnt/y/foo", "/mnt/y/foo" ]
     assert pipe_step.results == [ None, None ]
-    ic(pipe_step.processed_in)
-    ic(pipe_step.outs)
     assert pipe_step.outs[0].startswith( "Hello" ) and  pipe_step.outs[1].startswith( "all!" )
 
     # Run is tested for each individual step

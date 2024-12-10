@@ -20,8 +20,8 @@ stylekit={
 
 
 if __name__ == "__main__":
-    gui = Gui(pages=pages, css_file="main.css")
+    gui = Gui( pages=pages, css_file="main.css" )
     orchestrator = tp.Orchestrator()
     
     orchestrator.run()
-    gui.run(title="mine2sirius", port=5000, stylekit=stylekit)
+    gui.run( title="mine2sirius", port=5000, stylekit=stylekit, run_browser=False )

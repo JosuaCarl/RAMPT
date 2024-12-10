@@ -50,7 +50,7 @@ def save_params( state, path:StrPath=None, scenario_name:str=None ):
         path = os.path.join(work_dir_root, "Default_config.json")
 
     with open( path, "w") as file:
-        json.dump( construct_params_dict( state ), file )
+        json.dump( construct_params_dict( state ), file, indent=4 )
     save_path = path
 
 

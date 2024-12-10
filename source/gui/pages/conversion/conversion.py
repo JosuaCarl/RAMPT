@@ -4,7 +4,7 @@ import taipy.gui.builder as tgb
 from source.gui.helpers import *
 from source.gui.pages.common_parts import *
 
-from source.conversion.msconv_pipe import MSconvert_Runner
+from source.steps.conversion.msconv_pipe import MSconvert_Runner
 
 
 conversion_params = MSconvert_Runner()

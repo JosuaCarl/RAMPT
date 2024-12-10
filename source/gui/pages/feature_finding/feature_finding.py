@@ -4,7 +4,7 @@ import taipy.gui.builder as tgb
 from source.gui.helpers import *
 from source.gui.pages.common_parts import *
 
-from source.feature_finding.mzmine_pipe import MZmine_Runner
+from source.steps.feature_finding.mzmine_pipe import MZmine_Runner
 
 
 feature_finding_params = MZmine_Runner()

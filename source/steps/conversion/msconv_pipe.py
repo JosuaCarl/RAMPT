@@ -157,7 +157,6 @@ class MSconvert_Runner(Pipe_Step):
         if not os.path.isfile(out_path):
             out_path = os.path.join( out_path, '.'.join(os.path.basename(in_path).split(".")[:-1]) + self.target_format )
 
-        helpers.ic(out_path)
         super().compute( cmd=cmd, in_path=in_path, out_path=out_path )
 
         
