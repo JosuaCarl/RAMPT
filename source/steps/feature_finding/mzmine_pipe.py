@@ -93,7 +93,7 @@ class MZmine_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__( name="mzmine", patterns={"in": rf".*({r'|'.join(valid_formats)})$"}, 
+        super().__init__( patterns={"in": rf".*({r'|'.join(valid_formats)})$"}, 
                           save_log=save_log, additional_args=additional_args, verbosity=verbosity )
         if kwargs:
             self.update(kwargs)
@@ -101,6 +101,7 @@ class MZmine_Runner(Pipe_Step):
         self.login              = login
         self.batch              = batch
         self.valid_formats      = valid_formats
+        self.name               = "mzmine"
 
 
     def check_attributes( self ):

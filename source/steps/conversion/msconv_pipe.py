@@ -91,7 +91,7 @@ class MSconvert_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__( name="msconvert", exec_path=exec_path, platform=platform, patterns={"in": pattern}, save_log=save_log, 
+        super().__init__( exec_path=exec_path, platform=platform, patterns={"in": pattern}, save_log=save_log, 
                           additional_args=additional_args, verbosity=verbosity )
         if kwargs:
             self.update(kwargs)
@@ -103,6 +103,7 @@ class MSconvert_Runner(Pipe_Step):
         self.suffix         = suffix
         self.prefix         = prefix
         self.contains       = contains
+        self.name           = "msconvert"
 
         self.update_regex( pattern=pattern, contains=contains, suffix=suffix, prefix=prefix)
 

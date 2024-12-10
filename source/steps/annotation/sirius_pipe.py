@@ -69,13 +69,14 @@ class Sirius_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__( name="sirius", patterns={"in": r"_sirius.mgf$"},
+        super().__init__( patterns={"in": r"_sirius.mgf$"},
                           save_log=save_log, additional_args=additional_args, verbosity=verbosity)
         if kwargs:
             self.update(kwargs)
-        self.exec_path = exec_path if exec_path else "sirius"
-        self.config = self.extract_config(config)
-        self.projectspace = projectspace
+        self.exec_path      = exec_path if exec_path else "sirius"
+        self.config         = self.extract_config(config)
+        self.projectspace   = projectspace
+        self.name           = "sirius"
 
     
     
