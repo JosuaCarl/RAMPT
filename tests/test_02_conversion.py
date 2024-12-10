@@ -143,8 +143,4 @@ def test_msconv_pipe_main():
         assert file.get('fileName') ==  "file:///" + test_path + "/" + "minimal file.mzXML" # <- mzXML path is wrong for windows (fault with msconvert)
 
 
-def test_clean_out():
-    """
-    Clean out leftover data in output folder.
-    """
-    clean_out( out_path )
+clean_out( out_path )
