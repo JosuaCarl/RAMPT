@@ -276,7 +276,7 @@ class Pipe_Step(Step_Configuration):
         :type log_path: StrPath, optional
         """
         if not log_path:
-            log_path = os.path.join(out_path, f"{self.name}_log.txt") if self.save_log else None
+            log_path = os.path.join(helpers.get_directory(out_path), f"{self.name}_log.txt") if self.save_log else None
         if self.workers > 1:
             out, err = (None, None)
             future =  dask.delayed(helpers.execute_verbose_command)(cmd=cmd, verbosity=self.verbosity, out_path=log_path, in_path=in_path, **kwargs)
@@ -387,7 +387,7 @@ class Pipe_Step(Step_Configuration):
             # Ensure that further passed down lists are processed in parallel with in_path
             additional_arguments = { }
             for argument, value in kwargs.items():
-                if isinstance(value, list) and len(value) == len(in_paths):
+                if isinstance(value, list) and len(value) == len(self.scheduled_in):
                     additional_arguments[argument] = value[i]
                 else:
                     additional_arguments[argument] = value

@@ -76,4 +76,6 @@ def test_pipe_step():
     # Run is tested for each individual step
 
 
-clean_out( out_path )
+
+def test_clean():
+    clean_out( out_path )

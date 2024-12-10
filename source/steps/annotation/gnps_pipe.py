@@ -194,7 +194,8 @@ class GNPS_Runner(Pipe_Step):
                                                     gnps_response=gnps_response )
         
         if status:
-            out_path = join(out_path, f"{basename(in_path)}_gnps_all_db_annotations.json") if out_path else None
+            dir_name = basename(in_path) if os.path.isdir(in_path) else basename( os.path.split(in_path)[0] )
+            out_path = join(out_path, f"{dir_name}_gnps_all_db_annotations.json") if out_path else None
             results_dict = self.fetch_results( task_id=task_id, out_path=out_path )
             if self.verbosity >= 3:
                 print(f"GNPS results {basename(in_path)}:\n")
@@ -239,7 +240,7 @@ class GNPS_Runner(Pipe_Step):
                 if not made_out_root_dir:
                     os.makedirs( out_root_dir, exist_ok=True )
                     made_out_root_dir = True
-                self.compute( in_path=in_root_dir, out_path=out_root_dir )
+                self.run_single( in_path=in_root_dir, out_path=out_root_dir )
 
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
                 self.run_nested( in_root_dir=join(in_root_dir, dir),

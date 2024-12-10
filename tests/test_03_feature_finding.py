@@ -101,4 +101,6 @@ def test_mzmine_pipe_main():
     del text
 
 
-clean_out( out_path )
+
+def test_clean():
+    clean_out( out_path )

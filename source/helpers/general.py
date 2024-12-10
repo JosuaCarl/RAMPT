@@ -22,7 +22,7 @@ from source.helpers.types import *
 
 
 
-# File opeations
+# File operations
 def get_internal_filepath(file:str) -> StrPath:
     """
     Return the filepath of a passed file.
@@ -58,6 +58,23 @@ def make_new_dir(dir:StrPath) -> bool:
         os.mkdir( dir )
         return True
     return False
+
+
+def get_directory( path:StrPath ) -> StrPath:
+    """
+    Extract directory path from file or directory path.
+
+    :param path: file or directory path
+    :type path: StrPath
+    :return: directory path
+    :rtype: StrPath
+    """
+    if os.path.isdir( path ):
+        return path
+    elif os.path.isfile( path ):
+        return os.path.split( path )[0]
+    else:
+        raise(ValueError(f"{path} is not a file or directory"))
 
 
 
