@@ -80,6 +80,11 @@ class Sirius_Runner(Pipe_Step):
     
     
     def extract_config( self, config:StrPath ):
+        if os.path.isdir(config):
+            if os.path.isfile( join(config, "sirius_config.txt") ):
+                config = join(config, "sirius_config.txt")
+            else:
+                raise(ValueError(f"{config} directory does not contain sirius_config.txt"))
         if os.path.isfile(config):
             with open( config, "r" ) as config_file:
                 config = config_file.read()
@@ -157,7 +162,7 @@ class Sirius_Runner(Pipe_Step):
                 if not made_out_root_dir:
                     os.makedirs( out_root_dir, exist_ok=True )
                     made_out_root_dir = True
-                self.compute( in_path=entry_path, out_path=out_root_dir )
+                self.run_single( in_path=entry_path, out_path=out_root_dir )
             elif os.path.isdir( entry_path ):
                 self.run_nested( in_root_dir=entry_path,
                                  out_root_dir=join( out_root_dir, entry ),

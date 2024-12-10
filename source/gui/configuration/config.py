@@ -2,16 +2,15 @@
 
 import os
 
-
 from taipy import Config, Scope
 
 from source.helpers.types import StrPath
 
 # Import of Pipeline Steps
-from source.feature_finding.mzmine_pipe import MZmine_Runner
-from source.conversion.msconv_pipe import MSconvert_Runner
-from source.annotation.sirius_pipe import Sirius_Runner
-from source.annotation.gnps_pipe import GNPS_Runner
+from source.steps.feature_finding.mzmine_pipe import MZmine_Runner
+from source.steps.conversion.msconv_pipe import MSconvert_Runner
+from source.steps.annotation.sirius_pipe import Sirius_Runner
+from source.steps.annotation.gnps_pipe import GNPS_Runner
 
 
 
