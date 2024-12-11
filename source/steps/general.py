@@ -146,6 +146,9 @@ class Step_Configuration:
             if hasattr( value, "__dict__" ):
                 attributes_dict[attribute] = self.dict_representation( value )
             else:
+                if attribute in [ "scheduled_in", "scheduled_out" ]:
+                    value = [ entry.get( "label", entry ) if isinstance(entry, dict) else entry for entry in value ]
+                    setattr( self, attribute, value )
                 attributes_dict[attribute] = value
         return attributes_dict
     

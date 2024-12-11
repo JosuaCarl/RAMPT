@@ -7,8 +7,8 @@ import platform as pf
 import shutil
 import source.helpers.general as helpers
 
-
 from icecream import ic as ic
+from tqdm import tqdm as tqdm
 
 def get_platform():
     return pf.system()

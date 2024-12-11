@@ -69,10 +69,13 @@ def get_directory( path:StrPath ) -> StrPath:
     :return: directory path
     :rtype: StrPath
     """
+    # Base case
     if os.path.isdir( path ):
         return path
-    elif os.path.isfile( path ):
-        return os.path.split( path )[0]
+
+    directory = os.path.dirname( path )
+    if os.path.isdir( directory ):
+        return directory
     else:
         raise(ValueError(f"{path} is not a file or directory"))
 
