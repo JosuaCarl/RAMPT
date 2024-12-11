@@ -24,6 +24,26 @@ scope = "SCENARIO:SCOPE"
 storage_type = "csv"
 scope = "SCENARIO:SCOPE"
 
+[DATA_NODE.conversion_out]
+storage_type = "in_memory"
+scope = "SCENARIO:SCOPE"
+
+[DATA_NODE.feature_finding_out]
+storage_type = "in_memory"
+scope = "SCENARIO:SCOPE"
+
+[DATA_NODE.gnps_out]
+storage_type = "in_memory"
+scope = "SCENARIO:SCOPE"
+
+[DATA_NODE.sirius_out]
+storage_type = "in_memory"
+scope = "SCENARIO:SCOPE"
+
+[DATA_NODE.results_out]
+storage_type = "in_memory"
+scope = "SCENARIO:SCOPE"
+
 [DATA_NODE.global_params]
 storage_type = "json"
 scope = "SCENARIO:SCOPE"
@@ -62,31 +82,31 @@ scope = "SCENARIO:SCOPE"
 
 [TASK.convert_files]
 function = "source.gui.configuration.config.convert_files:function"
-inputs = [ "raw_data:SECTION", "conversion_params:SECTION", "global_params:SECTION",]
+inputs = [ "raw_data:SECTION", "conversion_out:SECTION", "conversion_params:SECTION", "global_params:SECTION",]
 outputs = [ "community_formatted_data:SECTION",]
 skippable = "False:bool"
 
 [TASK.find_features]
 function = "source.gui.configuration.config.find_features:function"
-inputs = [ "community_formatted_data:SECTION", "mzmine_batch:SECTION", "feature_finding_params:SECTION", "global_params:SECTION",]
+inputs = [ "community_formatted_data:SECTION", "feature_finding_out:SECTION", "mzmine_batch:SECTION", "feature_finding_params:SECTION", "global_params:SECTION",]
 outputs = [ "processed_data:SECTION", "mzmine_log:SECTION",]
 skippable = "False:bool"
 
 [TASK.annotate_gnps]
 function = "source.gui.configuration.config.annotate_gnps:function"
-inputs = [ "processed_data:SECTION", "mzmine_log:SECTION", "gnps_params:SECTION", "global_params:SECTION",]
+inputs = [ "processed_data:SECTION", "gnps_out:SECTION", "mzmine_log:SECTION", "gnps_params:SECTION", "global_params:SECTION",]
 outputs = [ "gnps_annotations:SECTION",]
 skippable = "False:bool"
 
 [TASK.annotate_sirius]
 function = "source.gui.configuration.config.annotate_sirius:function"
-inputs = [ "processed_data:SECTION", "sirius_config:SECTION", "sirius_params:SECTION", "global_params:SECTION",]
+inputs = [ "processed_data:SECTION", "sirius_out:SECTION", "sirius_config:SECTION", "sirius_params:SECTION", "global_params:SECTION",]
 outputs = [ "sirius_annotations:SECTION",]
 skippable = "False:bool"
 
 [TASK.analyze_difference]
 function = "source.gui.configuration.config.analyze_difference:function"
-inputs = [ "gnps_annotations:SECTION", "sirius_annotations:SECTION", "results:SECTION", "analysis_params:SECTION", "global_params:SECTION",]
+inputs = [ "gnps_annotations:SECTION", "sirius_annotations:SECTION", "results_out:SECTION", "results:SECTION", "analysis_params:SECTION", "global_params:SECTION",]
 outputs = [ "results:SECTION",]
 skippable = "False:bool"
 
