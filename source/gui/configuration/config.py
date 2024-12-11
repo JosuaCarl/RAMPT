@@ -67,18 +67,24 @@ sirius_config_config = Config.configure_in_memory_data_node( id="sirius_config",
 
 
 # Task methods
-def generic_step( step_class, step_params:dict, global_params:dict, in_paths:list=None,
+def generic_step( step_class, step_params:dict, global_params:dict, in_paths:list=None, out_paths:list=None,
                   out_path_target:StrPath=None, return_attributes:list=["processed_out"],
                   **kwargs):
 
+    # Fix parameters
     step_params.update( global_params )
     step_instance = step_class( **step_params )
 
+    # Overwrite scheduled, when new in_path is given
     if in_paths:
         step_instance.scheduled_in = []
+    if out_paths:
+        step_instance.scheduled_out = []
 
-    in_paths = [ in_path["label"] if isinstance(in_path, dict) else in_path for in_path in in_paths ]
-    if not step_instance.scheduled_out:
+    in_paths = [ in_path.get("label") if isinstance(in_path, dict) else in_path for in_path in in_paths ]
+    in_paths = [ in_path.get("label") if isinstance(in_path, dict) else in_path for in_path in in_paths ]
+
+    if out_paths:
         out_paths = []
         for in_path in in_paths:
             if os.path.isfile(in_path):
@@ -126,6 +132,7 @@ def annotate_sirius( processed_data:StrPath, config:StrPath, step_params:dict, g
     return generic_step(
         step_class=Sirius_Runner,
         in_paths=processed_data,
+        out_paths=annotated_data,
         out_path_target=os.path.join("..", "annotated"),
         step_params=step_params,
         global_params=global_params,
