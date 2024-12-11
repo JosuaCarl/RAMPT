@@ -115,6 +115,7 @@ match_data_node = { # Used to decide which values (the last in the list) are use
 
                     "sirius_projectspace": [ "sirius_params.projectspace" ],  }
 
+optional_data_nodes = [ "conversion_out", "feature_finding_out", "gnps_out", "sirius_out", "results_out" ]
 
 def lock_scenario( state ):
     global scenario
@@ -128,13 +129,13 @@ def lock_scenario( state ):
         for state_attribute in attribute_keys:
             attribute_split = state_attribute.split(".")
             value = params.get(attribute_split[0]).get(attribute_split[1])
-            if value:
+            if value or data_node_key in optional_data_nodes:                
                 for state_attribute in attribute_keys:
                     set_attribute_recursive( state, state_attribute, value, refresh=True)
                 data_nodes[data_node_key] = value
 
     for key, data_node in scenario.data_nodes.items():
-        if data_nodes.get(key):
+        if data_nodes.get(key) or key in optional_data_nodes:
             data_node.write( data_nodes.get(key) )
 
     state.scenario = scenario

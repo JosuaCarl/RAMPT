@@ -137,7 +137,7 @@ def find_features( community_formatted_data:StrPath, feature_finding_out:StrPath
         batch=mzmine_batch
     )
 
-def annotate_gnps( processed_data:StrPath, gnps_out:StrPath, mzmine_log:StrPath, step_params:dict, global_params:dict ):
+def annotate_gnps( processed_data:StrPath, mzmine_log:StrPath, gnps_out:StrPath, step_params:dict, global_params:dict ):
     return generic_step(
         step_class=GNPS_Runner,
         in_paths=processed_data,
@@ -197,8 +197,8 @@ find_features_config = Config.configure_task( "find_features",
 annotate_gnps_config = Config.configure_task( "annotate_gnps",
                                               function=annotate_gnps,
                                               input=[ processed_data_config,
-                                                      gnps_out_config,
                                                       mzmine_log_config,
+                                                      gnps_out_config,
                                                       gnps_params_config,
                                                       global_params_config ],
                                               output=gnps_annotations_config,
@@ -219,9 +219,8 @@ analyze_difference_config = Config.configure_task( "analyze_difference",
                                               input=[ gnps_annotations_config,
                                                       sirius_annotations_config,
                                                       results_out_config,
-                                                      results_config,
                                                       analysis_params_config, 
-                                                      global_params_config],
+                                                      global_params_config ],
                                               output=results_config,
                                               skippable=False )
 
@@ -231,8 +230,8 @@ analyze_difference_config = Config.configure_task( "analyze_difference",
 ms_analysis_config = Config.configure_scenario( id="MS_analysis",
                                                 task_configs=[ convert_files_config,
                                                                find_features_config,
-                                                               annotate_gnps_config,
                                                                annotate_sirius_config,
+                                                               annotate_gnps_config,
                                                                analyze_difference_config ],
                                                 sequences={ "conversion": [ convert_files_config ],
                                                             "feature finding": [ find_features_config ],
@@ -240,7 +239,6 @@ ms_analysis_config = Config.configure_scenario( id="MS_analysis",
                                                             "sirius": [ annotate_sirius_config ],
                                                             "analysis": [ analyze_difference_config ] } )
 
-Config.export( "exported_config.toml" )
 
 # CORE
 """
