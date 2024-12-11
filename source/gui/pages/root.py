@@ -65,12 +65,14 @@ def load_params( state, path:StrPath=None, scenario_name:str="Default" ):
 
 
 # SCENARIO
-scenario = tp.create_scenario( ms_analysis_config,
-                               name="Default" )
+scenario = tp.create_scenario( ms_analysis_config, name="Default" )
 
 
 ## Synchronisation of Scenario
-match_data_node = { # IO Data
+match_data_node = { # Used to decide which values (the last in the list) are used in case of conflicts
+                    # Processed chained Inputs are preffered to scheduled targets
+
+                    # In Data
                     "raw_data": [ "conversion_params.scheduled_in" ],
                    
                     "community_formatted_data": [ "feature_finding_params.scheduled_in",
@@ -87,6 +89,21 @@ match_data_node = { # IO Data
                                             "sirius_params.processed_out" ],
 
                     "results": [ "analysis_params.processed_out" ],
+
+                    # Out Data
+                    "conversion_out": [ "conversion_params.scheduled_out", "feature_finding_params.scheduled_in" ],
+                   
+                    "feature_finding_out": [ "feature_finding_params.scheduled_out",
+                                             "gnps_params.scheduled_in",
+                                             "sirius_params.scheduled_in" ],
+
+                    "gnps_out": [ "gnps_params.scheduled_out",
+                                  "analysis_params.scheduled_in" ],
+
+                    "sirius_out": [ "sirius_params.scheduled_out",
+                                    "analysis_params.scheduled_in"],
+
+                    "results_out": [ "analysis_params.scheduled_out"],
 
                     # Batches and more
                     "mzmine_batch": [ "feature_finding_params.batch" ],
