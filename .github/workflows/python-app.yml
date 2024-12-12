@@ -15,17 +15,21 @@ permissions:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        python-version: [ 3.11, 3.12 ]
 
     steps:
     - uses: actions/checkout@v4
     - name: Install poetry
       run: pipx install poetry
 
-    - name: Set up Python 3.12.7
+    - name: Set up Python
       uses: actions/setup-python@v3
       with:
-        python-version: "3.12.7"
+        python-version: ${{ matrix.python-version }}
         cache: "poetry"
 
     - name: Install dependencies
@@ -36,3 +40,11 @@ jobs:
     - name: Ruff checking
       run: |
         poetry run ruff check --output-format=github
+      
+    - name: Testing helpers
+      run: |
+        pytest ./tests/test_00_helpers.py
+
+    - name: Testing general
+      run: |
+        pytest ./tests/test_01_general.py

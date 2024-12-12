@@ -101,6 +101,21 @@ def extend_list( array, extension) -> list:
     return array
 
 
+def to_list( object ) -> list:
+    """
+    Put object into list, if not yet a list
+
+    :param object: an object
+    :type object: any
+    :return: List with object.
+    :rtype: list
+    """
+    if isinstance( object, list ):
+        return object
+    else:
+        return [ object ]
+
+
 
 # String operations
 def change_case_str(s:str, range, conversion:str) -> str:

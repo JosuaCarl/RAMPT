@@ -13,16 +13,13 @@ from tqdm import tqdm as tqdm
 def get_platform():
     return pf.system()
 
-def contruct_common_paths( filepath, taipy=False ):
+def contruct_common_paths( filepath ):
     out_path = helpers.construct_path(filepath, "..", "out")
     test_path = helpers.construct_path(filepath, "..", "test_files")
     example_path = helpers.construct_path(filepath, "..", "example_files")
     batch_path = helpers.construct_path(filepath, "..", "batch_files")
-    if taipy:
-        taipy_work_path = helpers.construct_path(filepath, "..", "taipy_workdir")
-        return out_path, test_path, example_path, batch_path, taipy_work_path
-    else:
-        return out_path, test_path, example_path, batch_path
+    
+    return out_path, test_path, example_path, batch_path
 
 def clean_out( out_path ):
     shutil.rmtree( out_path )

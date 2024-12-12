@@ -51,12 +51,14 @@ class GNPS_Runner(Pipe_Step):
     """
     A runner for checking on the GNPS process and subsequently saving the results.
     """
-    def __init__( self, mzmine_log:list[StrPath]=None, save_log:bool=False, additional_args:list=[], verbosity:int=1, **kwargs ):
+    def __init__( self, mzmine_log:list[StrPath]=None, resubmit:bool=True, save_log:bool=False, additional_args:list=[], verbosity:int=1, **kwargs ):
         """
         Initialize the GNPS_Runner.
 
         :param mzmine_log: Logfile from mzmine, defaults to None.
         :type mzmine_log: list[StrPath], optional
+        :param resubmit: Whether to submit a GNPS feature networking, when not already done, defaults to True.
+        :type resubmit: bool, optional
         :param save_log: Whether to save the output(s), defaults to False.
         :type save_log: bool, optional
         :param additional_args: Additional arguments for mzmine, defaults to []
@@ -69,6 +71,7 @@ class GNPS_Runner(Pipe_Step):
             self.update(kwargs)
         self.mzmine_log_query   = "io.github.mzmine.modules.io.export_features_gnps.GNPSUtils submitFbmnJob GNPS FBMN/IIMN response: "
         self.mzmine_log         = mzmine_log
+        self.resubmit           = resubmit
         self.name               = "gnps"
 
 
@@ -88,7 +91,6 @@ class GNPS_Runner(Pipe_Step):
             if query in line:
                 response_json = re.search(r"{.*}", line.replace(query, ""))[0]
                 return json.loads(response_json)
-
         raise(ValueError(f"Query <{query}> was not found in mzmine_log: Please provide a valid string or path."))
 
     def extract_task_info( self, query:str, mzmine_log:StrPath=None ) -> dict:
@@ -108,6 +110,33 @@ class GNPS_Runner(Pipe_Step):
                 return self.query_response_iterator( query=query, iterator=f.readlines())
         else:
             return self.query_response_iterator( query=query, iterator=mzmine_log.split("\n"))
+        
+
+    
+    def submit_to_gnps( self,  feature_ms2_file:StrPath, feature_quantification_file:StrPath  ) -> str:
+        # Read files
+        with open( feature_ms2_file, "r") as file:
+            feature_ms2_file = file.read()
+        with open( feature_quantification_file, "r") as file:
+            feature_quantification_file = file.read()
+        
+        # enter parameters
+        parameters = { "featuretool": "MZMINE2",
+                       "description": "Job from mine2sirius",
+                       "networkingpreset": "",
+                       "featurequantification": feature_quantification_file,
+                       "featurems2": feature_ms2_file }
+        
+        # Submit job
+        response = requests.post( "https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking", json=parameters)
+
+        helpers.ic(response)
+
+        # Check for finish
+        task_id, status = self.check_task_finished( gnps_response=response )
+
+        return task_id, status
+
 
 
     def check_task_finished( self, mzmine_log:str=None, gnps_response:dict=None ) -> tuple[str, bool]:
@@ -156,33 +185,45 @@ class GNPS_Runner(Pipe_Step):
         return json.loads(response.text)
 
 
-    def check_dir_files( self, dir:StrPath ) -> tuple[bool, bool]:
+    def check_dir_files( self, dir:StrPath,
+                         feature_ms2_file:StrPath=None, feature_quantification_file:str=None 
+                        ) -> tuple[bool, bool]:
         """
         Check whether the needed files for GNPS POST request are present, according to mzmine naming scheme.
 
         :param dir: Directory to search in
         :type dir: StrPath
+        :param feature_ms2_file: File with ms2 spectra (in .mgf format), defaults to None
+        :type feature_ms2_file: StrPath, optional
+        :param feature_quantification_file: File with quantification table (in .csv format), defaults to None
+        :type feature_quantification_file: StrPath, optional
         :return: MS2 feature and feature quantification file presence
         :rtype: tuple[bool, bool]
         """
-        feature_ms2_found = False
-        feature_quantification_found = False
         for root, dirs, files in os.walk(dir):
             for file in files:
-                feature_ms2_found |= file.endswith("_iimn_fbmn.mgf")
-                feature_quantification_found |= file.endswith("_iimn_fbmn_quant.csv")
-        return feature_ms2_found, feature_quantification_found
+                if not feature_ms2_file and file.endswith("_iimn_fbmn.mgf"):
+                    feature_ms2_file = file
+                elif not feature_quantification_file and file.endswith("_iimn_fbmn_quant.csv"):
+                    feature_quantification_file = file
+        return feature_ms2_file, feature_quantification_file
 
 
 
-    def run_single( self, in_path:StrPath, out_path:StrPath=None, mzmine_log:str=None, gnps_response:dict=None ):
+    def run_single( self, in_path:StrPath, out_path:StrPath=None,
+                    feature_ms2_file:StrPath=None, feature_quantification_file:str=None,
+                    mzmine_log:str=None, gnps_response:dict=None ):
         """
         Get the GNPS results from a single path, mzmine_log or GNPS response.
 
         :param in_path: Input directory
-        :type in_path: StrPath, optional
-        :param out_path: Output directory of result
-        :type out_path: StrPath
+        :type in_path: StrPath
+        :param out_path: Output directory of result, defaults to None
+        :type out_path: StrPath, optional
+        :param feature_ms2_file: File with ms2 spectra (in .mgf format), defaults to None
+        :type feature_ms2_file: StrPath, optional
+        :param feature_quantification_file: File with quantification table (in .csv format), defaults to None
+        :type feature_quantification_file: StrPath, optional
         :param mzmine_log: mzmine_log String containing GNPS response, defaults to None
         :type mzmine_log: str, optional
         :param gnps_response: GNPS response to POST request, defaults to None
@@ -191,8 +232,19 @@ class GNPS_Runner(Pipe_Step):
         """
         if not mzmine_log:
             mzmine_log = self.mzmine_log if self.mzmine_log else in_path
-        task_id, status = self.check_task_finished( mzmine_log=mzmine_log,
-                                                    gnps_response=gnps_response )
+        try:
+            task_id, status = self.check_task_finished( mzmine_log=mzmine_log,
+                                                        gnps_response=gnps_response )
+        except ValueError as ve:
+            if self.resubmit:
+                feature_ms2_file, feature_quantification_file = self.check_dir_files( dir=in_path,
+                                                                                      feature_ms2_file=feature_ms2_file,
+                                                                                      feature_quantification_file=feature_quantification_file )
+                gnps_response = self.submit_to_gnps( feature_ms2_file, feature_quantification_file )
+                task_id, status = self.check_task_finished( mzmine_log=mzmine_log,
+                                                            gnps_response=gnps_response )
+            else:
+                raise(ve)
         
         if status:
             dir_name = basename(in_path) if os.path.isdir(in_path) else basename( os.path.split(in_path)[0] )
@@ -236,12 +288,14 @@ class GNPS_Runner(Pipe_Step):
         made_out_root_dir = False
 
         for root, dirs, files in os.walk(in_root_dir):
-            feature_ms2_found, feature_quantification_found = self.check_dir_files(dir=root)
-            if feature_ms2_found and feature_quantification_found:
+            feature_ms2_file, feature_quantification_file = self.check_dir_files(dir=root)
+            if feature_ms2_file and feature_quantification_file:
                 if not made_out_root_dir:
                     os.makedirs( out_root_dir, exist_ok=True )
                     made_out_root_dir = True
-                self.run_single( in_path=in_root_dir, out_path=out_root_dir )
+                self.run_single( in_path=in_root_dir, out_path=out_root_dir,
+                                 feature_ms2_file=feature_ms2_file,
+                                 feature_quantification_file=feature_quantification_file )
 
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
                 self.run_nested( in_root_dir=join(in_root_dir, dir),

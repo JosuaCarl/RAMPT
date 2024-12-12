@@ -11,7 +11,7 @@ from taipy.core.submission.submission_status import SubmissionStatus
 
 platform = get_platform()
 filepath = helpers.get_internal_filepath(__file__)
-out_path, test_path, example_path, batch_path, taipy_work_path = contruct_common_paths( filepath, taipy=True )
+out_path, test_path, example_path, batch_path, = contruct_common_paths( filepath )
 
 
 def load_params( path:StrPath=None ):
@@ -67,28 +67,64 @@ def update_scenario( scenario, params ):
     return scenario
 
 
+def check_submission( entity, counter:int, time:float|int, unit:str):
+    submission = tp.submit( entity )
+
+    if submission.submission_status == SubmissionStatus.BLOCKED:
+        for id, task in scenario.tasks.items():
+            ic(f"Task: {id} Properties: {task.properties}, Context: {task._is_in_context}")
+            ic(task.input)
+            ic(task.output)
+            for node_id, data_node in task.data_nodes.items():
+                ic(f"Node: {node_id}, Content: {data_node}")
+
+    for i in tqdm( range( counter ) ):
+        if submission.submission_status in [ SubmissionStatus.RUNNING ] or \
+           ( submission.submission_status in [SubmissionStatus.SUBMITTED, SubmissionStatus.PENDING ] and i < 1 ): 
+            wait( time, unit )
+
+    assert submission.submission_status == SubmissionStatus.COMPLETED
+
+
+
+def test_prepare():
+    clean_out( out_path )
+    os.mkdir( os.path.join( out_path, "raw") )
+    shutil.copyfile( os.path.join( example_path, "minimal.mzML"), os.path.join( out_path, "raw", "minimal.mzML" ) )
+
+
 def test_taipy_simple_scenario():
     scenario = tp.create_scenario( ms_analysis_config )
 
     params = load_params( os.path.join( batch_path, "Example_parameters.json" ) )
     scenario = update_scenario( scenario=scenario, params=params )
     
-    scenario.data_nodes.get("raw_data").write( os.path.join( taipy_work_path, "raw", "minimal.mzML" ) )
-    scenario.data_nodes.get("mzmine_batch").write( os.path.join( batch_path, "minmal.mzbatch" ) )
-    scenario.data_nodes.get("sirius_config").write( os.path.join( batch_path, "sirius_config.txt" ) )
+    # write relevant nodes
+    scenario.data_nodes.get("raw_data").write( [ os.path.join( out_path, "raw", "minimal.mzML" ) ] )
+    scenario.data_nodes.get("mzmine_batch").write( [ os.path.join( batch_path, "minimal.mzbatch" ) ] )
+    scenario.data_nodes.get("sirius_config").write( [ os.path.join( batch_path, "sirius_config.txt" ) ] )
 
-    ic( { key: data_node.read() for key, data_node in scenario.data_nodes.items() } )
+    # write out nodes
+    scenario.data_nodes.get("conversion_out").write( None )
+    scenario.data_nodes.get("feature_finding_out").write( None )
+    scenario.data_nodes.get("gnps_out").write( None )
+    scenario.data_nodes.get("sirius_out").write( None )
+    scenario.data_nodes.get("results_out").write( None )
     
     orchestrator = tp.Orchestrator()
-    orchestrator.run(force_restart=True)
+    orchestrator.run( force_restart=True )
 
-    submission = tp.submit(scenario)
-    for i in tqdm(range(30)):
-        if not submission.submission_status == SubmissionStatus.RUNNING:
-            break
-        wait( 1, "minute")
+    # Submit steps
+    check_submission( entity=scenario.sequences.get("conversion"), counter=30, time=5.0, unit="seconds")
+    check_submission( entity=scenario.sequences.get("feature finding"), counter=60, time=5.0, unit="seconds")
+    check_submission( entity=scenario.sequences.get("gnps"), counter=30, time=1, unit="minute")
+    check_submission( entity=scenario.sequences.get("sirius"), counter=30, time=1, unit="minute")
+    check_submission( entity=scenario.sequences.get("analysis"), counter=30, time=5.0, unit="seconds")
 
-    assert submission.submission_status == SubmissionStatus.COMPLETED
+    # Submit scenario
+    check_submission( entity=scenario, counter=60, time=1, unit="minutes")
+
+    
 
 
 """
@@ -117,9 +153,10 @@ def test_taipy_nested_parallel_scenario():
 
     assert submission.submission_status == SubmissionStatus.COMPLETED
 
-"""
+
 
 def test_clean():
     clean_out( taipy_work_path )
     os.mkdir( os.path.join( taipy_work_path, "raw") )
     shutil.copyfile( os.path.join( example_path, "minimal.mzML"), os.path.join( taipy_work_path, "raw", "minimal.mzML" ) )
+    """

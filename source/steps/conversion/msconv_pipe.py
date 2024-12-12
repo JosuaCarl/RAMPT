@@ -153,10 +153,13 @@ class MSconvert_Runner(Pipe_Step):
         :param out_path: Path to output directory.
         :type out_path: str
         """
-        cmd = rf'"{self.exec_path}" --{self.target_format[1:]} -e {self.target_format} --64 -o "{out_path}" "{in_path}" {" ".join(self.additional_args)}'
+        out_file_name = '.'.join(os.path.basename(in_path).split(".")[:-1]) + self.target_format
+
+        cmd = rf'"{self.exec_path}" --{self.target_format[1:]} -e {self.target_format} --64 ' +\
+              rf'-o "{out_path}" --outfile "{out_file_name}" "{in_path}" {" ".join(self.additional_args)}'
 
         if not os.path.isfile(out_path):
-            out_path = os.path.join( out_path, '.'.join(os.path.basename(in_path).split(".")[:-1]) + self.target_format )
+            out_path = os.path.join( out_path, out_file_name )
 
         super().compute( cmd=cmd, in_path=in_path, out_path=out_path )
 

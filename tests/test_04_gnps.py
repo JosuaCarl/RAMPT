@@ -13,6 +13,18 @@ filepath = helpers.get_internal_filepath(__file__)
 out_path, test_path, example_path, batch_path = contruct_common_paths( filepath )
 
 
+def test_gnps_submit():
+    gnps_runner = GNPS_Runner( mzmine_log=join( example_path, "mzmine_log.txt") )
+
+    task_id, status = gnps_runner.submit_to_gnps( feature_ms2_file=join( example_path, "example_files_iimn_fbmn.mgf"),
+                                                  feature_quantification_file=join( example_path, "example_files_iimn_fbmn_quant.csv"))
+    
+    ic(task_id)
+    ic(status)
+    assert False
+    
+
+
 def test_gnps_pipe_run_single():
     clean_out( out_path )
 

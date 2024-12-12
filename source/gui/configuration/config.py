@@ -4,6 +4,7 @@ import os
 
 from taipy import Config, Scope
 
+import source.helpers.general as helpers
 from source.helpers.types import StrPath
 
 # Import of Pipeline Steps
@@ -85,7 +86,7 @@ sirius_config_config = Config.configure_in_memory_data_node( id="sirius_config",
 
 
 # Task methods
-def generic_step( step_class, step_params:dict, global_params:dict, in_paths:list=None, out_paths:list=None,
+def generic_step( step_class, step_params:dict, global_params:dict, in_paths:str|list=None, out_paths:str|list=None,
                   out_path_target:StrPath=None, return_attributes:list=["processed_out"],
                   **kwargs) -> tuple[Any]|Any:
 
@@ -93,18 +94,23 @@ def generic_step( step_class, step_params:dict, global_params:dict, in_paths:lis
     step_params.update( global_params )
     step_instance = step_class( **step_params )
 
+    helpers.ic(in_paths)
+    helpers.ic(out_paths)
+    helpers.ic(out_path_target)
     # Overwrite scheduled, when new in_path is given
     if in_paths:
+        in_paths = helpers.to_list( in_paths )
         step_instance.scheduled_in = []
     if out_paths:
+        out_paths = helpers.to_list( out_paths )
         step_instance.scheduled_out = []
     # Add out_paths as relatives to in_path if none is given
     else:
+        out_paths = []
         for in_path in in_paths:
-            if os.path.isfile(in_path):
-                out_paths.append( os.path.abspath(os.path.join(os.path.dirname(in_path), out_path_target)) )
-            else:
-                out_paths.append( os.path.abspath(os.path.join(in_path, out_path_target)) )
+            in_dir = helpers.get_directory( in_path )
+            out_paths.append( os.path.join( in_dir, out_path_target ) )
+    helpers.ic(out_paths)
     
     # Run step
     step_instance.run( in_paths=in_paths, out_paths=out_paths, **kwargs )
