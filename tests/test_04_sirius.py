@@ -14,7 +14,7 @@ filepath = helpers.get_internal_filepath(__file__)
 out_path, test_path, example_path, batch_path = contruct_common_paths( filepath )
 
 
-"""
+
 def test_sirius_pipe_run_single():
     clean_out( out_path )
 
@@ -51,7 +51,7 @@ def test_sirius_pipe_run_nested():
     assert os.path.isfile( join(out_path, "structure_identifications.tsv") )
     assert os.path.isfile( join(out_path, "example_nested", "projectspace.sirius") )
     assert os.path.isfile( join(out_path, "example_nested", "structure_identifications.tsv") )
-"""
+
 
 
 def test_sirius_pipe_run():

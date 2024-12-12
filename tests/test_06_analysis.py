@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """
-Testing the GNPS annotation.
+Testing the data analysis.
 """
 from tests.common import *
 import source.helpers.general as helpers
-from source.steps.annotation.gnps_pipe import *
-from source.steps.annotation.gnps_pipe import main as gnps_pipe_main
+from source.steps.analysis.analysis_pipe import *
+from source.steps.analysis.analysis_pipe  import main as analysis_pipe_main
 
 
 platform = get_platform()

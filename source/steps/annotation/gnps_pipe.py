@@ -115,25 +115,25 @@ class GNPS_Runner(Pipe_Step):
     
     def submit_to_gnps( self,  feature_ms2_file:StrPath, feature_quantification_file:StrPath  ) -> str:
         # Read files
-        with open( feature_ms2_file, "r") as file:
-            feature_ms2_file = file.read()
-        with open( feature_quantification_file, "r") as file:
-            feature_quantification_file = file.read()
-        
+        files = { "featurems2": open( feature_ms2_file, "r"),
+                  "featurequantification": open( feature_quantification_file, "r") }
+                
         # enter parameters
-        parameters = { "featuretool": "MZMINE2",
-                       "description": "Job from mine2sirius",
-                       "networkingpreset": "",
-                       "featurequantification": feature_quantification_file,
-                       "featurems2": feature_ms2_file }
-        
+        parameters = { "title": "Cool title",
+                       "featuretool": "MZMINE2",
+                       "description": "Job from mine2sirius" }
         # Submit job
-        response = requests.post( "https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking", json=parameters)
+        url = "https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking"
+        if self.verbosity >= 2:
+            print(f"POSTing request to  {url}")
 
-        helpers.ic(response)
+        response = requests.api.post( url, data=parameters, files=files)
+        
+        if self.verbosity >= 2:
+            print(f"POST request {response.request.url} returned status code {response.status_code}")
 
         # Check for finish
-        task_id, status = self.check_task_finished( gnps_response=response )
+        task_id, status = self.check_task_finished( gnps_response=response.json() )
 
         return task_id, status
 
@@ -203,9 +203,9 @@ class GNPS_Runner(Pipe_Step):
         for root, dirs, files in os.walk(dir):
             for file in files:
                 if not feature_ms2_file and file.endswith("_iimn_fbmn.mgf"):
-                    feature_ms2_file = file
+                    feature_ms2_file = join(root, file)
                 elif not feature_quantification_file and file.endswith("_iimn_fbmn_quant.csv"):
-                    feature_quantification_file = file
+                    feature_quantification_file = join(root, file)
         return feature_ms2_file, feature_quantification_file
 
 

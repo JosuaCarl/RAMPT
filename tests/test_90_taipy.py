@@ -87,13 +87,15 @@ def check_submission( entity, counter:int, time:float|int, unit:str):
 
 
 
-def test_prepare():
+def prepare_out():
     clean_out( out_path )
     os.mkdir( os.path.join( out_path, "raw") )
     shutil.copyfile( os.path.join( example_path, "minimal.mzML"), os.path.join( out_path, "raw", "minimal.mzML" ) )
 
 
 def test_taipy_simple_scenario():
+    prepare_out()
+
     scenario = tp.create_scenario( ms_analysis_config )
 
     params = load_params( os.path.join( batch_path, "Example_parameters.json" ) )
@@ -116,47 +118,107 @@ def test_taipy_simple_scenario():
 
     # Submit steps
     check_submission( entity=scenario.sequences.get("conversion"), counter=30, time=5.0, unit="seconds")
+    assert os.path.isfile( os.path.join( out_path, "converted", "minimal.mzML" ) )
+    assert os.path.isfile( os.path.join( out_path, "converted", "msconvert_log.txt" ) )
+
     check_submission( entity=scenario.sequences.get("feature finding"), counter=60, time=5.0, unit="seconds")
+    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "processed_iimn_fbmn_quant.csv" ) )
+    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "processed_iimn_fbmn.mgf" ) )
+    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "processed_sirius.mgf" ) )
+    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "mzmine_log.txt" ) )
+
     check_submission( entity=scenario.sequences.get("gnps"), counter=30, time=1, unit="minute")
+    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "annotated", "processed_gnps_all_db_annotations.json" ) )
+
     check_submission( entity=scenario.sequences.get("sirius"), counter=30, time=1, unit="minute")
+    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "annotated", "formula_identifications.tsv" ) )
+    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "annotated", "structure_identifications.tsv" ) )
+    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "annotated", "denovo_structure_identifications.tsv" ) )
+    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "annotated", "canopus_structure_summary.tsv" ) )
+    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "annotated", "sirius_log.txt" ) )
+
     check_submission( entity=scenario.sequences.get("analysis"), counter=30, time=5.0, unit="seconds")
+    # assert os.path.isfile( os.path.join( out_path, "converted", "processed", "annotated", "results", "analysis_log.txt" ) )
+
+
+
+def test_taipy_scenario_out_change():
+    prepare_out()
+
+    scenario = tp.create_scenario( ms_analysis_config )
+
+    params = load_params( os.path.join( batch_path, "Example_parameters_nested_parallel.json" ) )
+    scenario = update_scenario( scenario=scenario, params=params )
+    
+    # write relevant nodes
+    scenario.data_nodes.get("raw_data").write( [ os.path.join( out_path, "raw", "minimal.mzML" ) ] )
+    scenario.data_nodes.get("mzmine_batch").write( [ os.path.join( batch_path, "minimal.mzbatch" ) ] )
+    scenario.data_nodes.get("sirius_config").write( [ os.path.join( batch_path, "sirius_config.txt" ) ] )
+
+    # write out nodes
+    scenario.data_nodes.get("conversion_out").write( [ os.path.join( out_path, "converted_explicit" ) ] )
+    scenario.data_nodes.get("feature_finding_out").write( [ os.path.join( out_path, "" ) ] )
+    scenario.data_nodes.get("gnps_out").write( [ os.path.join( out_path, "annotated_explicit" ) ] )
+    scenario.data_nodes.get("sirius_out").write( [ os.path.join( out_path, "annotated_explicit" ) ] )
+    scenario.data_nodes.get("results_out").write( [ os.path.join( out_path, "results_explicit" ) ] )
+    
+    orchestrator = tp.Orchestrator()
+    orchestrator.run( force_restart=True )
+
+    # Submit steps
+    check_submission( entity=scenario.sequences.get("conversion"), counter=30, time=5.0, unit="seconds")
+    assert os.path.isfile( os.path.join( out_path, "converted_explicit", "minimal.mzML" ) )
+    assert os.path.isfile( os.path.join( out_path, "converted_explicit", "msconvert_log.txt" ) )
+
+    
+    check_submission( entity=scenario.sequences.get("feature finding"), counter=60, time=5.0, unit="seconds")
+    assert os.path.isfile( os.path.join( out_path, "processed_explicit", "processed_explicit_iimn_fbmn_quant.csv" ) )
+    assert os.path.isfile( os.path.join( out_path, "processed_explicit", "processed_explicit_iimn_fbmn.mgf" ) )
+    assert os.path.isfile( os.path.join( out_path, "processed_explicit", "processed_explicit_sirius.mgf" ) )
+    assert os.path.isfile( os.path.join( out_path, "processed_explicit", "mzmine_log.txt" ) )
+
+    check_submission( entity=scenario.sequences.get("gnps"), counter=30, time=1, unit="minute")
+    assert os.path.isfile( os.path.join( out_path, "annotated_explicit", "processed_explicit_gnps_all_db_annotations.json" ) )
+
+    check_submission( entity=scenario.sequences.get("sirius"), counter=30, time=1, unit="minute")
+    assert os.path.isfile( os.path.join( out_path, "annotated_explicit", "formula_identifications.tsv" ) )
+    assert os.path.isfile( os.path.join( out_path, "annotated_explicit", "structure_identifications.tsv" ) )
+    assert os.path.isfile( os.path.join( out_path, "annotated_explicit", "denovo_structure_identifications.tsv" ) )
+    assert os.path.isfile( os.path.join( out_path, "annotated_explicit", "canopus_structure_summary.tsv" ) )
+    assert os.path.isfile( os.path.join( out_path, "annotated_explicit", "sirius_log.txt" ) )
+
+    check_submission( entity=scenario.sequences.get("analysis"), counter=30, time=5.0, unit="seconds")
+    # assert os.path.isfile( os.path.join( out_path, "results_explicit", "analysis_log.txt" ) )
+    
+
+
+def test_taipy_nested_parallel_scenario():
+    prepare_out()
+
+    scenario = tp.create_scenario( ms_analysis_config )
+
+    params = load_params( os.path.join( batch_path, "Example_parameters_nested_parallel.json" ) )
+    scenario = update_scenario( scenario=scenario, params=params )
+    
+    # write relevant nodes
+    scenario.data_nodes.get("raw_data").write( [ os.path.join( out_path, "raw", "minimal.mzML" ) ] )
+    scenario.data_nodes.get("mzmine_batch").write( [ os.path.join( batch_path, "minimal.mzbatch" ) ] )
+    scenario.data_nodes.get("sirius_config").write( [ os.path.join( batch_path, "sirius_config.txt" ) ] )
+
+    # write out nodes
+    scenario.data_nodes.get("conversion_out").write( None )
+    scenario.data_nodes.get("feature_finding_out").write( None )
+    scenario.data_nodes.get("gnps_out").write( None )
+    scenario.data_nodes.get("sirius_out").write( None )
+    scenario.data_nodes.get("results_out").write( None )
+    
+    orchestrator = tp.Orchestrator()
+    orchestrator.run( force_restart=True )
 
     # Submit scenario
     check_submission( entity=scenario, counter=60, time=1, unit="minutes")
 
-    
-
-
-"""
-def test_taipy_nested_parallel_scenario():
-    gui = Gui( pages=pages )
-    gui.run(title="test", design=False, run_browser=False, run_server=False )
-
-    load_params(state=gui.state, path=os.path.join(batch_path, "Example_parameters_nested_parallel.json") )
-    lock_scenario( state=gui.state )
-    
-    scenario = gui.state.scenario
-
-    orchestrator = tp.Orchestrator()
-    orchestrator.run(force_restart=True)
-    
-    scenario.data_nodes.get("raw_data").write( os.path.join( taipy_work_path, "raw", "example_pos.mzML" ) )
-
-    scenario.data_nodes.get("mzmine_batch").write( os.path.join( batch_path, "minmal.mzbatch" ) )
-    scenario.data_nodes.get("sirius_config").write( os.path.join( batch_path, "sirius_config.txt" ) )
-
-    submission = tp.submit(scenario)
-    for i in range(30):
-        if submission.submission_status == SubmissionStatus.COMPLETED:
-            break
-        wait( 1, "minute")
-
-    assert submission.submission_status == SubmissionStatus.COMPLETED
-
 
 
 def test_clean():
-    clean_out( taipy_work_path )
-    os.mkdir( os.path.join( taipy_work_path, "raw") )
-    shutil.copyfile( os.path.join( example_path, "minimal.mzML"), os.path.join( taipy_work_path, "raw", "minimal.mzML" ) )
-    """
+    clean_out( out_path )
