@@ -52,6 +52,7 @@ ruamel-yaml = "^0.18.6"
 pytest = "^8.3.3"
 icecream = "^2.1.3" 
 ruff = "^0.8.1"
+pyopenms = "3.2.0"
 
 # Ruff rules
 [tool.ruff.lint]
