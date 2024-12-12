@@ -187,7 +187,7 @@ class GNPS_Runner(Pipe_Step):
 
     def check_dir_files( self, dir:StrPath,
                          feature_ms2_file:StrPath=None, feature_quantification_file:str=None 
-                        ) -> tuple[bool, bool]:
+                        ) -> tuple[StrPath, StrPath]:
         """
         Check whether the needed files for GNPS POST request are present, according to mzmine naming scheme.
 
@@ -197,8 +197,8 @@ class GNPS_Runner(Pipe_Step):
         :type feature_ms2_file: StrPath, optional
         :param feature_quantification_file: File with quantification table (in .csv format), defaults to None
         :type feature_quantification_file: StrPath, optional
-        :return: MS2 feature and feature quantification file presence
-        :rtype: tuple[bool, bool]
+        :return: MS2 feature and feature quantification file
+        :rtype: tuple[StrPath, StrPath]
         """
         for root, dirs, files in os.walk(dir):
             for file in files:

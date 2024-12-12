@@ -94,9 +94,6 @@ def generic_step( step_class, step_params:dict, global_params:dict, in_paths:str
     step_params.update( global_params )
     step_instance = step_class( **step_params )
 
-    helpers.ic(in_paths)
-    helpers.ic(out_paths)
-    helpers.ic(out_path_target)
     # Overwrite scheduled, when new in_path is given
     if in_paths:
         in_paths = helpers.to_list( in_paths )
@@ -110,8 +107,7 @@ def generic_step( step_class, step_params:dict, global_params:dict, in_paths:str
         for in_path in in_paths:
             in_dir = helpers.get_directory( in_path )
             out_paths.append( os.path.join( in_dir, out_path_target ) )
-    helpers.ic(out_paths)
-    
+
     # Run step
     step_instance.run( in_paths=in_paths, out_paths=out_paths, **kwargs )
 
@@ -208,7 +204,7 @@ annotate_gnps_config = Config.configure_task( "annotate_gnps",
                                                       gnps_params_config,
                                                       global_params_config ],
                                               output=gnps_annotations_config,
-                                              skippable=False )
+                                              skippable=True )
 
 annotate_sirius_config = Config.configure_task( "annotate_sirius",
                                               function=annotate_sirius,

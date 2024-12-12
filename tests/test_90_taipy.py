@@ -93,6 +93,14 @@ def prepare_out():
     shutil.copyfile( os.path.join( example_path, "minimal.mzML"), os.path.join( out_path, "raw", "minimal.mzML" ) )
 
 
+###### TESTS ######
+
+def test_start_orchestrator():
+    orchestrator = tp.Orchestrator()
+    orchestrator.run( force_restart=True )
+
+
+@pytest.mark.dependency(depends=['test_start_orchestrator'])
 def test_taipy_simple_scenario():
     prepare_out()
 
@@ -112,36 +120,34 @@ def test_taipy_simple_scenario():
     scenario.data_nodes.get("gnps_out").write( None )
     scenario.data_nodes.get("sirius_out").write( None )
     scenario.data_nodes.get("results_out").write( None )
-    
-    orchestrator = tp.Orchestrator()
-    orchestrator.run( force_restart=True )
 
     # Submit steps
     check_submission( entity=scenario.sequences.get("conversion"), counter=30, time=5.0, unit="seconds")
-    assert os.path.isfile( os.path.join( out_path, "converted", "minimal.mzML" ) )
-    assert os.path.isfile( os.path.join( out_path, "converted", "msconvert_log.txt" ) )
+    assert os.path.isfile( os.path.join( out_path, "raw", "converted", "minimal.mzML" ) )
+    assert os.path.isfile( os.path.join( out_path, "raw", "converted", "msconvert_log.txt" ) )
 
     check_submission( entity=scenario.sequences.get("feature finding"), counter=60, time=5.0, unit="seconds")
-    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "processed_iimn_fbmn_quant.csv" ) )
-    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "processed_iimn_fbmn.mgf" ) )
-    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "processed_sirius.mgf" ) )
-    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "mzmine_log.txt" ) )
+    assert os.path.isfile( os.path.join( out_path, "raw", "converted", "processed", "processed_iimn_fbmn_quant.csv" ) )
+    assert os.path.isfile( os.path.join( out_path, "raw", "converted", "processed", "processed_iimn_fbmn.mgf" ) )
+    assert os.path.isfile( os.path.join( out_path, "raw", "converted", "processed", "processed_sirius.mgf" ) )
+    assert os.path.isfile( os.path.join( out_path, "raw", "converted", "processed", "mzmine_log.txt" ) )
 
     check_submission( entity=scenario.sequences.get("gnps"), counter=30, time=1, unit="minute")
-    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "annotated", "processed_gnps_all_db_annotations.json" ) )
+    assert os.path.isfile( os.path.join( out_path, "raw", "converted", "processed", "annotated", "processed_gnps_all_db_annotations.json" ) )
 
     check_submission( entity=scenario.sequences.get("sirius"), counter=30, time=1, unit="minute")
-    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "annotated", "formula_identifications.tsv" ) )
-    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "annotated", "structure_identifications.tsv" ) )
-    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "annotated", "denovo_structure_identifications.tsv" ) )
-    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "annotated", "canopus_structure_summary.tsv" ) )
-    assert os.path.isfile( os.path.join( out_path, "converted", "processed", "annotated", "sirius_log.txt" ) )
+    assert os.path.isfile( os.path.join( out_path, "raw", "converted", "processed", "annotated", "formula_identifications.tsv" ) )
+    assert os.path.isfile( os.path.join( out_path, "raw", "converted", "processed", "annotated", "structure_identifications.tsv" ) )
+    assert os.path.isfile( os.path.join( out_path, "raw", "converted", "processed", "annotated", "denovo_structure_identifications.tsv" ) )
+    assert os.path.isfile( os.path.join( out_path, "raw", "converted", "processed", "annotated", "canopus_structure_summary.tsv" ) )
+    assert os.path.isfile( os.path.join( out_path, "raw", "converted", "processed", "annotated", "sirius_log.txt" ) )
 
     check_submission( entity=scenario.sequences.get("analysis"), counter=30, time=5.0, unit="seconds")
-    # assert os.path.isfile( os.path.join( out_path, "converted", "processed", "annotated", "results", "analysis_log.txt" ) )
+    # assert os.path.isfile( os.path.join( out_path, "raw", "converted", "processed", "annotated", "results", "analysis_log.txt" ) )
 
 
 
+@pytest.mark.dependency(depends=['test_taipy_simple_scenario'])
 def test_taipy_scenario_out_change():
     prepare_out()
 
@@ -161,9 +167,6 @@ def test_taipy_scenario_out_change():
     scenario.data_nodes.get("gnps_out").write( [ os.path.join( out_path, "annotated_explicit" ) ] )
     scenario.data_nodes.get("sirius_out").write( [ os.path.join( out_path, "annotated_explicit" ) ] )
     scenario.data_nodes.get("results_out").write( [ os.path.join( out_path, "results_explicit" ) ] )
-    
-    orchestrator = tp.Orchestrator()
-    orchestrator.run( force_restart=True )
 
     # Submit steps
     check_submission( entity=scenario.sequences.get("conversion"), counter=30, time=5.0, unit="seconds")
@@ -192,6 +195,7 @@ def test_taipy_scenario_out_change():
     
 
 
+@pytest.mark.dependency(depends=['test_taipy_scenario_out_change'])
 def test_taipy_nested_parallel_scenario():
     prepare_out()
 
@@ -211,14 +215,12 @@ def test_taipy_nested_parallel_scenario():
     scenario.data_nodes.get("gnps_out").write( None )
     scenario.data_nodes.get("sirius_out").write( None )
     scenario.data_nodes.get("results_out").write( None )
-    
-    orchestrator = tp.Orchestrator()
-    orchestrator.run( force_restart=True )
 
     # Submit scenario
     check_submission( entity=scenario, counter=60, time=1, unit="minutes")
 
 
 
+@pytest.mark.dependency(depends=['test_taipy_nested_parallel_scenario'])
 def test_clean():
     clean_out( out_path )

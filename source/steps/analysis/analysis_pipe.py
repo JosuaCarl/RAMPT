@@ -5,7 +5,6 @@ Analysis of feature quantification and annotation.
 """
 import os
 import argparse
-import regex
 
 from os.path import join
 from tqdm.auto import tqdm
@@ -37,13 +36,9 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     additional_args = additional_args if additional_args else unknown_args
     
     # Conversion
-    msconvert_runner = MSconvert_Runner( platform=platform, target_format=target_format,
-                                     pattern=pattern, suffix=suffix, prefix=prefix, contains=contains, 
-                                     redo_threshold=redo_threshold, overwrite=overwrite,
-                                     save_log=save_log, additional_args=additional_args, verbosity=verbosity,
-                                     nested=nested, workers=n_workers,
-                                     scheduled_in=in_dir, scheduled_out=out_dir )
-    return msconvert_runner.run()
+    analysis_runner = Analysis_Runner( overwrite=overwrite, save_log=save_log, additional_args=additional_args, verbosity=verbosity,
+                                        nested=nested, workers=n_workers, scheduled_in=in_dir, scheduled_out=out_dir )
+    return analysis_runner.run()
 
 
 
@@ -80,7 +75,8 @@ class Analysis_Runner(Pipe_Step):
                       denovo_structure_identifications_file:StrPath=None,
                       formula_identifications_file:StrPath=None,
                       structure_identifications_file:StrPath=None,
-                      gnps_annotations:StrPath=None ) -> bool:
+                      gnps_annotations:StrPath=None
+                      ) -> tuple[ StrPath, StrPath, StrPath, StrPath, StrPath, StrPath, StrPath ]:
         """
         Check for annotation and quantification files.
 
@@ -204,19 +200,12 @@ if __name__ == "__main__":
                                              The folder structure is mimiced at the place of the output.')
     parser.add_argument('-in',      '--in_dir',             required=True)
     parser.add_argument('-out',     '--out_dir',            required=True)
-    parser.add_argument('-tf',      '--target_format',      required=False)
-    parser.add_argument('-pat',     '--pattern',            required=False)
-    parser.add_argument('-suf',     '--suffix',             required=False)
-    parser.add_argument('-pre',     '--prefix',             required=False)
-    parser.add_argument('-con',     '--contains',           required=False)
-    parser.add_argument('-rt',      '--redo_threshold',     required=False)
     parser.add_argument('-o',       '--overwrite',          required=False,     action="store_true")
     parser.add_argument('-n',       '--nested',             required=False,     action="store_true")
     parser.add_argument('-w',       '--workers',            required=False,     type=int)
     parser.add_argument('-s',       '--save_log',           required=False,     action="store_true")
-    parser.add_argument('-plat',    '--platform',           required=False)
     parser.add_argument('-v',       '--verbosity',          required=False,     type=int)
-    parser.add_argument('-msconv',  '--msconv_arguments',   required=False,     nargs=argparse.REMAINDER)
+    parser.add_argument('-msconv',  '--analysis_arguments', required=False,     nargs=argparse.REMAINDER)
 
     
     args, unknown_args = parser.parse_known_args()
