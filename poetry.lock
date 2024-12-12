@@ -2984,6 +2984,18 @@ test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=8.3.2)", "pytest-
 type = ["mypy (>=1.11.2)"]
 
 [[package]]
+name = "please"
+version = "0.9.8"
+description = "Software for the analysis of Low Energy Electron Microscopy data"
+optional = false
+python-versions = "*"
+files = [
+    {file = "PLEASE-0.9.8-py2-none-any.whl", hash = "sha256:e61378c848686a4b669f8a8492972ae6ff1550c3b08df14f9fa43da626b95e52"},
+    {file = "PLEASE-0.9.8-py3-none-any.whl", hash = "sha256:72ae44f3cf569f43966045652af1c283d5c899001206036729b71a61e7163e6f"},
+    {file = "PLEASE-0.9.8.tar.gz", hash = "sha256:62e4e6ee47e45a553af7bc55740e11a9e74b546275aecd0b931e83a23a7671c7"},
+]
+
+[[package]]
 name = "plotly"
 version = "5.24.1"
 description = "An open-source, interactive data visualization library for Python"
@@ -5136,4 +5148,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "c09fb5c5ccd3a73a419397430cf2fae777c4f525dbceb593cee15d5a3475bae4"
+content-hash = "badff4a89d0d637d7d4084ba83d5fc1bef248f7305b070d1b4b4953251d62bef"

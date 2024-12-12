@@ -12,6 +12,7 @@ readme = {file = "README.txt", content-type = "text/markdown"}
 license = {file = "LICENSE" }
 keywords = ["mass-spectrometry", "workflow", "pipeline", "gui", "sirius", "mzmine" ]
 
+# Poetry rules
 [tool.poetry]
 name = "mine2sirius-pipe"
 version = "2024.2.1"
@@ -22,7 +23,7 @@ readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.11"
 numpy = "^1.26.4"
 scipy = "^1.14.1"
 pyarrow = "^17.0.0"
@@ -51,6 +52,7 @@ ruamel-yaml = "^0.18.6"
 pytest = "^8.3.3"
 icecream = "^2.1.3" 
 ruff = "^0.8.1"
+please = "^0.9.8"
 
 # Ruff rules
 [tool.ruff.lint]
