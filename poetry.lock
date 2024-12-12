@@ -775,7 +775,6 @@ files = [
 click = ">=8.1"
 cloudpickle = ">=3.0.0"
 fsspec = ">=2021.09.0"
-importlib_metadata = {version = ">=4.13.0", markers = "python_version < \"3.12\""}
 packaging = ">=20.0"
 partd = ">=1.4.0"
 pyyaml = ">=5.3.1"
@@ -1417,29 +1416,6 @@ files = [
 ]
 
 [[package]]
-name = "importlib-metadata"
-version = "8.5.0"
-description = "Read metadata from Python packages"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "importlib_metadata-8.5.0-py3-none-any.whl", hash = "sha256:45e54197d28b7a7f1559e60b95e7c567032b602131fbd588f1497f47880aa68b"},
-    {file = "importlib_metadata-8.5.0.tar.gz", hash = "sha256:71522656f0abace1d072b9e5481a48f07c138e00f079c38c8f883823f9c26bd7"},
-]
-
-[package.dependencies]
-zipp = ">=3.20"
-
-[package.extras]
-check = ["pytest-checkdocs (>=2.4)", "pytest-ruff (>=0.2.1)"]
-cover = ["pytest-cov"]
-doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
-enabler = ["pytest-enabler (>=2.2)"]
-perf = ["ipython"]
-test = ["flufl.flake8", "importlib-resources (>=1.3)", "jaraco.test (>=5.4)", "packaging", "pyfakefs", "pytest (>=6,!=8.1.*)", "pytest-perf (>=0.9.2)"]
-type = ["pytest-mypy"]
-
-[[package]]
 name = "incremental"
 version = "24.7.2"
 description = "A small library that versions your Python projects."
@@ -1521,7 +1497,6 @@ prompt_toolkit = ">=3.0.41,<3.1.0"
 pygments = ">=2.4.0"
 stack_data = "*"
 traitlets = ">=5.13.0"
-typing_extensions = {version = ">=4.6", markers = "python_version < \"3.12\""}
 
 [package.extras]
 all = ["ipython[black,doc,kernel,matplotlib,nbconvert,nbformat,notebook,parallel,qtconsole]", "ipython[test,test-extra]"]
@@ -2778,10 +2753,7 @@ files = [
 ]
 
 [package.dependencies]
-numpy = [
-    {version = ">=1.23.2", markers = "python_version == \"3.11\""},
-    {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
-]
+numpy = {version = ">=1.26.0", markers = "python_version >= \"3.12\""}
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
 tzdata = ">=2022.7"
@@ -3010,18 +2982,6 @@ files = [
 docs = ["furo (>=2024.8.6)", "proselint (>=0.14)", "sphinx (>=8.0.2)", "sphinx-autodoc-typehints (>=2.4)"]
 test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=8.3.2)", "pytest-cov (>=5)", "pytest-mock (>=3.14)"]
 type = ["mypy (>=1.11.2)"]
-
-[[package]]
-name = "please"
-version = "0.9.8"
-description = "Software for the analysis of Low Energy Electron Microscopy data"
-optional = false
-python-versions = "*"
-files = [
-    {file = "PLEASE-0.9.8-py2-none-any.whl", hash = "sha256:e61378c848686a4b669f8a8492972ae6ff1550c3b08df14f9fa43da626b95e52"},
-    {file = "PLEASE-0.9.8-py3-none-any.whl", hash = "sha256:72ae44f3cf569f43966045652af1c283d5c899001206036729b71a61e7163e6f"},
-    {file = "PLEASE-0.9.8.tar.gz", hash = "sha256:62e4e6ee47e45a553af7bc55740e11a9e74b546275aecd0b931e83a23a7671c7"},
-]
 
 [[package]]
 name = "plotly"
@@ -3323,15 +3283,27 @@ zstd = ["zstandard"]
 
 [[package]]
 name = "pyopenms"
-version = "3.2.0.1"
+version = "3.2.0"
 description = "Python wrapper for C++ LC-MS library OpenMS"
 optional = false
 python-versions = "*"
 files = [
-    {file = "pyopenms-3.2.0.1-cp310-cp310-win_amd64.whl", hash = "sha256:0e39bf8488860301f6ed525fa4be75c5ed3e6fc954221c5a1b459ea957b12eb6"},
-    {file = "pyopenms-3.2.0.1-cp311-cp311-win_amd64.whl", hash = "sha256:e3ef93912815899e3fb27f6e8a03419a7eea8fc99a422be4140d001691e86ffe"},
-    {file = "pyopenms-3.2.0.1-cp312-cp312-win_amd64.whl", hash = "sha256:63876738a209cdfdb197928e269e64cab1c7740b6c80dac872f344571ecfbe26"},
-    {file = "pyopenms-3.2.0.1-cp39-cp39-win_amd64.whl", hash = "sha256:e84e4a192741c0bcd2aa7109b53c6fc6e17f8633fc4216e178221b481d1a8b92"},
+    {file = "pyopenms-3.2.0-cp310-cp310-macosx_13_0_x86_64.whl", hash = "sha256:b962257d0172d94994ad66c63df362f9980f11fdb44f34798315dc1a98bb9688"},
+    {file = "pyopenms-3.2.0-cp310-cp310-macosx_14_0_arm64.whl", hash = "sha256:ccda824418d43e592da5c2cb34b8b07e51c79bfb9daf546e9264c64c651b13f6"},
+    {file = "pyopenms-3.2.0-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:0039860d1218f17d0e9a921c98d41667ff1eafef6b36fe80d65b158121009e50"},
+    {file = "pyopenms-3.2.0-cp310-cp310-win_amd64.whl", hash = "sha256:632e10b80f6324731e997fa0926a33857495b51a2091fcedddbdc810c6f1aa9f"},
+    {file = "pyopenms-3.2.0-cp311-cp311-macosx_13_0_x86_64.whl", hash = "sha256:c041a10ea6472a6758290cd7a1554a7060c3ba31c716c9df30c8926948d8c040"},
+    {file = "pyopenms-3.2.0-cp311-cp311-macosx_14_0_arm64.whl", hash = "sha256:cfd16fe1ea2c65f761d9c4c6ac3db89e7267e552acbed5ea79b2a38aef441312"},
+    {file = "pyopenms-3.2.0-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:ea32a6b092a2bf459997ed102bf7042701e2af3ab17e0531b2518bb767c0ccbf"},
+    {file = "pyopenms-3.2.0-cp311-cp311-win_amd64.whl", hash = "sha256:ea10adfebff42278ab03017298109c833da10a52469d4b7e6fbefb095f80cfb2"},
+    {file = "pyopenms-3.2.0-cp312-cp312-macosx_13_0_x86_64.whl", hash = "sha256:247d2addaf24a8239f1a4e0e6d093e8dcc2c46be45d007c4417b49c241e5ae74"},
+    {file = "pyopenms-3.2.0-cp312-cp312-macosx_14_0_arm64.whl", hash = "sha256:e2fe26f29e2b43581cb3db07a8deefc712b0686bd1c83f5b591c2028364aad1d"},
+    {file = "pyopenms-3.2.0-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:bb7d8c5aa155a8971236359ae9e244bc5c0a397b7bff9ffd1dd6fa35edd78d27"},
+    {file = "pyopenms-3.2.0-cp312-cp312-win_amd64.whl", hash = "sha256:020ff04aeb7dd36d45b366fb2e6a8db35217a97e9d773cebff65d7aa458f3d89"},
+    {file = "pyopenms-3.2.0-cp39-cp39-macosx_13_0_x86_64.whl", hash = "sha256:726e291dcf7c172e679d4c6205230ba1d531cd02cd659f666a3d9ad4277f98b0"},
+    {file = "pyopenms-3.2.0-cp39-cp39-macosx_14_0_arm64.whl", hash = "sha256:bb6bd26c0e452b001ef2739c26fd23027544da70a0ab246a241530b5560359e3"},
+    {file = "pyopenms-3.2.0-cp39-cp39-manylinux_2_28_x86_64.whl", hash = "sha256:6bbd862712d8c89b3dcfd10c3819ebf9728a3fd7842bbeb5ae9479aa1fbcfb6d"},
+    {file = "pyopenms-3.2.0-cp39-cp39-win_amd64.whl", hash = "sha256:32bf1f0e61187136f4024b6a05826397ff69309e85564faa8b63c8c627338919"},
 ]
 
 [package.dependencies]
@@ -5110,25 +5082,6 @@ files = [
 h11 = ">=0.9.0,<1"
 
 [[package]]
-name = "zipp"
-version = "3.21.0"
-description = "Backport of pathlib-compatible object wrapper for zip files"
-optional = false
-python-versions = ">=3.9"
-files = [
-    {file = "zipp-3.21.0-py3-none-any.whl", hash = "sha256:ac1bbe05fd2991f160ebce24ffbac5f6d11d83dc90891255885223d42b3cd931"},
-    {file = "zipp-3.21.0.tar.gz", hash = "sha256:2c9958f6430a2040341a52eb608ed6dd93ef4392e02ffe219417c1b28b5dd1f4"},
-]
-
-[package.extras]
-check = ["pytest-checkdocs (>=2.4)", "pytest-ruff (>=0.2.1)"]
-cover = ["pytest-cov"]
-doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
-enabler = ["pytest-enabler (>=2.2)"]
-test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-itertools", "pytest (>=6,!=8.1.*)", "pytest-ignore-flaky"]
-type = ["pytest-mypy"]
-
-[[package]]
 name = "zope-event"
 version = "5.0"
 description = "Very basic event publishing system"
@@ -5202,5 +5155,5 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = "^3.11"
-content-hash = "874dc0edf1a34df81498c9b12ae8bd39979f0521fc78f321dd6adddb47b26d55"
+python-versions = "^3.12"
+content-hash = "1202a0dc36d5827ad08b2fed3d33a89aa995c885baa4045223b347dbf60e6311"
