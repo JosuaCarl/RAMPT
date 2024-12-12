@@ -24,16 +24,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-
     - name: Install poetry
       run: pipx install poetry
 
-    - name: Cache poetry
-      uses: actions/setup-python@v3
+    - name: Setup python
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         cache: "poetry"
@@ -49,8 +44,8 @@ jobs:
       
     - name: Testing helpers
       run: |
-        pytest ./tests/test_00_helpers.py
+        poetry run pytest ./tests/test_00_helpers.py
 
     - name: Testing general
       run: |
-        pytest ./tests/test_01_general.py
+        poetry run pytest ./tests/test_01_general.py
