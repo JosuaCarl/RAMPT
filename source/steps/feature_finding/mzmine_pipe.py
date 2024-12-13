@@ -7,11 +7,13 @@ Use mzmine for feature finding.
 # Imports
 import os
 import argparse
+import subprocess
 
 from os.path import join
 from tqdm.auto import tqdm
 
 import source.helpers as helpers
+from source.helpers import *
 from source.helpers.types import StrPath
 from source.steps.general import Pipe_Step, get_value
 
@@ -73,7 +75,7 @@ class MZmine_Runner(Pipe_Step):
     """
     A runner for mzmine operations. Collects processed files and console outputs/errors.
     """
-    def __init__( self, exec_path:StrPath="mzmine_console", batch:StrPath="", login:str="-login", valid_formats:list=["mzML", "mzXML", "imzML"],
+    def __init__( self, exec_path:StrPath="mzmine", batch:StrPath="", login:str="-login", valid_formats:list=["mzML", "mzXML", "imzML"],
                   save_log:bool=False, additional_args:list=[], verbosity:int=1, **kwargs):
         """
         Initialize the MZmine_runner.
@@ -97,12 +99,30 @@ class MZmine_Runner(Pipe_Step):
                           save_log=save_log, additional_args=additional_args, verbosity=verbosity )
         if kwargs:
             self.update(kwargs)
-        self.exec_path          = exec_path
+        self.common_execs       = [ "mzmine", "mzmine.exe", "mzmine_console" ]
+        self.exec_path          = self.check_execs( exec=exec_path )
         self.login              = login
         self.batch              = batch
         self.valid_formats      = valid_formats
         self.name               = "mzmine"
 
+
+
+    def check_exec_path( self, exec_path=None, alternative_exec_path="mzmine_console" ):
+        exec_path = exec_path if exec_path else self.exec_path
+        try:
+            subprocess.check_call( f"{exec_path} --help" )
+            return True
+        except subprocess.CalledProcessError as cpe:
+            return False
+
+
+    def check_execs( self, exec_path ):
+        for exec in [ exec_path ] + self.common_execs:
+            if self.check_exec_path( exec ):
+                self.exec_path = exec
+        if self.exec_path != exec_path:
+            warn( )
 
     def check_attributes( self ):
         if not os.path.isfile(self.batch):

@@ -6,8 +6,8 @@ GUI creation with Taipy.
 import taipy as tp
 from taipy.gui import Gui
 
-from .pages.root import *
-
+import pages
+from pages.root import *
 
 
 pages = { "/": '<|toggle|theme|><center><|navbar|lov={[("/", "Application"), ("https://josuacarl.github.io/mine2sirius_pipe", "Documentation")]}|></center>',

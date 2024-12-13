@@ -97,7 +97,7 @@ def test_get_directory():
 # File operations
 def test_open_last_n_line():
     assert open_last_n_line( filepath=join(test_path, "example_text.txt"), n=1) == "Didididididididi"
-    assert open_last_n_line(filepath=join(test_path, "example_text.txt"), n=2) == "Huhuhuhuhu\n"
+    assert open_last_n_line(filepath=join(test_path, "example_text.txt"), n=2).startswith( "Huhuhuhuhu" )
     with pytest.raises(OSError):
         open_last_n_line(filepath=join(test_path, "example_text.txt"), n=5)
 

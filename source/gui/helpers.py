@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+from icecream import ic as ic
 import os 
 import tempfile
 

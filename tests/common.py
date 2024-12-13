@@ -8,11 +8,9 @@ import platform as pf
 import shutil
 import source.helpers as helpers
 
-from icecream import ic as ic
 from tqdm import tqdm as tqdm
 
 import pytest as pytest
-
 
 
 # Platform
