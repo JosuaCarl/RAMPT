@@ -51,7 +51,7 @@ def test_extend_list():
 
 def test_to_list():
     # Empty case
-    assert to_list( [] ) == []
+    assert to_list( [] ) is []
 
     # Filled case
     assert to_list( [ "x" ] ) == [ "x" ]
