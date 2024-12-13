@@ -1,8 +1,12 @@
 #!/usr/bin/env python
+"""    
+Make logging, warnings and error messages more consistent and expressive.
+"""
 from datetime import datetime
 import warnings
 
 from icecream import ic
+
 
 program_name = "m2s"
 
@@ -11,6 +15,13 @@ program_name = "m2s"
 def get_now() -> str:
     return str(datetime.now().replace(microsecond=0))
 
+
+
+def debug_msg( *args, **kwargs ):
+    """
+    Icecream debugging.
+    """
+    ic(* args, **kwargs )
 
 
 def log( message:str="Info", program:str=program_name, minimum_verbosity:int=0, verbosity:int=0, *args, **kwargs ):
@@ -56,11 +67,3 @@ def error( message:str="Error", error=ValueError, program:str=program_name, *arg
     :type program: str, optional
     """
     raise( error( f"[{get_now()}][{program}][ERROR]\t{message}", *args, **kwargs ) )
-
-
-
-def debug_msg( *args, **kwargs ):
-    """
-    Icecream debugging.
-    """
-    ic(* args, **kwargs )
