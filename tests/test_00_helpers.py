@@ -51,7 +51,7 @@ def test_extend_list():
 
 def test_to_list():
     # Empty case
-    assert to_list( [] ) is []
+    assert to_list( [] ) == []
 
     # Filled case
     assert to_list( [ "x" ] ) == [ "x" ]
@@ -197,7 +197,7 @@ def test_get_attribute_recursive():
     assert get_attribute_recursive( o, "b.j.e.c.z", 2 ) == 2
     assert get_attribute_recursive( o, "b.j.z.c.t", 2 ) == 2
     try:
-        get_attribute_recursive( o, "b.j.z.c.t" ) == None
+        get_attribute_recursive( o, "b.j.z.c.t" )
     except AttributeError as ae:
         assert str(ae) == r"'Object' object has no attribute 'z'"
 
