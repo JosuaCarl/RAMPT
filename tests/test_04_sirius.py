@@ -3,7 +3,7 @@
 Testing the SIRIUS annotation.
 """
 from tests.common import *
-import source.helpers.general as helpers
+import source.helpers as helpers
 from source.steps.annotation.sirius_pipe import *
 from source.steps.annotation.sirius_pipe import main as sirius_pipe_main
 

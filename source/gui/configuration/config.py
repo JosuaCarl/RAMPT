@@ -4,7 +4,7 @@ import os
 
 from taipy import Config, Scope
 
-import source.helpers.general as helpers
+import source.helpers as helpers
 from source.helpers.types import StrPath
 
 # Import of Pipeline Steps

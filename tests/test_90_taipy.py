@@ -3,7 +3,7 @@
 Testing the SIRIUS annotation.
 """
 from tests.common import *
-import source.helpers.general as helpers
+import source.helpers as helpers
 from source.gui.pages.root import *
 
 from taipy.core.submission.submission_status import SubmissionStatus

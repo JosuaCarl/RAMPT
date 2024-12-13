@@ -19,7 +19,7 @@ import pandas as pd
 
 from source.helpers.types import StrPath
 from source.steps.general import Pipe_Step, get_value
-import source.helpers.general as helpers
+import source.helpers as helpers
 
 
 def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):

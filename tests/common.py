@@ -6,7 +6,7 @@ from os.path import join as join
 import time
 import platform as pf
 import shutil
-import source.helpers.general as helpers
+import source.helpers as helpers
 
 from icecream import ic as ic
 from tqdm import tqdm as tqdm

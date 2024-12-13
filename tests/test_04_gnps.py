@@ -3,7 +3,7 @@
 Testing the GNPS annotation.
 """
 from tests.common import *
-import source.helpers.general as helpers
+import source.helpers as helpers
 from source.steps.annotation.gnps_pipe import *
 from source.steps.annotation.gnps_pipe import main as gnps_pipe_main
 

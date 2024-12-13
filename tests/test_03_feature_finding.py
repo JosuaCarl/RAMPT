@@ -3,7 +3,7 @@
 Testing the feature finding functions.
 """
 from tests.common import *
-import source.helpers.general as helpers
+import source.helpers as helpers
 from source.steps.feature_finding.mzmine_pipe import *
 from source.steps.feature_finding.mzmine_pipe import main as mzmine_pipe_main
 
@@ -12,14 +12,16 @@ import pandas as pd
 platform = get_platform()
 filepath = helpers.get_internal_filepath(__file__)
 out_path, test_path, example_path, batch_path = contruct_common_paths( filepath )
+
 user = "joca" # NEEDS TO BE EDITED FOR TESTING TO WORK
+login = f"--user {user}"
 
 
 def test_mzmine_pipe_run_single():
     clean_out( out_path )
 
     # Superficial testing of run_single
-    mzmine_runner = MZmine_Runner( batch=join( batch_path, "minimal.mzbatch" ), login=f"--user {user}" )
+    mzmine_runner = MZmine_Runner( batch=join( batch_path, "minimal.mzbatch" ), login=login )
     
     mzmine_runner.run_single( in_path=join(example_path, "example_pos.mzML"), out_path=out_path )
     
@@ -31,7 +33,7 @@ def test_mzmine_pipe_run_single():
 def test_mzmine_pipe_run_directory():
     clean_out( out_path )
     # Supoerficial testing of run_directory
-    mzmine_runner = MZmine_Runner( batch=join( batch_path, "minimal.mzbatch" ), login=f"--user {user}" )
+    mzmine_runner = MZmine_Runner( batch=join( batch_path, "minimal.mzbatch" ), login=login )
     
     mzmine_runner.run_directory( in_path=example_path, out_path=out_path )
 
@@ -43,7 +45,7 @@ def test_mzmine_pipe_run_directory():
 def test_mzmine_pipe_run_nested():
     clean_out( out_path )
     # Superficial testing of run_nested
-    mzmine_runner = MZmine_Runner( batch=join( batch_path, "minimal.mzbatch" ), login=f"--user {user}" )
+    mzmine_runner = MZmine_Runner( batch=join( batch_path, "minimal.mzbatch" ), login=login )
     
     mzmine_runner.run_nested( example_path, out_path )
     
@@ -65,7 +67,7 @@ def test_mzmine_pipe_run():
     clean_out( out_path )
 
     # Superficial testing of run
-    mzmine_runner = MZmine_Runner( batch=join( batch_path, "minimal.mzbatch" ), login=f"--user {user}", workers=2 )
+    mzmine_runner = MZmine_Runner( batch=join( batch_path, "minimal.mzbatch" ), login=login, workers=2 )
     
     mzmine_runner.run( in_paths=[example_path], out_paths=[out_path] )
     mzmine_runner.compute_futures()
@@ -82,7 +84,7 @@ def test_mzmine_pipe_main():
                                out_dir=out_path,
                                batch=join( batch_path, "minimal.mzbatch" ),
                                valid_formats=["mzML"],
-                               user="joca", nested=True, platform=platform, save_log=False,
+                               user=user, nested=True, platform=platform, save_log=False,
                                verbosity=3, mzmine_arguments=None)
     mzmine_pipe_main(args, unknown_args=[])
     

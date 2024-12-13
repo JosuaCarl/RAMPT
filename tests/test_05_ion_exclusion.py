@@ -3,7 +3,7 @@
 Testing the ion exclusion list creation.
 """
 from tests.common import *
-import source.helpers.general as helpers
+import source.helpers as helpers
 from source.steps.ion_exclusion.ion_exclusion import *
 from source.steps.ion_exclusion.ion_exclusion import main as ion_exclusion_pipe_main
 import pandas as pd

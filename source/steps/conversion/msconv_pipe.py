@@ -10,7 +10,7 @@ import regex
 from os.path import join
 from tqdm.auto import tqdm
 
-import source.helpers.general as helpers
+import source.helpers as helpers
 from source.helpers.types import StrPath
 from source.steps.general import Pipe_Step, get_value
 

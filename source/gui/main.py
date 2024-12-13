@@ -6,7 +6,7 @@ GUI creation with Taipy.
 import taipy as tp
 from taipy.gui import Gui
 
-from source.gui.pages.root import *
+from .pages.root import *
 
 
 

@@ -10,7 +10,7 @@ from multipledispatch import dispatch
 import dask.multiprocessing
 
 from source.helpers.types import StrPath
-import source.helpers.general as helpers
+import source.helpers as helpers
 
 
 # Helper methods for classes / namespaces
