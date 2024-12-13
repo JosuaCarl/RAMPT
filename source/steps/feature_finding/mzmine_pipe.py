@@ -54,8 +54,8 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
         else:
             login = f"--user {user}"
     else:
-        print("You did not provide a user. You will be prompted to login by mzmine.\
-               For future use please find your user file under $USER/.mzmine/users/ after completing the login.")
+        log( message="You did not provide a user. You will be prompted to login by mzmine.\
+                      For future use please find your user file under $USER/.mzmine/users/ after completing the login." )
         login = "--login"
 
     mzmine_runner = MZmine_Runner( exec_path=exec_path, batch=batch, login=login,
@@ -106,7 +106,7 @@ class MZmine_Runner(Pipe_Step):
 
     def check_attributes( self ):
         if not os.path.isfile(self.batch):
-            raise( ValueError(f"Batch path {self.batch} is no file. Please point to a valid mzbatch file."))
+            error( message=f"Batch path {self.batch} is no file. Please point to a valid mzbatch file.", error=ValueError )
 
 
 

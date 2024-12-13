@@ -6,7 +6,6 @@ import os
 import subprocess
 import time
 import math
-import warnings
 import regex
 import requests
 import dask
@@ -15,6 +14,7 @@ import tee_subprocess
 import functools
 
 from .types import *
+from .logging import *
 
 
 # File operations
@@ -72,7 +72,7 @@ def get_directory( path:StrPath ) -> StrPath:
     if os.path.isdir( directory ):
         return directory
     else:
-        raise(ValueError(f"{path} is not a file or directory"))
+        error( message=f"{path} is not a file or directory", error=ValueError)
 
 
 
@@ -135,7 +135,7 @@ def change_case_str(s:str, range, conversion:str) -> str:
         case "lower":
             selection = selection.lower()
         case _:
-            raise(ValueError(f"conversion {conversion} is invalid. Choose upper/lower as a valid conversion."))
+            error( message=f"conversion {conversion} is invalid. Choose upper/lower as a valid conversion.", error=ValueError)
 
     str_list[range] =  selection
 
@@ -280,11 +280,11 @@ def open_last_line_with_content(filepath:str) -> str:
         try:
             line = open_last_n_line(filepath=filepath, n=n)
         except OSError:
-            raise(ValueError(f"File {filepath} does not contain a line with content"))
+            error( message=f"File {filepath} does not contain a line with content", error=ValueError)
         if regex.search(r".*\S.*", line):
             return line
         n += 1
-    raise(ValueError(f"File {filepath} does not contain a line with content for 1000 lines"))
+    error( message=f"File {filepath} does not contain a line with content for 1000 lines", error=ValueError)
 
 
 def replace_file_ending( path:StrPath, new_ending:str ) -> str:
@@ -392,17 +392,15 @@ def check_for_str_request(url:str | bytes, query:str, retries:int=100, allowed_f
                 return True
         else:
             fails.append(response.status_code)
-            if verbosity >= 1:
-                warnings.warn( f"{url} returned status code {response.status_code} after {i} retries.\
-                            Requesting this URL will be terminated after further {allowed_fails - len(fails)} failed requests.",
-                            category=UserWarning )
+            warn( f"{url} returned status code {response.status_code} after {i} retries.\
+                    Requesting this URL will be terminated after further {allowed_fails - len(fails)} failed requests.",
+                   category=UserWarning )
         if len(fails) > allowed_fails:
             raise LookupError(f"The request to {url} failed more than {allowed_fails} times with the following status codes:\n{fails}")
         
         # Retry
         retry_time = ( 1 / math.log2(i + 2) ) * expected_wait_time
-        if verbosity >= 2:
-            print(f"{query} not found at {url}. Retrying in {retry_time}s.")
+        log( message=f"{query} not found at {url}. Retrying in {retry_time}s.", minimum_verbosity=2, verbosity=verbosity )
         time.sleep(retry_time)
 
     return False

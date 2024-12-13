@@ -87,7 +87,7 @@ def set_value( instance:object|dict, key, new_value, add_key:bool ):
         elif add_key:
             setattr( instance, key, new_value )
         else:
-            raise( ValueError(f"The key={key} is not found in instance={instance} and add_key={add_key}."))
+            error( message=f"The key={key} is not found in instance={instance} and add_key={add_key}.", error=ValueError)
 
     return instance
 
@@ -357,7 +357,7 @@ class Pipe_Step(Step_Configuration):
         :param kwargs: Dictionary of additional arguments for computation
         :type kwargs: ...
         """
-        raise(NotImplementedError("The compute function seems to be missing in local implementation"))
+        error( message=f"The run_single function seems to be missing in local implementation", error=NotImplementedError)
     
 
     def run_directory( self, **kwargs ):
@@ -367,8 +367,8 @@ class Pipe_Step(Step_Configuration):
         :param kwargs: Dictionary of additional arguments for computation
         :type kwargs: ...
         """
-        raise(NotImplementedError("The run_nested function seems to be missing in local implementation"))
-    
+        error( message=f"The run_directory function seems to be missing in local implementation", error=NotImplementedError)
+
 
     def run_nested( self, **kwargs ):
         """
@@ -377,8 +377,7 @@ class Pipe_Step(Step_Configuration):
         :param kwargs: Dictionary of additional arguments for computation
         :type kwargs: ...
         """
-        raise(NotImplementedError("The run_nested function seems to be missing in local implementation"))
-    
+        error( message=f"The run_nested function seems to be missing in local implementation", error=NotImplementedError)
 
 
     def run( self, in_paths:list|StrPath=[], out_paths:list|StrPath=[], **kwargs ) -> list:
@@ -394,8 +393,7 @@ class Pipe_Step(Step_Configuration):
         :return: Output that was processed
         :rtype: list
         """
-        if self.verbosity >= 2:
-            print(f"Started {self.__class__.__name__} step")
+        log( message=f"Started {self.__class__.__name__} step", minimum_verbosity=2, verbosity=self.verbosity )
 
         # Extend scheduled paths
         self.scheduled_in   = extend_list( self.scheduled_in, in_paths )
@@ -423,9 +421,7 @@ class Pipe_Step(Step_Configuration):
             # Construct out directory if not existent
             os.makedirs( out_path, exist_ok=True )
 
-            # Verbose output
-            if self.verbosity >= 3:
-                print(f"Processing {in_path} -> {out_path}")
+            log( message=f"Processing {in_path} -> {out_path}", minimum_verbosity=3, verbosity=self.verbosity )
 
             # Ensure that further passed down lists are processed in parallel with in_path
             additional_arguments = { }
@@ -443,8 +439,7 @@ class Pipe_Step(Step_Configuration):
             else:
                 self.run_single( in_path=in_path, out_path=out_path, **additional_arguments )
 
-            if self.verbosity >= 3:
-                print(f"Processed {in_path} -> {out_path}")
+            log( message=f"Processed {in_path} -> {out_path}", minimum_verbosity=3, verbosity=self.verbosity )
 
         # Compute futures
         if self.futures:
@@ -453,8 +448,7 @@ class Pipe_Step(Step_Configuration):
         # Clear schedules
         self.scheduled_in  = []
         self.scheduled_out = []
-
-        if self.verbosity >= 2:
-            print(f"Finished {self.__class__.__name__} step")
+        
+        log( message=f"Finished {self.__class__.__name__} step", minimum_verbosity=2, verbosity=self.verbosity )
 
         return self.processed_out

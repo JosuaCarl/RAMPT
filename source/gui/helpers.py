@@ -8,7 +8,7 @@ import tkinter.filedialog as fd
 from taipy.gui import download
 
 from source.helpers.general import *
-from source.helpers.types import StrPath
+from source.helpers.logging import *
 
 ### Trees
 path_nester = Path_Nester()
@@ -36,7 +36,7 @@ def change_work_dir_root( gui, new_root:StrPath=None ):
         if os.path.isdir( new_root ):
             work_dir_root = os.path.normpath( new_root )
         else:
-            raise( ValueError(f"{new_root} is not a valid directory") )
+            error( message=f"{new_root} is not a valid directory", error=ValueError )
     else:
         work_dir_root = gui._get_config("upload_folder", tempfile.gettempdir())
 
@@ -63,7 +63,7 @@ def download_directory( state, dir ):
 def download_data_node_files( state, data_node_name, files_attribute:str="scenario.data_nodes" ):
     entries = get_attribute_recursive( state, files_attribute )
     if data_node_name:
-        print( "Ready for reading: " + str(entries[data_node_name].is_ready_for_reading) )
+        log( "Ready for reading: " + str(entries[data_node_name].is_ready_for_reading) )
         entries = entries[data_node_name].read()
 
     entries = entries if isinstance(entries, list) else [entries]

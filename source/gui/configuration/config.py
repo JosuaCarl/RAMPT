@@ -4,8 +4,8 @@ import os
 
 from taipy import Config, Scope
 
-import source.helpers as helpers
-from source.helpers.types import StrPath
+from source.helpers.general import *
+from source.helpers.logging import *
 
 # Import of Pipeline Steps
 from source.steps.feature_finding.mzmine_pipe import MZmine_Runner
@@ -96,16 +96,16 @@ def generic_step( step_class, step_params:dict, global_params:dict, in_paths:str
 
     # Overwrite scheduled, when new in_path is given
     if in_paths:
-        in_paths = helpers.to_list( in_paths )
+        in_paths = to_list( in_paths )
         step_instance.scheduled_in = []
     if out_paths:
-        out_paths = helpers.to_list( out_paths )
+        out_paths = to_list( out_paths )
         step_instance.scheduled_out = []
     # Add out_paths as relatives to in_path if none is given
     else:
         out_paths = []
         for in_path in in_paths:
-            in_dir = helpers.get_directory( in_path )
+            in_dir = get_directory( in_path )
             out_paths.append( os.path.join( in_dir, out_path_target ) )
 
     # Run step
@@ -163,7 +163,7 @@ def annotate_sirius( processed_data:StrPath, sirius_out:StrPath, config:StrPath,
 
 
 def analyze_difference( gnps_annotated_data:StrPath, sirius_annotated_data:StrPath, results_out:StrPath, step_params:dict, global_params:dict ):
-    print("Analyze difference not implemented yet.")
+    warn("Analyze difference not implemented yet.")
     pass
     """
     return generic_step( step_class="",

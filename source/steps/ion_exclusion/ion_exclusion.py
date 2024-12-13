@@ -17,9 +17,7 @@ import pyopenms as oms
 import numpy as np
 import pandas as pd
 
-from source.helpers.types import StrPath
-from source.steps.general import Pipe_Step, get_value
-import source.helpers as helpers
+from source.steps.general import *
 
 
 def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
@@ -51,7 +49,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
 
     if nested:
         futures = ion_exclusion_runner.check_ms2_presences_nested( in_root_dir=in_dir, out_root_dir=out_dir, data_root_dir=data_dir )
-        helpers.compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
+        compute_scheduled( futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
     else:
         ion_exclusion_runner.check_ms2_presence( in_dir=in_dir, out_dir=out_dir, data_dir=data_dir )
 
@@ -60,6 +58,17 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
 
 
 class OpenMS_File_Handler:
+    def __init__(self, verbosity:int=1 ):
+        """
+        Initalize OpenMS_File_Handler
+
+        :param verbosity: Verbosity level, defaults to 1
+        :type verbosity: int, optional
+        """
+        self.verbosity  = verbosity
+
+
+
     def check_ending_experiment( self, file:StrPath ) -> bool:
         """
         Check whether the file has a mzML or mzXML ending.
@@ -216,12 +225,12 @@ class OpenMS_File_Handler:
         :type table_backend: _type_, optional
         :return: _description_
         :rtype: Union[pandas.DataFrame]
-        """    
-        print("Loading names:")
+        """
+        log("Loading names:", minimum_verbosity=2, verbosity=self.verbosity)
         names = self.load_names_batch(data_dir, file_ending)
         samples = [name.split("_")[:-1] for name in names]
         polarities = [{"pos": 1, "neg": -1}.get(name.split("_")[-1]) for name in names]
-        print("Loading experiments:")
+        log("Loading experiments:", minimum_verbosity=2, verbosity=self.verbosity)
         experiments = self.load_experiments(data_dir, file_ending, separator=separator, data_load=data_load)
         fia_df = table_backend.DataFrame([samples, polarities, experiments])
         fia_df = fia_df.transpose()

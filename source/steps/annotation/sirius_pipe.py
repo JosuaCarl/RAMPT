@@ -12,9 +12,8 @@ import argparse
 from os.path import join
 from tqdm.auto import tqdm
 
-from source.helpers.types import StrPath
+from source.steps.general import *
 
-from source.steps.general import Pipe_Step, get_value
 
 
 def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
@@ -85,7 +84,7 @@ class Sirius_Runner(Pipe_Step):
             if os.path.isfile( join(config, "sirius_config.txt") ):
                 config = join(config, "sirius_config.txt")
             else:
-                raise(ValueError(f"{config} directory does not contain sirius_config.txt"))
+                error( message=f"{config} directory does not contain sirius_config.txt", error=ValueError )
         if os.path.isfile(config):
             with open( config, "r" ) as config_file:
                 config = config_file.read()

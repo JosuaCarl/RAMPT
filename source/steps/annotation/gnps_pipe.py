@@ -89,7 +89,7 @@ class GNPS_Runner(Pipe_Step):
             if query in line:
                 response_json = re.search(r"{.*}", line.replace(query, ""))[0]
                 return json.loads(response_json)
-        raise(ValueError(f"Query <{query}> was not found in mzmine_log: Please provide a valid string or path."))
+        error( message=f"Query <{query}> was not found in mzmine_log: Please provide a valid string or path.", error=ValueError )
 
     def extract_task_info( self, query:str, mzmine_log:StrPath=None ) -> dict:
         """
@@ -122,14 +122,16 @@ class GNPS_Runner(Pipe_Step):
                        "description": "Job from mine2sirius" }
         # Submit job
         url = "https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking"
-        if self.verbosity >= 2:
-            print(f"POSTing request to  {url}")
+        
+        log( message=f"POSTing request to  {url}", minimum_verbosity=2, verbosity=self.verbosity )
 
         response = requests.api.post( url, data=parameters, files=files)
         
-        if self.verbosity >= 2:
-            print(f"POST request {response.request.url} returned status code {response.status_code}")
-
+        
+        log( message=f"POST request {response.request.url} returned status code {response.status_code}",
+             minimum_verbosity=2,
+             verbosity=self.verbosity )
+        
         # Check for finish
         task_id, status = self.check_task_finished( gnps_response=response.json() )
 
@@ -155,7 +157,7 @@ class GNPS_Runner(Pipe_Step):
         if gnps_response["status"] == "Success":
             task_id = gnps_response["task_id"]
         else:
-            raise(ValueError("mzmine_log reports an unsuccessful job submission to GNPS by mzmine."))
+            error( message="mzmine_log reports an unsuccessful job submission to GNPS by mzmine.", error=ValueError )
 
         url = f"https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={task_id}"
         return task_id, check_for_str_request( url=url, query='\"status\":\"DONE\"',
@@ -242,16 +244,16 @@ class GNPS_Runner(Pipe_Step):
                 task_id, status = self.check_task_finished( mzmine_log=mzmine_log,
                                                             gnps_response=gnps_response )
             else:
-                raise(ve)
+                error( message=str(ve), error=ValueError )
         
         if status:
             dir_name = basename(in_path) if os.path.isdir(in_path) else basename( os.path.split(in_path)[0] )
             out_path = join(out_path, f"{dir_name}_gnps_all_db_annotations.json") if out_path else None
             results_dict = self.fetch_results( task_id=task_id, out_path=out_path )
-            if self.verbosity >= 3:
-                print(f"GNPS results {basename(in_path)}:\n")
-                print(f"task_id:{task_id}\n")
-                print(results_dict)
+            
+            log( message=f"GNPS results {basename(in_path)}:\ntask_id:{task_id}\n{results_dict}",
+                 minimum_verbosity=3,
+                 verbosity=self.verbosity )
             
             in_path = gnps_response if gnps_response else mzmine_log if mzmine_log else in_path
 

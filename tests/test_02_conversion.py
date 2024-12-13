@@ -80,7 +80,6 @@ def test_msconv_pipe_run():
 
     clean_out( out_path )
 
-    print("specific RUN")
     # Specific run
     msconvert_runner.run( in_paths=[join(test_path, "minimal_file.mzML")],
                         out_paths=[out_path] )

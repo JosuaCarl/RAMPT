@@ -3,7 +3,6 @@
 import os
 import tempfile
 import json
-import warnings
 
 import taipy as tp
 import taipy.gui.builder as tgb
@@ -49,7 +48,7 @@ def save_params( state, path:StrPath=None, scenario_name:str=None ):
     elif save_path:
         path = save_path
     else:
-        warnings.warn( f"Saving to default path: {os.path.join(work_dir_root, "Default_config.json")}" )
+        warn( f"Saving to default path: {os.path.join(work_dir_root, "Default_config.json")}" )
         path = os.path.join(work_dir_root, "Default_config.json")
 
     with open( path, "w") as file:

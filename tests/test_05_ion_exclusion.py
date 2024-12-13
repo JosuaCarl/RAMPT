@@ -27,7 +27,6 @@ def test_ion_exclusion_pipe_main():
     assert os.path.isfile( join(out_path, "example_files_ms2_presence.tsv") )
     df = pd.read_csv( join( out_path, "example_files_ms2_presence.tsv"), sep="\t")
     
-    print(df.loc[0])
     assert df.loc[0]["rt"] == 0.25856668
 
     assert os.path.isfile( join( out_path, "example_nested/example_nested_ms2_presence.tsv") )

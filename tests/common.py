@@ -52,4 +52,4 @@ def wait( counter:float, unit:str="s"):
     elif unit == "d" or unit.startswith("day"):
         time.sleep( counter * 60 * 60 * 24 )
     else:
-        raise( ValueError(f"unit {unit} is invalid, please choose between d/h/m/s.") )
+        error( message=f"unit {unit} is invalid, please choose between d/h/m/s.", error=ValueError )
