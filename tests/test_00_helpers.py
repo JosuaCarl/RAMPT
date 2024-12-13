@@ -181,14 +181,6 @@ def test_compute_scheduled():
 
 
 
-# Webrequests
-def test_check_for_str_request():
-    url = "https://api.openstreetmap.org/api/0.6/relation/10000000/full.json"
-    assert check_for_str_request( url=url, query='\"version\":\"0.6\"', retries=2, allowed_fails=1, expected_wait_time=1.0, timeout=5 )
-    assert not check_for_str_request( url=url, query='\"version\":\"0.sad\"', retries=2, allowed_fails=1, expected_wait_time=1.0, timeout=5 )
-
-
-
 # Class handling
 def test_get_attribute_recursive():
     class Object(object):
@@ -202,12 +194,17 @@ def test_get_attribute_recursive():
     o.b = b
 
     assert get_attribute_recursive( o, "b.j.e.c.t" ) == 1
+    assert get_attribute_recursive( o, "b.j.e.c.z", 2 ) == 2
+    assert get_attribute_recursive( o, "b.j.z.c.t", 2 ) == 2
+    try:
+        get_attribute_recursive( o, "b.j.z.c.t" ) == None
+    except AttributeError as ae:
+        assert str(ae) == r"'Object' object has no attribute 'z'"
 
 
 def test_set_attribute_recursive():
     class Object(object):
         pass
-    
     o, b, j, e, c, t = [ Object() ] * 6
     setattr( c, "t", t)
     setattr( e, "c", c)
@@ -217,6 +214,14 @@ def test_set_attribute_recursive():
 
     set_attribute_recursive( o, "b.j.e.c.t", 2 ) 
     assert  get_attribute_recursive( o, "b.j.e.c.t" ) == 2
+
+
+
+# Webrequests
+def test_check_for_str_request():
+    url = "https://api.openstreetmap.org/api/0.6/relation/10000000/full.json"
+    assert check_for_str_request( url=url, query='\"version\":\"0.6\"', retries=2, allowed_fails=1, expected_wait_time=1.0, timeout=5 )
+    assert not check_for_str_request( url=url, query='\"version\":\"0.sad\"', retries=2, allowed_fails=1, expected_wait_time=1.0, timeout=5 )
 
 
 
