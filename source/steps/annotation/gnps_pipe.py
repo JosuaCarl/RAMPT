@@ -14,9 +14,7 @@ import requests
 from os.path import join, basename
 from tqdm.auto import tqdm
 
-import source.helpers as helpers
-from source.helpers.types import StrPath
-from source.steps.general import Pipe_Step, get_value
+from source.steps.general import *
 
 
 def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
@@ -160,9 +158,9 @@ class GNPS_Runner(Pipe_Step):
             raise(ValueError("mzmine_log reports an unsuccessful job submission to GNPS by mzmine."))
 
         url = f"https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={task_id}"
-        return task_id, helpers.check_for_str_request( url=url, query='\"status\":\"DONE\"',
-                                                       retries=100, allowed_fails=10, expected_wait_time=600.0,
-                                                       timeout=5 )
+        return task_id, check_for_str_request( url=url, query='\"status\":\"DONE\"',
+                                               retries=100, allowed_fails=10, expected_wait_time=600.0,
+                                               timeout=5 )
 
 
     def fetch_results( self, task_id:str, out_path:StrPath=None ) -> dict:

@@ -226,7 +226,7 @@ class Pipe_Step(Step_Configuration):
         try:
             execute_verbose_command( f"{exec_path} --help", verbosity=0 )
             return True
-        except BaseException as e:
+        except BaseException:
             pass
         return False
 

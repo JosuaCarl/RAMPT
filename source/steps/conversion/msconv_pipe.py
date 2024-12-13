@@ -10,9 +10,7 @@ import regex
 from os.path import join
 from tqdm.auto import tqdm
 
-import source.helpers as helpers
-from source.helpers.types import StrPath
-from source.steps.general import Pipe_Step, get_value
+from source.steps.general import *
 
 
 
@@ -98,7 +96,7 @@ class MSconvert_Runner(Pipe_Step):
         self.redo_threshold = redo_threshold
         self.overwrite      = overwrite
         self.target_format  = target_format if target_format.startswith(".") else f".{target_format}"
-        self.target_format = helpers.change_case_str(s=self.target_format, range=slice(3, len(self.target_format)), conversion="upper")
+        self.target_format  = change_case_str(s=self.target_format, range=slice(3, len(self.target_format)), conversion="upper")
         self.pattern        = pattern
         self.suffix         = suffix
         self.prefix         = prefix
@@ -139,7 +137,7 @@ class MSconvert_Runner(Pipe_Step):
         # Check target
         out_valid = self.overwrite or ( not os.path.isfile(out_path) )       or \
                     os.path.getsize( out_path ) < float(self.redo_threshold) or \
-                    not regex.search( "^</.*>$", helpers.open_last_line_with_content(filepath=out_path) )
+                    not regex.search( "^</.*>$", open_last_line_with_content(filepath=out_path) )
 
         return in_valid, out_valid
             
@@ -179,7 +177,7 @@ class MSconvert_Runner(Pipe_Step):
         verbose_tqdm = self.verbosity >= 2
         for entry in tqdm(os.listdir(in_path), disable=verbose_tqdm, desc="Converting folder"):
             entry_path = join( in_path, entry )
-            hypothetical_out_path = join( out_path, helpers.replace_file_ending( entry, self.target_format ) )
+            hypothetical_out_path = join( out_path, replace_file_ending( entry, self.target_format ) )
             in_valid, out_valid = self.select_for_conversion( in_path=entry_path, out_path=hypothetical_out_path)
 
             if in_valid and out_valid:
@@ -203,7 +201,7 @@ class MSconvert_Runner(Pipe_Step):
 
         for entry in tqdm(os.listdir(in_root_dir), disable=verbose_tqdm, desc="Schedule conversions"):
             entry_path = join( in_root_dir, entry )
-            hypothetical_out_path = join( out_root_dir, helpers.replace_file_ending( entry, self.target_format ) )
+            hypothetical_out_path = join( out_root_dir, replace_file_ending( entry, self.target_format ) )
             in_valid, out_valid = self.select_for_conversion( in_path=entry_path, out_path=hypothetical_out_path)
 
             if in_valid and out_valid:

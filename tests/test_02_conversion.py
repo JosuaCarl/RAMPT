@@ -8,7 +8,7 @@ from source.steps.conversion.msconv_pipe import main as msconv_pipe_main
 from bs4 import BeautifulSoup
 
 platform = get_platform()
-filepath = helpers.get_internal_filepath(__file__)
+filepath = get_internal_filepath(__file__)
 out_path, test_path, example_path, batch_path = contruct_common_paths( filepath )
 make_out( out_path )
 
@@ -55,7 +55,7 @@ def test_msconv_pipe_run_nested():
     
     futures = msconvert_runner.run_nested( in_root_dir=test_path,
                                                out_root_dir=out_path )
-    helpers.compute_scheduled( futures=futures, num_workers=msconvert_runner.workers, verbose=msconvert_runner.verbosity >= 1)
+    compute_scheduled( futures=futures, num_workers=msconvert_runner.workers, verbose=msconvert_runner.verbosity >= 1)
     
     assert msconvert_runner.processed_out == [ join(out_path, "minimal_file.mzML"), join(out_path, "nested_test_folder", "minimal_file.mzML") ]
     assert os.path.isfile( join(out_path, "minimal_file.mzML") )
@@ -124,7 +124,7 @@ def test_msconv_pipe_main():
         data = f.read()
         data = BeautifulSoup(data, "xml")
         file = data.find("sourceFile")
-        assert os.path.join( file.get('location'),  file.get('name') ) ==  "file:///" + helpers.construct_path(filepath, "..", "test_files", "minimal_file.mzML")
+        assert os.path.join( file.get('location'),  file.get('name') ) ==  "file:///" + construct_path(filepath, "..", "test_files", "minimal_file.mzML")
     
     
     # Test XML
@@ -136,7 +136,7 @@ def test_msconv_pipe_main():
     assert os.path.isfile( join(out_path, "minimal file.mzXML") )
     assert os.path.isfile( join(out_path, "nested_test_folder", "minimal_file.mzXML") )
 
-    with open(helpers.construct_path(filepath, "..", "out", "minimal file.mzXML")) as f:
+    with open( construct_path(filepath, "..", "out", "minimal file.mzXML") ) as f:
         data = f.read()
         data = BeautifulSoup(data, "xml")
         file = data.find_all("parentFile")[-1]

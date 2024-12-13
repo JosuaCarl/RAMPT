@@ -3,13 +3,12 @@
 Testing the GNPS annotation.
 """
 from tests.common import *
-import source.helpers as helpers
 from source.steps.annotation.gnps_pipe import *
 from source.steps.annotation.gnps_pipe import main as gnps_pipe_main
 
 
 platform = get_platform()
-filepath = helpers.get_internal_filepath(__file__)
+filepath = get_internal_filepath(__file__)
 out_path, test_path, example_path, batch_path = contruct_common_paths( filepath )
 make_out( out_path )
 

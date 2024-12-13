@@ -8,10 +8,13 @@ import warnings
 import taipy as tp
 import taipy.gui.builder as tgb
 
-from source.gui.helpers import *
-
 # Submodules
-from . import *
+from .analysis.analysis import *
+from .annotation.gnps import *
+from .annotation.sirius import *
+from .conversion.conversion import *
+from .feature_finding.feature_finding import *
+from .general.general import *
 
 # Configuration
 from source.gui.configuration.config import *
