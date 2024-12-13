@@ -12,9 +12,11 @@ import pandas as pd
 platform = get_platform()
 filepath = helpers.get_internal_filepath(__file__)
 out_path, test_path, example_path, batch_path = contruct_common_paths( filepath )
+make_out( out_path )
 
 user = "joca" # NEEDS TO BE EDITED FOR TESTING TO WORK
 login = f"--user {user}"
+
 
 
 def test_mzmine_pipe_run_single():

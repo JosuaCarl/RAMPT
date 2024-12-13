@@ -13,9 +13,26 @@ from tqdm import tqdm as tqdm
 
 import pytest as pytest
 
+
+
+# Platform
 def get_platform():
     return pf.system()
 
+
+
+# Out dir
+def make_out( out_path ):
+    helpers.make_new_dir( out_path )
+
+
+def clean_out( out_path ):
+    shutil.rmtree( out_path )
+    helpers.make_new_dir( out_path )
+
+
+
+# Pathing
 def contruct_common_paths( filepath ):
     out_path = helpers.construct_path(filepath, "..", "out")
     test_path = helpers.construct_path(filepath, "..", "test_files")
@@ -24,10 +41,9 @@ def contruct_common_paths( filepath ):
     
     return out_path, test_path, example_path, batch_path
 
-def clean_out( out_path ):
-    shutil.rmtree( out_path )
-    helpers.make_new_dir( out_path )
 
+
+# Timing
 def wait( counter:float, unit:str="s"):
     if unit == "s" or unit.startswith("second"):
         time.sleep( counter )
