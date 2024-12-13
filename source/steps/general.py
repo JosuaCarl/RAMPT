@@ -9,8 +9,9 @@ from multipledispatch import dispatch
 
 import dask.multiprocessing
 
-from source.helpers.types import StrPath
-import source.helpers as helpers
+from source.helpers.general import *
+from source.helpers.logging import *
+
 
 
 # Helper methods for classes / namespaces
@@ -199,6 +200,7 @@ class Pipe_Step(Step_Configuration):
         super().__init__( name=name, platform=platform, overwrite=overwrite, nested=nested, workers=workers, patterns=patterns,
                         save_log=save_log, verbosity=verbosity, additional_args=additional_args )
 
+        self.common_execs       = []
         self.exec_path          = exec_path
         self.futures            = []
         self.scheduled_in       = []
@@ -210,6 +212,44 @@ class Pipe_Step(Step_Configuration):
         self.log_paths          = []
         self.results            = []
 
+
+
+    def check_exec_path( self, exec_path:StrPath=None ) -> bool:
+        """
+        Check whether a path to an executable is valid.
+
+        :param exec_path: Path to executable, defaults to None
+        :type exec_path: StrPath, optional
+        :return: Path valid or not
+        :rtype: bool
+        """
+        try:
+            execute_verbose_command( f"{exec_path} --help", verbosity=0 )
+            return True
+        except BaseException as e:
+            pass
+        return False
+
+
+    def check_execs( self, exec_path:StrPath ) -> StrPath:
+        """
+        Check a number of execuatable paths
+
+        :param exec_path: Path to executable
+        :type exec_path: StrPath
+        :return: Valid path
+        :rtype: StrPath
+        """
+        for exec in [ exec_path ] + self.common_execs:
+            if self.check_exec_path( exec ):
+                valid_exec = exec
+                break
+            
+        if valid_exec != exec_path:
+            warn( f"{self.name}exec_path is set to {self.exec_path}" )
+        
+        return valid_exec
+    
 
 
     def match_file_name( self, pattern:str, file_name:StrPath ) -> bool:
@@ -279,12 +319,12 @@ class Pipe_Step(Step_Configuration):
         :type log_path: StrPath, optional
         """
         if not log_path:
-            log_path = os.path.join(helpers.get_directory(out_path), f"{self.name}_log.txt") if self.save_log else None
+            log_path = os.path.join(get_directory(out_path), f"{self.name}_log.txt") if self.save_log else None
         if self.workers > 1:
             out, err = (None, None)
-            future =  dask.delayed(helpers.execute_verbose_command)(cmd=cmd, verbosity=self.verbosity, out_path=log_path, in_path=in_path, **kwargs)
+            future =  dask.delayed(execute_verbose_command)(cmd=cmd, verbosity=self.verbosity, out_path=log_path, in_path=in_path, **kwargs)
         else:
-            out, err = helpers.execute_verbose_command( cmd=cmd, verbosity=self.verbosity, out_path=log_path, **kwargs )
+            out, err = execute_verbose_command( cmd=cmd, verbosity=self.verbosity, out_path=log_path, **kwargs )
             future = None
         
         self.store_progress(in_path=in_path, out_path=out_path, results=results, future=future, out=out, err=err, log_path=log_path)
@@ -301,7 +341,7 @@ class Pipe_Step(Step_Configuration):
                 in_paths.append( in_path )
                 futures.append( future )
 
-        results = helpers.compute_scheduled( futures=futures, num_workers=self.workers, verbose=self.verbosity >= 1)
+        results = compute_scheduled( futures=futures, num_workers=self.workers, verbose=self.verbosity >= 1)
 
         for in_path, (out, err) in zip(in_paths, results[0]):
             i = self.processed_in.index( in_path )
@@ -358,8 +398,8 @@ class Pipe_Step(Step_Configuration):
             print(f"Started {self.__class__.__name__} step")
 
         # Extend scheduled paths
-        self.scheduled_in   = helpers.extend_list( self.scheduled_in, in_paths )
-        self.scheduled_out  = helpers.extend_list( self.scheduled_out, out_paths )
+        self.scheduled_in   = extend_list( self.scheduled_in, in_paths )
+        self.scheduled_out  = extend_list( self.scheduled_out, out_paths )
 
         # Handle empty output paths by choosing input direcotory as base
         self.scheduled_out = self.scheduled_out if self.scheduled_out\

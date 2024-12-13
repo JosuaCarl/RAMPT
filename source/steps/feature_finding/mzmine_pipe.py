@@ -7,15 +7,11 @@ Use mzmine for feature finding.
 # Imports
 import os
 import argparse
-import subprocess
 
 from os.path import join
 from tqdm.auto import tqdm
 
-import source.helpers as helpers
-from source.helpers import *
-from source.helpers.types import StrPath
-from source.steps.general import Pipe_Step, get_value
+from source.steps.general import *
 
 
 def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
@@ -42,7 +38,7 @@ def main(args:argparse.Namespace|dict, unknown_args:list[str]=[]):
     additional_args = additional_args if additional_args else unknown_args
     
     if not exec_path:
-        match helpers.Substring(platform.lower()):
+        match Substring(platform.lower()):
             case "linux":
                 exec_path = r'/opt/mzmine-linux-installer/bin/mzmine' 
             case "windows":
@@ -100,29 +96,13 @@ class MZmine_Runner(Pipe_Step):
         if kwargs:
             self.update(kwargs)
         self.common_execs       = [ "mzmine", "mzmine.exe", "mzmine_console" ]
-        self.exec_path          = self.check_execs( exec=exec_path )
+        self.exec_path          = self.check_execs( exec_path=exec_path )
         self.login              = login
         self.batch              = batch
         self.valid_formats      = valid_formats
         self.name               = "mzmine"
 
 
-
-    def check_exec_path( self, exec_path=None, alternative_exec_path="mzmine_console" ):
-        exec_path = exec_path if exec_path else self.exec_path
-        try:
-            subprocess.check_call( f"{exec_path} --help" )
-            return True
-        except subprocess.CalledProcessError as cpe:
-            return False
-
-
-    def check_execs( self, exec_path ):
-        for exec in [ exec_path ] + self.common_execs:
-            if self.check_exec_path( exec ):
-                self.exec_path = exec
-        if self.exec_path != exec_path:
-            warn( )
 
     def check_attributes( self ):
         if not os.path.isfile(self.batch):

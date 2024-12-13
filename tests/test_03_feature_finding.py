@@ -3,14 +3,13 @@
 Testing the feature finding functions.
 """
 from tests.common import *
-import source.helpers as helpers
 from source.steps.feature_finding.mzmine_pipe import *
 from source.steps.feature_finding.mzmine_pipe import main as mzmine_pipe_main
 
 import pandas as pd
 
 platform = get_platform()
-filepath = helpers.get_internal_filepath(__file__)
+filepath = get_internal_filepath(__file__)
 out_path, test_path, example_path, batch_path = contruct_common_paths( filepath )
 make_out( out_path )
 
@@ -58,7 +57,7 @@ def test_mzmine_pipe_run_nested():
     
     with open( join( out_path, "example_nested", "source_files.txt"), "r") as file:
         source_files = file.read().split("\n")
-        assert source_files[0].endswith( join( "example_nested", "example_neg.mzML" ) )
+        assert source_files[0].endswith( join( "example_nested", "minimal.mzML" ) )
         
     assert os.path.isfile( join( out_path, "out_iimn_fbmn_quant.csv") ) 
     assert os.path.isfile( join( out_path, "example_nested", "example_nested_iimn_fbmn_quant.csv") ) 

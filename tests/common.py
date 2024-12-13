@@ -6,7 +6,7 @@ from os.path import join as join
 import time
 import platform as pf
 import shutil
-import source.helpers as helpers
+from source.helpers.general import *
 
 from tqdm import tqdm as tqdm
 
@@ -21,22 +21,22 @@ def get_platform():
 
 # Out dir
 def make_out( out_path ):
-    helpers.make_new_dir( out_path )
+    make_new_dir( out_path )
 
 
 def clean_out( out_path ):
     shutil.rmtree( out_path )
-    helpers.make_new_dir( out_path )
+    make_new_dir( out_path )
 
 
 
 # Pathing
 def contruct_common_paths( filepath ):
-    out_path = helpers.construct_path(filepath, "..", "out")
-    test_path = helpers.construct_path(filepath, "..", "test_files")
-    example_path = helpers.construct_path(filepath, "..", "example_files")
-    batch_path = helpers.construct_path(filepath, "..", "batch_files")
-    
+    out_path = construct_path(filepath, "..", "out")
+    test_path = construct_path(filepath, "..", "test_files")
+    example_path = construct_path(filepath, "..", "example_files")
+    batch_path = construct_path(filepath, "..", "batch_files")
+
     return out_path, test_path, example_path, batch_path
 
 
