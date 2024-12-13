@@ -2,6 +2,7 @@
 """
 Common helpers for tests
 """
+from os.path import join as join
 import time
 import platform as pf
 import shutil

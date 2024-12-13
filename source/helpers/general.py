@@ -12,18 +12,16 @@ import requests
 import dask
 from tqdm.dask import TqdmCallback
 import tee_subprocess
+import functools
 
 from icecream import ic as ic
-
-import functools
 
 from source.helpers.types import *
 
 
 
-
 # File operations
-def get_internal_filepath(file:str) -> StrPath:
+def get_internal_filepath( file:str ) -> StrPath:
     """
     Return the filepath of a passed file.
 
@@ -32,17 +30,17 @@ def get_internal_filepath(file:str) -> StrPath:
     :return: path of file on system
     :rtype: StrPath
     """
-    return os.path.abspath(file)
+    return os.path.abspath( file )
 
 
-def construct_path(*args:list[StrPath]) -> StrPath:
+def construct_path( *args:list[StrPath] ) -> StrPath:
     """
     Construct a path from the given list of paths
 
     :return: Combine path
     :rtype: StrPath
     """
-    return os.path.abspath(os.path.join(*args))
+    return os.path.abspath( os.path.join( *args ) )
 
 
 def make_new_dir(dir:StrPath) -> bool:
@@ -51,7 +49,7 @@ def make_new_dir(dir:StrPath) -> bool:
 
     :param dir: path to directory
     :type dir: StrPath
-    :return: whether a new directory has been
+    :return: Whether a new directory has been made
     :rtype: bool
     """
     if not os.path.isdir( dir ):
@@ -64,9 +62,9 @@ def get_directory( path:StrPath ) -> StrPath:
     """
     Extract directory path from file or directory path.
 
-    :param path: file or directory path
+    :param path: File or directory path
     :type path: StrPath
-    :return: directory path
+    :return: Directory path
     :rtype: StrPath
     """
     # Base case
@@ -248,8 +246,6 @@ class Path_Nester:
                 
         
 
-
-
 # File operations
 def open_last_n_line(filepath:str, n:int=1) -> str:
     """
@@ -271,6 +267,7 @@ def open_last_n_line(filepath:str, n:int=1) -> str:
             if f.read(1) == b'\n':
                 num_newlines += 1
         return f.readline().decode()
+
 
 def open_last_line_with_content(filepath:str) -> str:
     """
