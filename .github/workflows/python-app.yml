@@ -42,6 +42,9 @@ jobs:
       run: |
         poetry run ruff check --output-format=github
       
+    - run: |
+        tree / 
+  
     - name: Testing helpers
       run: |
         poetry run pytest ./tests/test_00_helpers.py
