@@ -12,7 +12,8 @@
 preloadsubincludes = ///python//build_defs:python
 
 [build]
-path = /home/josua/miniconda3_linux/envs/mine2sirius/bin:/usr/local/bin:/usr/bin:/bin
+# /home/josua/miniconda3_linux/envs/mine2sirius/bin
+path = /home/josua/.pyenv/versions/3.12.8/bin:/usr/local/bin:/usr/bin:/bin
 
 [Plugin "python"]
 Target = //plugins:python
