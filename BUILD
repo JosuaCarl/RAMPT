@@ -23,10 +23,25 @@ python_library(
 package(default_visibility = ["PUBLIC"])
 
 pip_library(
-    name = "numpy",
-    version = "1.23.4",
-    zip_safe = False, # This is because NumPy has shared object files which can't be linked to them when zipped up
+    name = "poetry",
+    version = "1.8.3",
+    zip_safe = False,
 )
+
+genrule(
+    name = "Test poetry"
+    cmd = "poetry --version"
+)
+
+# TODO: Use cmd to install SIRIUS, MZMINE, MSCONVERT if not already installed
+genrule(
+    name = "word_count",
+    srcs = ["file.txt"],
+    outs = ["file.wordcount"],
+    cmd = "wc $SRCS > $OUT",
+)
+
+
 
 # TODO: Define tests
 python_test(
@@ -37,13 +52,7 @@ python_test(
     deps = [":greetings"],
 )
 
-# TODO: Use cmd to install SIRIUS, MZMINE, MSCONVERT if not already installed
-genrule(
-    name = "word_count",
-    srcs = ["file.txt"],
-    outs = ["file.wordcount"],
-    cmd = "wc $SRCS > $OUT",
-)
+
 
 # TODO: Make final binary to export
 # Define the Python binary that will serve as the entry point
