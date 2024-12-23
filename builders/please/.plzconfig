@@ -1,0 +1,23 @@
+; Please config file
+; Leaving this file as is is enough to use plz to build your project.
+; Please will stay on whatever version you currently have until you run
+; 'plz update', when it will download the latest available version.
+;
+; Or you can uncomment the following to pin everyone to a particular version;
+; when you change it all users will automatically get updated.
+; [please]
+; version = 17.12.5
+
+[parse]
+#preloadsubincludes = ///docker//build_defs:docker
+preloadsubincludes = ///python//build_defs:python
+
+[build]
+# /home/josua/miniconda3_linux/envs/mine2sirius/bin
+path = /home/josua/.pyenv/versions/3.12.8/bin:/usr/local/bin:/usr/bin:/bin
+
+#[Plugin "docker"]
+#Target = //plugins:docker
+
+[Plugin "python"]
+Target = //plugins:python
