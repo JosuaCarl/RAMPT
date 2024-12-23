@@ -357,7 +357,7 @@ class Pipe_Step(Step_Configuration):
         :param kwargs: Dictionary of additional arguments for computation
         :type kwargs: ...
         """
-        error( message=f"The run_single function seems to be missing in local implementation", error=NotImplementedError)
+        error( message="The run_single function seems to be missing in local implementation", error=NotImplementedError)
     
 
     def run_directory( self, **kwargs ):
@@ -367,7 +367,7 @@ class Pipe_Step(Step_Configuration):
         :param kwargs: Dictionary of additional arguments for computation
         :type kwargs: ...
         """
-        error( message=f"The run_directory function seems to be missing in local implementation", error=NotImplementedError)
+        error( message="The run_directory function seems to be missing in local implementation", error=NotImplementedError)
 
 
     def run_nested( self, **kwargs ):
@@ -377,7 +377,7 @@ class Pipe_Step(Step_Configuration):
         :param kwargs: Dictionary of additional arguments for computation
         :type kwargs: ...
         """
-        error( message=f"The run_nested function seems to be missing in local implementation", error=NotImplementedError)
+        error( message="The run_nested function seems to be missing in local implementation", error=NotImplementedError)
 
 
     def run( self, in_paths:list|StrPath=[], out_paths:list|StrPath=[], **kwargs ) -> list:
