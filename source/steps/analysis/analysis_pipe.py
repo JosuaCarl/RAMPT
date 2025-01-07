@@ -143,9 +143,9 @@ class Analysis_Runner(Pipe_Step):
 			gnps_annotations,
 		)
 
-	def run_single(self, in_path: str, out_path: str):
+	def run_single(self, in_path: StrPath, out_path: StrPath):
 		"""
-		Convert one file with msconvert.
+		Analyze a set of annotations with regards to their expression.
 
 		:param in_path: Path to scheduled file.
 		:type in_path: str
