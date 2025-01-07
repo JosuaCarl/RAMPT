@@ -34,12 +34,17 @@ jobs:
       with:
         python-version-file: "pyproject.toml"
 
-    - name: Install the project dependencies
-      run: uv sync --all-extras --dev
+    - name: Install project dependencies
+      run: |
+        uv sync --all-extras --dev
     
     - name: Ruff checking
       run: |
         uv run ruff check --output-format=github
+
+    - name: Ruff formatting
+      run: |
+          uv run ruff format
   
     - name: Testing helpers
       run: |
