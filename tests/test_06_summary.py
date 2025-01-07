@@ -5,7 +5,6 @@ Testing the data analysis.
 
 from tests.common import *
 from source.steps.analysis.summary_pipe import *
-from source.steps.analysis.summary_pipe import main as summary_pipe_main
 
 
 platform = get_platform()

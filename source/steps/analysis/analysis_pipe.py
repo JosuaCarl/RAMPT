@@ -143,7 +143,7 @@ class Analysis_Runner(Pipe_Step):
 			gnps_annotations,
 		)
 
-	def run_single(self, in_path_annotations: str, in_path_quantification: str, out_path: str):
+	def run_single(self, in_path: StrPath, out_path: StrPath):
 		"""
 		Analyze a set of annotations with regards to their expression.
 

@@ -12,6 +12,7 @@ from tqdm.auto import tqdm
 
 import pandas as pd
 import numpy as np
+import json
 
 import source.helpers as helpers
 from source.helpers.types import StrPath
@@ -85,7 +86,6 @@ class Summary_Runner(Pipe_Step):
 		self.name = "analysis"
 		self.summary = pd.DataFrame()
 
-
 	def search_quantification_file(
 		self,
 		dir: StrPath,
@@ -107,7 +107,6 @@ class Summary_Runner(Pipe_Step):
 					quantification_file = join(root, file)
 
 		return quantification_file
-	
 
 	def search_annotation_files(
 		self,
@@ -165,12 +164,10 @@ class Summary_Runner(Pipe_Step):
 			"gnps_annotations": gnps_annotations,
 		}
 
-
-
-	def read_sirius_df(self, file_path: StrPath, filter_columns: list|str) -> pd.DataFrame:
+	def read_sirius_df(self, file_path: StrPath, filter_columns: list | str) -> pd.DataFrame:
 		df = pd.read_csv(file_path, sep="\t")
 		df.replace("-Infinity", -np.inf, inplace=True)
-		df.rename(columns={'mappingFeatureId': 'ID'})
+		df.rename(columns={"mappingFeatureId": "ID"})
 
 		if isinstance(filter_columns, str):
 			filter_columns = [column for column in df.columns if filter_columns in column]
@@ -178,14 +175,16 @@ class Summary_Runner(Pipe_Step):
 			df[filter_column] = df[filter_column].replace(r",", r".", regex=True).astype(float)
 
 		return df
-	#
 
+	
+
+	# TODO: Add documentation & Testing
 	def add_quantification(self, quantification_file: StrPath, summary: pd.DataFrame = None):
 		df = pd.read_csv(quantification_file)
 		df.columns = [column.replace("row ", "") for column in df.columns]
-		
+
 		if summary:
-			summary.merge( df, how="outer" )
+			summary.merge(df, how="outer")
 		else:
 			summary = df
 
@@ -193,21 +192,31 @@ class Summary_Runner(Pipe_Step):
 
 		return summary
 
-
-	def add_annotation(self, annotation_file: StrPath, annotation_file_type: str, summary: pd.DataFrame):
+	def add_annotation(
+		self, annotation_file: StrPath, annotation_file_type: str, summary: pd.DataFrame
+	):
 		match annotation_file_type:
 			case "formula_identifications_file":
 				df = self.read_sirius_df(file_path=annotation_file, filter_columns=["ZodiacScore"])
 				df = df[["molecularFormula", "ZodiacScore"]]
-				df.rename(columns={'molecularFormula': 'Sirius_formula',
-					   			   "ZodiacScore": "Sirius_formula_confidence"})
-				
+				df.rename(
+					columns={
+						"molecularFormula": "Sirius_formula",
+						"ZodiacScore": "Sirius_formula_confidence",
+					}
+				)
+
 			case "canopus_formula_summary_file":
 				df = self.read_sirius_df(file_path=annotation_file, filter_columns=["Probability"])
-				df = df[[column for column in df.columns
-			 			 if (column.startswith("NPC") or column.startswith("ClassyFire"))
-						    and not column.endswith("all classifications")]]
-				
+				df = df[
+					[
+						column
+						for column in df.columns
+						if (column.startswith("NPC") or column.startswith("ClassyFire"))
+						and not column.endswith("all classifications")
+					]
+				]
+
 				rename_dict = {}
 				for column in df.columns:
 					tool, name = column.split("#", maxsplit=1)
@@ -216,20 +225,40 @@ class Summary_Runner(Pipe_Step):
 				df.rename(columns=rename_dict)
 
 			case "structure_identifications_file":
-				df = self.read_sirius_df(file_path=annotation_file, filter_columns=["ConfidenceScoreExact", "ConfidenceScoreApproximate"])
-				df = df[["smiles", "links", "ConfidenceScoreExact", "ConfidenceScoreApproximate", "CSI:FingerIDScore"]]
-				df.rename(columns={'smiles': 'Sirius_structure_smiles',
-					   			   "links": "Sirius_structure_links",
-					   			   "ConfidenceScoreExact": "Sirius_structure_confidence",
-								   "ConfidenceScoreApproximate": "Sirius_approximate_structure_confidence",
-								   "CSI:FingerIDScore": "Sirius_structure_CSI:FingerIDScore"})
-				
+				df = self.read_sirius_df(
+					file_path=annotation_file,
+					filter_columns=["ConfidenceScoreExact", "ConfidenceScoreApproximate"],
+				)
+				df = df[
+					[
+						"smiles",
+						"links",
+						"ConfidenceScoreExact",
+						"ConfidenceScoreApproximate",
+						"CSI:FingerIDScore",
+					]
+				]
+				df.rename(
+					columns={
+						"smiles": "Sirius_structure_smiles",
+						"links": "Sirius_structure_links",
+						"ConfidenceScoreExact": "Sirius_structure_confidence",
+						"ConfidenceScoreApproximate": "Sirius_approximate_structure_confidence",
+						"CSI:FingerIDScore": "Sirius_structure_CSI:FingerIDScore",
+					}
+				)
+
 			case "canopus_structure_summary_file":
 				df = self.read_sirius_df(file_path=annotation_file, filter_columns=["Probability"])
-				df = df[[column for column in df.columns
-			 			 if (column.startswith("NPC") or column.startswith("ClassyFire"))
-						    and not column.endswith("all classifications")]]
-				
+				df = df[
+					[
+						column
+						for column in df.columns
+						if (column.startswith("NPC") or column.startswith("ClassyFire"))
+						and not column.endswith("all classifications")
+					]
+				]
+
 				rename_dict = {}
 				for column in df.columns:
 					tool, name = column.split("#", maxsplit=1)
@@ -238,26 +267,44 @@ class Summary_Runner(Pipe_Step):
 				df.rename(columns=rename_dict)
 
 			case "denovo_structure_identifications_file":
-				df = self.read_sirius_df(file_path=annotation_file, filter_columns=["ConfidenceScoreExact", "ConfidenceScoreApproximate"])
+				df = self.read_sirius_df(
+					file_path=annotation_file,
+					filter_columns=["ConfidenceScoreExact", "ConfidenceScoreApproximate"],
+				)
 				df = df[["smiles", "CSI:FingerIDScore"]]
-				df.rename(columns={'smiles': 'Sirius_structure_smiles',
-								   "CSI:FingerIDScore": "Sirius_denovo_structure_CSI:FingerIDScore"})
+				df.rename(
+					columns={
+						"smiles": "Sirius_structure_smiles",
+						"CSI:FingerIDScore": "Sirius_denovo_structure_CSI:FingerIDScore",
+					}
+				)
 
 			case "gnps_annotations":
-				pass
-		
-		summary.merge( df, how="outer", on="ID")
+				hit_dicts = json.load(annotation_file)["blockData"]
+				df = pd.DataFrame(hit_dicts)[
+					"#Scan#", "Compound_Name", "MQScore", "MZErrorPPM", "SharedPeaks"
+				]
+				df.rename(
+					columns={
+						"#Scan#": "ID",
+						"Compound_Name": "GNPS_compound_name",
+						"MQScore": "GNPS_MQ_score(cosine)",
+						"MZErrorPPM": "GNPS_m/z_error(ppm)",
+						"SharedPeaks": "GNPS_shared_peaks",
+					}
+				)
+
+		summary.merge(df, how="outer", on="ID")
 		return summary
 
-
-
+	# TODO: RUN SINGLE SUMMARY
 	def run_single(
 		self,
 		in_path_quantification: StrPath,
 		in_path_annotation: StrPath,
 		annotation_file_type: str,
-		out_path: StrPath
-		):
+		out_path: StrPath,
+	):
 		"""
 		Add the annotations into a quantification file.
 
@@ -266,21 +313,19 @@ class Summary_Runner(Pipe_Step):
 		:param out_path: Path to output directory.
 		:type out_path: str
 		"""
+		out_path = join(out_path, "m2s_summary.tsv") if os.path.isdir(out_path) else out_path
 
-		
-		out_file_name = ".".join(os.path.basename(in_path).split(".")[:-1]) + self.target_format
+		# TODO: Use add_annotation + add_quantification to build csv
 
-		cmd = (
-			rf'"{self.exec_path}" --{self.target_format[1:]} -e {self.target_format} --64 '
-			+ rf'-o "{out_path}" --outfile "{out_file_name}" "{in_path}" {" ".join(self.additional_args)}'
+		cmd = f"echo 'Added annotation from {in_path_annotation} to {in_path_quantification}'"
+
+		super().compute(
+			cmd=cmd, in_path=(in_path_quantification, in_path_annotation), out_path=out_path
 		)
 
-		if not os.path.isfile(out_path):
-			out_path = os.path.join(out_path, out_file_name)
-
-		super().compute(cmd=cmd, in_path=in_path, out_path=out_path)
-
-	def run_directory(self, in_path_annotation: StrPath, in_path_quantification: StrPath, out_path: StrPath):
+	def run_directory(
+		self, in_path_annotation: StrPath, in_path_quantification: StrPath, out_path: StrPath
+	):
 		"""
 		Convert all matching files in a folder.
 
@@ -294,10 +339,11 @@ class Summary_Runner(Pipe_Step):
 
 		for annotation_file_type, annotation_path in annotation_files.items():
 			if annotation_path:
-				self.run_single(in_path_quantification=quantification_file,
-								in_path_annotation=annotation_path,
-								annotation_file_type=annotation_file_type)
-
+				self.add_annotation(
+					in_path_quantification=quantification_file,
+					in_path_annotation=annotation_path,
+					annotation_file_type=annotation_file_type,
+				)
 
 	def run_nested(self, in_root_dir: StrPath, out_root_dir: StrPath, recusion_level: int = 0):
 		"""
