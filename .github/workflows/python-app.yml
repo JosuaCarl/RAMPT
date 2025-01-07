@@ -19,33 +19,32 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
-        python-version: [ 3.12 ]
 
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+          version: "0.5.15"
+          enable-cache: true
 
-    - name: Install poetry
-      run: pipx install poetry
-
-    - name: Setup python
+    - name: "Set up Python"
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
-        cache: "poetry"
+        python-version-file: "pyproject.toml"
 
-    - name: Install dependencies
-      run: |
-        poetry lock --no-update
-        poetry install
+    - name: Install the project dependencies
+      run: uv sync --all-extras --dev
     
     - name: Ruff checking
       run: |
-        poetry run ruff check --output-format=github
+        uv run ruff check --output-format=github
   
     - name: Testing helpers
       run: |
-        poetry run pytest ./tests/test_00_helpers.py
+        uv run pytest ./tests/test_00_helpers.py
 
     - name: Testing general
       run: |
-        poetry run pytest ./tests/test_01_general.py
+        uv run pytest ./tests/test_01_general.py
