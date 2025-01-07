@@ -11,7 +11,7 @@ import zipfile
 import hashlib
 import platform
 
-import tkinter
+import tkinter as tk
 
 from source.helpers.types import StrPath
 
@@ -68,6 +68,16 @@ def download_extract_zip(url:str, target_path:StrPath, expected_hash:str=None):
         if expected_hash is None or verify_hash( io.BytesIO(response.content), expected_hash ):
             zip_file.extractall(path=target_path)
 
+
+def make_window():
+    window = tk.Tk()
+    
+    window.geometry("800x500")
+    window.title("mine2sirius installer")
+
+    window
+
+    window.mainloop()
 
 def main():
     # TODO: TKinter installer (ask for installation + give LISENCES)
