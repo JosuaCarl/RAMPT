@@ -4,8 +4,8 @@ Testing the data analysis.
 """
 
 from tests.common import *
-from source.steps.analysis.analysis_pipe import *
-from source.steps.analysis.analysis_pipe import main as analysis_pipe_main
+from source.steps.analysis.summary_pipe import *
+from source.steps.analysis.summary_pipe import main as summary_pipe_main
 
 
 platform = get_platform()
@@ -18,7 +18,7 @@ def test_analysis_pipe_run_single():
 	clean_out(out_path)
 
 	# Superficial testing of run_single
-	analysis_runner = Analysis_Runner()
+	analysis_runner = Summary_Runner()
 
 	analysis_runner.run_single(in_path=join(example_path, "mzmine_log.txt"), out_path=out_path)
 
