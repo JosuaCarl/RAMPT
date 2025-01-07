@@ -1,58 +1,49 @@
-[build-system]
-requires = [ "poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
 [project]
 name = "mine2sirius-pipe"
-description = "An integrated workflow to extract (novel) outlier metabolites from MS data."
-requires-python = ">=3.12"
-dependencies = []
-authors = [ { name = "Josua Carl", email = "josua.carl@uni-tuebingen.de" } ]
-readme = {file = "README.txt", content-type = "text/markdown"}
-license = {file = "LICENSE" }
+description = "mzMine to SIRIUS pipeline with additional analysis"
+requires-python = "<4.0,>=3.12"
+dependencies = [
+    "numpy<2.0.0,>=1.26.4",
+    "scipy<2.0.0,>=1.14.1",
+    "pyarrow<18.0.0,>=17.0.0",
+    "jupyter<2.0.0,>=1.1.1",
+    "tqdm<5.0.0,>=4.66.5",
+    "dask<2025.0.0,>=2024.9.1",
+    "argparse<2.0.0,>=1.4.0",
+    "sphinx<8,>=7",
+    "regex<2025.0.0,>=2024.9.11",
+    "beautifulsoup4<5.0.0,>=4.12.3",
+    "lxml<6.0.0,>=5.3.0",
+    "pandas<3.0.0,>=2.2.2",
+    "pydata-sphinx-theme<1.0.0,>=0.15.4",
+    "statsmodels<1.0.0,>=0.14.4",
+    "seaborn<1.0.0,>=0.13.2",
+    "plotly<6.0.0,>=5.24.1",
+    "requests<3.0.0,>=2.32.3",
+    "tee-subprocess<2.0.0,>=1.2.0",
+    "pyopenms<4.0.0,>=3.2.0",
+    "chardet<6.0.0,>=5.2.0",
+    "multipledispatch<2.0.0,>=1.0.0",
+    "taipy<5.0.0,>=4.0.1",
+    "ruamel-yaml<1.0.0,>=0.18.6",
+]
+authors = [
+    {name = "JosuaCarl", email = "josua.carl@uni-tuebingen.de"},
+]
+readme = {file = "README.md", content-type = "text/markdown"}
+license = {file = "LICENSE", text = "GPL-3.0 license"}
 keywords = ["mass-spectrometry", "workflow", "pipeline", "gui", "sirius", "mzmine" ]
+version = "2024.0.1a"
 
-# Poetry rules
-[tool.poetry]
-name = "mine2sirius-pipe"
-version = "2024.2.1"
-description = "mzMine to SIRIUS pipeline"
-authors = ["JosuaCarl <josua.carl@uni-tuebingen.de>"]
-license = "GPL-3.0 license"
-readme = "README.md"
-package-mode = false
 
-[tool.poetry.dependencies]
-python = "^3.12"
-numpy = "^1.26.4"
-scipy = "^1.14.1"
-pyarrow = "^17.0.0"
-jupyter = "^1.1.1"
-tqdm = "^4.66.5"
-dask = "^2024.9.1"
-argparse = "^1.4.0"
-sphinx = "^7"
-regex = "^2024.9.11"
-beautifulsoup4 = "^4.12.3"
-lxml = "^5.3.0"
-pandas = "^2.2.2"
-pydata-sphinx-theme = "^0.15.4"
-statsmodels = "^0.14.4"
-seaborn = "^0.13.2"
-plotly = "^5.24.1"
-requests = "^2.32.3"
-tee-subprocess = "^1.2.0"
-pyopenms = "^3.2.0"
-chardet = "^5.2.0"
-multipledispatch = "^1.0.0"
-taipy = "^4.0.1"
-ruamel-yaml = "^0.18.6"
+[dependency-groups]
+dev = [
+    "pytest<9.0.0,>=8.3.3",
+    "icecream<3.0.0,>=2.1.3",
+    "ruff<1.0.0,>=0.8.1",
+    "pyopenms==3.2.0",
+]
 
-[tool.poetry.dev-dependencies]
-pytest = "^8.3.3"
-icecream = "^2.1.3" 
-ruff = "^0.8.1"
-pyopenms = "3.2.0"
 
 # Ruff rules
 [tool.ruff.lint]
