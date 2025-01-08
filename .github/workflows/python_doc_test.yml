@@ -66,6 +66,16 @@ jobs:
       run: |
           cd docs
           uv run make html
+    
+    - name: Check html
+      run: |
+        tree docs/_build/html/
+
+    - name: Upload static files as artifact
+      id: deployment
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: docs/_build/html/
 
   deploy:
     # Add a dependency to the build job
@@ -85,12 +95,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: html-docs
-          path: docs/_build/html/
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
