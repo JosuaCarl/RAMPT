@@ -324,8 +324,8 @@ ms_analysis_config = Config.configure_scenario(
 	sequences={
 		"convert": [convert_files_config],
 		"find features": [find_features_config],
-		"annotate(GNPS)": [annotate_gnps_config],
-		"annotate(Sirius)": [annotate_sirius_config],
+		"annotate with gnps": [annotate_gnps_config],
+		"annotate with sirius": [annotate_sirius_config],
 		"analyze": [analyze_difference_config],
 	},
 )
