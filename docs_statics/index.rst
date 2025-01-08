@@ -19,7 +19,6 @@ The aim of this project is to construct a integrated pipeline from conversion of
 
    source
    tests
-   setup
 
 
 Indices and tables
