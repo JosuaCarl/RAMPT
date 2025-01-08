@@ -512,7 +512,6 @@ class Pipe_Step(Step_Configuration):
 			else:
 				in_path_example = in_path
 
-
 			if self.nested:
 				self.run_nested(in_root_dir=in_path, out_root_dir=out_path)
 			elif os.path.isdir(in_path_example):

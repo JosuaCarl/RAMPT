@@ -14,7 +14,6 @@ import pandas as pd
 import numpy as np
 import json
 
-import source.helpers as helpers
 from source.helpers.types import StrPath
 from source.steps.general import Pipe_Step, get_value
 
@@ -164,7 +163,6 @@ class Summary_Runner(Pipe_Step):
 			"gnps_annotations": gnps_annotations,
 		}
 
-
 	def read_sirius_df(self, file_path: StrPath, filter_columns: list | str) -> pd.DataFrame:
 		df = pd.read_csv(file_path, sep="\t")
 		df.replace("-Infinity", -np.inf, inplace=True)
@@ -177,14 +175,10 @@ class Summary_Runner(Pipe_Step):
 
 		return df
 
-	
-
 	# TODO: Add documentation & Testing
 	def add_quantification(
-			self,
-			quantification_file: StrPath,
-			summary: pd.DataFrame = None
-		) -> pd.DataFrame :
+		self, quantification_file: StrPath, summary: pd.DataFrame = None
+	) -> pd.DataFrame:
 		df = pd.read_csv(quantification_file)
 		df.columns = [column.replace("row ", "") for column in df.columns]
 
@@ -199,10 +193,9 @@ class Summary_Runner(Pipe_Step):
 
 		return summary
 
-
 	def add_annotation(
 		self, annotation_file: StrPath, annotation_file_type: str, summary: pd.DataFrame
-	) -> pd.DataFrame :
+	) -> pd.DataFrame:
 		match annotation_file_type:
 			case "formula_identifications_file":
 				df = self.read_sirius_df(file_path=annotation_file, filter_columns=["ZodiacScore"])
@@ -221,8 +214,8 @@ class Summary_Runner(Pipe_Step):
 					[
 						column
 						for column in df.columns
-						if column == "mappingFeatureId" or
-						(column.startswith("NPC") or column.startswith("ClassyFire"))
+						if column == "mappingFeatureId"
+						or (column.startswith("NPC") or column.startswith("ClassyFire"))
 						and not column.endswith("all classifications")
 					]
 				]
@@ -253,7 +246,7 @@ class Summary_Runner(Pipe_Step):
 				]
 				df = df.rename(
 					columns={
-						"mappingFeatureId": "ID", 
+						"mappingFeatureId": "ID",
 						"smiles": "Sirius_structure_smiles",
 						"links": "Sirius_structure_links",
 						"ConfidenceScoreExact": "Sirius_structure_confidence",
@@ -268,8 +261,8 @@ class Summary_Runner(Pipe_Step):
 					[
 						column
 						for column in df.columns
-						if column == "mappingFeatureId" or
-						(column.startswith("NPC") or column.startswith("ClassyFire"))
+						if column == "mappingFeatureId"
+						or (column.startswith("NPC") or column.startswith("ClassyFire"))
 						and not column.endswith("all classifications")
 					]
 				]
@@ -300,9 +293,9 @@ class Summary_Runner(Pipe_Step):
 			case "gnps_annotations":
 				with open(annotation_file, "r") as file:
 					hit_dicts = json.load(file)["blockData"]
-				df = pd.DataFrame(hit_dicts)[[
-					"#Scan#", "Compound_Name", "MQScore", "MZErrorPPM", "SharedPeaks"
-				]]
+				df = pd.DataFrame(hit_dicts)[
+					["#Scan#", "Compound_Name", "MQScore", "MZErrorPPM", "SharedPeaks"]
+				]
 				df = df.rename(
 					columns={
 						"#Scan#": "ID",
@@ -312,14 +305,12 @@ class Summary_Runner(Pipe_Step):
 						"SharedPeaks": "FBMN_shared_peaks",
 					}
 				)
-		
+
 		df = df.astype({"ID": str})
 		summary = summary.merge(df, how="left", on="ID")
 		return summary
-	
-	def add_annotations(
-		self, annotation_files: StrPath, summary: pd.DataFrame
-	):
+
+	def add_annotations(self, annotation_files: StrPath, summary: pd.DataFrame):
 		# Order the annotations
 		order_list = [
 			"formula_identifications_file",
@@ -339,24 +330,20 @@ class Summary_Runner(Pipe_Step):
 				summary = self.add_annotation(
 					annotation_file=annotation_path,
 					annotation_file_type=annotation_file_type,
-					summary=summary
+					summary=summary,
 				)
 
 		return summary
 
-
 	def sort_in_paths(
-		self,
-		in_paths: tuple[StrPath] | list[StrPath] | dict[str, StrPath] | StrPath
+		self, in_paths: tuple[StrPath] | list[StrPath] | dict[str, StrPath] | StrPath
 	) -> tuple[StrPath]:
 		if isinstance(in_paths, dict):
-			return ( in_paths["in_path_quantification"], in_paths["in_path_annotation"] )
+			return (in_paths["in_path_quantification"], in_paths["in_path_annotation"])
 		elif isinstance(in_paths, StrPath):
 			return in_paths, in_paths
 		else:
 			return in_paths[0], in_paths[1]
-
-
 
 	def run_single(
 		self,
@@ -375,18 +362,17 @@ class Summary_Runner(Pipe_Step):
 		"""
 		summary = summary if summary else self.summary
 		in_path_quantification, in_path_annotation = self.sort_in_paths(in_paths=in_path)
-		out_path = join(out_path, f"summary.tsv") if os.path.isdir(out_path) else out_path
-		
+		out_path = join(out_path, "summary.tsv") if os.path.isdir(out_path) else out_path
+
 		summary = self.add_quantification(
-			quantification_file=in_path_quantification,
-			summary=summary
+			quantification_file=in_path_quantification, summary=summary
 		)
 		summary = self.add_annotation(
 			annotation_file=in_path_annotation,
 			annotation_file_type=annotation_file_type,
-			summary=summary
+			summary=summary,
 		)
-		
+
 		summary.to_csv(out_path, sep="\t")
 
 		cmd = f"echo 'Added annotation from {in_path_annotation} to {in_path_quantification}'"
@@ -394,7 +380,6 @@ class Summary_Runner(Pipe_Step):
 		super().compute(
 			cmd=cmd, in_path=(in_path_quantification, in_path_annotation), out_path=out_path
 		)
-
 
 	def run_directory(
 		self,
@@ -422,7 +407,7 @@ class Summary_Runner(Pipe_Step):
 			annotation_files = self.search_annotation_files(dir=in_path_annotation)
 
 		summary = self.add_quantification(quantification_file=quantification_file, summary=summary)
-		summary = self.add_annotations( annotation_files=annotation_files, summary=summary)
+		summary = self.add_annotations(annotation_files=annotation_files, summary=summary)
 
 		summary.to_csv(out_path, sep="\t")
 
@@ -431,7 +416,6 @@ class Summary_Runner(Pipe_Step):
 		super().compute(
 			cmd=cmd, in_path=(in_path_quantification, in_path_annotation), out_path=out_path
 		)
-
 
 	def run_nested(self, in_root_dir: StrPath, out_root_dir: StrPath, recusion_level: int = 0):
 		"""
@@ -452,15 +436,14 @@ class Summary_Runner(Pipe_Step):
 			quantification_file = self.search_quantification_file(dir=root)
 			annotation_files = self.search_annotation_files(dir=root)
 
-			if quantification_file and [val for val in annotation_files.values() if val is not None]:
+			if quantification_file and [
+				val for val in annotation_files.values() if val is not None
+			]:
 				if not made_out_root_dir:
 					os.makedirs(out_root_dir, exist_ok=True)
 					made_out_root_dir = True
-				
-				self.run_directory(
-					in_path=root,
-					out_path=out_root_dir
-				)
+
+				self.run_directory(in_path=root, out_path=out_root_dir)
 
 			for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
 				self.run_nested(
