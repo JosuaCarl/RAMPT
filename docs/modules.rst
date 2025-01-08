@@ -1,5 +1,5 @@
-mine2sirius_pipe
-================
+source
+======
 
 .. toctree::
    :maxdepth: 4

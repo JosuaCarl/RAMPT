@@ -62,9 +62,9 @@ jobs:
           uv run sphinx-apidoc -o docs .
 
     - name: Build HTML
-      uses: ammaraskar/sphinx-action@master
-      with:
-        docs-folder: "docs/"
+      run: |
+          cd docs
+          make html
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3

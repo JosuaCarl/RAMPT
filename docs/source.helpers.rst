@@ -4,18 +4,18 @@ source.helpers package
 Submodules
 ----------
 
-source.helpers.classes module
------------------------------
-
-.. automodule:: source.helpers.classes
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 source.helpers.general module
 -----------------------------
 
 .. automodule:: source.helpers.general
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+source.helpers.logging module
+-----------------------------
+
+.. automodule:: source.helpers.logging
    :members:
    :undoc-members:
    :show-inheritance:

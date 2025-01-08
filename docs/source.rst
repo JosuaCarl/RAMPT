@@ -7,12 +7,9 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   source.annotation
-   source.conversion
-   source.feature_finding
+   source.gui
    source.helpers
-   source.ion_exclusion
-   source.population_difference_testing
+   source.steps
 
 Module contents
 ---------------

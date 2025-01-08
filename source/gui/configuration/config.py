@@ -90,6 +90,7 @@ sirius_config_config = Config.configure_in_memory_data_node(
 )
 
 
+# TODO: DOCUMENTATION & TESTING
 # Task methods
 def generic_step(
 	step_class,
@@ -321,11 +322,11 @@ ms_analysis_config = Config.configure_scenario(
 		analyze_difference_config,
 	],
 	sequences={
-		"conversion": [convert_files_config],
-		"feature finding": [find_features_config],
-		"gnps": [annotate_gnps_config],
-		"sirius": [annotate_sirius_config],
-		"analysis": [analyze_difference_config],
+		"convert": [convert_files_config],
+		"find features": [find_features_config],
+		"annotate(GNPS)": [annotate_gnps_config],
+		"annotate(Sirius)": [annotate_sirius_config],
+		"analyze": [analyze_difference_config],
 	},
 )
 
