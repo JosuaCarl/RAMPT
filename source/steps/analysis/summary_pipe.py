@@ -179,7 +179,11 @@ class Summary_Runner(Pipe_Step):
 	
 
 	# TODO: Add documentation & Testing
-	def add_quantification(self, quantification_file: StrPath, summary: pd.DataFrame = None):
+	def add_quantification(
+			self,
+			quantification_file: StrPath,
+			summary: pd.DataFrame = None
+		) -> pd.DataFrame :
 		df = pd.read_csv(quantification_file)
 		df.columns = [column.replace("row ", "") for column in df.columns]
 
@@ -188,6 +192,8 @@ class Summary_Runner(Pipe_Step):
 		else:
 			summary = df
 
+		summary = summary.dropna(how="all", axis=1)
+		summary = summary.astype({"ID": str})
 		summary = summary.sort_values("retention time", ascending=True)
 
 		return summary
@@ -195,12 +201,12 @@ class Summary_Runner(Pipe_Step):
 
 	def add_annotation(
 		self, annotation_file: StrPath, annotation_file_type: str, summary: pd.DataFrame
-	):
+	) -> pd.DataFrame :
 		match annotation_file_type:
 			case "formula_identifications_file":
 				df = self.read_sirius_df(file_path=annotation_file, filter_columns=["ZodiacScore"])
 				df = df[["molecularFormula", "ZodiacScore"]]
-				df.rename(
+				df = df.rename(
 					columns={
 						"molecularFormula": "Sirius_formula",
 						"ZodiacScore": "Sirius_formula_confidence",
@@ -223,7 +229,8 @@ class Summary_Runner(Pipe_Step):
 					tool, name = column.split("#", maxsplit=1)
 					name = name.lower().replace(" ", "_").replace("probability", "confidence")
 					rename_dict[column] = f"Sirius_formula_{tool}_{name}"
-				df.rename(columns=rename_dict)
+				
+				df = df.rename(columns=rename_dict)
 
 			case "structure_identifications_file":
 				df = self.read_sirius_df(
@@ -239,7 +246,7 @@ class Summary_Runner(Pipe_Step):
 						"CSI:FingerIDScore",
 					]
 				]
-				df.rename(
+				df = df.rename(
 					columns={
 						"smiles": "Sirius_structure_smiles",
 						"links": "Sirius_structure_links",
@@ -265,7 +272,7 @@ class Summary_Runner(Pipe_Step):
 					tool, name = column.split("#", maxsplit=1)
 					name = name.lower().replace(" ", "_").replace("probability", "confidence")
 					rename_dict[column] = f"Sirius_structure_{tool}_{name}"
-				df.rename(columns=rename_dict)
+				df = df.rename(columns=rename_dict)
 
 			case "denovo_structure_identifications_file":
 				df = self.read_sirius_df(
@@ -273,7 +280,7 @@ class Summary_Runner(Pipe_Step):
 					filter_columns=["ConfidenceScoreExact", "ConfidenceScoreApproximate"],
 				)
 				df = df[["smiles", "CSI:FingerIDScore"]]
-				df.rename(
+				df = df.rename(
 					columns={
 						"smiles": "Sirius_structure_smiles",
 						"CSI:FingerIDScore": "Sirius_denovo_structure_CSI:FingerIDScore",
@@ -281,11 +288,12 @@ class Summary_Runner(Pipe_Step):
 				)
 
 			case "gnps_annotations":
-				hit_dicts = json.load(annotation_file)["blockData"]
-				df = pd.DataFrame(hit_dicts)[
+				with open(annotation_file, "r") as file:
+					hit_dicts = json.load(file)["blockData"]
+				df = pd.DataFrame(hit_dicts)[[
 					"#Scan#", "Compound_Name", "MQScore", "MZErrorPPM", "SharedPeaks"
-				]
-				df.rename(
+				]]
+				df = df.rename(
 					columns={
 						"#Scan#": "ID",
 						"Compound_Name": "FBMN_compound_name",
@@ -294,8 +302,9 @@ class Summary_Runner(Pipe_Step):
 						"SharedPeaks": "FBMN_shared_peaks",
 					}
 				)
-
-		summary.merge(df, how="outer", on="ID")
+		
+		df = df.astype({"ID": str})
+		summary = summary.merge(df, how="left", on="ID")
 		return summary
 	
 	def add_annotations(
@@ -327,9 +336,9 @@ class Summary_Runner(Pipe_Step):
 
 
 	def sort_in_paths(
-			self,
-			in_paths: tuple[StrPath] | list[StrPath] | dict[str, StrPath] | StrPath
-			) -> tuple[StrPath]:
+		self,
+		in_paths: tuple[StrPath] | list[StrPath] | dict[str, StrPath] | StrPath
+	) -> tuple[StrPath]:
 		if isinstance(in_paths, dict):
 			return ( in_paths["in_path_quantification"], in_paths["in_path_annotation"] )
 		elif isinstance(in_paths, StrPath):
