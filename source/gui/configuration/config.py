@@ -12,6 +12,8 @@ from source.steps.feature_finding.mzmine_pipe import MZmine_Runner
 from source.steps.conversion.msconv_pipe import MSconvert_Runner
 from source.steps.annotation.sirius_pipe import Sirius_Runner
 from source.steps.annotation.gnps_pipe import GNPS_Runner
+from source.steps.analysis.summary_pipe import Summary_Runner
+from source.steps.analysis.analysis_pipe import Analysis_Runner
 
 from typing import Any
 
@@ -36,7 +38,10 @@ sirius_annotations_config = Config.configure_csv_data_node(
 	id="sirius_annotations", scope=Scope.SCENARIO
 )
 
-results_config = Config.configure_csv_data_node(id="results", scope=Scope.SCENARIO)
+summary_config = Config.configure_csv_data_node(id="summary", scope=Scope.SCENARIO)
+
+analysis_config = Config.configure_csv_data_node(id="analysis", scope=Scope.SCENARIO)
+
 
 ## Output paths
 conversion_out_config = Config.configure_in_memory_data_node(
@@ -51,7 +56,9 @@ gnps_out_config = Config.configure_in_memory_data_node(id="gnps_out", scope=Scop
 
 sirius_out_config = Config.configure_in_memory_data_node(id="sirius_out", scope=Scope.SCENARIO)
 
-results_out_config = Config.configure_in_memory_data_node(id="results_out", scope=Scope.SCENARIO)
+summary_out_config = Config.configure_in_memory_data_node(id="summary_out", scope=Scope.SCENARIO)
+
+analysis_out_config = Config.configure_in_memory_data_node(id="analysis_out", scope=Scope.SCENARIO)
 
 
 ## Parameters
@@ -68,6 +75,8 @@ feature_finding_params_config = Config.configure_json_data_node(
 gnps_params_config = Config.configure_json_data_node(id="gnps_params", scope=Scope.SCENARIO)
 
 sirius_params_config = Config.configure_json_data_node(id="sirius_params", scope=Scope.SCENARIO)
+
+summary_params_config = Config.configure_json_data_node(id="summary_params", scope=Scope.SCENARIO)
 
 analysis_params_config = Config.configure_json_data_node(id="analysis_params", scope=Scope.SCENARIO)
 
@@ -93,7 +102,7 @@ def generic_step(
 	return_attributes: list = ["processed_out"],
 	**kwargs,
 ) -> tuple[Any] | Any:
-	# Fix parameters
+	# Fixate parameters
 	step_params.update(global_params)
 	step_instance = step_class(**step_params)
 
@@ -127,7 +136,7 @@ def convert_files(
 		step_class=MSconvert_Runner,
 		in_paths=raw_data,
 		out_paths=conversion_out,
-		out_path_target="converted",
+		out_path_target=os.path.join("..", "converted"),
 		step_params=step_params,
 		global_params=global_params,
 	)
@@ -144,7 +153,7 @@ def find_features(
 		step_class=MZmine_Runner,
 		in_paths=community_formatted_data,
 		out_paths=feature_finding_out,
-		out_path_target="processed",
+		out_path_target=os.path.join("..", "processed"),
 		step_params=step_params,
 		global_params=global_params,
 		return_attributes=["processed_out", "log_paths"],
@@ -163,7 +172,7 @@ def annotate_gnps(
 		step_class=GNPS_Runner,
 		in_paths=processed_data,
 		out_paths=gnps_out,
-		out_path_target="annotated",
+		out_path_target=os.path.join("..", "annotated"),
 		step_params=step_params,
 		global_params=global_params,
 		mzmine_log=mzmine_log,
@@ -181,29 +190,45 @@ def annotate_sirius(
 		step_class=Sirius_Runner,
 		in_paths=processed_data,
 		out_paths=sirius_out,
-		out_path_target="annotated",
+		out_path_target=os.path.join("..", "annotated"),
 		step_params=step_params,
 		global_params=global_params,
 		config=config,
 	)
 
 
-def analyze_difference(
+def summarize_annotations(
+	processed_data: StrPath,
 	gnps_annotated_data: StrPath,
 	sirius_annotated_data: StrPath,
-	results_out: StrPath,
+	summary_out: StrPath,
 	step_params: dict,
 	global_params: dict,
 ):
-	warn("Analyze difference not implemented yet.")
-	pass
-	"""
-    return generic_step( step_class="",
-        
-                         input=annotated_data, output=os.path.join("..", "results"),
-                         step_params=step_params,
-                         global_params=global_params )
-    """
+	return generic_step(
+		step_class=Summary_Runner,
+		in_paths=(processed_data, sirius_annotated_data, gnps_annotated_data),
+		out_paths=summary_out,
+		out_path_target=os.path.join("..", "analysis"),
+		step_params=step_params,
+		global_params=global_params,
+	)
+
+
+def analyze_difference(
+	summary_data: StrPath,
+	analysis_out: StrPath,
+	step_params: dict,
+	global_params: dict,
+):
+	return generic_step(
+		step_class=Summary_Runner,
+		in_paths=summary_data,
+		out_paths=analysis_out,
+		out_path_target=os.path.join("..", "analysis"),
+		step_params=step_params,
+		global_params=global_params,
+	)
 
 
 # Tasks
@@ -257,17 +282,31 @@ annotate_sirius_config = Config.configure_task(
 	skippable=False,
 )
 
+summarize_annotations_config = Config.configure_task(
+	"summarize_annotations",
+	function=summarize_annotations,
+	input=[
+		processed_data_config,
+		gnps_annotations_config,
+		sirius_annotations_config,
+		summary_out_config,
+		summary_params_config,
+		global_params_config,
+	],
+	output=summary_config,
+	skippable=False,
+)
+
 analyze_difference_config = Config.configure_task(
 	"analyze_difference",
 	function=analyze_difference,
 	input=[
-		gnps_annotations_config,
-		sirius_annotations_config,
-		results_out_config,
+		summary_config,
+		analysis_out_config,
 		analysis_params_config,
 		global_params_config,
 	],
-	output=results_config,
+	output=analysis_config,
 	skippable=False,
 )
 

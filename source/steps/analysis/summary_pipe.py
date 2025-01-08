@@ -156,11 +156,11 @@ class Summary_Runner(Pipe_Step):
 				elif not gnps_annotations and file.endswith("_gnps_all_db_annotations.json"):
 					gnps_annotations = join(root, file)
 		return {
+			"formula_identifications_file": formula_identifications_file,
 			"canopus_formula_summary_file": canopus_formula_summary_file,
+			"structure_identifications_file": structure_identifications_file,
 			"canopus_structure_summary_file": canopus_structure_summary_file,
 			"denovo_structure_identifications_file": denovo_structure_identifications_file,
-			"formula_identifications_file": formula_identifications_file,
-			"structure_identifications_file": structure_identifications_file,
 			"gnps_annotations": gnps_annotations,
 		}
 
@@ -191,6 +191,7 @@ class Summary_Runner(Pipe_Step):
 		summary = summary.sort_values("retention time", ascending=True)
 
 		return summary
+
 
 	def add_annotation(
 		self, annotation_file: StrPath, annotation_file_type: str, summary: pd.DataFrame
@@ -287,23 +288,63 @@ class Summary_Runner(Pipe_Step):
 				df.rename(
 					columns={
 						"#Scan#": "ID",
-						"Compound_Name": "GNPS_compound_name",
-						"MQScore": "GNPS_MQ_score(cosine)",
-						"MZErrorPPM": "GNPS_m/z_error(ppm)",
-						"SharedPeaks": "GNPS_shared_peaks",
+						"Compound_Name": "FBMN_compound_name",
+						"MQScore": "FBMN_MQ_score(cosine)",
+						"MZErrorPPM": "FBMN_m/z_error(ppm)",
+						"SharedPeaks": "FBMN_shared_peaks",
 					}
 				)
 
 		summary.merge(df, how="outer", on="ID")
 		return summary
+	
+	def add_annotations(
+		self, annotation_files: StrPath, summary: pd.DataFrame
+	):
+		# Order the annotations
+		order_list = [
+			"formula_identifications_file",
+			"canopus_formula_summary_file",
+			"structure_identifications_file",
+			"canopus_structure_summary_file",
+			"denovo_structure_identifications_file",
+			"gnps_annotations",
+		]
+		annotation_files_ordered = dict()
+		for key in order_list:
+			annotation_files_ordered[key] = annotation_files[key]
 
-	# TODO: RUN SINGLE SUMMARY
+		# Append all annotations
+		for annotation_file_type, annotation_path in annotation_files_ordered.items():
+			if annotation_path:
+				summary = self.add_annotation(
+					annotation_file=annotation_path,
+					annotation_file_type=annotation_file_type,
+					summary=summary
+				)
+
+		return summary
+
+
+	def sort_in_paths(
+			self,
+			in_paths: tuple[StrPath] | list[StrPath] | dict[str, StrPath] | StrPath
+			) -> tuple[StrPath]:
+		if isinstance(in_paths, dict):
+			return ( in_paths["in_path_quantification"], in_paths["in_path_annotation"] )
+		elif isinstance(in_paths, StrPath):
+			return in_paths, in_paths
+		else:
+			return in_paths[0], in_paths[1]
+
+
+
 	def run_single(
 		self,
-		in_path_quantification: StrPath,
-		in_path_annotation: StrPath,
-		annotation_file_type: str,
+		in_path: StrPath,
 		out_path: StrPath,
+		annotation_file_type: str,
+		summary: pd.DataFrame = None,
 	):
 		"""
 		Add the annotations into a quantification file.
@@ -313,9 +354,21 @@ class Summary_Runner(Pipe_Step):
 		:param out_path: Path to output directory.
 		:type out_path: str
 		"""
-		out_path = join(out_path, "m2s_summary.tsv") if os.path.isdir(out_path) else out_path
-
-		# TODO: Use add_annotation + add_quantification to build csv
+		summary = summary if summary else self.summary
+		in_path_quantification, in_path_annotation = self.sort_in_paths(in_paths=in_path)
+		out_path = join(out_path, f"summary.tsv") if os.path.isdir(out_path) else out_path
+		
+		summary = self.add_quantification(
+			quantification_file=in_path_quantification,
+			summary=summary
+		)
+		summary = self.add_annotation(
+			annotation_file=in_path_annotation,
+			annotation_file_type=annotation_file_type,
+			summary=summary
+		)
+		
+		summary.to_csv(out_path, sep="\t")
 
 		cmd = f"echo 'Added annotation from {in_path_annotation} to {in_path_quantification}'"
 
@@ -323,8 +376,14 @@ class Summary_Runner(Pipe_Step):
 			cmd=cmd, in_path=(in_path_quantification, in_path_annotation), out_path=out_path
 		)
 
+
 	def run_directory(
-		self, in_path_annotation: StrPath, in_path_quantification: StrPath, out_path: StrPath
+		self,
+		in_path: StrPath,
+		out_path: StrPath,
+		summary: pd.DataFrame = None,
+		quantification_file: StrPath = None,
+		annotation_files: dict[str, StrPath] = None,
 	):
 		"""
 		Convert all matching files in a folder.
@@ -334,16 +393,26 @@ class Summary_Runner(Pipe_Step):
 		:param out_path: Path to output directory.
 		:type out_path: str
 		"""
-		quantification_file = self.search_quantification_file(dir=in_path_quantification)
-		annotation_files = self.search_annotation_files(dir=in_path_annotation)
+		summary = summary if summary else self.summary
+		in_path_quantification, in_path_annotation = self.sort_in_paths(in_paths=in_path)
+		out_path = join(out_path, "summary.tsv") if os.path.isdir(out_path) else out_path
 
-		for annotation_file_type, annotation_path in annotation_files.items():
-			if annotation_path:
-				self.add_annotation(
-					in_path_quantification=quantification_file,
-					in_path_annotation=annotation_path,
-					annotation_file_type=annotation_file_type,
-				)
+		if not quantification_file:
+			quantification_file = self.search_quantification_file(dir=in_path_quantification)
+		if not annotation_files:
+			annotation_files = self.search_annotation_files(dir=in_path_annotation)
+
+		summary = self.add_quantification(quantification_file=quantification_file, summary=summary)
+		summary = self.add_annotations( annotation_files=annotation_files, summary=summary)
+
+		summary.to_csv(out_path, sep="\t")
+
+		cmd = f"echo 'Added annotation from {in_path_annotation} to {in_path_quantification}'"
+
+		super().compute(
+			cmd=cmd, in_path=(in_path_quantification, in_path_annotation), out_path=out_path
+		)
+
 
 	def run_nested(self, in_root_dir: StrPath, out_root_dir: StrPath, recusion_level: int = 0):
 		"""
@@ -360,26 +429,24 @@ class Summary_Runner(Pipe_Step):
 		verbose_tqdm = self.verbosity >= recusion_level + 2
 		made_out_root_dir = False
 
-		for entry in tqdm(
-			os.listdir(in_root_dir), disable=verbose_tqdm, desc="Schedule conversions"
-		):
-			entry_path = join(in_root_dir, entry)
-			hypothetical_out_path = join(
-				out_root_dir, helpers.replace_file_ending(entry, self.target_format)
-			)
-			in_valid, out_valid = self.select_for_conversion(
-				in_path=entry_path, out_path=hypothetical_out_path
-			)
+		for root, dirs, files in os.walk(in_root_dir):
+			quantification_file = self.search_quantification_file(dir=root)
+			annotation_files = self.search_annotation_files(dir=root)
 
-			if in_valid and out_valid:
+			if quantification_file and [val for val in annotation_files.values() if val is not None]:
 				if not made_out_root_dir:
 					os.makedirs(out_root_dir, exist_ok=True)
 					made_out_root_dir = True
-				self.run_single(in_path=entry_path, out_path=out_root_dir)
-			elif os.path.isdir(entry_path) and not in_valid:
+				
+				self.run_directory(
+					in_path=root,
+					out_path=out_root_dir
+				)
+
+			for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
 				self.run_nested(
-					in_root_dir=entry_path,
-					out_root_dir=join(out_root_dir, entry),
+					in_root_dir=join(in_root_dir, dir),
+					out_root_dir=join(out_root_dir, dir),
 					recusion_level=recusion_level + 1,
 				)
 

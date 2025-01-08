@@ -4,6 +4,7 @@ Common helpers for tests
 """
 
 from os.path import join as join
+from os.path import basename as basename
 import time
 import platform as pf
 import shutil

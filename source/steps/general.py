@@ -466,7 +466,7 @@ class Pipe_Step(Step_Configuration):
 		self.scheduled_in = extend_list(self.scheduled_in, in_paths)
 		self.scheduled_out = extend_list(self.scheduled_out, out_paths)
 
-		# Handle empty output paths by choosing input direcotory as base
+		# Handle empty output paths by choosing input directory as base
 		self.scheduled_out = (
 			self.scheduled_out
 			if self.scheduled_out
