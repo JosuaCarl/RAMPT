@@ -57,10 +57,9 @@ jobs:
       run: |
         uv run pytest ./tests/test_06_summary.py
 
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
+    - name: Sphinx apidoc
+      run: |
+          uv run sphinx-apidoc -o docs .
 
     - name: Build HTML
       uses: ammaraskar/sphinx-action@master
@@ -79,16 +78,3 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: docs/_build/html
-    
-
-  pages:
-    runs-on: ubuntu-20.04
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    permissions:
-      pages: write
-      id-token: write
-    steps:
-    - id: deployment
-      uses: sphinx-notes/pages@v3
