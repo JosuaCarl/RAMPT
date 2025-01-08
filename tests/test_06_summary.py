@@ -81,12 +81,16 @@ def test_summary_add_annotations():
 	summary = summary_runner.add_quantification(quantification_file, summary=None)
 	summary = summary_runner.add_annotations(annotation_files, summary=summary)
 
-	assert "ID" in summary.columns and "m/z" in summary.columns and "retention time" in summary.columns\
-			and "FBMN_m/z_error(ppm)" in summary.columns
+	assert summary[summary["ID"] == "2"]["m/z"][0] == 267.12273020717777
+	assert summary[summary["ID"] == "2"]["Sirius_formula"][0] == 'C14H18O5'
+	assert summary[summary["ID"] == "2"]["Sirius_formula_NPC_pathway"][0] == 'Polyketides'
+	assert summary[summary["ID"] == "2"]["Sirius_structure_smiles"][0] == 'CC(C=CC=CC1(C(=C(C(=O)O1)C(=O)C)OC)C)O'
+	assert summary[summary["ID"] == "2"]["Sirius_structure_ClassyFire_most_specific_class"][0] == 'Carboxylic acid esters'
+	assert summary[summary["ID"] == "2"]["Sirius_denovo_structure_smiles"][0] == 'CC=C(OC)C(C)OC(=O)C=CC1=CC(C)OC1=O'
 	assert summary[summary["ID"] == "2"]["FBMN_compound_name"][0] == 'GLUTATHIONE - 40.0 eV'
 
 
-"""
+
 def test_summary_pipe_run_single():
 	clean_out(out_path)
 
@@ -94,40 +98,50 @@ def test_summary_pipe_run_single():
 	summary_runner = Summary_Runner()
 
 	summary_runner.run_single(
-		in_path_quantification=join(example_path, "example_files_iimn_fbmn_quant.csv"),
-		in_path_annotation=join(example_path, "example_files_gnps_all_db_annotations.json"),
-		out_path=out_path
+		in_path=(
+			join(example_path, "example_files_iimn_fbmn_quant.csv"),
+		   	join(example_path, "example_files_gnps_all_db_annotations.json")
+		),
+		out_path=out_path,
+		annotation_file_type="gnps_annotations"
 	)
 
 	assert os.path.isfile(
-		join(out_path, f"summary.tsv")
+		join(out_path, "summary.tsv")
 	)
 
 
 def test_summary_pipe_run_directory():
 	clean_out(out_path)
-	# Supoerficial testing of run_directory
-	summary_runner = summary_runner(mzmine_log=example_path)
 
-	summary_runner.run_directory(in_path=example_path, out_path=out_path)
+	# Superficial testing of run_single
+	summary_runner = Summary_Runner()
 
-	assert os.path.isfile(
-		join(out_path, f"{basename(example_path)}_summary_all_db_annotations.json")
+	summary_runner.run_directory(
+		in_path=example_path,
+		out_path=out_path,
 	)
 
+	assert os.path.isfile(
+		join(out_path, "summary.tsv")
+	)
 
 def test_summary_pipe_run_nested():
 	clean_out(out_path)
-	# Superficial testing of run_nested
-	summary_runner = summary_runner()
 
-	summary_runner.run_nested(example_path, out_path)
+	# Superficial testing of run_single
+	summary_runner = Summary_Runner()
+
+	summary_runner.run_nested(
+		in_root_dir=example_path,
+		out_root_dir=out_path,
+	)
 
 	assert os.path.isfile(
-		join(out_path, f"{basename(example_path)}_summary_all_db_annotations.json")
+		join(out_path, "summary.tsv")
 	)
 	assert os.path.isfile(
-		join(out_path, "example_nested", "example_nested_summary_all_db_annotations.json")
+		join(out_path, "example_nested", "summary.tsv")
 	)
 
 
@@ -135,36 +149,35 @@ def test_summary_pipe_run():
 	clean_out(out_path)
 
 	# Superficial testing of run
-	summary_runner = summary_runner(workers=2)
+	summary_runner = Summary_Runner(workers=2)
 
 	summary_runner.run(in_paths=[example_path], out_paths=[out_path])
 	summary_runner.compute_futures()
 
-	assert summary_runner.processed_in == [example_path]
+	assert summary_runner.processed_in == [(example_path, example_path)]
 	assert summary_runner.processed_out == [
-		join(out_path, f"{basename(example_path)}_summary_all_db_annotations.json")
+		join(out_path, "summary.tsv")
 	]
 
 
 def test_summary_pipe_main():
 	args = argparse.Namespace(
-		in_dir=example_path,
+		in_dir_annotations=example_path,
+		in_dir_quantification=example_path,
 		out_dir=out_path,
-		nested=True,
+		nested=False,
 		workers=1,
 		save_log=True,
 		verbosity=0,
-		summary_args=None,
+		summary_arguments=None,
 	)
 
 	summary_pipe_main(args, unknown_args=[])
 
-	assert os.path.isfile(join(out_path, "example_files_summary_all_db_annotations.json"))
 	assert os.path.isfile(
-		join(out_path, "example_nested", "example_nested_summary_all_db_annotations.json")
+		join(out_path, "summary.tsv")
 	)
 
 
-"""
 def test_clean():
 	clean_out(out_path)

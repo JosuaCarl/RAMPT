@@ -505,9 +505,17 @@ class Pipe_Step(Step_Configuration):
 					additional_arguments[argument] = value
 
 			# Activate right computation function
+			if isinstance(in_path, tuple) or isinstance(in_path, list):
+				in_path_example = in_path[0]
+			elif isinstance(in_path, dict):
+				in_path_example = list(in_path.values())[0]
+			else:
+				in_path_example = in_path
+
+
 			if self.nested:
 				self.run_nested(in_root_dir=in_path, out_root_dir=out_path)
-			elif os.path.isdir(in_path):
+			elif os.path.isdir(in_path_example):
 				self.run_directory(in_path=in_path, out_path=out_path, **additional_arguments)
 			else:
 				self.run_single(in_path=in_path, out_path=out_path, **additional_arguments)

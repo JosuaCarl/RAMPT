@@ -37,21 +37,21 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
 	n_workers = get_value(args, "workers", 1)
 	save_log = get_value(args, "save_log", False)
 	verbosity = get_value(args, "verbosity", 1)
-	additional_args = get_value(args, "analysis_arguments")
+	additional_args = get_value(args, "summary_arguments")
 	additional_args = additional_args if additional_args else unknown_args
 
 	# Conversion
-	analysis_runner = Summary_Runner(
+	summary_runner = Summary_Runner(
 		overwrite=overwrite,
 		save_log=save_log,
 		additional_args=additional_args,
 		verbosity=verbosity,
 		nested=nested,
 		workers=n_workers,
-		scheduled_in=(in_dir_quantification, in_dir_annotations),
+		scheduled_in=[(in_dir_quantification, in_dir_annotations)],
 		scheduled_out=out_dir,
 	)
-	return analysis_runner.run()
+	return summary_runner.run()
 
 
 class Summary_Runner(Pipe_Step):
@@ -84,7 +84,7 @@ class Summary_Runner(Pipe_Step):
 			self.update(kwargs)
 		self.overwrite = overwrite
 		self.name = "analysis"
-		self.summary = pd.DataFrame()
+		self.summary = None
 
 	def search_quantification_file(
 		self,
@@ -164,6 +164,7 @@ class Summary_Runner(Pipe_Step):
 			"gnps_annotations": gnps_annotations,
 		}
 
+
 	def read_sirius_df(self, file_path: StrPath, filter_columns: list | str) -> pd.DataFrame:
 		df = pd.read_csv(file_path, sep="\t")
 		df.replace("-Infinity", -np.inf, inplace=True)
@@ -187,7 +188,7 @@ class Summary_Runner(Pipe_Step):
 		df = pd.read_csv(quantification_file)
 		df.columns = [column.replace("row ", "") for column in df.columns]
 
-		if summary:
+		if summary is not None:
 			summary.merge(df, how="outer")
 		else:
 			summary = df
@@ -205,31 +206,34 @@ class Summary_Runner(Pipe_Step):
 		match annotation_file_type:
 			case "formula_identifications_file":
 				df = self.read_sirius_df(file_path=annotation_file, filter_columns=["ZodiacScore"])
-				df = df[["molecularFormula", "ZodiacScore"]]
+				df = df[["mappingFeatureId", "molecularFormula", "ZodiacScore"]]
 				df = df.rename(
 					columns={
+						"mappingFeatureId": "ID",
 						"molecularFormula": "Sirius_formula",
 						"ZodiacScore": "Sirius_formula_confidence",
 					}
 				)
 
 			case "canopus_formula_summary_file":
-				df = self.read_sirius_df(file_path=annotation_file, filter_columns=["Probability"])
+				df = self.read_sirius_df(file_path=annotation_file, filter_columns="Probability")
 				df = df[
 					[
 						column
 						for column in df.columns
-						if (column.startswith("NPC") or column.startswith("ClassyFire"))
+						if column == "mappingFeatureId" or
+						(column.startswith("NPC") or column.startswith("ClassyFire"))
 						and not column.endswith("all classifications")
 					]
 				]
 
 				rename_dict = {}
 				for column in df.columns:
-					tool, name = column.split("#", maxsplit=1)
-					name = name.lower().replace(" ", "_").replace("probability", "confidence")
-					rename_dict[column] = f"Sirius_formula_{tool}_{name}"
-				
+					if "#" in column:
+						tool, name = column.split("#", maxsplit=1)
+						name = name.lower().replace(" ", "_").replace("probability", "confidence")
+						rename_dict[column] = f"Sirius_formula_{tool}_{name}"
+				rename_dict.update({"mappingFeatureId": "ID"})
 				df = df.rename(columns=rename_dict)
 
 			case "structure_identifications_file":
@@ -239,6 +243,7 @@ class Summary_Runner(Pipe_Step):
 				)
 				df = df[
 					[
+						"mappingFeatureId",
 						"smiles",
 						"links",
 						"ConfidenceScoreExact",
@@ -248,6 +253,7 @@ class Summary_Runner(Pipe_Step):
 				]
 				df = df.rename(
 					columns={
+						"mappingFeatureId": "ID", 
 						"smiles": "Sirius_structure_smiles",
 						"links": "Sirius_structure_links",
 						"ConfidenceScoreExact": "Sirius_structure_confidence",
@@ -257,32 +263,36 @@ class Summary_Runner(Pipe_Step):
 				)
 
 			case "canopus_structure_summary_file":
-				df = self.read_sirius_df(file_path=annotation_file, filter_columns=["Probability"])
+				df = self.read_sirius_df(file_path=annotation_file, filter_columns="Probability")
 				df = df[
 					[
 						column
 						for column in df.columns
-						if (column.startswith("NPC") or column.startswith("ClassyFire"))
+						if column == "mappingFeatureId" or
+						(column.startswith("NPC") or column.startswith("ClassyFire"))
 						and not column.endswith("all classifications")
 					]
 				]
 
 				rename_dict = {}
 				for column in df.columns:
-					tool, name = column.split("#", maxsplit=1)
-					name = name.lower().replace(" ", "_").replace("probability", "confidence")
-					rename_dict[column] = f"Sirius_structure_{tool}_{name}"
+					if "#" in column:
+						tool, name = column.split("#", maxsplit=1)
+						name = name.lower().replace(" ", "_").replace("probability", "confidence")
+						rename_dict[column] = f"Sirius_structure_{tool}_{name}"
+				rename_dict.update({"mappingFeatureId": "ID"})
 				df = df.rename(columns=rename_dict)
 
 			case "denovo_structure_identifications_file":
 				df = self.read_sirius_df(
 					file_path=annotation_file,
-					filter_columns=["ConfidenceScoreExact", "ConfidenceScoreApproximate"],
+					filter_columns=["CSI:FingerIDScore"],
 				)
-				df = df[["smiles", "CSI:FingerIDScore"]]
+				df = df[["mappingFeatureId", "smiles", "CSI:FingerIDScore"]]
 				df = df.rename(
 					columns={
-						"smiles": "Sirius_structure_smiles",
+						"mappingFeatureId": "ID",
+						"smiles": "Sirius_denovo_structure_smiles",
 						"CSI:FingerIDScore": "Sirius_denovo_structure_CSI:FingerIDScore",
 					}
 				)
@@ -462,7 +472,7 @@ class Summary_Runner(Pipe_Step):
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(
-		prog="msconv_pipe.py",
+		prog="summary_pipe.py",
 		description="Conversion of manufacturer MS files to .mzML or .mzXML target_format.\
                                              The folder structure is mimiced at the place of the output.",
 	)
@@ -474,7 +484,7 @@ if __name__ == "__main__":
 	parser.add_argument("-w", "--workers", required=False, type=int)
 	parser.add_argument("-s", "--save_log", required=False, action="store_true")
 	parser.add_argument("-v", "--verbosity", required=False, type=int)
-	parser.add_argument("-msconv", "--analysis_arguments", required=False, nargs=argparse.REMAINDER)
+	parser.add_argument("-summary", "--summary_arguments", required=False, nargs=argparse.REMAINDER)
 
 	args, unknown_args = parser.parse_known_args()
 	main(args=args, unknown_args=unknown_args)
