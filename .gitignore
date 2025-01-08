@@ -167,7 +167,6 @@ cython_debug/
 ## Folders
 data/
 .conda/
-docsource/_build/
 substep_batches/
 tests/out/*
 backup/

@@ -52,17 +52,38 @@ jobs:
     - name: Testing general
       run: |
         uv run pytest ./tests/test_01_general.py
+    
+    - name: Testing summary
+      run: |
+        uv run pytest ./tests/test_06_summary.py
 
   docs:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - uses: ammaraskar/sphinx-action@master
+    - uses: actions/checkout@v3
+
+    - name: Build HTML
+      uses: ammaraskar/sphinx-action@master
       with:
         docs-folder: "docsource/"
+
     - name: "Copy to docs"
       run: |
         cp -r docsource/_build/html/* docs/
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: html-docs
+        path: docs/
+
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: docs/
+    
 
   pages:
     runs-on: ubuntu-20.04
