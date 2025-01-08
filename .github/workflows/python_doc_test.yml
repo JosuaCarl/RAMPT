@@ -65,20 +65,20 @@ jobs:
     - name: Build HTML
       uses: ammaraskar/sphinx-action@master
       with:
-        docs-folder: "docsource/"
+        docs-folder: "docs/"
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
         name: html-docs
-        path: docsource/build/html/
+        path: docs/_build/html/
 
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
       if: github.ref == 'refs/heads/main'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: docsource/build/html
+        publish_dir: docs/_build/html
     
 
   pages:
