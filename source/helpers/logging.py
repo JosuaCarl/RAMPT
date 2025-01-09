@@ -82,6 +82,3 @@ def error(
 		raise error_type(f"[{get_now()}][{program}][ERROR]\t{message}", *args)
 	else:
 		return error_type(f"[{get_now()}][{program}][ERROR]\t{message}", *args)
-
-
-ValueError()
