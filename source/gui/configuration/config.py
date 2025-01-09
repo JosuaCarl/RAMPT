@@ -116,9 +116,15 @@ def generic_step(
 	# Add out_paths as relatives to in_path if none is given
 	else:
 		out_paths = []
-		for in_path in in_paths:
-			in_dir = get_directory(in_path)
-			out_paths.append(os.path.join(in_dir, out_path_target))
+		try:
+			for in_path in in_paths:
+				in_dir = get_directory(in_path)
+				out_paths.append(os.path.join(in_dir, out_path_target))
+		except TypeError as e:
+			raise error(
+				message=f"No input in in_paths and {step_instance.__class__.__name__}.scheduled_in",
+				error_type=TypeError,
+			) from e
 
 	# Run step
 	step_instance.run(in_paths=in_paths, out_paths=out_paths, **kwargs)
