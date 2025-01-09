@@ -73,7 +73,7 @@ def get_directory(path: StrPath) -> StrPath:
 	if os.path.isdir(directory):
 		return directory
 	else:
-		error(message=f"{path} is not a file or directory", error=ValueError)
+		error(message=f"{path} is not a file or directory", error_type=ValueError)
 
 
 # List operations
@@ -136,7 +136,7 @@ def change_case_str(s: str, range, conversion: str) -> str:
 		case _:
 			error(
 				message=f"conversion {conversion} is invalid. Choose upper/lower as a valid conversion.",
-				error=ValueError,
+				error_type=ValueError,
 			)
 
 	str_list[range] = selection
@@ -298,14 +298,18 @@ def open_last_line_with_content(filepath: str) -> str:
 	while n < 1e3:
 		try:
 			line = open_last_n_line(filepath=filepath, n=n)
-		except OSError:
-			error(message=f"File {filepath} does not contain a line with content", error=ValueError)
+		except OSError as e:
+			raise error(
+				message=f"File {filepath} does not contain a line with content",
+				error_type=ValueError,
+				raise_error=False
+			) from e
 		if regex.search(r".*\S.*", line):
 			return line
 		n += 1
 	error(
 		message=f"File {filepath} does not contain a line with content for 1000 lines",
-		error=ValueError,
+		error_type=ValueError,
 	)
 
 

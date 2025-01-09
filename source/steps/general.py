@@ -90,7 +90,7 @@ def set_value(instance: object | dict, key, new_value, add_key: bool):
 		else:
 			error(
 				message=f"The key={key} is not found in instance={instance} and add_key={add_key}.",
-				error=ValueError,
+				error_type=ValueError,
 			)
 
 	return instance
@@ -416,7 +416,7 @@ class Pipe_Step(Step_Configuration):
 		"""
 		error(
 			message="The run_single function seems to be missing in local implementation",
-			error=NotImplementedError,
+			error_type=NotImplementedError,
 		)
 
 	def run_directory(self, **kwargs):
@@ -428,7 +428,7 @@ class Pipe_Step(Step_Configuration):
 		"""
 		error(
 			message="The run_directory function seems to be missing in local implementation",
-			error=NotImplementedError,
+			error_type=NotImplementedError,
 		)
 
 	def run_nested(self, **kwargs):
@@ -440,7 +440,7 @@ class Pipe_Step(Step_Configuration):
 		"""
 		error(
 			message="The run_nested function seems to be missing in local implementation",
-			error=NotImplementedError,
+			error_type=NotImplementedError,
 		)
 
 	def run(self, in_paths: list | StrPath = [], out_paths: list | StrPath = [], **kwargs) -> list:

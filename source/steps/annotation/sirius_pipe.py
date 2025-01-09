@@ -101,7 +101,7 @@ class Sirius_Runner(Pipe_Step):
 			else:
 				error(
 					message=f"{config} directory does not contain sirius_config.txt",
-					error=ValueError,
+					error_type=ValueError,
 				)
 		if os.path.isfile(config):
 			with open(config, "r") as config_file:

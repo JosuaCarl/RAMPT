@@ -128,7 +128,7 @@ class MZmine_Runner(Pipe_Step):
 		if not os.path.isfile(self.batch):
 			error(
 				message=f"Batch path {self.batch} is no file. Please point to a valid mzbatch file.",
-				error=ValueError,
+				error_type=ValueError,
 			)
 
 	def run_single(self, in_path: StrPath, out_path: StrPath, batch: StrPath = None) -> bool:

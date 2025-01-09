@@ -103,7 +103,7 @@ class GNPS_Runner(Pipe_Step):
 				return json.loads(response_json)
 		error(
 			message=f"Query <{query}> was not found in mzmine_log: Please provide a valid string or path.",
-			error=ValueError,
+			error_type=ValueError,
 		)
 
 	def extract_task_info(self, query: str, mzmine_log: StrPath = None) -> dict:
@@ -180,7 +180,7 @@ class GNPS_Runner(Pipe_Step):
 		else:
 			error(
 				message="mzmine_log reports an unsuccessful job submission to GNPS by mzmine.",
-				error=ValueError,
+				error_type=ValueError,
 			)
 
 		url = f"https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={task_id}"
@@ -284,7 +284,7 @@ class GNPS_Runner(Pipe_Step):
 					mzmine_log=mzmine_log, gnps_response=gnps_response
 				)
 			else:
-				error(message=str(ve), error=ValueError)
+				error(message=str(ve), error_type=ValueError)
 
 		if status:
 			dir_name = (
