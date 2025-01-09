@@ -170,7 +170,9 @@ def test_msconv_pipe_main():
 		data = f.read()
 		data = BeautifulSoup(data, "xml")
 		file = data.find("sourceFile")
-		assert os.path.join(file.get("location"), file.get("name")) == "file:///" + join(mock_path, "minimal_file.mzML")
+		assert os.path.join(file.get("location"), file.get("name")) == "file:///" + join(
+			mock_path, "minimal_file.mzML"
+		)
 
 	# Test XML
 	clean_out(out_path)
