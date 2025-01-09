@@ -61,9 +61,9 @@ def warn(message: str = "Warning", program: str = program_name, *args, **kwargs)
 	warnings.warn(f"[{get_now()}][{program}][WARNING]\t{message}", *args, **kwargs)
 
 
-def error(message: str = "Error", error=ValueError, program: str = program_name, *args, **kwargs):
+def error(message: str = "Error", error_type=ValueError, raise_error:bool = False, program: str = program_name, *args, **kwargs):
 	"""
-	Raise an Error.
+	Pass an error to raise at approporiate place, or raise.
 
 	:param message: Error message, defaults to "Error"
 	:type message: str, optional
@@ -72,4 +72,7 @@ def error(message: str = "Error", error=ValueError, program: str = program_name,
 	:param program: Name of the program to report for, defaults to program_name
 	:type program: str, optional
 	"""
-	raise (error(f"[{get_now()}][{program}][ERROR]\t{message}", *args, **kwargs))
+	if raise_error:
+		raise error_type(f"[{get_now()}][{program}][ERROR]\t{message}", *args, **kwargs)
+	else:
+		return error_type(f"[{get_now()}][{program}][ERROR]\t{message}", *args, **kwargs)
