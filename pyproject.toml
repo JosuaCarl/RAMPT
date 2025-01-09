@@ -1,7 +1,7 @@
 [project]
 name = "mine2sirius-pipe"
 description = "mzMine to SIRIUS pipeline with additional analysis"
-requires-python = "<4.0,>=3.12"
+requires-python = "<3.13,>=3.12"
 dependencies = [
     "numpy<2.0.0,>=1.26.4",
     "scipy<2.0.0,>=1.14.1",
