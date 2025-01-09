@@ -124,7 +124,7 @@ def generic_step(
 			raise error(
 				message=f"No input in in_paths and {step_instance.__class__.__name__}.scheduled_in",
 				error_type=TypeError,
-				raise_error=False
+				raise_error=False,
 			) from e
 
 	# Run step
