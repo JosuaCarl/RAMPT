@@ -22,9 +22,7 @@ def test_generic_step():
 		assert True
 
 	try:
-		generic_step(
-			step_class=Pipe_Step, step_params={}, global_params={}, in_paths=[mock_path]
-		)
+		generic_step(step_class=Pipe_Step, step_params={}, global_params={}, in_paths=[mock_path])
 	except NotImplementedError:
 		assert True
 
