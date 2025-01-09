@@ -57,3 +57,5 @@ line-length = 100
 quote-style = "double"
 indent-style = "tab"
 docstring-code-format = true
+line-ending = "auto"
+skip-magic-trailing-comma = true

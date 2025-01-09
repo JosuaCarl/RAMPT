@@ -7,13 +7,16 @@ Analysis of feature quantification and annotation.
 import os
 import argparse
 
+import pandas as pd
+import numpy as np
+
 from os.path import join
 from tqdm.auto import tqdm
 
 import source.helpers as helpers
 from source.helpers.types import StrPath
 from source.steps.general import Pipe_Step, get_value
-
+from source.steps.analysis.statistics import *
 
 def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
 	"""
@@ -79,92 +82,68 @@ class Analysis_Runner(Pipe_Step):
 			self.update(kwargs)
 		self.overwrite = overwrite
 		self.name = "analysis"
+		self.analysis = None
 
-	def search_files(
+
+
+	def build_z_score(self, summary: pd.DataFrame):
+		pass
+
+
+	def analyze_difference(self, summary: pd.DataFrame):
+		pass
+
+
+	def complete_analysis(self, summary: pd.DataFrame, analysis: pd.DataFrame):
+		pass
+
+
+
+	def run_single(
 		self,
-		dir: StrPath,
-		quantification_file: StrPath = None,
-		canopus_formula_summary_file: StrPath = None,
-		canopus_structure_summary_file: StrPath = None,
-		denovo_structure_identifications_file: StrPath = None,
-		formula_identifications_file: StrPath = None,
-		structure_identifications_file: StrPath = None,
-		gnps_annotations: StrPath = None,
-	) -> tuple[StrPath, StrPath, StrPath, StrPath, StrPath, StrPath, StrPath]:
+		in_path: StrPath,
+		out_path: StrPath,
+		annotation_file_type: str,
+		summary: pd.DataFrame = None,
+	):
 		"""
-		Check for annotation and quantification files.
-
-		:param dir: Directory to search in
-		:type dir: StrPath
-		:param quantification_file: Quantification table path, defaults to None
-		:type quantification_file: StrPath, optional
-		:param canopus_formula_summary_file: Canopus formula table path, defaults to None
-		:type canopus_formula_summary_file: StrPath, optional
-		:param canopus_structure_summary_file: Canopus structure table path, defaults to None
-		:type canopus_structure_summary_file: StrPath, optional
-		:param denovo_structure_identifications_file: DeNovo structure table path, defaults to None
-		:type denovo_structure_identifications_file: StrPath, optional
-		:param formula_identifications_file: Formula identifications table path, defaults to None
-		:type formula_identifications_file: StrPath, optional
-		:param structure_identifications_file: Structure identifications table path, defaults to None
-		:type structure_identifications_file: StrPath, optional
-		:param gnps_annotations: _description_, defaults to None
-		:type gnps_annotations: StrPath, optional
-		:return: _description_
-		:rtype: bool
-		"""
-
-		for root, dirs, files in os.walk(dir):
-			for file in files:
-				if not quantification_file and file.endswith("_quant.csv"):
-					quantification_file = join(root, file)
-				elif not canopus_formula_summary_file and file == "canopus_formula_summary.tsv":
-					canopus_formula_summary_file = join(root, file)
-				elif not canopus_structure_summary_file and file == "canopus_structure_summary.tsv":
-					canopus_structure_summary_file = join(root, file)
-				elif (
-					not denovo_structure_identifications_file
-					and file == "denovo_structure_identifications.tsv"
-				):
-					denovo_structure_identifications_file = join(root, file)
-				elif not formula_identifications_file and file == "formula_identifications.tsv":
-					formula_identifications_file = join(root, file)
-				elif not structure_identifications_file and file == "structure_identifications.tsv":
-					structure_identifications_file = join(root, file)
-				elif not gnps_annotations and file.endswith("_gnps_all_db_annotations.json"):
-					gnps_annotations = join(root, file)
-		return (
-			quantification_file,
-			canopus_formula_summary_file,
-			canopus_structure_summary_file,
-			denovo_structure_identifications_file,
-			formula_identifications_file,
-			structure_identifications_file,
-			gnps_annotations,
-		)
-
-	def run_single(self, in_path: StrPath, out_path: StrPath):
-		"""
-		Analyze a set of annotations with regards to their expression.
+		Add the annotations into a quantification file.
 
 		:param in_path: Path to scheduled file.
 		:type in_path: str
 		:param out_path: Path to output directory.
 		:type out_path: str
 		"""
-		out_file_name = ".".join(os.path.basename(in_path).split(".")[:-1]) + self.target_format
+		summary = summary if summary else self.summary
+		in_path_quantification, in_path_annotation = self.sort_in_paths(in_paths=in_path)
+		out_path = join(out_path, "summary.tsv") if os.path.isdir(out_path) else out_path
 
-		cmd = (
-			rf'"{self.exec_path}" --{self.target_format[1:]} -e {self.target_format} --64 '
-			+ rf'-o "{out_path}" --outfile "{out_file_name}" "{in_path}" {" ".join(self.additional_args)}'
+		summary = self.add_quantification(
+			quantification_file=in_path_quantification, summary=summary
+		)
+		summary = self.add_annotation(
+			annotation_file=in_path_annotation,
+			annotation_file_type=annotation_file_type,
+			summary=summary,
 		)
 
-		if not os.path.isfile(out_path):
-			out_path = os.path.join(out_path, out_file_name)
+		summary.to_csv(out_path, sep="\t")
 
-		super().compute(cmd=cmd, in_path=in_path, out_path=out_path)
+		cmd = f"echo 'Added annotation from {in_path_annotation} to {in_path_quantification}'"
 
-	def run_directory(self, in_path: str, out_path: str):
+		super().compute(
+			cmd=cmd, in_path=(in_path_quantification, in_path_annotation), out_path=out_path
+		)
+
+
+	def run_directory(
+		self,
+		in_path: StrPath,
+		out_path: StrPath,
+		summary: pd.DataFrame = None,
+		quantification_file: StrPath = None,
+		annotation_files: dict[str, StrPath] = None,
+	):
 		"""
 		Convert all matching files in a folder.
 
@@ -173,18 +152,26 @@ class Analysis_Runner(Pipe_Step):
 		:param out_path: Path to output directory.
 		:type out_path: str
 		"""
-		verbose_tqdm = self.verbosity >= 2
-		for entry in tqdm(os.listdir(in_path), disable=verbose_tqdm, desc="Converting folder"):
-			entry_path = join(in_path, entry)
-			hypothetical_out_path = join(
-				out_path, helpers.replace_file_ending(entry, self.target_format)
-			)
-			in_valid, out_valid = self.select_for_conversion(
-				in_path=entry_path, out_path=hypothetical_out_path
-			)
+		summary = summary if summary else self.summary
+		in_path_quantification, in_path_annotation = self.sort_in_paths(in_paths=in_path)
+		out_path = join(out_path, "summary.tsv") if os.path.isdir(out_path) else out_path
 
-			if in_valid and out_valid:
-				self.run_single(in_path=entry_path, out_path=out_path)
+		if not quantification_file:
+			quantification_file = self.search_quantification_file(dir=in_path_quantification)
+		if not annotation_files:
+			annotation_files = self.search_annotation_files(dir=in_path_annotation)
+
+		summary = self.add_quantification(quantification_file=quantification_file, summary=summary)
+		summary = self.add_annotations(annotation_files=annotation_files, summary=summary)
+
+		summary.to_csv(out_path, sep="\t")
+
+		cmd = f"echo 'Added annotation from {in_path_annotation} to {in_path_quantification}'"
+
+		super().compute(
+			cmd=cmd, in_path=(in_path_quantification, in_path_annotation), out_path=out_path
+		)
+
 
 	def run_nested(self, in_root_dir: StrPath, out_root_dir: StrPath, recusion_level: int = 0):
 		"""
@@ -201,26 +188,23 @@ class Analysis_Runner(Pipe_Step):
 		verbose_tqdm = self.verbosity >= recusion_level + 2
 		made_out_root_dir = False
 
-		for entry in tqdm(
-			os.listdir(in_root_dir), disable=verbose_tqdm, desc="Schedule conversions"
-		):
-			entry_path = join(in_root_dir, entry)
-			hypothetical_out_path = join(
-				out_root_dir, helpers.replace_file_ending(entry, self.target_format)
-			)
-			in_valid, out_valid = self.select_for_conversion(
-				in_path=entry_path, out_path=hypothetical_out_path
-			)
+		for root, dirs, files in os.walk(in_root_dir):
+			quantification_file = self.search_quantification_file(dir=root)
+			annotation_files = self.search_annotation_files(dir=root)
 
-			if in_valid and out_valid:
+			if quantification_file and [
+				val for val in annotation_files.values() if val is not None
+			]:
 				if not made_out_root_dir:
 					os.makedirs(out_root_dir, exist_ok=True)
 					made_out_root_dir = True
-				self.run_single(in_path=entry_path, out_path=out_root_dir)
-			elif os.path.isdir(entry_path) and not in_valid:
+
+				self.run_directory(in_path=root, out_path=out_root_dir)
+
+			for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
 				self.run_nested(
-					in_root_dir=entry_path,
-					out_root_dir=join(out_root_dir, entry),
+					in_root_dir=join(in_root_dir, dir),
+					out_root_dir=join(out_root_dir, dir),
 					recusion_level=recusion_level + 1,
 				)
 
