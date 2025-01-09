@@ -60,7 +60,7 @@ jobs:
     - name: Sphinx apidoc
       run: |
           uv run sphinx-apidoc --remove-old -o docs . plz-out .taipy
-          cp "./docs_statics/index.rst" ./docs
+          cp "./statics/docs/index.rst" ./docs
 
     - name: Build HTML
       run: |
