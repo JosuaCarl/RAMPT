@@ -45,9 +45,10 @@ def test_find_features():
 	clean_out(out_path)
 
 	find_features(
-		community_formatted_data=join(example_path, "minimal.mzML"),
+		community_formatted_data=join(example_path, "example_neg.mzXML"),
 		feature_finding_out=out_path,
-		step_params={},
+		mzmine_batch=join(batch_path, "minimal.mzbatch"),
+		step_params={"verbosity": 4, "login": "--user joca"},
 		global_params={},
 	)
 
@@ -65,7 +66,7 @@ def test_annotate_gnps():
 		global_params={},
 	)
 
-	assert os.path.isfile(join(out_path, "out_gnps_all_db_annotations.json"))
+	assert os.path.isfile(join(out_path, "example_files_gnps_all_db_annotations.json"))
 
 
 def test_annotate_sirius():
@@ -79,7 +80,7 @@ def test_annotate_sirius():
 		global_params={},
 	)
 
-	assert os.path.isfile(join(out_path, "out_gnps_all_db_annotations.json"))
+	assert os.path.isfile(join(out_path, "projectspace.sirius"))
 
 
 def test_summarize_annotations():
@@ -94,9 +95,19 @@ def test_summarize_annotations():
 		global_params={},
 	)
 
-	assert os.path.isfile(join(out_path, "out_gnps_all_db_annotations.json"))
+	assert os.path.isfile(join(out_path, "summary.tsv"))
 
 
 def test_analyze_difference():
-	analyze_difference()
-	pass
+	analyze_difference(
+		summary_data=example_path,
+		analysis_out=out_path,
+		step_params={},
+		global_params={}
+	)
+	
+	assert os.path.isfile(join(out_path, "analysis.tsv"))
+
+
+def test_clean():
+	clean_out(out_path)
