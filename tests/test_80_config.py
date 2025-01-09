@@ -100,12 +100,9 @@ def test_summarize_annotations():
 
 def test_analyze_difference():
 	analyze_difference(
-		summary_data=example_path,
-		analysis_out=out_path,
-		step_params={},
-		global_params={}
+		summary_data=example_path, analysis_out=out_path, step_params={}, global_params={}
 	)
-	
+
 	assert os.path.isfile(join(out_path, "analysis.tsv"))
 
 
