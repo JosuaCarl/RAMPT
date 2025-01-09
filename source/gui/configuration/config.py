@@ -98,7 +98,7 @@ def generic_step(
 	global_params: dict,
 	in_paths: str | list = None,
 	out_paths: str | list = None,
-	out_path_target: StrPath = None,
+	out_path_target: StrPath = ".",
 	return_attributes: list = ["processed_out"],
 	**kwargs,
 ) -> tuple[Any] | Any:
@@ -110,22 +110,22 @@ def generic_step(
 	if in_paths:
 		in_paths = to_list(in_paths)
 		step_instance.scheduled_in = []
+	elif not step_instance.scheduled_in:
+		raise error(
+			message=f"No input in in_paths and {step_instance.__class__.__name__}.scheduled_in",
+			error_type=TypeError,
+			raise_error=False
+		)
+	
+	# Add out_paths as relatives to in_path if none is given
 	if out_paths:
 		out_paths = to_list(out_paths)
 		step_instance.scheduled_out = []
-	# Add out_paths as relatives to in_path if none is given
 	else:
 		out_paths = []
-		try:
-			for in_path in in_paths:
-				in_dir = get_directory(in_path)
-				out_paths.append(os.path.join(in_dir, out_path_target))
-		except TypeError as e:
-			raise error(
-				message=f"No input in in_paths and {step_instance.__class__.__name__}.scheduled_in",
-				error_type=TypeError,
-				raise_error=False,
-			) from e
+		for in_path in in_paths:
+			in_dir = get_directory(in_path)
+			out_paths.append(os.path.join(in_dir, out_path_target))
 
 	# Run step
 	step_instance.run(in_paths=in_paths, out_paths=out_paths, **kwargs)

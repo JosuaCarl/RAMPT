@@ -73,8 +73,8 @@ def error(
 
 	:param message: Error message, defaults to "Error"
 	:type message: str, optional
-	:param error: Error class
-	:type error: Error
+	:param error_type: Error class
+	:type error_type: Error
 	:param program: Name of the program to report for, defaults to program_name
 	:type program: str, optional
 	"""
