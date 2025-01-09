@@ -36,27 +36,7 @@ jobs:
     - name: Install project dependencies
       run: |
         uv sync --all-extras --dev
-    
-    - name: Ruff checking
-      run: |
-        uv run ruff check --output-format=github
-
-    - name: Ruff formatting
-      run: |
-          uv run ruff format
   
-    - name: Testing helpers
-      run: |
-        uv run pytest ./tests/test_00_helpers.py
-
-    - name: Testing general
-      run: |
-        uv run pytest ./tests/test_01_general.py
-    
-    - name: Testing summary
-      run: |
-        uv run pytest ./tests/test_06_summary.py
-
     - name: Sphinx apidoc
       run: |
           uv run sphinx-apidoc --remove-old -o docs . plz-out .taipy

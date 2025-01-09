@@ -1,0 +1,55 @@
+name: Testing
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+          version: "0.5.15"
+          enable-cache: true
+
+    - name: "Set up Python"
+      uses: actions/setup-python@v5
+      with:
+        python-version-file: "pyproject.toml"
+
+    - name: Install project dependencies
+      run: |
+        uv sync --all-extras --dev
+    
+    - name: Ruff checking
+      run: |
+        uv run ruff check --output-format=github
+
+    - name: Ruff formatting
+      run: |
+          uv run ruff format
+  
+    - name: Testing helpers
+      run: |
+        uv run pytest ./tests/test_00_helpers.py
+
+    - name: Testing general
+      run: |
+        uv run pytest ./tests/test_01_general.py
+    
+    - name: Testing summary
+      run: |
+        uv run pytest ./tests/test_06_summary.py
