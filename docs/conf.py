@@ -12,7 +12,7 @@ import toml
 
 sys.path.insert(0, os.path.abspath(".."))
 with open(os.path.join("..", "pyproject.toml"), "r") as project_file:
-    project_config = toml.load(project_file)["project"]
+	project_config = toml.load(project_file)["project"]
 
 project = project_config["name"]
 author = ", ".join([author.get("name") for author in project_config["authors"]])
