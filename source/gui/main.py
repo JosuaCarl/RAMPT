@@ -14,10 +14,7 @@ pages = {
 	"configuration": root,
 }
 
-stylekit = {
-	"color_paper_light": "#EFE6F1",
-	"color_background_light": "#EBE5EC",
-}
+stylekit = {"color_paper_light": "#EFE6F1", "color_background_light": "#EBE5EC"}
 
 
 if __name__ == "__main__":

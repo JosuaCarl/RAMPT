@@ -166,9 +166,7 @@ job = None
 data_node = None
 
 
-style = {
-	".sticky-part": {"position": "sticky", "align-self": "flex-start", "top": "10px"},
-}
+style = {".sticky-part": {"position": "sticky", "align-self": "flex-start", "top": "10px"}}
 
 with tgb.Page(style=style) as root:
 	with tgb.layout(columns="1 3 1", columns__mobile="1", gap="2.5%"):

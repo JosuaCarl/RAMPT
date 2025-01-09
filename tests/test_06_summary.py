@@ -135,10 +135,7 @@ def test_summary_pipe_run_directory():
 	# Superficial testing of run_single
 	summary_runner = Summary_Runner()
 
-	summary_runner.run_directory(
-		in_path=example_path,
-		out_path=out_path,
-	)
+	summary_runner.run_directory(in_path=example_path, out_path=out_path)
 
 	assert os.path.isfile(join(out_path, "summary.tsv"))
 
@@ -149,10 +146,7 @@ def test_summary_pipe_run_nested():
 	# Superficial testing of run_single
 	summary_runner = Summary_Runner()
 
-	summary_runner.run_nested(
-		in_root_dir=example_path,
-		out_root_dir=out_path,
-	)
+	summary_runner.run_nested(in_root_dir=example_path, out_root_dir=out_path)
 
 	assert os.path.isfile(join(out_path, "summary.tsv"))
 	assert os.path.isfile(join(out_path, "example_nested", "summary.tsv"))

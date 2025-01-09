@@ -98,9 +98,7 @@ def main():
 			pass
 		case "linux":
 			if install_msconvert and not tool_available(executable="msconvert"):
-				download_extract_zip(
-					msconvert_sources,
-				)
+				download_extract_zip(msconvert_sources)
 		case _:
 			raise (
 				SystemError(

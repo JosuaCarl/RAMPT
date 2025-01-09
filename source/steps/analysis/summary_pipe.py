@@ -86,9 +86,7 @@ class Summary_Runner(Pipe_Step):
 		self.summary = None
 
 	def search_quantification_file(
-		self,
-		dir: StrPath,
-		quantification_file: StrPath = None,
+		self, dir: StrPath, quantification_file: StrPath = None
 	) -> StrPath:
 		"""
 		Check for quantification file.
@@ -278,8 +276,7 @@ class Summary_Runner(Pipe_Step):
 
 			case "denovo_structure_identifications_file":
 				df = self.read_sirius_df(
-					file_path=annotation_file,
-					filter_columns=["CSI:FingerIDScore"],
+					file_path=annotation_file, filter_columns=["CSI:FingerIDScore"]
 				)
 				df = df[["mappingFeatureId", "smiles", "CSI:FingerIDScore"]]
 				df = df.rename(

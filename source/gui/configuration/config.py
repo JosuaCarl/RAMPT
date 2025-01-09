@@ -223,10 +223,7 @@ def summarize_annotations(
 
 
 def analyze_difference(
-	summary_data: StrPath,
-	analysis_out: StrPath,
-	step_params: dict,
-	global_params: dict,
+	summary_data: StrPath, analysis_out: StrPath, step_params: dict, global_params: dict
 ):
 	return generic_step(
 		step_class=Summary_Runner,
@@ -307,12 +304,7 @@ summarize_annotations_config = Config.configure_task(
 analyze_difference_config = Config.configure_task(
 	"analyze_difference",
 	function=analyze_difference,
-	input=[
-		summary_config,
-		analysis_out_config,
-		analysis_params_config,
-		global_params_config,
-	],
+	input=[summary_config, analysis_out_config, analysis_params_config, global_params_config],
 	output=analysis_config,
 	skippable=False,
 )
