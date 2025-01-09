@@ -66,7 +66,7 @@ def error(
 	error_type=ValueError,
 	raise_error: bool = True,
 	program: str = program_name,
-	*args
+	*args,
 ):
 	"""
 	Pass an error to raise at approporiate place, or raise.
@@ -82,4 +82,6 @@ def error(
 		raise error_type(f"[{get_now()}][{program}][ERROR]\t{message}", *args)
 	else:
 		return error_type(f"[{get_now()}][{program}][ERROR]\t{message}", *args)
+
+
 ValueError()

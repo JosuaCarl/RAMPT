@@ -302,7 +302,7 @@ def open_last_line_with_content(filepath: str) -> str:
 			raise error(
 				message=f"File {filepath} does not contain a line with content",
 				error_type=ValueError,
-				raise_error=False
+				raise_error=False,
 			) from e
 		if regex.search(r".*\S.*", line):
 			return line
