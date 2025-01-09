@@ -40,7 +40,7 @@ def change_work_dir_root(gui, new_root: StrPath = None):
 		if os.path.isdir(new_root):
 			work_dir_root = os.path.normpath(new_root)
 		else:
-			error(message=f"{new_root} is not a valid directory", error=ValueError)
+			error(message=f"{new_root} is not a valid directory", error_type=ValueError)
 	else:
 		work_dir_root = gui._get_config("upload_folder", tempfile.gettempdir())
 

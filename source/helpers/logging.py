@@ -64,7 +64,7 @@ def warn(message: str = "Warning", program: str = program_name, *args, **kwargs)
 def error(
 	message: str = "Error",
 	error_type=ValueError,
-	raise_error: bool = False,
+	raise_error: bool = True,
 	program: str = program_name,
 	*args,
 	**kwargs,
