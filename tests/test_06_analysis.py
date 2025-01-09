@@ -10,7 +10,7 @@ from source.steps.analysis.analysis_pipe import main as analysis_pipe_main
 
 platform = get_platform()
 filepath = get_internal_filepath(__file__)
-out_path, test_path, example_path, batch_path = contruct_common_paths(filepath)
+out_path, mock_path, example_path, batch_path = contruct_common_paths(filepath)
 make_out(out_path)
 
 

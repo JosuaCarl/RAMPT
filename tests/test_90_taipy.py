@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Testing the SIRIUS annotation.
+Testing final Taipy integration.
 """
 
 from tests.common import *
@@ -13,7 +13,7 @@ platform = get_platform()
 filepath = get_internal_filepath(__file__)
 (
 	out_path,
-	test_path,
+	mock_path,
 	example_path,
 	batch_path,
 ) = contruct_common_paths(filepath)

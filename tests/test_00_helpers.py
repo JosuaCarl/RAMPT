@@ -9,7 +9,7 @@ from source.helpers.general import *
 
 platform = get_platform()
 filepath = get_internal_filepath(__file__)
-out_path, test_path, example_path, batch_path = contruct_common_paths(filepath)
+out_path, mock_path, example_path, batch_path = contruct_common_paths(filepath)
 make_out(out_path)
 
 
@@ -93,23 +93,23 @@ def test_get_directory():
 
 # File operations
 def test_open_last_n_line():
-	assert open_last_n_line(filepath=join(test_path, "example_text.txt"), n=1) == "Didididididididi"
-	assert open_last_n_line(filepath=join(test_path, "example_text.txt"), n=2).startswith(
+	assert open_last_n_line(filepath=join(mock_path, "example_text.txt"), n=1) == "Didididididididi"
+	assert open_last_n_line(filepath=join(mock_path, "example_text.txt"), n=2).startswith(
 		"Huhuhuhuhu"
 	)
 	with pytest.raises(OSError):
-		open_last_n_line(filepath=join(test_path, "example_text.txt"), n=5)
+		open_last_n_line(filepath=join(mock_path, "example_text.txt"), n=5)
 
 
 def test_open_last_line_with_content():
 	assert (
-		open_last_line_with_content(filepath=join(test_path, "example_text.txt"))
+		open_last_line_with_content(filepath=join(mock_path, "example_text.txt"))
 		== "Didididididididi"
 	)
 	with pytest.raises(ValueError):
-		open_last_line_with_content(filepath=join(test_path, "empty_file"))
+		open_last_line_with_content(filepath=join(mock_path, "empty_file"))
 	with pytest.raises(ValueError):
-		open_last_line_with_content(filepath=join(test_path, "empty_text.txt"))
+		open_last_line_with_content(filepath=join(mock_path, "empty_text.txt"))
 
 
 def test_replace_file_ending():
@@ -119,7 +119,7 @@ def test_replace_file_ending():
 
 
 # Path nester
-def test_path_nester():
+def mock_path_nester():
 	path_nester = Path_Nester()
 
 	result = path_nester.update_nested_paths(new_paths=["/a/c", "/a/b"])
