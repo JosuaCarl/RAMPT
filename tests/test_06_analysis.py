@@ -76,7 +76,6 @@ def test_analysis_pipe_run_single():
 	assert os.path.isfile(join(out_path, "analysis_negative_mode.tsv"))
 
 
-@pytest.mark.filterwarnings(f"ignore:{data_warning}")
 def test_analysis_pipe_run_directory():
 	clean_out(out_path)
 	# Supoerficial testing of run_directory
@@ -90,7 +89,6 @@ def test_analysis_pipe_run_directory():
 	assert os.path.isfile(join(out_path, "analysis_negative_mode.tsv"))
 
 
-@pytest.mark.filterwarnings(f"ignore:{data_warning}")
 def test_analysis_pipe_run_nested():
 	clean_out(out_path)
 	# Superficial testing of run_nested
@@ -103,7 +101,6 @@ def test_analysis_pipe_run_nested():
 	assert os.path.isfile(join(out_path, "example_nested", "analysis.tsv"))
 
 
-@pytest.mark.filterwarnings(f"ignore:{data_warning}")
 def test_analysis_pipe_run():
 	clean_out(out_path)
 
@@ -118,7 +115,6 @@ def test_analysis_pipe_run():
 	assert analysis_runner.processed_out == [out_path]
 
 
-@pytest.mark.filterwarnings(f"ignore:{data_warning}")
 def test_analysis_pipe_main():
 	args = argparse.Namespace(
 		in_dir=example_path,
