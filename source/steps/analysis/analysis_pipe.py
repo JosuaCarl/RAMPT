@@ -83,6 +83,16 @@ class Analysis_Runner(Pipe_Step):
 		self.name = "analysis"
 		self.analysis = None
 
+	def read_summary(self, file_path: StrPath):
+		"""
+		Read in summary file.
+
+		:param file_path: Path to summary file
+		:type file_path: StrPath
+		"""
+		return pd.read_csv(file_path, sep="\t", index_col=0)
+
+
 	def search_check_peak_info(
 		self,
 		summary: pd.DataFrame,
@@ -104,7 +114,7 @@ class Analysis_Runner(Pipe_Step):
 		:return: Dictionary of positive and negative peaks
 		:rtype: dict
 		"""
-		peak_columns = {"positive": [], "negative": []}
+		peak_columns = {"positive": [], "negative": [], "unknown": []}
 		for column_name in summary.columns:
 			keyword_peak_found = bool(
 				[
@@ -136,31 +146,43 @@ class Analysis_Runner(Pipe_Step):
 						peak_columns["positive"].append(column_name)
 					elif keyword_neg_found:
 						peak_columns["negative"].append(column_name)
-		return peak_columns
+					else:
+						peak_columns["unknown"].append(column_name)
+		
+		return {mode: mode_columns for mode, mode_columns in peak_columns.items() if mode_columns}
 
-	def z_score(self, summary: pd.DataFrame, peak_columns_mode: list) -> pd.DataFrame:
-		if len(peak_columns_mode) < 2:
+
+	def z_score(self, summary: pd.DataFrame, peak_mode_columns: list) -> pd.DataFrame:
+		if len(peak_mode_columns) < 2:
 			warn(
 				"Data must contain at least 2 columns with peak information to calculate z-scores between samples. Returning unchanged."
 			)
-			return summary[peak_columns_mode]
+			return summary[peak_mode_columns]
 		else:
-			analysis = stats.zscore(summary[peak_columns_mode], axis=1)
+			analysis = stats.zscore(summary[peak_mode_columns], axis=1, nan_policy="omit")
 			return analysis
+
 
 	def export_results(self, analysis: pd.DataFrame, peak_columns: list, out_path: StrPath):
 		if os.path.isfile(out_path):
 			analysis.to_csv(out_path, sep="\t")
 		else:
-			analysis[peak_columns].to_csv(join(out_path, "analysis.tsv"), sep="\t")
-			analysis.to_csv(join(out_path, "analysis_full.tsv"), sep="\t")
+			analysis.to_csv(join(out_path, "analysis.tsv"), sep="\t")
+			for mode, mode_columns in peak_columns.items(): 
+				analysis[mode_columns].to_csv(join(out_path, f"analysis_{mode}_mode.tsv"), sep="\t")
+
 
 	def complete_analysis(self, in_path: StrPath, out_path: StrPath) -> pd.DataFrame:
-		summary = pd.read_csv(in_path, sep="\t", index_col=0)
+		summary = self.read_summary(file_path=in_path)
 
 		peak_columns = self.search_check_peak_info(summary=summary)
 
-		self.analysis = self.z_score(summary, peak_columns)
+		self.analysis = summary
+		
+		analyses = {mode: self.z_score(summary, mode_columns) for mode, mode_columns in peak_columns.items()}
+
+		for mode, mode_columns in peak_columns.items():
+			self.analysis[mode_columns] = analyses[mode]
 
 		self.export_results(analysis=self.analysis, peak_columns=peak_columns, out_path=out_path)
 
@@ -196,10 +218,7 @@ class Analysis_Runner(Pipe_Step):
 		:param out_path: Path to output directory.
 		:type out_path: str
 		"""
-		analysis = analysis if analysis else self.analysis
-		out_path = join(out_path, "analysis.tsv") if os.path.isdir(out_path) else out_path
-
-		self.run_single(in_path=join(in_path, "summary.tsv"), out_path=out_path, analysis=analysis)
+		self.run_single(in_path=join(in_path, "summary.tsv"), out_path=out_path)
 
 	def run_nested(self, in_root_dir: StrPath, out_root_dir: StrPath, recusion_level: int = 0):
 		"""
@@ -217,12 +236,12 @@ class Analysis_Runner(Pipe_Step):
 		made_out_root_dir = False
 
 		for root, dirs, files in os.walk(in_root_dir):
-			if "summary.txt" in files:
+			if "summary.tsv" in files:
 				if not made_out_root_dir:
 					os.makedirs(out_root_dir, exist_ok=True)
 					made_out_root_dir = True
 
-				self.run_single(in_path=join(root, "summary.txt"), out_path=out_root_dir)
+				self.run_single(in_path=join(root, "summary.tsv"), out_path=out_root_dir)
 
 			for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
 				self.run_nested(
@@ -245,7 +264,7 @@ if __name__ == "__main__":
 	parser.add_argument("-w", "--workers", required=False, type=int)
 	parser.add_argument("-s", "--save_log", required=False, action="store_true")
 	parser.add_argument("-v", "--verbosity", required=False, type=int)
-	parser.add_argument("-msconv", "--analysis_arguments", required=False, nargs=argparse.REMAINDER)
+	parser.add_argument("-analysis", "--analysis_arguments", required=False, nargs=argparse.REMAINDER)
 
 	args, unknown_args = parser.parse_known_args()
 	main(args=args, unknown_args=unknown_args)
