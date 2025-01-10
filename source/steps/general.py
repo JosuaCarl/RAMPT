@@ -372,7 +372,7 @@ class Pipe_Step(Step_Configuration):
 
 		# Extract results
 		results = response[0]
-		out, err = [response[i] if i < len(response) else None for i in range(1,3)]
+		out, err = [response[i] if i < len(response) else None for i in range(1, 3)]
 
 		self.store_progress(
 			in_path=kwargs.get("in_path"),
