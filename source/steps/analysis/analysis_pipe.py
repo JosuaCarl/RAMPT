@@ -128,6 +128,15 @@ class Analysis_Runner(Pipe_Step):
 			cmd=cmd, in_path=(in_path_quantification, in_path_annotation), out_path=out_path
 		)
 
+		self.compute(
+			step_function=execute_verbose_command,
+			in_path=in_path,
+			out_path=out_path,
+			log_path=self.get_log_path(out_path=out_path),
+			cmd=cmd,
+			verbosity=self.verbosity
+		)
+
 	def run_directory(
 		self,
 		in_path: StrPath,

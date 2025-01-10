@@ -148,7 +148,14 @@ class MZmine_Runner(Pipe_Step):
 
 		cmd = rf'"{self.exec_path}" {self.login} --batch "{batch}" --input "{in_path}" --output "{out_path}" {" ".join(self.additional_args)}'
 
-		super().compute(cmd=cmd, in_path=in_path, out_path=out_path)
+		self.compute(
+			step_function=execute_verbose_command,
+			in_path=in_path,
+			out_path=out_path,
+			log_path=self.get_log_path(out_path=out_path),
+			cmd=cmd,
+			verbosity=self.verbosity
+		)
 
 	def run_directory(self, in_path: StrPath, out_path: StrPath, batch: StrPath = None):
 		"""

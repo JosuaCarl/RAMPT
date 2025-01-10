@@ -3,10 +3,14 @@
 Make logging, warnings and error messages more consistent and expressive.
 """
 
-from datetime import datetime
+import sys
 import warnings
+from datetime import datetime
+from typing import Callable, Any
 
 from icecream import ic
+
+from source.helpers.types import StrPath
 
 
 program_name = "m2s"
@@ -82,3 +86,74 @@ def error(
 		raise error_type(f"[{get_now()}][{program}][ERROR]\t{message}", *args)
 	else:
 		return error_type(f"[{get_now()}][{program}][ERROR]\t{message}", *args)
+
+
+class TeeStream:
+	"""
+	Tee a stream to print to a file and console output.
+	"""
+	def __init__(self, original_stream):
+		"""
+		Initalize Tee Stream.
+
+		:param original_stream: Original stdout or stderr
+		:type original_stream: Stream
+		"""
+		self.original_stream = original_stream
+		self.log = []
+
+	def write(self, data):
+		"""
+		Write to file and stream.
+
+		:param data: Captured data
+		:type data: Any
+		"""
+		self.original_stream.write(data)
+		self.log.append(data)
+
+	def flush(self):
+		"""
+		Flush the stream.
+		"""
+		self.original_stream.flush()
+
+
+def capture_and_log(func: Callable, *args, log_path: StrPath = None, **kwargs) -> tuple[list, list, Any]:
+	"""
+	Captures stdout and stderr, prints in real-time, and logs to files.
+
+	:param func: Function to execute
+	:type func: Callable
+	:param *args: Arguments without keywords for the function
+	:type *args: *args
+	:param log_path: Path to logfile
+	:type log_path: StrPath
+	:param **kwargs: Keyword arguments
+	:type **kwargs: **kwargs
+	:return: Standard output and standard error
+	:rtype: tuple[list, list, Any]
+	"""
+	# Save standard out & err
+	original_stdout = sys.stdout
+	original_stderr = sys.stderr
+
+	# Replace with custom
+	sys.stdout = TeeStream(original_stdout)
+	sys.stderr = TeeStream(original_stderr)
+
+	# Run method
+	response = func(*args, **kwargs)
+
+	# Save caputured output
+	out = sys.stdout.log
+	err = sys.stderr.log
+	if log_path:
+		with open(log_path, "w") as out_file:
+			out_file.write(f"out:\n{''.join(out)}\n\n\nerr:\n{''.join(err)}")
+
+	# Restore original
+	sys.stdout = original_stdout
+	sys.stderr = original_stderr
+
+	return out, err, response

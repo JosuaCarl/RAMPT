@@ -239,8 +239,9 @@ class GNPS_Runner(Pipe_Step):
 				elif not feature_quantification_file and file.endswith("_iimn_fbmn_quant.csv"):
 					feature_quantification_file = join(root, file)
 		return feature_ms2_file, feature_quantification_file
+	
 
-	def run_single(
+	def gnps_check_resubmit(
 		self,
 		in_path: StrPath,
 		out_path: StrPath = None,
@@ -266,8 +267,6 @@ class GNPS_Runner(Pipe_Step):
 		:type gnps_response: dict, optional
 		:raises BrokenPipeError: When the task does not complete in the expected time
 		"""
-		if not mzmine_log:
-			mzmine_log = self.mzmine_log if self.mzmine_log else in_path
 		try:
 			task_id, status = self.check_task_finished(
 				mzmine_log=mzmine_log, gnps_response=gnps_response
@@ -303,11 +302,54 @@ class GNPS_Runner(Pipe_Step):
 
 			in_path = gnps_response if gnps_response else mzmine_log if mzmine_log else in_path
 
-			cmd = f"echo 'fetched gnps results from {in_path}'"
-			super().compute(cmd=cmd, in_path=in_path, out_path=out_path, results=results_dict)
+			log(
+				"Fetched gnps results from {in_path}",
+				minimum_verbosity=1,
+				verbosity=self.verbosity
+			)
 
 		else:
 			raise BrokenPipeError(f"Status of {task_id} was not marked DONE.")
+
+	def run_single(
+		self,
+		in_path: StrPath,
+		out_path: StrPath = None,
+		feature_ms2_file: StrPath = None,
+		feature_quantification_file: str = None,
+		mzmine_log: str = None,
+		gnps_response: dict = None,
+	):
+		"""
+		Get the GNPS results from a single path, mzmine_log or GNPS response.
+
+		:param in_path: Input directory
+		:type in_path: StrPath
+		:param out_path: Output directory of result, defaults to None
+		:type out_path: StrPath, optional
+		:param feature_ms2_file: File with ms2 spectra (in .mgf format), defaults to None
+		:type feature_ms2_file: StrPath, optional
+		:param feature_quantification_file: File with quantification table (in .csv format), defaults to None
+		:type feature_quantification_file: StrPath, optional
+		:param mzmine_log: mzmine_log String containing GNPS response, defaults to None
+		:type mzmine_log: str, optional
+		:param gnps_response: GNPS response to POST request, defaults to None
+		:type gnps_response: dict, optional
+		"""
+		if not mzmine_log:
+			mzmine_log = self.mzmine_log if self.mzmine_log else in_path
+
+		self.compute(
+			step_function=capture_and_log,
+			func=self.gnps_check_resubmit,
+			in_path=in_path,
+			out_path=out_path,
+			feature_ms2_file=feature_ms2_file,
+			feature_quantification_file=feature_quantification_file,
+			mzmine_log=mzmine_log,
+			gnps_response=gnps_response,
+			log_path=self.get_log_path(out_path=out_path),
+		)
 
 	def run_directory(self, **kwargs):
 		"""

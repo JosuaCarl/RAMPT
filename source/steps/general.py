@@ -8,6 +8,8 @@ import regex
 import json
 from multipledispatch import dispatch
 
+from typing import Callable
+
 import dask.multiprocessing
 
 from source.helpers.general import *
@@ -294,6 +296,15 @@ class Pipe_Step(Step_Configuration):
 		"""
 		return bool(regex.search(pattern=pattern, string=str(file_name)))
 
+	def get_log_path(self, out_path: StrPath) -> StrPath:
+		log_path = (
+			os.path.join(get_directory(out_path), f"{self.name}_log.txt")
+			if self.save_log
+			else None
+		)
+
+		return log_path
+
 	def store_progress(
 		self,
 		in_path: StrPath,
@@ -339,52 +350,45 @@ class Pipe_Step(Step_Configuration):
 
 	def compute(
 		self,
-		cmd: str | list,
-		in_path: StrPath,
-		out_path: StrPath,
-		results=None,
-		log_path: StrPath = None,
+		step_function: Callable | str | list,
+		*args,
 		**kwargs,
 	):
 		"""
 		Execute a computation of a command with or without parallelization.
 
-		:param cmd: Command
-		:type cmd: str | list
-		:param in_path: Path to in files
-		:type in_path: StrPath
-		:param out_path: Output path
-		:type out_path: StrPath
-		:param results: Results of computation
-		:type results: any
-		:param log_path: Path to logfile, defaults to None
-		:type log_path: StrPath, optional
+		:param step_function: Function to execute with arguments
+		:type step_function: Callable|str|list
+		:param *args: Arguments without keywords for the function
+		:type *args: *args
+		:param **kwargs: Keyword arguments, must contain in_path, and out_path
+		:type **kwargs: **kwargs
 		"""
-		if not log_path:
-			log_path = (
-				os.path.join(get_directory(out_path), f"{self.name}_log.txt")
-				if self.save_log
-				else None
-			)
+		# Catch passed bash commands
+		if isinstance(step_function, str) or isinstance(step_function, str):
+			kwargs["cmd"] = step_function
+			step_function = execute_verbose_command
+
+		# Check parallelization
 		if self.workers > 1:
-			out, err = (None, None)
-			future = dask.delayed(execute_verbose_command)(
-				cmd=cmd, verbosity=self.verbosity, out_path=log_path, in_path=in_path, **kwargs
-			)
+			response = [None, None, None]
+			future = dask.delayed(step_function)(*args, **kwargs)
 		else:
-			out, err = execute_verbose_command(
-				cmd=cmd, verbosity=self.verbosity, out_path=log_path, **kwargs
-			)
+			response = step_function(*args, **kwargs)
 			future = None
 
+		# Extract results
+		out, err = [response[i] if i < len(response) else None for i in range(2)]
+		results = None if len(response) < 3 else response[2:]
+
 		self.store_progress(
-			in_path=in_path,
-			out_path=out_path,
+			in_path=kwargs.get("in_path"),
+			out_path=kwargs.get("out_path"),
 			results=results,
 			future=future,
 			out=out,
 			err=err,
-			log_path=log_path,
+			log_path=kwargs.get("log_path", None),
 		)
 
 	def compute_futures(self):

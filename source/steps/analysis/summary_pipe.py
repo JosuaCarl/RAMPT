@@ -14,6 +14,7 @@ import pandas as pd
 import numpy as np
 import json
 
+from source.helpers.logging import *
 from source.helpers.types import StrPath
 from source.steps.general import Pipe_Step, get_value
 
@@ -342,6 +343,48 @@ class Summary_Runner(Pipe_Step):
 		else:
 			return in_paths[0], in_paths[1]
 
+
+	def add_quantification_annotation_s(
+		self,
+		in_path: StrPath,
+		out_path: StrPath,
+		annotation_file_type: str = None,
+		quantification_file: StrPath = None,
+		annotation_files: dict[str, StrPath] = None,
+		summary: pd.DataFrame = None,
+	):
+		# Determine paths
+		in_path_quantification, in_path_annotation = self.sort_in_paths(in_paths=in_path)
+		out_path = join(out_path, "summary.tsv") if os.path.isdir(out_path) else out_path
+
+		# Case run_single
+		if annotation_file_type:
+			summary = self.add_quantification(
+				quantification_file=in_path_quantification, summary=summary
+			)
+			summary = self.add_annotation(
+				annotation_file=in_path_annotation,
+				annotation_file_type=annotation_file_type,
+				summary=summary,
+			)
+		else:
+			if not quantification_file:
+				quantification_file = self.search_quantification_file(dir=in_path_quantification)
+			if not annotation_files:
+				annotation_files = self.search_annotation_files(dir=in_path_annotation)
+
+			summary = self.add_quantification(quantification_file=quantification_file, summary=summary)
+			summary = self.add_annotations(annotation_files=annotation_files, summary=summary)
+
+		summary.to_csv(out_path, sep="\t")
+
+		log(
+			f"Added annotation from {in_path_annotation} to {in_path_quantification}",
+			minimum_verbosity=1,
+			verbosity=self.verbosity,
+		)
+
+
 	def run_single(
 		self,
 		in_path: StrPath,
@@ -356,26 +399,21 @@ class Summary_Runner(Pipe_Step):
 		:type in_path: str
 		:param out_path: Path to output directory.
 		:type out_path: str
+		:param annotation_file_type: File type of annotation
+		:type annotation_file_type: str
+		:param summary: Summary to write to, defaults to None
+		:type summary: pd.DataFrame, optional
 		"""
+		
 		summary = summary if summary else self.summary
-		in_path_quantification, in_path_annotation = self.sort_in_paths(in_paths=in_path)
-		out_path = join(out_path, "summary.tsv") if os.path.isdir(out_path) else out_path
 
-		summary = self.add_quantification(
-			quantification_file=in_path_quantification, summary=summary
-		)
-		summary = self.add_annotation(
-			annotation_file=in_path_annotation,
+		self.compute(
+			step_function=capture_and_log,
+			func=self.add_quantification_annotation_s,
+			in_path=in_path,
+			out_path=out_path,
 			annotation_file_type=annotation_file_type,
-			summary=summary,
-		)
-
-		summary.to_csv(out_path, sep="\t")
-
-		cmd = f"echo 'Added annotation from {in_path_annotation} to {in_path_quantification}'"
-
-		super().compute(
-			cmd=cmd, in_path=(in_path_quantification, in_path_annotation), out_path=out_path
+			log_path=self.get_log_path(out_path=out_path),
 		)
 
 	def run_directory(
@@ -395,23 +433,15 @@ class Summary_Runner(Pipe_Step):
 		:type out_path: str
 		"""
 		summary = summary if summary else self.summary
-		in_path_quantification, in_path_annotation = self.sort_in_paths(in_paths=in_path)
-		out_path = join(out_path, "summary.tsv") if os.path.isdir(out_path) else out_path
 
-		if not quantification_file:
-			quantification_file = self.search_quantification_file(dir=in_path_quantification)
-		if not annotation_files:
-			annotation_files = self.search_annotation_files(dir=in_path_annotation)
-
-		summary = self.add_quantification(quantification_file=quantification_file, summary=summary)
-		summary = self.add_annotations(annotation_files=annotation_files, summary=summary)
-
-		summary.to_csv(out_path, sep="\t")
-
-		cmd = f"echo 'Added annotation from {in_path_annotation} to {in_path_quantification}'"
-
-		super().compute(
-			cmd=cmd, in_path=(in_path_quantification, in_path_annotation), out_path=out_path
+		self.compute(
+			step_function=capture_and_log,
+			func=self.add_quantification_annotation_s,
+			in_path=in_path,
+			out_path=out_path,
+			quantification_file=quantification_file,
+			annotation_files=annotation_files,
+			log_path=self.get_log_path(out_path=out_path),
 		)
 
 	def run_nested(self, in_root_dir: StrPath, out_root_dir: StrPath, recusion_level: int = 0):

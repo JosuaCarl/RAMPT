@@ -55,7 +55,7 @@ def test_pipe_step():
 	assert pipe_step.results == [{"hello": "all"}]
 
 	# Test computation with same input
-	pipe_step.compute("echo Hello!", "/mnt/x/bar", "/mnt/y/foo")
+	pipe_step.compute("echo Hello!", in_path="/mnt/x/bar", out_path="/mnt/y/foo")
 	assert pipe_step.processed_in == ["/mnt/x/bar"]
 	assert pipe_step.processed_out == ["/mnt/y/foo"]
 	assert pipe_step.results == [None]
@@ -63,12 +63,12 @@ def test_pipe_step():
 
 	# Test parallel execution
 	pipe_step.workers = 2
-	pipe_step.compute("echo Hello", "/mnt/x/bar", "/mnt/y/foo")
-	pipe_step.compute("echo all!", "/mnt/x/foo", "/mnt/y/foo")
+	pipe_step.compute("echo Hello", in_path="/mnt/x/bar", out_path="/mnt/y/foo")
+	pipe_step.compute("echo all!", in_path="/mnt/x/foo", out_path="/mnt/y/foo")
 	pipe_step.compute_futures()
 	assert pipe_step.processed_in == ["/mnt/x/bar", "/mnt/x/foo"]
 	assert pipe_step.processed_out == ["/mnt/y/foo", "/mnt/y/foo"]
-	assert pipe_step.results == [None, None]
+	assert pipe_step.results == [[None], [None]]
 	assert pipe_step.outs[0].startswith("Hello") and pipe_step.outs[1].startswith("all!")
 
 	# Run is tested for each individual step

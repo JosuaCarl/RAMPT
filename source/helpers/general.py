@@ -331,7 +331,7 @@ def replace_file_ending(path: StrPath, new_ending: str) -> str:
 def execute_verbose_command(
 	cmd: str | list,
 	verbosity: int = 1,
-	out_path: StrPath = None,
+	log_path: StrPath = None,
 	decode_text: bool = True,
 	**kwargs,
 ) -> tuple[str, str]:
@@ -342,8 +342,8 @@ def execute_verbose_command(
 	:type cmd: str|list
 	:param verbosity: Verbosity level, defaults to 1
 	:type verbosity: int, optional
-	:param out_path: Path to outfile, defaults to None
-	:type out_path: StrPath
+	:param log_path: Path to logfile, defaults to None
+	:type log_path: StrPath
 	:param decode_text: Whether to decode the text, defaults to True
 	:type decode_text: bool
 	:return: Stdout, Stderr
@@ -358,8 +358,8 @@ def execute_verbose_command(
 		capture_output=True,
 	)
 
-	if out_path:
-		with open(out_path, "w") as out_file:
+	if log_path:
+		with open(log_path, "w") as out_file:
 			out_file.write(f"out:\n{process.stdout}\n\n\nerr:\n{process.stderr}")
 	return process.stdout, process.stderr
 

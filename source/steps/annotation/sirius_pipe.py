@@ -138,12 +138,13 @@ class Sirius_Runner(Pipe_Step):
 
 		cmd = rf'"{self.exec_path}" --project {join(projectspace, "projectspace")} --input {in_path} config {config} write-summaries --output {out_path} {" ".join(self.additional_args)}'
 
-		super().compute(
-			cmd=cmd,
+		self.compute(
+			step_function=execute_verbose_command,
 			in_path=in_path,
 			out_path=out_path,
-			results=None,
-			log_path=None,
+			log_path=self.get_log_path(out_path=out_path),
+			cmd=cmd,
+			verbosity=self.verbosity,
 			decode_text=False,
 		)
 
