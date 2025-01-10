@@ -395,14 +395,15 @@ class Pipe_Step(Step_Configuration):
 				in_paths.append(in_path)
 				futures.append(future)
 
-		results = compute_scheduled(
+		response = compute_scheduled(
 			futures=futures, num_workers=self.workers, verbose=self.verbosity >= 1
 		)
 
-		for in_path, (out, err) in zip(in_paths, results[0]):
+		for in_path, (out, err, results) in zip(in_paths, response[0]):
 			i = self.processed_in.index(in_path)
 			self.outs[i] = out
 			self.errs[i] = err
+			self.results[i] = results
 
 	def run_single(self, **kwargs):
 		"""

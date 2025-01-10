@@ -285,12 +285,6 @@ class GNPS_Runner(Pipe_Step):
 				error(message=str(ve), error_type=ValueError)
 
 		if status:
-			dir_name = (
-				basename(in_path) if os.path.isdir(in_path) else basename(os.path.split(in_path)[0])
-			)
-			out_path = (
-				join(out_path, f"{dir_name}_gnps_all_db_annotations.json") if out_path else None
-			)
 			results_dict = self.fetch_results(task_id=task_id, out_path=out_path)
 
 			log(
@@ -335,6 +329,9 @@ class GNPS_Runner(Pipe_Step):
 		"""
 		if not mzmine_log:
 			mzmine_log = self.mzmine_log if self.mzmine_log else in_path
+		if out_path:
+			dir_name = basename(get_directory(in_path))
+			out_path = join(out_path, f"{dir_name}_gnps_all_db_annotations.json")
 
 		self.compute(
 			step_function=capture_and_log,

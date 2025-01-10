@@ -161,7 +161,9 @@ def test_summary_pipe_run():
 	summary_runner.run(in_paths=[example_path], out_paths=[out_path])
 	summary_runner.compute_futures()
 
-	assert summary_runner.processed_in == [(example_path, example_path)]
+	assert summary_runner.processed_in == [
+		{"quantification": example_path, "annotation": example_path}
+	]
 	assert summary_runner.processed_out == [join(out_path, "summary.tsv")]
 
 

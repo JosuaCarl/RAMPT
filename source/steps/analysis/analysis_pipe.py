@@ -83,22 +83,94 @@ class Analysis_Runner(Pipe_Step):
 		self.name = "analysis"
 		self.analysis = None
 
-	def build_z_score(self, summary: pd.DataFrame):
-		pass
-
-	def analyze_difference(self, summary: pd.DataFrame):
-		pass
-
-	def complete_analysis(self, summary: pd.DataFrame, analysis: pd.DataFrame):
-		pass
-
-	def run_single(
+	def search_check_peak_info(
 		self,
-		in_path: StrPath,
-		out_path: StrPath,
-		annotation_file_type: str,
-		summary: pd.DataFrame = None,
-	):
+		summary: pd.DataFrame,
+		keywords_peaks: list[str] = ["peak area", "peak height"],
+		keywords_pos: list[str] = ["pos", "+"],
+		keywords_neg: list[str] = ["neg", "-"],
+	) -> dict:
+		"""
+		Search for peaks with information quantification information.
+
+		:param summary: Summary dataframe
+		:type summary: pd.DataFrame
+		:param keywords_peaks: Keywords for peaks, defaults to ["peak area", "peak height"]
+		:type keywords_peaks: list[str], optional
+		:param keywords_pos: Keywords for positive mode, defaults to ["pos", "+"]
+		:type keywords_pos: list[str], optional
+		:param keywords_neg: Keywords for negative mode, defaults to ["neg", "-"]
+		:type keywords_neg: list[str], optional
+		:return: Dictionary of positive and negative peaks
+		:rtype: dict
+		"""
+		peak_columns = {"positive": [], "negative": []}
+		for column_name in summary.columns:
+			keyword_peak_found = bool(
+				[
+					column_name
+					for keyword in keywords_peaks
+					if keyword.lower() in column_name.lower()
+				]
+			)
+			if keyword_peak_found:
+				if (
+					"float" in summary[column_name].dtype.name
+					or "int" in summary[column_name].dtype.name
+				):
+					keyword_pos_found = bool(
+						[
+							column_name
+							for keyword in keywords_pos
+							if keyword.lower() in column_name.lower()
+						]
+					)
+					keyword_neg_found = bool(
+						[
+							column_name
+							for keyword in keywords_neg
+							if keyword.lower() in column_name.lower()
+						]
+					)
+					if keyword_pos_found:
+						peak_columns["positive"].append(column_name)
+					elif keyword_neg_found:
+						peak_columns["negative"].append(column_name)
+		return peak_columns
+
+	def z_score(self, summary: pd.DataFrame, peak_columns_mode: list) -> pd.DataFrame:
+		if len(peak_columns_mode) < 2:
+			warn(
+				"Data must contain at least 2 columns with peak information to calculate z-scores between samples. Returning unchanged."
+			)
+			return summary[peak_columns_mode]
+		else:
+			analysis = stats.zscore(summary[peak_columns_mode], axis=1)
+			return analysis
+
+	def export_results(self, analysis: pd.DataFrame, peak_columns: list, out_path: StrPath):
+		if os.path.isfile(out_path):
+			analysis.to_csv(out_path, sep="\t")
+		else:
+			analysis[peak_columns].to_csv(join(out_path, "analysis.tsv"), sep="\t")
+			analysis.to_csv(join(out_path, "analysis_full.tsv"), sep="\t")
+
+	def complete_analysis(self, in_path: StrPath, out_path: StrPath) -> pd.DataFrame:
+		summary = pd.read_csv(in_path, sep="\t", index_col=0)
+
+		peak_columns = self.search_check_peak_info(summary=summary)
+
+		self.analysis = self.z_score(summary, peak_columns)
+
+		self.export_results(analysis=self.analysis, peak_columns=peak_columns, out_path=out_path)
+
+		log(
+			f"Analyzed {in_path}, saved to {out_path}",
+			minimum_verbosity=1,
+			verbosity=self.verbosity,
+		)
+
+	def run_single(self, in_path: StrPath, out_path: StrPath):
 		"""
 		Add the annotations into a quantification file.
 
@@ -107,44 +179,15 @@ class Analysis_Runner(Pipe_Step):
 		:param out_path: Path to output directory.
 		:type out_path: str
 		"""
-		summary = summary if summary else self.summary
-		in_path_quantification, in_path_annotation = self.sort_in_paths(in_paths=in_path)
-		out_path = join(out_path, "summary.tsv") if os.path.isdir(out_path) else out_path
-
-		summary = self.add_quantification(
-			quantification_file=in_path_quantification, summary=summary
-		)
-		summary = self.add_annotation(
-			annotation_file=in_path_annotation,
-			annotation_file_type=annotation_file_type,
-			summary=summary,
-		)
-
-		summary.to_csv(out_path, sep="\t")
-
-		cmd = f"echo 'Added annotation from {in_path_annotation} to {in_path_quantification}'"
-
-		super().compute(
-			cmd=cmd, in_path=(in_path_quantification, in_path_annotation), out_path=out_path
-		)
-
 		self.compute(
-			step_function=execute_verbose_command,
+			step_function=capture_and_log,
+			func=self.complete_analysis,
 			in_path=in_path,
 			out_path=out_path,
 			log_path=self.get_log_path(out_path=out_path),
-			cmd=cmd,
-			verbosity=self.verbosity,
 		)
 
-	def run_directory(
-		self,
-		in_path: StrPath,
-		out_path: StrPath,
-		summary: pd.DataFrame = None,
-		quantification_file: StrPath = None,
-		annotation_files: dict[str, StrPath] = None,
-	):
+	def run_directory(self, in_path: StrPath, out_path: StrPath):
 		"""
 		Convert all matching files in a folder.
 
@@ -153,25 +196,10 @@ class Analysis_Runner(Pipe_Step):
 		:param out_path: Path to output directory.
 		:type out_path: str
 		"""
-		summary = summary if summary else self.summary
-		in_path_quantification, in_path_annotation = self.sort_in_paths(in_paths=in_path)
-		out_path = join(out_path, "summary.tsv") if os.path.isdir(out_path) else out_path
+		analysis = analysis if analysis else self.analysis
+		out_path = join(out_path, "analysis.tsv") if os.path.isdir(out_path) else out_path
 
-		if not quantification_file:
-			quantification_file = self.search_quantification_file(dir=in_path_quantification)
-		if not annotation_files:
-			annotation_files = self.search_annotation_files(dir=in_path_annotation)
-
-		summary = self.add_quantification(quantification_file=quantification_file, summary=summary)
-		summary = self.add_annotations(annotation_files=annotation_files, summary=summary)
-
-		summary.to_csv(out_path, sep="\t")
-
-		cmd = f"echo 'Added annotation from {in_path_annotation} to {in_path_quantification}'"
-
-		super().compute(
-			cmd=cmd, in_path=(in_path_quantification, in_path_annotation), out_path=out_path
-		)
+		self.run_single(in_path=join(in_path, "summary.tsv"), out_path=out_path, analysis=analysis)
 
 	def run_nested(self, in_root_dir: StrPath, out_root_dir: StrPath, recusion_level: int = 0):
 		"""
@@ -189,17 +217,12 @@ class Analysis_Runner(Pipe_Step):
 		made_out_root_dir = False
 
 		for root, dirs, files in os.walk(in_root_dir):
-			quantification_file = self.search_quantification_file(dir=root)
-			annotation_files = self.search_annotation_files(dir=root)
-
-			if quantification_file and [
-				val for val in annotation_files.values() if val is not None
-			]:
+			if "summary.txt" in files:
 				if not made_out_root_dir:
 					os.makedirs(out_root_dir, exist_ok=True)
 					made_out_root_dir = True
 
-				self.run_directory(in_path=root, out_path=out_root_dir)
+				self.run_single(in_path=join(root, "summary.txt"), out_path=out_root_dir)
 
 			for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
 				self.run_nested(

@@ -345,17 +345,15 @@ class Summary_Runner(Pipe_Step):
 
 	def add_quantification_annotation_s(
 		self,
-		in_path: StrPath,
+		in_path: dict,
 		out_path: StrPath,
 		annotation_file_type: str = None,
 		quantification_file: StrPath = None,
 		annotation_files: dict[str, StrPath] = None,
 		summary: pd.DataFrame = None,
 	):
-		# Determine paths
-		in_path_quantification, in_path_annotation = self.sort_in_paths(in_paths=in_path)
-		out_path = join(out_path, "summary.tsv") if os.path.isdir(out_path) else out_path
-
+		in_path_quantification = in_path.get("quantification")
+		in_path_annotation = in_path.get("annotation")
 		# Case run_single
 		if annotation_file_type:
 			summary = self.add_quantification(
@@ -380,7 +378,7 @@ class Summary_Runner(Pipe_Step):
 		summary.to_csv(out_path, sep="\t")
 
 		log(
-			f"Added annotation from {in_path_annotation} to {in_path_quantification}",
+			f"Added annotation from {in_path_annotation} to {in_path_quantification}.Exported to {out_path}.",
 			minimum_verbosity=1,
 			verbosity=self.verbosity,
 		)
@@ -404,13 +402,16 @@ class Summary_Runner(Pipe_Step):
 		:param summary: Summary to write to, defaults to None
 		:type summary: pd.DataFrame, optional
 		"""
-
 		summary = summary if summary else self.summary
+
+		# Determine paths
+		in_path_quantification, in_path_annotation = self.sort_in_paths(in_paths=in_path)
+		out_path = join(out_path, "summary.tsv") if os.path.isdir(out_path) else out_path
 
 		self.compute(
 			step_function=capture_and_log,
 			func=self.add_quantification_annotation_s,
-			in_path=in_path,
+			in_path={"quantification": in_path_quantification, "annotation": in_path_annotation},
 			out_path=out_path,
 			annotation_file_type=annotation_file_type,
 			log_path=self.get_log_path(out_path=out_path),
@@ -431,13 +432,19 @@ class Summary_Runner(Pipe_Step):
 		:type in_path: str
 		:param out_path: Path to output directory.
 		:type out_path: str
+		:param summary: Summary to write to, defaults to None
+		:type summary: pd.DataFrame, optional
 		"""
 		summary = summary if summary else self.summary
+
+		# Determine paths
+		in_path_quantification, in_path_annotation = self.sort_in_paths(in_paths=in_path)
+		out_path = join(out_path, "summary.tsv") if os.path.isdir(out_path) else out_path
 
 		self.compute(
 			step_function=capture_and_log,
 			func=self.add_quantification_annotation_s,
-			in_path=in_path,
+			in_path={"quantification": in_path_quantification, "annotation": in_path_annotation},
 			out_path=out_path,
 			quantification_file=quantification_file,
 			annotation_files=annotation_files,
