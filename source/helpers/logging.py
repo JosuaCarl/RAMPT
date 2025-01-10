@@ -92,6 +92,7 @@ class TeeStream:
 	"""
 	Tee a stream to print to a file and console output.
 	"""
+
 	def __init__(self, original_stream):
 		"""
 		Initalize Tee Stream.
@@ -119,7 +120,9 @@ class TeeStream:
 		self.original_stream.flush()
 
 
-def capture_and_log(func: Callable, *args, log_path: StrPath = None, **kwargs) -> tuple[list, list, Any]:
+def capture_and_log(
+	func: Callable, *args, log_path: StrPath = None, **kwargs
+) -> tuple[list, list, Any]:
 	"""
 	Captures stdout and stderr, prints in real-time, and logs to files.
 

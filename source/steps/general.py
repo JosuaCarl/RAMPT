@@ -298,9 +298,7 @@ class Pipe_Step(Step_Configuration):
 
 	def get_log_path(self, out_path: StrPath) -> StrPath:
 		log_path = (
-			os.path.join(get_directory(out_path), f"{self.name}_log.txt")
-			if self.save_log
-			else None
+			os.path.join(get_directory(out_path), f"{self.name}_log.txt") if self.save_log else None
 		)
 
 		return log_path
@@ -348,12 +346,7 @@ class Pipe_Step(Step_Configuration):
 			self.results.append(results)
 			self.futures.append(future)
 
-	def compute(
-		self,
-		step_function: Callable | str | list,
-		*args,
-		**kwargs,
-	):
+	def compute(self, step_function: Callable | str | list, *args, **kwargs):
 		"""
 		Execute a computation of a command with or without parallelization.
 

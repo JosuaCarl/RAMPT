@@ -134,7 +134,7 @@ class Analysis_Runner(Pipe_Step):
 			out_path=out_path,
 			log_path=self.get_log_path(out_path=out_path),
 			cmd=cmd,
-			verbosity=self.verbosity
+			verbosity=self.verbosity,
 		)
 
 	def run_directory(

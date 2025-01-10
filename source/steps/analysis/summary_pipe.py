@@ -343,7 +343,6 @@ class Summary_Runner(Pipe_Step):
 		else:
 			return in_paths[0], in_paths[1]
 
-
 	def add_quantification_annotation_s(
 		self,
 		in_path: StrPath,
@@ -373,7 +372,9 @@ class Summary_Runner(Pipe_Step):
 			if not annotation_files:
 				annotation_files = self.search_annotation_files(dir=in_path_annotation)
 
-			summary = self.add_quantification(quantification_file=quantification_file, summary=summary)
+			summary = self.add_quantification(
+				quantification_file=quantification_file, summary=summary
+			)
 			summary = self.add_annotations(annotation_files=annotation_files, summary=summary)
 
 		summary.to_csv(out_path, sep="\t")
@@ -383,7 +384,6 @@ class Summary_Runner(Pipe_Step):
 			minimum_verbosity=1,
 			verbosity=self.verbosity,
 		)
-
 
 	def run_single(
 		self,
@@ -404,7 +404,7 @@ class Summary_Runner(Pipe_Step):
 		:param summary: Summary to write to, defaults to None
 		:type summary: pd.DataFrame, optional
 		"""
-		
+
 		summary = summary if summary else self.summary
 
 		self.compute(

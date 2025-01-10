@@ -239,7 +239,6 @@ class GNPS_Runner(Pipe_Step):
 				elif not feature_quantification_file and file.endswith("_iimn_fbmn_quant.csv"):
 					feature_quantification_file = join(root, file)
 		return feature_ms2_file, feature_quantification_file
-	
 
 	def gnps_check_resubmit(
 		self,
@@ -303,9 +302,7 @@ class GNPS_Runner(Pipe_Step):
 			in_path = gnps_response if gnps_response else mzmine_log if mzmine_log else in_path
 
 			log(
-				"Fetched gnps results from {in_path}",
-				minimum_verbosity=1,
-				verbosity=self.verbosity
+				"Fetched gnps results from {in_path}", minimum_verbosity=1, verbosity=self.verbosity
 			)
 
 		else:

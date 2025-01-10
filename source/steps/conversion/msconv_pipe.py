@@ -173,7 +173,6 @@ class MSconvert_Runner(Pipe_Step):
 
 		return in_valid, out_valid
 
-
 	def run_single(self, in_path: str, out_path: str):
 		"""
 		Convert one file with msconvert.
@@ -199,7 +198,7 @@ class MSconvert_Runner(Pipe_Step):
 			in_path=in_path,
 			out_path=out_path,
 			log_path=self.get_log_path(out_path=out_path),
-			verbosity=self.verbosity
+			verbosity=self.verbosity,
 		)
 
 	def run_directory(self, in_path: str, out_path: str):
