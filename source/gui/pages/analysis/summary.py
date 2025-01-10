@@ -31,4 +31,3 @@ def create_summary():
 	create_list_selection(
 		process="summary", attribute="mzmine_log", extensions="*", name="MZmine log file"
 	)
-

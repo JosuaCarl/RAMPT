@@ -16,4 +16,3 @@ analysis_select_folder_in = False
 def create_analysis():
 	tgb.text("###### File selection", mode="markdown")
 	create_file_selection(process="analysis", out_node="analysis_data")
-
