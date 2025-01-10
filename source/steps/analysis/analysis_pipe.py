@@ -92,7 +92,6 @@ class Analysis_Runner(Pipe_Step):
 		"""
 		return pd.read_csv(file_path, sep="\t", index_col=0)
 
-
 	def search_check_peak_info(
 		self,
 		summary: pd.DataFrame,
@@ -148,9 +147,8 @@ class Analysis_Runner(Pipe_Step):
 						peak_columns["negative"].append(column_name)
 					else:
 						peak_columns["unknown"].append(column_name)
-		
-		return {mode: mode_columns for mode, mode_columns in peak_columns.items() if mode_columns}
 
+		return {mode: mode_columns for mode, mode_columns in peak_columns.items() if mode_columns}
 
 	def z_score(self, summary: pd.DataFrame, peak_mode_columns: list) -> pd.DataFrame:
 		if len(peak_mode_columns) < 2:
@@ -162,15 +160,13 @@ class Analysis_Runner(Pipe_Step):
 			analysis = stats.zscore(summary[peak_mode_columns], axis=1, nan_policy="omit")
 			return analysis
 
-
 	def export_results(self, analysis: pd.DataFrame, peak_columns: list, out_path: StrPath):
 		if os.path.isfile(out_path):
 			analysis.to_csv(out_path, sep="\t")
 		else:
 			analysis.to_csv(join(out_path, "analysis.tsv"), sep="\t")
-			for mode, mode_columns in peak_columns.items(): 
+			for mode, mode_columns in peak_columns.items():
 				analysis[mode_columns].to_csv(join(out_path, f"analysis_{mode}_mode.tsv"), sep="\t")
-
 
 	def complete_analysis(self, in_path: StrPath, out_path: StrPath) -> pd.DataFrame:
 		summary = self.read_summary(file_path=in_path)
@@ -178,8 +174,10 @@ class Analysis_Runner(Pipe_Step):
 		peak_columns = self.search_check_peak_info(summary=summary)
 
 		self.analysis = summary
-		
-		analyses = {mode: self.z_score(summary, mode_columns) for mode, mode_columns in peak_columns.items()}
+
+		analyses = {
+			mode: self.z_score(summary, mode_columns) for mode, mode_columns in peak_columns.items()
+		}
 
 		for mode, mode_columns in peak_columns.items():
 			self.analysis[mode_columns] = analyses[mode]
@@ -264,7 +262,9 @@ if __name__ == "__main__":
 	parser.add_argument("-w", "--workers", required=False, type=int)
 	parser.add_argument("-s", "--save_log", required=False, action="store_true")
 	parser.add_argument("-v", "--verbosity", required=False, type=int)
-	parser.add_argument("-analysis", "--analysis_arguments", required=False, nargs=argparse.REMAINDER)
+	parser.add_argument(
+		"-analysis", "--analysis_arguments", required=False, nargs=argparse.REMAINDER
+	)
 
 	args, unknown_args = parser.parse_known_args()
 	main(args=args, unknown_args=unknown_args)

@@ -15,7 +15,6 @@ make_out(out_path)
 data_warning = "Data must contain at least 2 columns with peak information to calculate z-scores between samples. Returning unchanged."
 
 
-
 def test_analysis_search_check_peak_info():
 	analysis_runner = Analysis_Runner()
 
@@ -23,7 +22,11 @@ def test_analysis_search_check_peak_info():
 
 	peak_columns = analysis_runner.search_check_peak_info(summary=summary)
 
-	assert peak_columns["positive"] == ["acnA_R1_P3-C1_pos.mzML Peak area", "acnA_R1_P3-C2_pos.mzML Peak area", "acnA_R1_P3-C3_pos.mzML Peak area"]
+	assert peak_columns["positive"] == [
+		"acnA_R1_P3-C1_pos.mzML Peak area",
+		"acnA_R1_P3-C2_pos.mzML Peak area",
+		"acnA_R1_P3-C3_pos.mzML Peak area",
+	]
 	assert peak_columns["negative"] == ["acnA_R1_P3-C1_neg.mzML Peak Area"]
 
 
@@ -39,26 +42,24 @@ def test_z_score(recwarn):
 
 	analysis = analysis_runner.z_score(summary=summary, peak_mode_columns=peak_columns["positive"])
 	ic(analysis[0])
-	assert np.all( np.isclose( analysis[0], np.array([np.nan, 1., -1.]), equal_nan=True ))
-	assert np.all( np.isclose( analysis[1], np.array([np.nan, np.nan, np.nan]), equal_nan=True ) )
-	assert np.all( np.isclose( analysis[2], np.array([-1.41419473,  0.7134186 ,  0.70077613]) ) )
+	assert np.all(np.isclose(analysis[0], np.array([np.nan, 1.0, -1.0]), equal_nan=True))
+	assert np.all(np.isclose(analysis[1], np.array([np.nan, np.nan, np.nan]), equal_nan=True))
+	assert np.all(np.isclose(analysis[2], np.array([-1.41419473, 0.7134186, 0.70077613])))
 
 
 def test_complete_analysis():
 	clean_out(out_path)
-	
+
 	analysis_runner = Analysis_Runner()
 
 	with pytest.warns(UserWarning):
 		analysis_runner.complete_analysis(
-			in_path=join(example_path, "summary.tsv"),
-			out_path=out_path
+			in_path=join(example_path, "summary.tsv"), out_path=out_path
 		)
 
 	assert os.path.isfile(join(out_path, "analysis.tsv"))
 	assert os.path.isfile(join(out_path, "analysis_positive_mode.tsv"))
 	assert os.path.isfile(join(out_path, "analysis_negative_mode.tsv"))
-
 
 
 def test_analysis_pipe_run_single():
@@ -97,7 +98,7 @@ def test_analysis_pipe_run_nested():
 
 	with pytest.warns(UserWarning):
 		analysis_runner.run_nested(example_path, out_path)
-	
+
 	assert os.path.isfile(join(out_path, "analysis.tsv"))
 	assert os.path.isfile(join(out_path, "example_nested", "analysis.tsv"))
 
@@ -108,7 +109,7 @@ def test_analysis_pipe_run():
 
 	# Superficial testing of run
 	analysis_runner = Analysis_Runner(workers=2)
-	
+
 	with pytest.warns(UserWarning):
 		analysis_runner.run(in_paths=[example_path], out_paths=[out_path])
 		analysis_runner.compute_futures()
@@ -131,7 +132,7 @@ def test_analysis_pipe_main():
 
 	with pytest.warns(UserWarning):
 		analysis_pipe_main(args, unknown_args=[])
-	
+
 	assert os.path.isfile(join(out_path, "analysis.tsv"))
 	assert os.path.isfile(join(out_path, "example_nested", "analysis.tsv"))
 
