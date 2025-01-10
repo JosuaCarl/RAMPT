@@ -18,7 +18,6 @@ from source.helpers.openms import OpenMS_File_Handler
 from source.steps.general import *
 
 
-
 def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
 	"""
 	Exclude ions.
