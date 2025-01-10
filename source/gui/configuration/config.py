@@ -37,9 +37,9 @@ sirius_annotations_config = Config.configure_csv_data_node(
 	id="sirius_annotations", scope=Scope.SCENARIO
 )
 
-summary_config = Config.configure_csv_data_node(id="summary", scope=Scope.SCENARIO)
+summary_config = Config.configure_csv_data_node(id="summary_data", scope=Scope.SCENARIO)
 
-analysis_config = Config.configure_csv_data_node(id="analysis", scope=Scope.SCENARIO)
+analysis_config = Config.configure_csv_data_node(id="analysis_data", scope=Scope.SCENARIO)
 
 
 ## Output paths
