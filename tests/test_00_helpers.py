@@ -166,7 +166,7 @@ def test_execute_verbose_command():
 		text = f.read()
 		assert text.strip() == "test2"
 
-	execute_verbose_command("echo test3", verbosity=1, out_path=join(out_path, "text.txt"))
+	execute_verbose_command("echo test3", verbosity=1, log_path=join(out_path, "text.txt"))
 	with open(join(out_path, "text.txt"), "r") as f:
 		text = f.read()
 		assert text.replace("\n", "") == "out:test3err:None"
