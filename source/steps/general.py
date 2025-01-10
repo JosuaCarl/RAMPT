@@ -371,8 +371,8 @@ class Pipe_Step(Step_Configuration):
 			future = None
 
 		# Extract results
-		out, err = [response[i] if i < len(response) else None for i in range(2)]
-		results = None if len(response) < 3 else response[2:]
+		results = response[0]
+		out, err = [response[i] if i < len(response) else None for i in range(1,3)]
 
 		self.store_progress(
 			in_path=kwargs.get("in_path"),
@@ -399,7 +399,7 @@ class Pipe_Step(Step_Configuration):
 			futures=futures, num_workers=self.workers, verbose=self.verbosity >= 1
 		)
 
-		for in_path, (out, err, results) in zip(in_paths, response[0]):
+		for in_path, (results, out, err) in zip(in_paths, response[0]):
 			i = self.processed_in.index(in_path)
 			self.outs[i] = out
 			self.errs[i] = err

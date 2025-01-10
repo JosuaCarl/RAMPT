@@ -68,7 +68,7 @@ def test_pipe_step():
 	pipe_step.compute_futures()
 	assert pipe_step.processed_in == ["/mnt/x/bar", "/mnt/x/foo"]
 	assert pipe_step.processed_out == ["/mnt/y/foo", "/mnt/y/foo"]
-	assert pipe_step.results == [[None], [None]]
+	assert pipe_step.results == [None, None]
 	assert pipe_step.outs[0].startswith("Hello") and pipe_step.outs[1].startswith("all!")
 
 	# Run is tested for each individual step

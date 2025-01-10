@@ -361,7 +361,7 @@ def execute_verbose_command(
 	if log_path:
 		with open(log_path, "w") as out_file:
 			out_file.write(f"out:\n{process.stdout}\n\n\nerr:\n{process.stderr}")
-	return process.stdout, process.stderr
+	return None, process.stdout, process.stderr
 
 
 # Parallel processing

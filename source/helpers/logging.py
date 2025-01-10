@@ -146,7 +146,7 @@ def capture_and_log(
 	sys.stderr = TeeStream(original_stderr)
 
 	# Run method
-	response = func(*args, **kwargs)
+	results = func(*args, **kwargs)
 
 	# Save caputured output
 	out = sys.stdout.log
@@ -159,4 +159,4 @@ def capture_and_log(
 	sys.stdout = original_stdout
 	sys.stderr = original_stderr
 
-	return out, err, response
+	return results, out, err
