@@ -64,7 +64,9 @@ def verify_hash(downloaded_file: StrPath | io.BufferedReader, expected_hash: str
 	return calculated_hash == expected_hash
 
 
-def download_extract(url: str, target_path: StrPath, expected_hash: str = None, extraction_method: str = "zip"):
+def download_extract(
+	url: str, target_path: StrPath, expected_hash: str = None, extraction_method: str = "zip"
+):
 	"""
 	Download a compressed file and extract its contents to target_path.
 	"""
@@ -75,10 +77,10 @@ def download_extract(url: str, target_path: StrPath, expected_hash: str = None, 
 				with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
 					zip_file.extractall(path=target_path)
 			case "tar.bz2":
-				with tarfile.open(fileobj=io.BytesIO(response.content))  as tar_file:
+				with tarfile.open(fileobj=io.BytesIO(response.content)) as tar_file:
 					tar_file.extractall(target_path)
 	else:
-		raise(ValueError("Wrong hashing value of file."))
+		raise (ValueError("Wrong hashing value of file."))
 
 
 def make_window():

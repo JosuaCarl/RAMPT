@@ -143,7 +143,6 @@ def lock_scenario(state):
 					set_attribute_recursive(state, state_attribute, value, refresh=True)
 				data_nodes[data_node_key] = value
 
-
 	for key, data_node in scenario.data_nodes.items():
 		if data_nodes.get(key) or key in optional_data_nodes:
 			data_node.write(data_nodes.get(key))
