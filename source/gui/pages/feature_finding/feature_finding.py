@@ -9,9 +9,9 @@ from source.steps.feature_finding.mzmine_pipe import MZmine_Runner
 
 feature_finding_params = MZmine_Runner()
 
-feature_finding_path_in = "."
-feature_finding_selection_tree_in = []
-feature_finding_select_folder_in = False
+feature_finding_path_scheduled_in = "."
+feature_finding_selection_tree_scheduled_in = []
+feature_finding_select_folder_scheduled_in = False
 
 feature_finding_batch_selected = "."
 feature_finding_batch_path = ".mzbatch"

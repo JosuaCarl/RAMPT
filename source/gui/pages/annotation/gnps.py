@@ -7,9 +7,9 @@ from source.steps.annotation.gnps_pipe import GNPS_Runner
 
 gnps_params = GNPS_Runner()
 
-gnps_path_in = "."
-gnps_selection_tree_in = []
-gnps_select_folder_in = False
+gnps_path_scheduled_in = "."
+gnps_selection_tree_scheduled_in = []
+gnps_select_folder_scheduled_in = False
 
 gnps_mzmine_log_selected = "."
 gnps_mzmine_log_path = "mzmine_log.txt"

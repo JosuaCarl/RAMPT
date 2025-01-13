@@ -48,7 +48,7 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
 		verbosity=verbosity,
 		nested=nested,
 		workers=n_workers,
-		scheduled_in=[(in_dir_quantification, in_dir_annotations)],
+		scheduled_in=[{"quantification": in_dir_quantification, "annotation": in_dir_annotations}],
 		scheduled_out=out_dir,
 	)
 	return summary_runner.run()
@@ -85,6 +85,7 @@ class Summary_Runner(Pipe_Step):
 		self.overwrite = overwrite
 		self.name = "analysis"
 		self.summary = None
+		self.scheduled_in = [{"quantification": None, "annotation": None}]
 
 	def search_quantification_file(
 		self, dir: StrPath, quantification_file: StrPath = None

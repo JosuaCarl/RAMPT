@@ -7,23 +7,26 @@ from source.steps.analysis.summary_pipe import Summary_Runner
 
 summary_params = Summary_Runner()
 
-summary_path_quantification_in = "."
-summary_selection_tree_quantification_in = []
-summary_select_folder_in = False
+summary_path_scheduled_in_quantification = "."
+summary_selection_tree_scheduled_in_quantification = []
+summary_select_folder_in_quantification = False
 
 
-summary_path_annotation_in = "."
-summary_selection_tree_annotation_in = []
-summary_select_folder_in = False
+summary_path_scheduled_in_annotation = "."
+summary_selection_tree_scheduled_in_annotation = []
+summary_select_folder_scheduled_in_annotation = False
+
+summary_params_scheduled_in = {"quantification": None, "annotation": None}
+summary_params.scheduled_in = {}
 
 
 # TODO: Implement passing of two files to scheduled_in
 def create_summary():
 	tgb.text("###### File selection (quantification)", mode="markdown")
-	create_file_selection(process="summary", out_node="summary_data")
+	create_file_selection(process="summary", execution_key_in="quantification", out_node="summary_data")
 
 	tgb.text("###### File selection (annotation)", mode="markdown")
-	create_file_selection(process="summary", out_node="summary_data")
+	create_file_selection(process="summary", execution_key_in="annotation", out_node="summary_data")
 
 	tgb.html("br")
 

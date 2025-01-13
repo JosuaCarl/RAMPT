@@ -7,9 +7,9 @@ from source.steps.annotation.sirius_pipe import Sirius_Runner
 
 sirius_params = Sirius_Runner()
 
-sirius_path_in = "."
-sirius_selection_tree_in = []
-sirius_select_folder_in = False
+sirius_path_scheduled_in = "."
+sirius_selection_tree_scheduled_in = []
+sirius_select_folder_scheduled_in = False
 
 sirius_config_selected = "."
 sirius_config_path = ""

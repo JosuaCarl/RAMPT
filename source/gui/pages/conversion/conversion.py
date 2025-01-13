@@ -9,9 +9,9 @@ from source.steps.conversion.msconv_pipe import MSconvert_Runner
 
 conversion_params = MSconvert_Runner()
 
-conversion_path_in = "."
-conversion_selection_tree_in = []
-conversion_select_folder_in = False
+conversion_path_scheduled_in = "."
+conversion_selection_tree_scheduled_in = []
+conversion_select_folder_scheduled_in = False
 
 
 def create_conversion():
