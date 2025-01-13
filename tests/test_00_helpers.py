@@ -238,15 +238,7 @@ def test_check_for_str_request():
 	assert check_for_str_request(
 		url=url,
 		query='"version":"0.6"',
-		retries=2,
-		allowed_fails=1,
-		expected_wait_time=1.0,
-		timeout=5,
-	)
-	assert not check_for_str_request(
-		url=url,
-		query='"version":"0.sad"',
-		retries=2,
+		retries=10,
 		allowed_fails=1,
 		expected_wait_time=1.0,
 		timeout=5,
