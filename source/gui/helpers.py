@@ -10,8 +10,10 @@ from taipy.gui import download
 from source.helpers.general import *
 from source.helpers.logging import *
 
-
 ### Trees
+path_nester = Path_Nester()
+
+
 def get_selection_labels(state, state_attribute: str):
 	selection_labels = [
 		selection.get("label") for selection in get_attribute_recursive(state, state_attribute)

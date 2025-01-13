@@ -124,6 +124,10 @@ def generic_step(
 	else:
 		out_paths = []
 		for in_path in in_paths:
+			if isinstance(in_path, dict):
+				in_path = in_path.values()[0]
+			elif isinstance(in_path, list) or isinstance(in_path, tuple):
+				in_path = in_path[0]
 			in_dir = get_directory(in_path)
 			out_paths.append(os.path.join(in_dir, out_path_target))
 

@@ -132,7 +132,6 @@ def lock_scenario(state):
 	scenario = state.scenario
 
 	params = construct_params_dict(state)
-
 	data_nodes = params.copy()
 
 	for data_node_key, attribute_keys in match_data_node.items():
@@ -144,7 +143,6 @@ def lock_scenario(state):
 					set_attribute_recursive(state, state_attribute, value, refresh=True)
 				data_nodes[data_node_key] = value
 
-	ic(data_nodes)
 
 	for key, data_node in scenario.data_nodes.items():
 		if data_nodes.get(key) or key in optional_data_nodes:

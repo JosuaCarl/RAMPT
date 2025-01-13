@@ -6,7 +6,10 @@ Setup an installation of mine2sirius.
 import io
 import shutil
 import requests
+
 import zipfile
+import tarfile
+
 import hashlib
 import platform
 
@@ -61,14 +64,21 @@ def verify_hash(downloaded_file: StrPath | io.BufferedReader, expected_hash: str
 	return calculated_hash == expected_hash
 
 
-def download_extract_zip(url: str, target_path: StrPath, expected_hash: str = None):
+def download_extract(url: str, target_path: StrPath, expected_hash: str = None, extraction_method: str = "zip"):
 	"""
 	Download a compressed file and extract its contents to target_path.
 	"""
 	response = requests.get(url)
-	with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
-		if expected_hash is None or verify_hash(io.BytesIO(response.content), expected_hash):
-			zip_file.extractall(path=target_path)
+	if expected_hash is None or verify_hash(io.BytesIO(response.content), expected_hash):
+		match extraction_method:
+			case "zip":
+				with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
+					zip_file.extractall(path=target_path)
+			case "tar.bz2":
+				with tarfile.open(fileobj=io.BytesIO(response.content))  as tar_file:
+					tar_file.extractall(target_path)
+	else:
+		raise(ValueError("Wrong hashing value of file."))
 
 
 def make_window():
@@ -98,7 +108,7 @@ def main():
 			pass
 		case "linux":
 			if install_msconvert and not tool_available(executable="msconvert"):
-				download_extract_zip(msconvert_sources)
+				download_extract(msconvert_sources)
 		case _:
 			raise (
 				SystemError(
