@@ -18,9 +18,7 @@ def create_feature_finding(process="feature_finding"):
 
 	tgb.text("###### Batch selection", mode="markdown")
 	create_list_selection(
-		process="feature_finding",
-		extensions=".mzbatch,.xml",
-		default_value=".mzbatch"
+		process="feature_finding", extensions=".mzbatch,.xml", default_value=".mzbatch"
 	)
 
 	create_advanced_settings()

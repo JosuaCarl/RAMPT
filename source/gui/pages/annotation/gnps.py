@@ -16,5 +16,9 @@ def create_gnps():
 
 	tgb.text("###### MZmine log selection", mode="markdown")
 	create_list_selection(
-		process="gnps", attribute="mzmine_log", extensions="*", name="MZmine log file", default_value="mzmine_log.txt"
+		process="gnps",
+		attribute="mzmine_log",
+		extensions="*",
+		name="MZmine log file",
+		default_value="mzmine_log.txt",
 	)

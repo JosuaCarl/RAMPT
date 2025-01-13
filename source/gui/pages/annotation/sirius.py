@@ -29,5 +29,5 @@ def create_sirius():
 		process="sirius",
 		attribute="projectspace",
 		name="projectspace",
-		default_value="projectspace"
+		default_value="projectspace",
 	)
