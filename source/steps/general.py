@@ -478,8 +478,6 @@ class Pipe_Step(Step_Configuration):
 
 		# Loop over all in/out combinations
 		for i, (in_path, out_path) in enumerate(zip(self.scheduled_in, self.scheduled_out)):
-			in_path = in_path["label"] if isinstance(in_path, dict) else in_path
-			out_path = out_path["label"] if isinstance(out_path, dict) else out_path
 
 			# Skip already processed files/folders
 			if in_path in self.processed_in and not self.overwrite:

@@ -4,7 +4,18 @@ import taipy.gui.builder as tgb
 
 from source.gui.helpers import *
 
-selections = {}
+# Intemediary paths for selections
+## File selection
+uploaded_paths = {}
+select_folders = {}
+
+selection_trees_pruned = {}
+selection_trees_full = {}
+
+selected = {}
+
+# List selectors
+list_selections = {}
 
 
 def create_expandable_setting(
@@ -29,28 +40,37 @@ def create_advanced_settings():
 	tgb.text("###### Advanced settings", mode="markdown")
 
 
-def create_file_selection(
-	process: str,
-	param_attribute_in: str = "scheduled_in",
-	execution_key_in: str = None,
-	out_node: str = "",
-):
-	selections.update({f"{process}_in": []})
+def create_file_selection(process: str, param_attribute_in: str = "scheduled_in", execution_key_in: str = None, out_node: str = ""):
 
-	def construct_selection_tree(
-		state, path: StrPath = None, tree_id: str = f"{process}_{param_attribute_in}"
-	):
-		path = (
-			path if path else get_attribute_recursive(state, f"{process}_path_{param_attribute_in}")
-		)
+	naming_list = [process, param_attribute_in, execution_key_in] if execution_key_in else [process, param_attribute_in]
 
-		if path != ".":
-			selections[tree_id] = add_path_to_tree(selections[tree_id], path)
+	# Construct intermediary dicts
+	selector_id = "_".join(naming_list)
 
-			pruned_tree = path_nester.prune_lca(nested_paths=selections[tree_id])
-			set_attribute_recursive(
-				state, f"{process}_selection_tree_{param_attribute_in}", pruned_tree
-			)
+	selection_trees_pruned.update({selector_id: []})
+	selection_trees_full.update({selector_id: []})
+	uploaded_paths.update({selector_id: "."})
+	select_folders.update({selector_id: False})
+	selected.update({selector_id: []})
+	
+	def construct_selection_tree(state, new_path: StrPath = None):
+		new_path = new_path if new_path else get_attribute_recursive(state, f"uploaded_paths.{selector_id}")
+
+		if new_path != ".":
+			selection_trees_full[selector_id] = path_nester.update_nested_paths(selection_trees_full[selector_id], new_paths=new_path)
+			pruned_tree = path_nester.prune_lca(nested_paths=selection_trees_full[selector_id])
+			set_attribute_recursive(state, f"selection_trees_pruned.{selector_id}", pruned_tree)
+
+
+	def update_selection(state, name, value):
+		selected_labels = [element.get("label") if isinstance(element, dict) else element for element in value]
+		if execution_key_in:
+			in_list = get_attribute_recursive(state, f"{process}_params.{param_attribute_in}")
+			dictionary = in_list[0] if in_list else {}
+			dictionary.update({execution_key_in: selected_labels[0]})
+			selected_labels = [dictionary]
+		set_attribute_recursive(state, f"{process}_params.{param_attribute_in}", selected_labels, refresh=True)
+
 
 	with tgb.layout(columns="1 2 2", columns__mobile="1", gap="5%"):
 		# In
@@ -62,32 +82,30 @@ def create_file_selection(
 						state,
 						open_file_folder(
 							select_folder=get_attribute_recursive(
-								state, f"{process}_select_folder_{param_attribute_in}"
+								state, f"select_folders.{selector_id}",
 							)
 						),
 					),
 				)
 			with tgb.part(render="{not local}"):
 				tgb.file_selector(
-					f"{{{process}_path_{param_attribute_in}}}",
+					f"{{uploaded_paths.{selector_id}}}",
 					label="Select in",
 					extensions="*",
 					drop_message=f"Drop files/folders for {process} here:",
 					multiple=True,
 					on_action=lambda state: construct_selection_tree(state),
 				)
-			tgb.toggle(f"{{{process}_select_folder_{param_attribute_in}}}", label="Select folder")
-
-		param_variable_in = f"{{{process}_params.{param_attribute_in}}}"
-		if execution_key_in:
-			param_variable_in = param_variable_in + f"['{execution_key_in}']"
+			tgb.toggle(f"{{select_folders.{selector_id}}}", label="Select folder")
+		
 		tgb.tree(
-			param_variable_in,
-			lov=f"{{{process}_selection_tree_{param_attribute_in}}}",
+			f"{{selected.{selector_id}}}",
+			lov=f"{{selection_trees_pruned.{selector_id}}}",
 			label=f"Select in for {process}",
 			filter=True,
-			multiple=True,
+			multiple=execution_key_in is None,
 			expanded=True,
+			on_change=lambda state, name, value: update_selection(state, name, value)
 		)
 
 		# Out
@@ -117,7 +135,7 @@ def create_file_selection(
 def create_list_selection(
 	process: str, attribute: str = "batch", extensions: str = "*", name: str = "batch file"
 ):
-	selections.update({f"{process}_{attribute}": []})
+	list_selections.update({f"{process}_{attribute}": []})
 
 	def construct_selection_list(
 		state, path: StrPath = None, list_id: str = f"{process}_{attribute}"
@@ -125,10 +143,10 @@ def create_list_selection(
 		path = path if path else get_attribute_recursive(state, f"{process}_{attribute}_selected")
 
 		if path != ".":
-			if path not in selections:
-				selections[list_id].append(path)
+			if path not in list_selections:
+				list_selections[list_id].append(path)
 			set_attribute_recursive(
-				state, f"{process}_{attribute}_selection_list", selections[list_id]
+				state, f"{process}_{attribute}_selection_list", list_selections[list_id]
 			)
 
 	with tgb.layout(columns="1 1", columns__mobile="1", gap="5%"):

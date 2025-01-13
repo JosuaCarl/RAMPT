@@ -9,6 +9,7 @@ import taipy.gui.builder as tgb
 
 # Submodules
 from .analysis.analysis import *
+from .analysis.summary import *
 from .annotation.gnps import *
 from .annotation.sirius import *
 from .conversion.conversion import *
@@ -224,7 +225,7 @@ with tgb.Page(style=style) as root:
 			)
 
 			create_expandable_setting(
-				create_methods={"": create_analysis},
+				create_methods={"Summary": create_summary, "Analysis": create_analysis},
 				title="📈 Analysis",
 				hover_text="Statistical analysis of annotated features.",
 			)

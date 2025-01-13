@@ -111,6 +111,25 @@ def to_list(object) -> list:
 		return [object]
 
 
+def insert_unlinked_list(arr: list, index: int, object) -> list:
+	"""
+	Insert and element into a copy of a list.
+
+	:param arr: Old list
+	:type arr: list
+	:param index: Position of insertion
+	:type index: int
+	:param object: Object to be inserted
+	:type object: Any
+	:return: List with element at given index
+	:rtype: list
+	"""
+	arr_new = arr.copy()
+	arr_new.insert(index, object)
+	return arr_new
+
+
+
 # String operations
 def change_case_str(s: str, range, conversion: str) -> str:
 	"""
@@ -191,7 +210,6 @@ class Path_Nester:
 		:type sub_name: str, optional
 		"""
 		self.nesting_depth = nesting_depth
-		self.nested_paths = nested_paths
 		self.dir_name = dir_name
 		self.sub_name = sub_name
 		self.id_name = id_name
@@ -245,17 +263,16 @@ class Path_Nester:
 
 		return nested_paths
 
-	def update_nested_paths(self, new_paths: str | list[str]):
+	def update_nested_paths(self, nested_paths, new_paths: str | list[str]):
 		if isinstance(new_paths, str):
 			new_paths = [new_paths]
 		for new_path in new_paths:
 			in_path = os.path.normpath(new_path)
 			split_path = in_path.split(os.sep)
-			self.nested_paths = self.add_nested_lists(split_path[1:], self.nested_paths, in_path)
-		return self.nested_paths
+			nested_paths = self.add_nested_lists(split_path[1:], nested_paths, in_path)
+		return nested_paths
 
-	def prune_lca(self, nested_paths: list = None):
-		nested_paths = nested_paths if nested_paths is not None else self.nested_paths
+	def prune_lca(self, nested_paths):
 		if len(nested_paths) == 1 and len(nested_paths[0][self.sub_name]) == 1:
 			return self.prune_lca(nested_paths=nested_paths[0][self.sub_name])
 		else:
