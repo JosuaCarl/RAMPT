@@ -29,17 +29,28 @@ def create_advanced_settings():
 	tgb.text("###### Advanced settings", mode="markdown")
 
 
-def create_file_selection(process: str, param_attribute_in: str = "scheduled_in", execution_key_in: str = None ,out_node: str = ""):
+def create_file_selection(
+	process: str,
+	param_attribute_in: str = "scheduled_in",
+	execution_key_in: str = None,
+	out_node: str = "",
+):
 	selections.update({f"{process}_in": []})
 
-	def construct_selection_tree(state, path: StrPath = None, tree_id: str = f"{process}_{param_attribute_in}"):
-		path = path if path else get_attribute_recursive(state, f"{process}_path_{param_attribute_in}")
+	def construct_selection_tree(
+		state, path: StrPath = None, tree_id: str = f"{process}_{param_attribute_in}"
+	):
+		path = (
+			path if path else get_attribute_recursive(state, f"{process}_path_{param_attribute_in}")
+		)
 
 		if path != ".":
 			selections[tree_id] = add_path_to_tree(selections[tree_id], path)
 
 			pruned_tree = path_nester.prune_lca(nested_paths=selections[tree_id])
-			set_attribute_recursive(state, f"{process}_selection_tree_{param_attribute_in}", pruned_tree)
+			set_attribute_recursive(
+				state, f"{process}_selection_tree_{param_attribute_in}", pruned_tree
+			)
 
 	with tgb.layout(columns="1 2 2", columns__mobile="1", gap="5%"):
 		# In
@@ -66,7 +77,7 @@ def create_file_selection(process: str, param_attribute_in: str = "scheduled_in"
 					on_action=lambda state: construct_selection_tree(state),
 				)
 			tgb.toggle(f"{{{process}_select_folder_{param_attribute_in}}}", label="Select folder")
-		
+
 		param_variable_in = f"{{{process}_params.{param_attribute_in}}}"
 		if execution_key_in:
 			param_variable_in = param_variable_in + f"['{execution_key_in}']"
