@@ -482,8 +482,15 @@ class Pipe_Step(Step_Configuration):
 			if in_path in self.processed_in and not self.overwrite:
 				continue
 
-			# Construct out directory if not existent
-			os.makedirs(out_path, exist_ok=True)
+			# Construct out directories if not existent
+			if isinstance(out_path, dict):
+				target_paths = list(out_path.values())
+			elif isinstance(out_path, list) or isinstance(out_path, tuple):
+				target_paths = out_path
+			else:
+				target_paths = [out_path]
+			for target_path in target_paths:
+				os.makedirs(target_path, exist_ok=True)
 
 			log(
 				message=f"Processing {in_path} -> {out_path}",

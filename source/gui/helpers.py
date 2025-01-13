@@ -11,19 +11,11 @@ from source.helpers.general import *
 from source.helpers.logging import *
 
 ### Trees
-path_nester = Path_Nester()
-
-
 def get_selection_labels(state, state_attribute: str):
 	selection_labels = [
 		selection.get("label") for selection in get_attribute_recursive(state, state_attribute)
 	]
 	return selection_labels
-
-
-def add_path_to_tree(local_tree, paths):
-	local_tree = path_nester.update_nested_paths(new_paths=paths)
-	return local_tree
 
 
 ### Dialogs

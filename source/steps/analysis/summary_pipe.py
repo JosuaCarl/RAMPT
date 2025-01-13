@@ -86,6 +86,7 @@ class Summary_Runner(Pipe_Step):
 		self.name = "analysis"
 		self.summary = None
 
+
 	def search_quantification_file(
 		self, dir: StrPath, quantification_file: StrPath = None
 	) -> StrPath:
@@ -337,7 +338,7 @@ class Summary_Runner(Pipe_Step):
 		self, in_paths: tuple[StrPath] | list[StrPath] | dict[str, StrPath] | StrPath
 	) -> tuple[StrPath]:
 		if isinstance(in_paths, dict):
-			return (in_paths["in_path_quantification"], in_paths["in_path_annotation"])
+			return (in_paths["quantification"], in_paths["annotation"])
 		elif isinstance(in_paths, StrPath):
 			return in_paths, in_paths
 		else:

@@ -145,7 +145,7 @@ def lock_scenario(state):
 				data_nodes[data_node_key] = value
 
 	ic(data_nodes)
-	
+
 	for key, data_node in scenario.data_nodes.items():
 		if data_nodes.get(key) or key in optional_data_nodes:
 			data_node.write(data_nodes.get(key))
