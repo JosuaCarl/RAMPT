@@ -129,7 +129,6 @@ def insert_unlinked_list(arr: list, index: int, object) -> list:
 	return arr_new
 
 
-
 # String operations
 def change_case_str(s: str, range, conversion: str) -> str:
 	"""

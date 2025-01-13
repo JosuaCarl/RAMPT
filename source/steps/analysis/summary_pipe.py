@@ -87,7 +87,6 @@ class Summary_Runner(Pipe_Step):
 		self.summary = None
 		self.scheduled_in = [{"quantification": None, "annotation": None}]
 
-
 	def search_quantification_file(
 		self, dir: StrPath, quantification_file: StrPath = None
 	) -> StrPath:

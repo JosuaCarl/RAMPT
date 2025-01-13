@@ -478,7 +478,6 @@ class Pipe_Step(Step_Configuration):
 
 		# Loop over all in/out combinations
 		for i, (in_path, out_path) in enumerate(zip(self.scheduled_in, self.scheduled_out)):
-
 			# Skip already processed files/folders
 			if in_path in self.processed_in and not self.overwrite:
 				continue
