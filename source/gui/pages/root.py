@@ -122,7 +122,8 @@ optional_data_nodes = [
 	"feature_finding_out",
 	"gnps_out",
 	"sirius_out",
-	"summary_out" "analysis_out",
+	"summary_out",
+	"analysis_out",
 ]
 
 
@@ -138,11 +139,7 @@ def lock_scenario(state):
 		for state_attribute in attribute_keys:
 			attribute_split = state_attribute.split(".")
 			value = params.get(attribute_split[0]).get(attribute_split[1])
-			ic({data_node_key: value})
-			ic(optional_data_nodes)
-			ic(data_node_key in optional_data_nodes)
 			if value or data_node_key in optional_data_nodes:
-				ic(data_node_key)
 				for state_attribute in attribute_keys:
 					set_attribute_recursive(state, state_attribute, value, refresh=True)
 				data_nodes[data_node_key] = value
