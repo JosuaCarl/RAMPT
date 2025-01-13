@@ -187,9 +187,9 @@ class GNPS_Runner(Pipe_Step):
 		return task_id, check_for_str_request(
 			url=url,
 			query='"status":"DONE"',
-			retries=100,
+			retries=180,
 			allowed_fails=10,
-			expected_wait_time=600.0,
+			retry_time=20.0,
 			timeout=5,
 		)
 

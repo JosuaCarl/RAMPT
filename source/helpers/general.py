@@ -412,9 +412,9 @@ def compute_scheduled(
 def check_for_str_request(
 	url: str | bytes,
 	query: str,
-	retries: int = 100,
+	retries: int = 90,
 	allowed_fails: int = 10,
-	expected_wait_time: float = 600.0,
+	retry_time: float = 20.0,
 	verbosity: int = 1,
 	**kwargs,
 ) -> bool:
@@ -429,8 +429,8 @@ def check_for_str_request(
 	:type retries: int, optional
 	:param allowed_fails: Number of times the request are allowed to fail, defaults to 10
 	:type allowed_fails: int, optional
-	:param expected_wait_time: Expected time until query is found, defaults to 10.0
-	:type expected_wait_time: float, optional
+	:param retry_time: Time till retry, defaults to 20.0
+	:type retry_time: float, optional
 	:param verbosity: Level of verbosity, defaults to 1
 	:type verbosity: int, optional
 	:param kwargs: Additional arguments, passed on to requests.get()
@@ -458,7 +458,6 @@ def check_for_str_request(
 			)
 
 		# Retry
-		retry_time = (1 / math.log2(i + 2)) * expected_wait_time
 		log(
 			message=f"{query} not found at {url}. Retrying in {retry_time}s.",
 			minimum_verbosity=2,
