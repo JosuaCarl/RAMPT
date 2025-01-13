@@ -86,7 +86,6 @@ class Summary_Runner(Pipe_Step):
 		self.name = "analysis"
 		self.summary = None
 
-
 	def search_quantification_file(
 		self, dir: StrPath, quantification_file: StrPath = None
 	) -> StrPath:

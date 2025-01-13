@@ -10,6 +10,7 @@ from taipy.gui import download
 from source.helpers.general import *
 from source.helpers.logging import *
 
+
 ### Trees
 def get_selection_labels(state, state_attribute: str):
 	selection_labels = [
