@@ -358,7 +358,7 @@ class Summary_Runner(Pipe_Step):
 		# TODO: Deal properly with GNPS and SIRIUS input
 		if isinstance(in_path_annotation, list):
 			in_path_annotation = in_path_annotation[0]
-			
+
 		# Case run_single
 		if annotation_file_type:
 			summary = self.add_quantification(

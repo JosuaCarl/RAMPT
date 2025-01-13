@@ -215,8 +215,8 @@ def summarize_annotations(
 	return generic_step(
 		step_class=Summary_Runner,
 		in_paths={
-			"quantification": processed_data, 
-			"annotation": [sirius_annotated_data, gnps_annotated_data]
+			"quantification": processed_data,
+			"annotation": [sirius_annotated_data, gnps_annotated_data],
 		},
 		out_paths=summary_out,
 		out_path_target=os.path.join("..", "analysis"),

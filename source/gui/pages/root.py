@@ -27,7 +27,15 @@ work_dir_root = tempfile.gettempdir()
 
 # SYNCHRONISATION (First GUI, then Scenario)
 ## Synchronisation of GUI
-param_segment_names = ["global", "conversion", "feature_finding", "gnps", "sirius", "summary", "analysis"]
+param_segment_names = [
+	"global",
+	"conversion",
+	"feature_finding",
+	"gnps",
+	"sirius",
+	"summary",
+	"analysis",
+]
 save_path = None
 save_file_types = [("json files", "*.json")]
 
@@ -73,10 +81,9 @@ scenario = tp.create_scenario(ms_analysis_config, name="Default")
 
 
 ## Synchronisation of Scenario
-match_data_node = { 
+match_data_node = {
 	# Used to decide which values (the last in the list) are used in case of conflicts
 	# Processed chained Inputs are preffered to scheduled targets
-
 	# In Data
 	"raw_data": ["conversion_params.scheduled_in"],
 	"community_formatted_data": [
@@ -92,7 +99,6 @@ match_data_node = {
 	"sirius_annotations": ["sirius_params.processed_out"],
 	"summary_data": ["analysis_params.scheduled_in", "summary_params.processed_out"],
 	"analysis_data": ["analysis_params.processed_out"],
-
 	# Out Data
 	"conversion_out": ["conversion_params.scheduled_out", "feature_finding_params.scheduled_in"],
 	"feature_finding_out": [
@@ -104,7 +110,6 @@ match_data_node = {
 	"sirius_out": ["sirius_params.scheduled_out"],
 	"summary_out": ["summary_params.scheduled_out", "analysis_params.scheduled_in"],
 	"analysis_out": ["analysis_params.scheduled_out"],
-
 	# Batches and more
 	"mzmine_batch": ["feature_finding_params.batch"],
 	"mzmine_log": ["feature_finding_params.log_paths", "gnps_params.mzmine_log"],
@@ -117,8 +122,7 @@ optional_data_nodes = [
 	"feature_finding_out",
 	"gnps_out",
 	"sirius_out",
-	"summary_out"
-	"analysis_out",
+	"summary_out" "analysis_out",
 ]
 
 
