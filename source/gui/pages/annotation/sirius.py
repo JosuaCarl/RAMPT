@@ -7,18 +7,6 @@ from source.steps.annotation.sirius_pipe import Sirius_Runner
 
 sirius_params = Sirius_Runner()
 
-sirius_path_scheduled_in = "."
-sirius_selection_tree_scheduled_in = []
-sirius_select_folder_scheduled_in = False
-
-sirius_config_selected = "."
-sirius_config_path = ""
-sirius_config_selection_list = []
-
-sirius_projectspace_selected = "."
-sirius_projectspace_path = "projectspace"
-sirius_projectspace_selection_list = []
-
 
 def create_sirius():
 	tgb.text("###### File selection", mode="markdown")
@@ -37,4 +25,9 @@ def create_sirius():
 
 	tgb.html("br")
 
-	create_list_selection(process="sirius", attribute="projectspace", name="projectspace")
+	create_list_selection(
+		process="sirius",
+		attribute="projectspace",
+		name="projectspace",
+		default_value="projectspace"
+	)

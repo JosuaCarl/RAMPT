@@ -9,14 +9,6 @@ from source.steps.feature_finding.mzmine_pipe import MZmine_Runner
 
 feature_finding_params = MZmine_Runner()
 
-feature_finding_path_scheduled_in = "."
-feature_finding_selection_tree_scheduled_in = []
-feature_finding_select_folder_scheduled_in = False
-
-feature_finding_batch_selected = "."
-feature_finding_batch_path = ".mzbatch"
-feature_finding_batch_selection_list = []
-
 
 def create_feature_finding(process="feature_finding"):
 	tgb.text("###### File selection", mode="markdown")
@@ -25,7 +17,11 @@ def create_feature_finding(process="feature_finding"):
 	tgb.html("br")
 
 	tgb.text("###### Batch selection", mode="markdown")
-	create_list_selection(process="feature_finding", extensions=".mzbatch,.xml")
+	create_list_selection(
+		process="feature_finding",
+		extensions=".mzbatch,.xml",
+		default_value=".mzbatch"
+	)
 
 	create_advanced_settings()
 

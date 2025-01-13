@@ -9,11 +9,6 @@ from source.steps.conversion.msconv_pipe import MSconvert_Runner
 
 conversion_params = MSconvert_Runner()
 
-conversion_path_scheduled_in = "."
-conversion_selection_tree_scheduled_in = []
-conversion_select_folder_scheduled_in = False
-
-
 def create_conversion():
 	tgb.text("###### File selection", mode="markdown")
 	create_file_selection(process="conversion", out_node="community_formatted_data")

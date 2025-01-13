@@ -14,9 +14,6 @@ selection_trees_full = {}
 
 selected = {}
 
-# List selectors
-list_selections = {}
-
 
 def create_expandable_setting(
 	create_methods: dict, title: str, hover_text: str = "", expanded=False, **kwargs
@@ -148,22 +145,36 @@ def create_file_selection(
 					)
 
 
+
+# List selectors
+list_options = {}
+list_uploaded = {}
+list_selected = {}
+
 def create_list_selection(
-	process: str, attribute: str = "batch", extensions: str = "*", name: str = "batch file"
-):
-	list_selections.update({f"{process}_{attribute}": []})
+	process: str, attribute: str = "batch", extensions: str = "*", name: str = "batch file", default_value = None
+):	
+	selector_id = f"{process}_{attribute}"
+	list_options.update({selector_id: []})
+	list_uploaded.update({selector_id: ""})
+	list_selected.update({selector_id: default_value})
 
 	def construct_selection_list(
-		state, path: StrPath = None, list_id: str = f"{process}_{attribute}"
+		state, new_path: StrPath = None
 	):
-		path = path if path else get_attribute_recursive(state, f"{process}_{attribute}_selected")
+		new_path = new_path if new_path else get_attribute_recursive(state, f"list_uploaded.{selector_id}")
 
-		if path != ".":
-			if path not in list_selections:
-				list_selections[list_id].append(path)
+		if new_path != ".":
+			if new_path not in list_options:
+				list_options[selector_id].append(new_path)
 			set_attribute_recursive(
-				state, f"{process}_{attribute}_selection_list", list_selections[list_id]
+				state, f"list_options.{selector_id}", list_options[selector_id]
 			)
+
+	def update_selection(state, name, value):
+		set_attribute_recursive(
+			state, f"{process}_params.{attribute}", value, refresh=True
+		)
 
 	with tgb.layout(columns="1 1", columns__mobile="1", gap="5%"):
 		with tgb.part(render="{local}"):
@@ -181,7 +192,7 @@ def create_list_selection(
 			)
 		with tgb.part(render="{not local}"):
 			tgb.file_selector(
-				f"{{{process}_{attribute}_selected}}",
+				f"{{list_uploaded.{selector_id}}}",
 				label=f"Select {name}",
 				extensions=extensions,
 				drop_message=f"Drop {name} for {process} here:",
@@ -190,12 +201,13 @@ def create_list_selection(
 			)
 
 		tgb.selector(
-			f"{{{process}_params.{attribute}}}",
-			lov=f"{{{process}_{attribute}_selection_list}}",
+			f"{{list_selected.{selector_id}}}",
+			lov=f"{{list_options.{selector_id}}}",
 			label=f"Select a {name} for {process}",
 			filter=True,
 			multiple=False,
 			mode="radio",
+			on_change=lambda state, name, value: update_selection(state, name, value)
 		)
 
 
