@@ -1,18 +1,16 @@
 [project]
-name = "mine2sirius-pipe"
-description = "mzMine to SIRIUS pipeline with additional analysis"
+name = "RAMP"
+description = "Raw to annotation metabolomics pipline"
 requires-python = "<3.13,>=3.12"
 dependencies = [
     "numpy<2.0.0,>=1.26.4",
     "scipy<2.0.0,>=1.14.1",
-    "pyarrow<18.0.0,>=17.0.0",
     "jupyter<2.0.0,>=1.1.1",
     "tqdm<5.0.0,>=4.66.5",
     "dask<2025.0.0,>=2024.9.1",
     "argparse<2.0.0,>=1.4.0",
     "regex>=2024.9.11,<2025.0.0",
     "beautifulsoup4<5.0.0,>=4.12.3",
-    "lxml<6.0.0,>=5.3.0",
     "pandas<3.0.0,>=2.2.2",
     "statsmodels<1.0.0,>=0.14.4",
     "seaborn<1.0.0,>=0.13.2",
@@ -20,7 +18,6 @@ dependencies = [
     "requests>=2.32.3,<3.0.0",
     "tee-subprocess<2.0.0,>=1.2.0",
     "pyopenms<4.0.0,>=3.2.0",
-    "chardet<6.0.0,>=5.2.0",
     "multipledispatch<2.0.0,>=1.0.0",
     "taipy<5.0.0,>=4.0.1",
     "ruamel-yaml<1.0.0,>=0.18.6",
@@ -33,16 +30,30 @@ license = {file = "LICENSE"}
 keywords = ["mass-spectrometry", "workflow", "pipeline", "gui", "sirius", "mzmine" ]
 version = "2025.0.1a"
 
+# URLs
+[project.urls]
+Homepage = "https://github.com/JosuaCarl/mine2sirius_pipe"
+Documentation = "https://josuacarl.github.io/mine2sirius_pipe/"
+Repository = "https://github.com/JosuaCarl/mine2sirius_pipe.git"
+Issues = "https://github.com/JosuaCarl/mine2sirius_pipe/issues"
+Changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 
+
+# Define entypoint
+[project.scripts]
+cli-name = "source.gui.main"
+
+
+# Developer dependencies
 [dependency-groups]
 dev = [
+    "pyopenms==3.2.0",
     "sphinx<8,>=7",
     "pydata-sphinx-theme<1.0.0,>=0.15.4",
     "pytest<9.0.0,>=8.3.3",
     "icecream<3.0.0,>=2.1.3",
     "ruff<1.0.0,>=0.8.1",
-    "pyopenms==3.2.0",
-    "pyinstaller>=6.11.1",
+    "cx-freeze>=7.2.8",
 ]
 
 
@@ -60,3 +71,13 @@ indent-style = "tab"
 docstring-code-format = true
 line-ending = "auto"
 skip-magic-trailing-comma = true
+
+
+# Setuptools
+[tool.setuptools.packages.find]
+# All the following settings are optional:
+where = ["source"]  # ["."] by default
+include = ["*"]  # ["*"] by default
+exclude = ["tests"]  # empty by default
+namespaces = false  # true by default
+
