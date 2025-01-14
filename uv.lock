@@ -1367,7 +1367,6 @@ dependencies = [
     { name = "ruamel-yaml" },
     { name = "scipy" },
     { name = "seaborn" },
-    { name = "setuptools" },
     { name = "statsmodels" },
     { name = "taipy" },
     { name = "tee-subprocess" },
@@ -1382,6 +1381,7 @@ dev = [
     { name = "pyopenms" },
     { name = "pytest" },
     { name = "ruff" },
+    { name = "setuptools" },
     { name = "sphinx" },
 ]
 
@@ -1404,7 +1404,6 @@ requires-dist = [
     { name = "ruamel-yaml", specifier = ">=0.18.6,<1.0.0" },
     { name = "scipy", specifier = ">=1.14.1,<2.0.0" },
     { name = "seaborn", specifier = ">=0.13.2,<1.0.0" },
-    { name = "setuptools", specifier = ">=75.7.0" },
     { name = "statsmodels", specifier = ">=0.14.4,<1.0.0" },
     { name = "taipy", specifier = ">=4.0.1,<5.0.0" },
     { name = "tee-subprocess", specifier = ">=1.2.0,<2.0.0" },
@@ -1419,6 +1418,7 @@ dev = [
     { name = "pyopenms", specifier = "==3.2.0" },
     { name = "pytest", specifier = ">=8.3.3,<9.0.0" },
     { name = "ruff", specifier = ">=0.8.1,<1.0.0" },
+    { name = "setuptools", specifier = ">=75.7.0" },
     { name = "sphinx", specifier = ">=7,<8" },
 ]
 
