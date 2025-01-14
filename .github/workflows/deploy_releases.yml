@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest ] #, windows-latest, macos-latest ]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
 
     steps:
     - uses: actions/checkout@v4
@@ -32,22 +32,21 @@ jobs:
 
     - name: Install project dependencies
       run: |
-        uv sync --all-extras --dev
+        uv sync --all-extras --all-groups
   
-    - name: Sync requirements from environment
+    - name: Use Nuitka to compile exe
       run: |
-          uv pip sync requirements.txt
-
-    - name: Build HTML
-      run: |
-          cd docs
-          uv run make html
-
-    - name: Upload static files as artifact
-      id: deployment
-      uses: actions/upload-pages-artifact@v3
+          uv run --frozen python -m nuitka --static-libpython=no --standalone --onefile source/__main__.py
+    
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
       with:
-        path: docs/_build/html/
+        name: ${{ runner.os }} build
+        path: |
+          build/*.exe
+          build/*.bin
+          build/*.app/**/*
+        include-hidden-files: true
 
   deploy:
     # Add a dependency to the build job
@@ -59,14 +58,15 @@ jobs:
       id-token: write   # to verify the deployment originates from an appropriate source
 
     # Deploy to the github-pages environment
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    # Specify runner + deployment step
     runs-on: ubuntu-latest
-
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          body_path: ${{ github.workspace }}-CHANGELOG.txt
+          files: |
+            build/*.exe
+            build/*.bin
+            build/*.app/**/*
+            LICENSE.txt

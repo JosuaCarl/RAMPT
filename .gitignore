@@ -190,3 +190,8 @@ plz-out
 /dist/
 
 /builders/
+
+# Nuikta
+*.build/
+*.dist/
+*.onefile-build/
