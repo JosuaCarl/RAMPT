@@ -1395,75 +1395,6 @@ wheels = [
 ]
 
 [[package]]
-name = "mine2sirius-pipe"
-version = "2025.0.1a0"
-source = { virtual = "." }
-dependencies = [
-    { name = "argparse" },
-    { name = "beautifulsoup4" },
-    { name = "dask" },
-    { name = "jupyter" },
-    { name = "multipledispatch" },
-    { name = "numpy" },
-    { name = "pandas" },
-    { name = "plotly" },
-    { name = "pyopenms" },
-    { name = "regex" },
-    { name = "requests" },
-    { name = "ruamel-yaml" },
-    { name = "scipy" },
-    { name = "seaborn" },
-    { name = "statsmodels" },
-    { name = "taipy" },
-    { name = "tee-subprocess" },
-    { name = "tqdm" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "cx-freeze" },
-    { name = "icecream" },
-    { name = "pydata-sphinx-theme" },
-    { name = "pyopenms" },
-    { name = "pytest" },
-    { name = "ruff" },
-    { name = "sphinx" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "argparse", specifier = ">=1.4.0,<2.0.0" },
-    { name = "beautifulsoup4", specifier = ">=4.12.3,<5.0.0" },
-    { name = "dask", specifier = ">=2024.9.1,<2025.0.0" },
-    { name = "jupyter", specifier = ">=1.1.1,<2.0.0" },
-    { name = "multipledispatch", specifier = ">=1.0.0,<2.0.0" },
-    { name = "numpy", specifier = ">=1.26.4,<2.0.0" },
-    { name = "pandas", specifier = ">=2.2.2,<3.0.0" },
-    { name = "plotly", specifier = ">=5.24.1,<6.0.0" },
-    { name = "pyopenms", specifier = ">=3.2.0,<4.0.0" },
-    { name = "regex", specifier = ">=2024.9.11,<2025.0.0" },
-    { name = "requests", specifier = ">=2.32.3,<3.0.0" },
-    { name = "ruamel-yaml", specifier = ">=0.18.6,<1.0.0" },
-    { name = "scipy", specifier = ">=1.14.1,<2.0.0" },
-    { name = "seaborn", specifier = ">=0.13.2,<1.0.0" },
-    { name = "statsmodels", specifier = ">=0.14.4,<1.0.0" },
-    { name = "taipy", specifier = ">=4.0.1,<5.0.0" },
-    { name = "tee-subprocess", specifier = ">=1.2.0,<2.0.0" },
-    { name = "tqdm", specifier = ">=4.66.5,<5.0.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "cx-freeze", specifier = ">=7.2.8" },
-    { name = "icecream", specifier = ">=2.1.3,<3.0.0" },
-    { name = "pydata-sphinx-theme", specifier = ">=0.15.4,<1.0.0" },
-    { name = "pyopenms", specifier = "==3.2.0" },
-    { name = "pytest", specifier = ">=8.3.3,<9.0.0" },
-    { name = "ruff", specifier = ">=0.8.1,<1.0.0" },
-    { name = "sphinx", specifier = ">=7,<8" },
-]
-
-[[package]]
 name = "mistune"
 version = "3.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2087,6 +2018,75 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/07/18/907134c85c7152f679ed744e73e645b365f3ad571f38bdb62e36f347699a/pyzmq-26.2.0-cp312-cp312-win32.whl", hash = "sha256:989d842dc06dc59feea09e58c74ca3e1678c812a4a8a2a419046d711031f69c7", size = 575533 },
     { url = "https://files.pythonhosted.org/packages/ce/2c/a6f4a20202a4d3c582ad93f95ee78d79bbdc26803495aec2912b17dbbb6c/pyzmq-26.2.0-cp312-cp312-win_amd64.whl", hash = "sha256:2a50625acdc7801bc6f74698c5c583a491c61d73c6b7ea4dee3901bb99adb27a", size = 637768 },
     { url = "https://files.pythonhosted.org/packages/5f/0e/eb16ff731632d30554bf5af4dbba3ffcd04518219d82028aea4ae1b02ca5/pyzmq-26.2.0-cp312-cp312-win_arm64.whl", hash = "sha256:4d29ab8592b6ad12ebbf92ac2ed2bedcfd1cec192d8e559e2e099f648570e19b", size = 540675 },
+]
+
+[[package]]
+name = "ramp"
+version = "2025.0.1a0"
+source = { virtual = "." }
+dependencies = [
+    { name = "argparse" },
+    { name = "beautifulsoup4" },
+    { name = "dask" },
+    { name = "jupyter" },
+    { name = "multipledispatch" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "plotly" },
+    { name = "pyopenms" },
+    { name = "regex" },
+    { name = "requests" },
+    { name = "ruamel-yaml" },
+    { name = "scipy" },
+    { name = "seaborn" },
+    { name = "statsmodels" },
+    { name = "taipy" },
+    { name = "tee-subprocess" },
+    { name = "tqdm" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "cx-freeze" },
+    { name = "icecream" },
+    { name = "pydata-sphinx-theme" },
+    { name = "pyopenms" },
+    { name = "pytest" },
+    { name = "ruff" },
+    { name = "sphinx" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "argparse", specifier = ">=1.4.0,<2.0.0" },
+    { name = "beautifulsoup4", specifier = ">=4.12.3,<5.0.0" },
+    { name = "dask", specifier = ">=2024.9.1,<2025.0.0" },
+    { name = "jupyter", specifier = ">=1.1.1,<2.0.0" },
+    { name = "multipledispatch", specifier = ">=1.0.0,<2.0.0" },
+    { name = "numpy", specifier = ">=1.26.4,<2.0.0" },
+    { name = "pandas", specifier = ">=2.2.2,<3.0.0" },
+    { name = "plotly", specifier = ">=5.24.1,<6.0.0" },
+    { name = "pyopenms", specifier = ">=3.2.0,<4.0.0" },
+    { name = "regex", specifier = ">=2024.9.11,<2025.0.0" },
+    { name = "requests", specifier = ">=2.32.3,<3.0.0" },
+    { name = "ruamel-yaml", specifier = ">=0.18.6,<1.0.0" },
+    { name = "scipy", specifier = ">=1.14.1,<2.0.0" },
+    { name = "seaborn", specifier = ">=0.13.2,<1.0.0" },
+    { name = "statsmodels", specifier = ">=0.14.4,<1.0.0" },
+    { name = "taipy", specifier = ">=4.0.1,<5.0.0" },
+    { name = "tee-subprocess", specifier = ">=1.2.0,<2.0.0" },
+    { name = "tqdm", specifier = ">=4.66.5,<5.0.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "cx-freeze", specifier = ">=7.2.8" },
+    { name = "icecream", specifier = ">=2.1.3,<3.0.0" },
+    { name = "pydata-sphinx-theme", specifier = ">=0.15.4,<1.0.0" },
+    { name = "pyopenms", specifier = "==3.2.0" },
+    { name = "pytest", specifier = ">=8.3.3,<9.0.0" },
+    { name = "ruff", specifier = ">=0.8.1,<1.0.0" },
+    { name = "sphinx", specifier = ">=7,<8" },
 ]
 
 [[package]]
