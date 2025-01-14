@@ -240,7 +240,7 @@ def test_check_for_str_request():
 		query='"version":"0.6"',
 		retries=10,
 		allowed_fails=3,
-		expected_wait_time=1.0,
+		retry_time=1.0,
 		timeout=5,
 	)
 	assert not check_for_str_request(
@@ -248,7 +248,7 @@ def test_check_for_str_request():
 		query='"version":"0.sad"',
 		retries=10,
 		allowed_fails=3,
-		expected_wait_time=1.0,
+		retry_time=1.0,
 		timeout=5,
 	)
 
