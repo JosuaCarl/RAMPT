@@ -17,7 +17,7 @@ dependencies = [
     "statsmodels<1.0.0,>=0.14.4",
     "seaborn<1.0.0,>=0.13.2",
     "plotly<6.0.0,>=5.24.1",
-    "requests<3.0.0,>=2.32.3",
+    "requests>=2.32.3,<3.0.0",
     "tee-subprocess<2.0.0,>=1.2.0",
     "pyopenms<4.0.0,>=3.2.0",
     "chardet<6.0.0,>=5.2.0",
@@ -43,6 +43,7 @@ dev = [
     "ruff<1.0.0,>=0.8.1",
     "pyopenms==3.2.0",
     "pyinstaller>=6.11.1",
+    "setuptools>=75.7.0",
 ]
 
 
