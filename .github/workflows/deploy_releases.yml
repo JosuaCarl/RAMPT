@@ -36,7 +36,7 @@ jobs:
   
     - name: Use Nuitka to compile exe
       run: |
-          uv run --frozen python -m nuitka --static-libpython=no --standalone --onefile source/__main__.py
+          uv run --frozen python -m nuitka --standalone --onefile --output-dir=build source/__main__.py
     
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
