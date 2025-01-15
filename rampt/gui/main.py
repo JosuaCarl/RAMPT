@@ -16,12 +16,11 @@ pages_dict = {
 
 stylekit = {"color_paper_light": "#EFE6F1", "color_background_light": "#EBE5EC"}
 
-
-if __name__ == "__main__":
+def main():
 	gui = Gui(pages=pages_dict, css_file="main.css")
 	orchestrator = tp.Orchestrator()
 
 	orchestrator.run()
 	gui.run(
-		title="mine2sirius", port=5001, stylekit=stylekit, async_mode="threading", run_browser=False
+		title="mine2sirius", port=5001, stylekit=stylekit, async_mode="threading", run_browser=False, debug=False,
 	)

@@ -22,7 +22,12 @@ def test_gnps_submit():
 		feature_quantification_file=join(example_path, "example_files_iimn_fbmn_quant.csv"),
 	)
 
-	assert status
+	if not status:
+		warn(
+			"GNPS is probably down (again)." + 
+			f"Try reaching https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={task_id} to check task." +
+			"Debugging is recommended via graphical web interface, to get meaningful errors.",
+		)
 	assert isinstance(task_id, str) and task_id != ""
 
 

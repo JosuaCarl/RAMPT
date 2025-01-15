@@ -410,9 +410,11 @@ def compute_scheduled(
 # Webrequests
 def check_for_str_request(
 	url: str | bytes,
-	query: str,
+	query_success: str,
+	query_failed: str,
+	query_running: str = None,
 	retries: int = 90,
-	allowed_fails: int = 10,
+	allowed_fails: int = 5,
 	retry_time: float = 20.0,
 	verbosity: int = 1,
 	**kwargs,
@@ -422,8 +424,12 @@ def check_for_str_request(
 
 	:param url: Target URL
 	:type url: str | bytes
-	:param query: Query string that is searched in response
-	:type query: str
+	:param query_success: Query string that is searched in response to indicate successful completion
+	:type query_success: str
+	:param query_failed: Query string that is searched in response to indicate failure
+	:type query_failed: str
+	:param query_running: Query string that is searched in response to indicate ongoing process
+	:type query_running: str
 	:param retries: Number of retries, defaults to 100
 	:type retries: int, optional
 	:param allowed_fails: Number of times the request are allowed to fail, defaults to 10
@@ -442,8 +448,27 @@ def check_for_str_request(
 		response = requests.get(url, **kwargs)
 
 		if response.status_code == 200:
-			if query in str(response.content):
+			if query_success in str(response.content):
+				log(
+					message=f"Request succeeded ({query_success} in response).",
+					minimum_verbosity=3,
+					verbosity=verbosity,
+				)
 				return True
+			
+			elif query_failed in str(response.content):
+				log(
+					message=f"Request failed ({query_failed} in response).",
+					minimum_verbosity=3,
+					verbosity=verbosity,
+				)
+				return False
+			elif query_running and query_running in str(response.content):
+				log(
+					message=f"Request still running ({query_running} in response).",
+					minimum_verbosity=3,
+					verbosity=verbosity,
+				)
 		else:
 			fails.append(response.status_code)
 			warn(
@@ -451,6 +476,8 @@ def check_for_str_request(
                     Requesting this URL will be terminated after further {allowed_fails - len(fails)} failed requests.",
 				category=UserWarning,
 			)
+		
+		# Check Failure
 		if len(fails) > allowed_fails:
 			raise LookupError(
 				f"The request to {url} failed more than {allowed_fails} times with the following status codes:\n{fails}"
@@ -458,7 +485,7 @@ def check_for_str_request(
 
 		# Retry
 		log(
-			message=f"{query} not found at {url}. Retrying in {retry_time}s.",
+			message=f"{query_success} not found at {url}. Retrying in {retry_time}s.",
 			minimum_verbosity=2,
 			verbosity=verbosity,
 		)

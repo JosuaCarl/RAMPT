@@ -186,9 +186,11 @@ class GNPS_Runner(Pipe_Step):
 		url = f"https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={task_id}"
 		return task_id, check_for_str_request(
 			url=url,
-			query='"status":"DONE"',
+			query_success='"status":"DONE"',
+			query_failed='"status":"FAILED"',
+			query_running='"status":"RUNNING"',
 			retries=180,
-			allowed_fails=10,
+			allowed_fails=5,
 			retry_time=20.0,
 			timeout=5,
 			verbosity=self.verbosity,
@@ -290,14 +292,14 @@ class GNPS_Runner(Pipe_Step):
 
 			log(
 				message=f"GNPS results {basename(in_path)}:\ntask_id:{task_id}\n{results_dict}",
-				minimum_verbosity=3,
+				minimum_verbosity=4,
 				verbosity=self.verbosity,
 			)
 
 			in_path = gnps_response if gnps_response else mzmine_log if mzmine_log else in_path
 
 			log(
-				"Fetched gnps results from {in_path}", minimum_verbosity=1, verbosity=self.verbosity
+				f"Fetched gnps results from {in_path}", minimum_verbosity=1, verbosity=self.verbosity
 			)
 
 		else:

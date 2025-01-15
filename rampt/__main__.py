@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 # __init__.py
 
-from rampt.gui.main import *
+from rampt.gui.main import main
 
 if __name__ == "__main__":
-	gui = Gui(pages=pages_dict, css_file="main.css")
-	orchestrator = tp.Orchestrator()
+	main()
 
-	orchestrator.run()
-	gui.run(
-		title="mine2sirius", port=5001, stylekit=stylekit, async_mode="threading", run_browser=False
-	)
+
