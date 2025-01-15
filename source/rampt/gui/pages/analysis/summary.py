@@ -3,7 +3,7 @@
 import taipy.gui.builder as tgb
 from ..common_parts import *
 
-from  ....steps.analysis.summary_pipe import Summary_Runner
+from ....steps.analysis.summary_pipe import Summary_Runner
 
 summary_params = Summary_Runner()
 

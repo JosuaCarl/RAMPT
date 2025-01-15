@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 import taipy.gui.builder as tgb
-from  ...helpers import *
+from ...helpers import *
 from ..common_parts import *
 
-from  ....steps.conversion.msconv_pipe import MSconvert_Runner
+from ....steps.conversion.msconv_pipe import MSconvert_Runner
 
 
 conversion_params = MSconvert_Runner()

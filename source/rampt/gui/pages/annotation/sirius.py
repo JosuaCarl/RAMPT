@@ -3,7 +3,7 @@
 import taipy.gui.builder as tgb
 from ..common_parts import *
 
-from  ....steps.annotation.sirius_pipe import Sirius_Runner
+from ....steps.annotation.sirius_pipe import Sirius_Runner
 
 sirius_params = Sirius_Runner()
 

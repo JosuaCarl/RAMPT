@@ -2,5 +2,3 @@
 # __init__.py
 
 __all__ = ["msconv_pipe"]
-
-from . import msconv_pipe as msconv_pipe

@@ -2,5 +2,3 @@
 # __init__.py
 
 __all__ = ["mzmine_pipe"]
-
-from . import mzmine_pipe as mzmine_pipe
