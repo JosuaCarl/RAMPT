@@ -4,8 +4,8 @@ Testing the conversion functions.
 """
 
 from tests.common import *
-from source.rampt.steps.conversion.msconv_pipe import *
-from source.rampt.steps.conversion.msconv_pipe import main as msconv_pipe_main
+from rampt.steps.conversion.msconv_pipe import *
+from rampt.steps.conversion.msconv_pipe import main as msconv_pipe_main
 from bs4 import BeautifulSoup
 
 platform = get_platform()

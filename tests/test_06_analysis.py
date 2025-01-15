@@ -4,8 +4,8 @@ Testing the data analysis.
 """
 
 from tests.common import *
-from source.rampt.steps.analysis.analysis_pipe import *
-from source.rampt.steps.analysis.analysis_pipe import main as analysis_pipe_main
+from rampt.steps.analysis.analysis_pipe import *
+from rampt.steps.analysis.analysis_pipe import main as analysis_pipe_main
 
 
 platform = get_platform()

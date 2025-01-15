@@ -9,7 +9,7 @@ import time
 import platform as pf
 import shutil
 
-from source.rampt.helpers.general import *
+from rampt.helpers.general import *
 
 from tqdm import tqdm as tqdm
 

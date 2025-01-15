@@ -4,8 +4,8 @@ Testing the feature finding functions.
 """
 
 from tests.common import *
-from source.rampt.steps.feature_finding.mzmine_pipe import *
-from source.rampt.steps.feature_finding.mzmine_pipe import main as mzmine_pipe_main
+from rampt.steps.feature_finding.mzmine_pipe import *
+from rampt.steps.feature_finding.mzmine_pipe import main as mzmine_pipe_main
 
 import pandas as pd
 

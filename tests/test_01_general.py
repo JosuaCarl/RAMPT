@@ -3,7 +3,7 @@
 Testing the conversion functions.
 """
 
-from source.rampt.steps.general import *
+from rampt.steps.general import *
 from tests.common import *
 
 platform = get_platform()
