@@ -4,7 +4,7 @@ Testing the helper functions.
 """
 
 from tests.common import *
-from source.helpers.general import *
+from source.rampt.helpers.general import *
 
 
 platform = get_platform()

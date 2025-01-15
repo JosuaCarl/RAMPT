@@ -4,7 +4,7 @@ Testing final Taipy integration.
 """
 
 from tests.common import *
-from source.gui.pages.root import *
+from source.rampt.gui.pages.root import *
 
 from taipy.core.submission.submission_status import SubmissionStatus
 

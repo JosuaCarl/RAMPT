@@ -8,7 +8,8 @@ from os.path import basename as basename
 import time
 import platform as pf
 import shutil
-from source.helpers.general import *
+
+from source.rampt.helpers.general import *
 
 from tqdm import tqdm as tqdm
 

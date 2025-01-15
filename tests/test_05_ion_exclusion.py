@@ -4,8 +4,8 @@ Testing the ion exclusion list creation.
 """
 
 from tests.common import *
-from source.steps.ion_exclusion.ion_exclusion import *
-from source.steps.ion_exclusion.ion_exclusion import main as ion_exclusion_pipe_main
+from source.rampt.steps.ion_exclusion.ion_exclusion import *
+from source.rampt.steps.ion_exclusion.ion_exclusion import main as ion_exclusion_pipe_main
 import pandas as pd
 
 platform = get_platform()

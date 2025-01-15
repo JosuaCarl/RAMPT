@@ -1,0 +1,8 @@
+
+# Setuptools
+[tool.setuptools.packages.find]
+# All the following settings are optional:
+where = ["source"]  # ["."] by default
+include = ["*"]  # ["*"] by default
+exclude = ["tests"]  # empty by default
+namespaces = false  # true by default

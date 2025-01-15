@@ -4,9 +4,9 @@ Testing the configuration of taipy scenario.
 """
 
 from tests.common import *
-from source.gui.configuration.config import *
+from source.rampt.gui.configuration.config import *
 
-from source.steps.general import Pipe_Step
+from source.rampt.steps.general import Pipe_Step
 
 
 platform = get_platform()
