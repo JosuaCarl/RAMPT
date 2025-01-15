@@ -4,8 +4,8 @@ Testing the GNPS annotation.
 """
 
 from tests.common import *
-from source.rampt.steps.annotation.gnps_pipe import *
-from source.rampt.steps.annotation.gnps_pipe import main as gnps_pipe_main
+from rampt.steps.annotation.gnps_pipe import *
+from rampt.steps.annotation.gnps_pipe import main as gnps_pipe_main
 
 
 platform = get_platform()
@@ -15,7 +15,7 @@ make_out(out_path)
 
 
 def test_gnps_submit():
-	gnps_runner = GNPS_Runner(mzmine_log=join(example_path, "mzmine_log.txt"))
+	gnps_runner = GNPS_Runner(verbosity=3)
 
 	task_id, status = gnps_runner.submit_to_gnps(
 		feature_ms2_file=join(example_path, "example_files_iimn_fbmn.mgf"),
@@ -30,7 +30,7 @@ def test_gnps_pipe_run_single():
 	clean_out(out_path)
 
 	# Superficial testing of run_single
-	gnps_runner = GNPS_Runner(mzmine_log=join(example_path, "mzmine_log.txt"))
+	gnps_runner = GNPS_Runner(verbosity=3)
 
 	gnps_runner.run_single(in_path=join(example_path, "mzmine_log.txt"), out_path=out_path)
 
@@ -40,7 +40,7 @@ def test_gnps_pipe_run_single():
 def test_gnps_pipe_run_directory():
 	clean_out(out_path)
 	# Supoerficial testing of run_directory
-	gnps_runner = GNPS_Runner(mzmine_log=example_path)
+	gnps_runner = GNPS_Runner(verbosity=3)
 
 	gnps_runner.run_directory(in_path=example_path, out_path=out_path)
 
@@ -50,7 +50,7 @@ def test_gnps_pipe_run_directory():
 def test_gnps_pipe_run_nested():
 	clean_out(out_path)
 	# Superficial testing of run_nested
-	gnps_runner = GNPS_Runner()
+	gnps_runner = GNPS_Runner(verbosity=3)
 
 	gnps_runner.run_nested(example_path, out_path)
 
@@ -64,7 +64,7 @@ def test_gnps_pipe_run():
 	clean_out(out_path)
 
 	# Superficial testing of run
-	gnps_runner = GNPS_Runner(workers=2)
+	gnps_runner = GNPS_Runner(verbosity=3, workers=2)
 
 	gnps_runner.run(in_paths=[example_path], out_paths=[out_path])
 	gnps_runner.compute_futures()

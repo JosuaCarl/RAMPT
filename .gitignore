@@ -196,3 +196,5 @@ plz-out
 *.dist/
 *.onefile-build/
 
+# PyInstaller
+rampt/output*

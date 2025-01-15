@@ -1,0 +1,16 @@
+#!/bin/usr/env bash
+
+## Conversion
+python -m source.conversion.raw_to_mzml -in D:\mine2sirius_pipe\data\raw -out D:\mine2sirius_pipe\data\converted -s ".d" -f "mzML" -w 8 -v 1 -plat "windows"
+python -m source.conversion.raw_to_mzml -in /mnt/d/mine2sirius_pipe/data/raw/ -out /mnt/d/mine2sirius_pipe/data/converted -s ".d" -f "mzML" -w 8 -v 1 -plat "linux"
+# Only works in windows for Agilent files (msconvert is installed)
+
+## Feature finding
+python -m source.feature_finding.mzmine_pipe -mz  "C:\Program Files\mzmine\mzmine_console.exe" -in D:\mine2sirius_pipe\data\converted -out D:\mine2sirius_pipe\data\processed\test -batch "D:\mine2sirius_pipe\project_batches\mzmine\lc_ms_wiz.mzbatch" -u joca -n -p "windows" -v 2
+
+
+## GNPS
+
+## SIRIUS
+
+## Ion exclusion 
