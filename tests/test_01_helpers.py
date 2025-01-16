@@ -236,15 +236,30 @@ def test_set_attribute_recursive():
 def test_check_for_str_request():
     url = "https://api.openstreetmap.org/api/0.6/relation/10000000/full.json"
     assert check_for_str_request(
-        url=url, query_success='"version":"0.6"', retries=10, allowed_fails=3, retry_time=1.0, timeout=5
+        url=url,
+        query_success='"version":"0.6"',
+        retries=10,
+        allowed_fails=3,
+        retry_time=1.0,
+        timeout=5,
     )
     assert not check_for_str_request(
-        url=url, query_success='"version":"0.sad"', retries=10, allowed_fails=3, retry_time=1.0, timeout=5
+        url=url,
+        query_success='"version":"0.sad"',
+        retries=10,
+        allowed_fails=3,
+        retry_time=1.0,
+        timeout=5,
     )
 
     # Also check correct failure
     assert not check_for_str_request(
-        url=url, query_failed='"version":"0.6"', retries=10, allowed_fails=3, retry_time=1.0, timeout=5
+        url=url,
+        query_failed='"version":"0.6"',
+        retries=10,
+        allowed_fails=3,
+        retry_time=1.0,
+        timeout=5,
     )
 
 
