@@ -255,6 +255,7 @@ def test_check_for_str_request():
     # Also check correct failure
     assert not check_for_str_request(
         url=url,
+        query_success='"version":"0.sad"',
         query_failed='"version":"0.6"',
         retries=10,
         allowed_fails=3,
