@@ -1,7 +1,7 @@
 name: Deployment of executables
 
-on:
-  push:
+on:  
+  create:
     tags:
       - '*'
 
