@@ -411,7 +411,7 @@ def compute_scheduled(
 def check_for_str_request(
     url: str | bytes,
     query_success: str,
-    query_failed: str,
+    query_failed: str = None,
     query_running: str = None,
     retries: int = 90,
     allowed_fails: int = 5,
@@ -456,7 +456,7 @@ def check_for_str_request(
                 )
                 return True
 
-            elif query_failed in str(response.content):
+            elif query_failed and query_failed in str(response.content):
                 log(
                     message=f"Request failed ({query_failed} in response).",
                     minimum_verbosity=3,
