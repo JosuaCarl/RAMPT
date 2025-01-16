@@ -987,8 +987,8 @@ class Installer(tk.Tk):
                         force=force,
                     )
 
-                    subprocess.call(f'cd "{install_path}" && uv sync --no-dev')
-
+                    subprocess.Popen(["uv", "sync", "--no-dev"], cwd=install_path)
+                    
                     python_path = join(install_path, ".venv", "bin", "python")
                     if "windows" in self.op_sys:
                         path_executable = join(install_path, f"{self.name}.bat")
