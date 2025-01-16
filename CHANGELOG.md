@@ -1,4 +1,4 @@
 # Changes
 
-## First release
+## Release
 ✨yay✨
