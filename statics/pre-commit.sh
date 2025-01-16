@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-
+PROJECTFILE=$1
 # Use ruff for formatting
 uv run ruff format
 
@@ -17,7 +17,7 @@ get_toml_value() {
     # Then it finds the key within that section
     # using grep and cut.
 
-    local file="pyproject.toml"
+    local file="$PROJECTFILE"
     local section="project"
     local key="version"
 
