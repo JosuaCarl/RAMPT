@@ -547,6 +547,17 @@ wheels = [
 ]
 
 [[package]]
+name = "dload"
+version = "0.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fc/30/41da7ccf08389e9e262dfef55d68acc5e066ab85bfdd26c9039fef57ead9/dload-0.6-py3-none-any.whl", hash = "sha256:40113d7a77ad782b40ea2713f8fe17cbdfe49dbd63db6061eb80ca91c1000e9e", size = 8141 },
+]
+
+[[package]]
 name = "dnspython"
 version = "2.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2097,6 +2108,7 @@ dependencies = [
     { name = "argparse" },
     { name = "auto-py-to-exe" },
     { name = "dask" },
+    { name = "dload" },
     { name = "icecream" },
     { name = "lxml" },
     { name = "multipledispatch" },
@@ -2136,6 +2148,7 @@ requires-dist = [
     { name = "argparse", specifier = ">=1.4.0,<2.0.0" },
     { name = "auto-py-to-exe", specifier = ">=2.45.1" },
     { name = "dask", specifier = ">=2024.9.1,<2025.0.0" },
+    { name = "dload", specifier = ">=0.6" },
     { name = "icecream", specifier = ">=2.1.3,<3.0.0" },
     { name = "lxml", specifier = ">=5.3.0" },
     { name = "multipledispatch", specifier = ">=1.0.0,<2.0.0" },

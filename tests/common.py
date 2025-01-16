@@ -33,12 +33,13 @@ def clean_out(out_path):
 
 # Pathing
 def contruct_common_paths(filepath):
-	out_path = construct_path(filepath, "..", "out")
-	mock_path = construct_path(filepath, "..", "mock_files")
-	example_path = construct_path(filepath, "..", "example_files")
-	batch_path = construct_path(filepath, "..", "batch_files")
+	out_path = construct_path(filepath, "..", "statics", "out")
+	mock_path = construct_path(filepath, "..", "statics", "mock_files")
+	example_path = construct_path(filepath, "..", "statics", "example_files")
+	batch_path = construct_path(filepath, "..", "statics", "batch_files")
+	installs_path = construct_path(filepath, "..", "statics", "installs")
 
-	return out_path, mock_path, example_path, batch_path
+	return out_path, mock_path, example_path, batch_path, installs_path
 
 
 # Timing

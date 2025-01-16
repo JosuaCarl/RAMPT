@@ -18,7 +18,6 @@ dependencies = [
     "taipy<5.0.0,>=4.0.1",
     "ruamel-yaml>=0.18.10",
     "icecream<3.0.0,>=2.1.3",
-    "auto-py-to-exe>=2.45.1",
     "lxml>=5.3.0",
 ]
 authors = [
@@ -28,6 +27,24 @@ readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE.txt"}
 keywords = ["mass-spectrometry", "workflow", "pipeline", "gui", "sirius", "mzmine" ]
 version = "2025.0.1a"
+
+# Developer dependencies
+[dependency-groups]
+dev = [
+    "beautifulsoup4<5.0.0,>=4.12.3",
+    "pytest<9.0.0,>=8.3.3",
+    "pyopenms==3.2.0",
+    "sphinx<8,>=7",
+    "pydata-sphinx-theme<1.0.0,>=0.15.4",
+    "ruff<1.0.0,>=0.8.1",
+    "auto-py-to-exe>=2.45.1",
+]
+notebook = [
+    "jupyter<2.0.0,>=1.1.1",
+    "plotly<6.0.0,>=5.24.1",
+    "seaborn<1.0.0,>=0.13.2",
+]
+
 
 # URLs
 [project.urls]
@@ -47,26 +64,6 @@ cli-name = "rampt.gui:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-
-# Developer dependencies
-[dependency-groups]
-installer = [
-    "pex>=2.28.1",
-]
-dev = [
-    "beautifulsoup4<5.0.0,>=4.12.3",
-    "pytest<9.0.0,>=8.3.3",
-    "pyopenms==3.2.0",
-    "sphinx<8,>=7",
-    "pydata-sphinx-theme<1.0.0,>=0.15.4",
-    "ruff<1.0.0,>=0.8.1",
-]
-notebook = [
-    "jupyter<2.0.0,>=1.1.1",
-    "plotly<6.0.0,>=5.24.1",
-    "seaborn<1.0.0,>=0.13.2",
-]
 
 
 # Ruff rules
