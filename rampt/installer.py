@@ -934,7 +934,7 @@ class Installer(tk.Tk):
             with open(path_executable, "w") as file:
                 file.write(execution_script)
         else:
-            path_executable = join(install_path, self.name)
+            path_executable = join(install_path, f"{self.name}.sh")
             execution_script = f'#!/usr/bin/sh\n"{python_path}" -m module'
             with open(path_executable, "w") as file:
                 file.write(execution_script)
@@ -1020,9 +1020,8 @@ class Installer(tk.Tk):
                 case self.name:
                     self.install_project(
                         name=self.name,
-                        url="https://codeload.github.com/JosuaCarl/mine2sirius_pipe/zip/refs/heads/main",
+                        url="https://github.com/JosuaCarl/RAMPT/releases/latest/download/rampt.zip",
                         install_path=self.install_path,
-                        force=force,
                     )
 
                 case "MSconvert":

@@ -53,17 +53,16 @@ def test_install_project():
     clean_out(out_path)
     installer = Installer()
     name = "rampt"
-
+    ic(out_path)
     install_path = installer.install_project(
         name=name,
-        url="https://codeload.github.com/JosuaCarl/mine2sirius_pipe/zip/refs/heads/main",
+        url="https://github.com/JosuaCarl/RAMPT/releases/latest/download/rampt.zip",
         install_path=out_path,
     )
 
     assert install_path == join(out_path, name)
     assert os.path.isdir(join(out_path, name))
     assert tool_available(name.lower())
-    assert False
 
 
 def test_install_msconvert(recwarn):

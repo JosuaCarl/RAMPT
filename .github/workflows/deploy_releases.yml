@@ -2,7 +2,6 @@ name: Deployment of executables
 
 on: 
   push:
-    branches: [ "main" ]
     tags:
       - 'v*'
 
@@ -21,7 +20,7 @@ jobs:
       with:
         type: 'zip'
         filename: 'rampt.zip'
-        exclusions: '*.git* /*github/* /*tests/* /*docs/* CHANGELOG.md Contribute.md README.md'
+        exclusions: '*.git* /*github/* /*tests/* /*docs/* Contribute.md'
 
     - name: Upload Release
       uses: ncipollo/release-action@v1
