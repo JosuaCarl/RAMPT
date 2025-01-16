@@ -12,23 +12,20 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@master
+    
     - name: Archive Release
       uses: thedoctor0/zip-release@0.7.5
       with:
         type: 'zip'
         filename: 'rampt.zip'
-        exclusions: '*.git* /*github/* .tests .docs CHANGELOG.md Contribute.md README.md'
-  
-  deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-    - uses: actions/checkout@master
+        exclusions: '*.git* /*github/* tests docs CHANGELOG.md Contribute.md README.md'
+
     - name: Upload Release
-      uses: ncipollo/release-action@v1.12.0
+      uses: ncipollo/release-action@v1
       with:
         tag: latest
         artifacts: "rampt.zip"
