@@ -15,17 +15,13 @@ jobs:
     - uses: actions/checkout@master
       with:
         fetch-depth: 0
-
-    - name: See tags
-      run: |
-        git tag -l | cat 
     
     - name: Archive Release
       uses: thedoctor0/zip-release@0.7.5
       with:
         type: 'zip'
         filename: 'rampt.zip'
-        exclusions: '*.git* /*github/* tests/* docs/* CHANGELOG.md Contribute.md README.md'
+        exclusions: '*.git* /*github/* /*tests/* /*docs/* CHANGELOG.md Contribute.md README.md'
 
     - name: Upload Release
       uses: ncipollo/release-action@v1
