@@ -24,9 +24,9 @@ def test_gnps_submit():
 
 	if not status:
 		warn(
-			"GNPS is probably down (again)." + 
-			f"Try reaching https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={task_id} to check task." +
-			"Debugging is recommended via graphical web interface, to get meaningful errors.",
+			"GNPS is probably down (again)."
+			+ f"Try reaching https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={task_id} to check task."
+			+ "Debugging is recommended via graphical web interface, to get meaningful errors."
 		)
 	assert isinstance(task_id, str) and task_id != ""
 

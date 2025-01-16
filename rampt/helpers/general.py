@@ -455,7 +455,7 @@ def check_for_str_request(
 					verbosity=verbosity,
 				)
 				return True
-			
+
 			elif query_failed in str(response.content):
 				log(
 					message=f"Request failed ({query_failed} in response).",
@@ -476,7 +476,7 @@ def check_for_str_request(
                     Requesting this URL will be terminated after further {allowed_fails - len(fails)} failed requests.",
 				category=UserWarning,
 			)
-		
+
 		# Check Failure
 		if len(fails) > allowed_fails:
 			raise LookupError(

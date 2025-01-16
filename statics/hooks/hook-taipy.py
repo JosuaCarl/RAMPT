@@ -6,7 +6,7 @@ datas = []
 hiddenimports = []
 binaries = []
 
-data, binary, hiddenimport = collect_all('taipy')
+data, binary, hiddenimport = collect_all("taipy")
 datas += data
 hiddenimports += hiddenimport
 binaries += binary

@@ -299,7 +299,9 @@ class GNPS_Runner(Pipe_Step):
 			in_path = gnps_response if gnps_response else mzmine_log if mzmine_log else in_path
 
 			log(
-				f"Fetched gnps results from {in_path}", minimum_verbosity=1, verbosity=self.verbosity
+				f"Fetched gnps results from {in_path}",
+				minimum_verbosity=1,
+				verbosity=self.verbosity,
 			)
 
 		else:
