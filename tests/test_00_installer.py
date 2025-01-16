@@ -63,10 +63,10 @@ def test_install_project():
     )
 
     subprocess.Popen(["uv", "sync", "--no-dev"], cwd=install_path)
-    
+
     assert install_path == join(out_path, name)
     assert os.path.isdir(join(out_path, name))
-    
+
     python_path = join(install_path, ".venv", "bin", "python")
     if "windows" in installer.op_sys:
         path_executable = join(install_path, f"{installer.name}.bat")
@@ -79,9 +79,7 @@ def test_install_project():
         with open(path_executable, "w") as file:
             file.write(execution_script)
 
-    register_program(
-        op_sys=installer.op_sys, program_path=path_executable, name=installer.name
-    )
+    register_program(op_sys=installer.op_sys, program_path=path_executable, name=installer.name)
 
     assert tool_available(name.lower())
 
