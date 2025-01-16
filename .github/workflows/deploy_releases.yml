@@ -3,7 +3,7 @@ name: Deployment of executables
 on:  
   create:
     tags:
-      - '*'
+      - v*
 
 permissions:
   contents: read
