@@ -903,7 +903,6 @@ class Installer(tk.Tk):
             subprocess.check_output(["sh"], stdin=ps.stdout)
             ps.wait()
 
-
     def install_project(
         self,
         name: str,
@@ -921,16 +920,11 @@ class Installer(tk.Tk):
         # Download and extraction
         install_path = join(install_path, name)
         download_extract(
-            url=url,
-            target_path=install_path,
-            expected_hash=expected_hash,
-            extraction_method="zip",
+            url=url, target_path=install_path, expected_hash=expected_hash, extraction_method="zip"
         )
 
-        
-
         self.install_uv()
-        
+
         subprocess.Popen(["uv", "sync", "--no-dev"], cwd=install_path)
 
         python_path = join(install_path, ".venv", "bin", "python")
@@ -945,12 +939,9 @@ class Installer(tk.Tk):
             with open(path_executable, "w") as file:
                 file.write(execution_script)
 
-        register_program(
-            op_sys=self.op_sys, program_path=path_executable, name=self.name
-        )
+        register_program(op_sys=self.op_sys, program_path=path_executable, name=self.name)
 
         return os.path.abspath(install_path)
-        
 
     def install_component(
         self,

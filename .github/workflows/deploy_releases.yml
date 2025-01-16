@@ -19,13 +19,17 @@ jobs:
       with:
         type: 'zip'
         filename: 'rampt.zip'
-        exclusions: '*.git* /*github/* .tests .docs CHANGELOG.md Contribute.md NOTICE.txt README.md requirem'
+        exclusions: '*.git* /*github/* .tests .docs CHANGELOG.md Contribute.md README.md'
   
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
+    - uses: actions/checkout@master
     - name: Upload Release
       uses: ncipollo/release-action@v1.12.0
       with:
         artifacts: "release.zip"
+        bodyFile: "CHANGELOG.md"
         token: ${{ secrets.GITHUB_TOKEN }}

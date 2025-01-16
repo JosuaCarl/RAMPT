@@ -59,7 +59,7 @@ def test_install_project():
         url="https://codeload.github.com/JosuaCarl/mine2sirius_pipe/zip/refs/heads/main",
         install_path=out_path,
     )
-    
+
     assert install_path == join(out_path, name)
     assert os.path.isdir(join(out_path, name))
     assert tool_available(name.lower())
