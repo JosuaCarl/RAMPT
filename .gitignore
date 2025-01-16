@@ -168,7 +168,7 @@ cython_debug/
 data/
 .conda/
 substep_batches/
-tests/out/*
+tests/statics/out/*
 backup/
 .taipy/
 .vscode/

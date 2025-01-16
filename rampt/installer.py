@@ -757,13 +757,12 @@ def download_extract(
     """
     response = requests.get(url)
     if expected_hash is None or verify_hash(io.BytesIO(response.content), expected_hash):
-        match extraction_method:
-            case "zip":
-                with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
-                    zip_file.extractall(path=target_path)
-            case "tar.bz2":
-                with tarfile.open(fileobj=io.BytesIO(response.content)) as tar_file:
-                    tar_file.extractall(target_path)
+        if "zip" in extraction_method:
+            with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
+                zip_file.extractall(path=target_path)
+        elif "tar.bz2" in extraction_method:
+            with tarfile.open(fileobj=io.BytesIO(response.content)) as tar_file:
+                tar_file.extractall(target_path)
     else:
         raise (ValueError("Wrong hashing value of file."))
 
@@ -795,31 +794,34 @@ def is_in_path(directory_or_program: StrPath) -> bool:
 
 
 def add_to_path(op_sys: str, path: str):
-    exported_to_path = False
-    if "windows" in op_sys:
-        current_path = os.environ.get("PATH", "")
-        if str(path) not in current_path:
-            subprocess.run(["setx", "PATH", f"{path};{current_path}"], check=True)
-        exported_to_path = True
+    if is_in_path(path):
+        print(f"{path} already in PATH.")
     else:
-        for shell_profile in [
-            ".profile",
-            ".bashrc",
-            ".zshrc",
-            os.path.join(".config", "fish", "config.fish"),
-            "~/.cshrc",
-            "~/.tcshrc",
-        ]:
-            shell_profile = Path.home() / shell_profile
-            if shell_profile.exists():
-                export_line = 'export PATH="$HOME/.local/bin:$PATH"'
-                with shell_profile.open("a") as file:
-                    file.write(f"\n# Ensure ~/.local/bin is in PATH\n{export_line}\n")
-                exported_to_path = True
-                print(f"Added ~/.local/bin to PATH in {shell_profile}")
-    if not exported_to_path:
-        warnings.warn(
-            "No shell rc was found to export ~/.local/bin to PATH. You might have to do it yourself."
+        exported_to_path = False
+        if "windows" in op_sys:
+            current_path = os.environ.get("PATH", "")
+            if str(path) not in current_path:
+                subprocess.run(["setx", "PATH", f"{path};{current_path}"], check=True)
+            exported_to_path = True
+        else:
+            for shell_profile in [
+                ".profile",
+                ".bashrc",
+                ".zshrc",
+                os.path.join(".config", "fish", "config.fish"),
+                "~/.cshrc",
+                "~/.tcshrc",
+            ]:
+                shell_profile = Path.home() / shell_profile
+                if shell_profile.exists():
+                    export_line = 'export PATH="$HOME/.local/bin:$PATH"'
+                    with shell_profile.open("a") as file:
+                        file.write(f"\n# Ensure ~/.local/bin is in PATH\n{export_line}\n")
+                    exported_to_path = True
+                    print(f"Added ~/.local/bin to PATH in {shell_profile}")
+        if not exported_to_path:
+            warnings.warn(
+                "No shell rc was found to export ~/.local/bin to PATH. You might have to do it yourself."
         )
 
 
