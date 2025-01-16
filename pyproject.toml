@@ -25,7 +25,7 @@ authors = [
 ]
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE.txt"}
-keywords = ["mass-spectrometry", "workflow", "pipeline", "gui", "sirius", "mzmine" ]
+keywords = ["mass", "spectrometry", "workflow", "pipeline", "gui", "sirius", "mzmine" ]
 version = "2025.0.1a"
 
 # Developer dependencies
