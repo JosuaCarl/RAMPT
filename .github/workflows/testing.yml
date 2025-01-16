@@ -44,11 +44,11 @@ jobs:
   
     - name: Testing helpers
       run: |
-        uv run pytest ./tests/test_00_helpers.py
+        uv run pytest ./tests/test_01_helpers.py
 
     - name: Testing general
       run: |
-        uv run pytest ./tests/test_01_general.py
+        uv run pytest ./tests/test_02_general.py
     
     - name: Testing summary
       run: |
