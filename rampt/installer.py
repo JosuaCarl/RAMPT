@@ -903,6 +903,55 @@ class Installer(tk.Tk):
             subprocess.check_output(["sh"], stdin=ps.stdout)
             ps.wait()
 
+
+    def install_project(
+        self,
+        name: str,
+        url: dict | StrPath,
+        install_path: StrPath,
+        hash_url_addendum: StrPath = None,
+    ):
+        # Hash check
+        if hash_url_addendum:
+            response = requests.get(url + hash_url_addendum)
+            expected_hash = response.content
+        else:
+            expected_hash = None
+
+        # Download and extraction
+        install_path = join(install_path, name)
+        download_extract(
+            url=url,
+            target_path=install_path,
+            expected_hash=expected_hash,
+            extraction_method="zip",
+        )
+
+        
+
+        self.install_uv()
+        
+        subprocess.Popen(["uv", "sync", "--no-dev"], cwd=install_path)
+
+        python_path = join(install_path, ".venv", "bin", "python")
+        if "windows" in self.op_sys:
+            path_executable = join(install_path, f"{self.name}.bat")
+            execution_script = f'@echo off\n"{python_path}" -m module %*'
+            with open(path_executable, "w") as file:
+                file.write(execution_script)
+        else:
+            path_executable = join(install_path, self.name)
+            execution_script = f'#!/usr/bin/sh\n"{python_path}" -m module'
+            with open(path_executable, "w") as file:
+                file.write(execution_script)
+
+        register_program(
+            op_sys=self.op_sys, program_path=path_executable, name=self.name
+        )
+
+        return os.path.abspath(install_path)
+        
+
     def install_component(
         self,
         name: str,
@@ -978,31 +1027,11 @@ class Installer(tk.Tk):
         for i, component in enumerate([self.name] + components, 1):
             match component:
                 case self.name:
-                    self.install_uv()
-
-                    install_path = self.install_component(
+                    self.install_project(
                         name=self.name,
-                        urls="https://codeload.github.com/JosuaCarl/mine2sirius_pipe/zip/refs/heads/main",
+                        url="https://codeload.github.com/JosuaCarl/mine2sirius_pipe/zip/refs/heads/main",
                         install_path=self.install_path,
                         force=force,
-                    )
-
-                    subprocess.Popen(["uv", "sync", "--no-dev"], cwd=install_path)
-
-                    python_path = join(install_path, ".venv", "bin", "python")
-                    if "windows" in self.op_sys:
-                        path_executable = join(install_path, f"{self.name}.bat")
-                        execution_script = f'@echo off\n"{python_path}" -m module %*'
-                        with open(path_executable, "w") as file:
-                            file.write(execution_script)
-                    else:
-                        path_executable = join(install_path, self.name)
-                        execution_script = f'#!/usr/bin/sh\n"{python_path}" -m module'
-                        with open(path_executable, "w") as file:
-                            file.write(execution_script)
-
-                    register_program(
-                        op_sys=self.op_sys, program_path=path_executable, name=self.name
                     )
 
                 case "MSconvert":
@@ -1011,7 +1040,7 @@ class Installer(tk.Tk):
                         urls=urls.get(component),
                         install_path=self.install_path,
                         extraction_method="tar.bz2",
-                        bin_path=install_path,
+                        bin_path="",
                         command="msconvert",
                     )
 
@@ -1052,7 +1081,7 @@ class InstallerApp(tk.Tk):
         self.current_page = 0
 
         self.install_path = tk.StringVar(
-            value=join(self.installer.install_path, self.name)
+            value=self.installer.install_path
         )  # Default installation directory
 
         self.accept_var = tk.BooleanVar()
@@ -1186,7 +1215,7 @@ class InstallerApp(tk.Tk):
             initialdir=self.install_path.get(), title="Select Installation Directory"
         )
         if directory:
-            self.install_path.set(join(directory, self.name))
+            self.install_path.set(directory)
             self.installer.install_path = self.install_path.get()
 
     def install(self):

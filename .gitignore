@@ -198,3 +198,6 @@ plz-out
 
 # PyInstaller
 *output*
+
+# UV
+uv.lock

@@ -11,62 +11,21 @@ permissions:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
-
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install uv
-      uses: astral-sh/setup-uv@v5
-      with:
-          version: "0.5.15"
-          enable-cache: true
-
-    - name: "Set up Python"
-      uses: actions/setup-python@v5
-      with:
-        python-version-file: "pyproject.toml"
-
-    - name: Install project dependencies
-      run: |
-        uv sync --all-extras --all-groups
-  
-    - name: Use Nuitka to compile exe
-      run: |
-          uv run --frozen python -m nuitka --standalone --onefile --output-dir=build source/__main__.py
-    
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ runner.os }} build
-        path: |
-          build/*.exe
-          build/*.bin
-          build/*.app/**/*
-        include-hidden-files: true
-
-  deploy:
-    # Add a dependency to the build job
-    needs: build
-
-    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
-    permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
-
-    # Deploy to the github-pages environment
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          body_path: ${{ github.workspace }}-CHANGELOG.txt
-          files: |
-            build/*.exe
-            build/*.bin
-            build/*.app/**/*
-            LICENSE.txt
+    - uses: actions/checkout@master
+    - name: Archive Release
+      uses: thedoctor0/zip-release@0.7.5
+      with:
+        type: 'zip'
+        filename: 'rampt.zip'
+        exclusions: '*.git* /*github/* .tests .docs CHANGELOG.md Contribute.md NOTICE.txt README.md requirem'
+  
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Upload Release
+      uses: ncipollo/release-action@v1.12.0
+      with:
+        artifacts: "release.zip"
+        token: ${{ secrets.GITHUB_TOKEN }}
