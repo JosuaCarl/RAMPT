@@ -365,19 +365,16 @@ class InstallerApp(tk.Tk):
 		self.root.quit()
 
 
-
 def main():
 	system = platform.system()
-	if system.lower() in ["windows","macos", "linux"]:	
-		root = tk.Tk()
-		app = InstallerApp(root)
-		root.mainloop()
-	else:
+	if system.lower() not in ["windows", "macos", "linux"]:
 		warnings.warn(
-			f"System {system} not known. Only Windows, MacOS and Linux are supported." +
-			"This will result in a linux-like installation attempt."
+			f"System {system} not known. Only Windows, MacOS and Linux are supported."
+			+ "This will result in a linux-like installation attempt."
 		)
-
+	root = tk.Tk()
+	app = InstallerApp(root)
+	app.root.mainloop()
 
 
 if __name__ == "__main__":

@@ -2,4 +2,3 @@
 """
 Test installation of project.
 """
-
