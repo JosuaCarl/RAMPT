@@ -1,12 +1,9 @@
 name: Deployment of executables
 
-on:  
-  create:
+on: 
+  push:
     tags:
-      - v*
-
-permissions:
-  contents: read
+    - '*'
 
 jobs:
   build:
@@ -15,6 +12,8 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@master
+      with:
+        fetch-depth: 0
     
     - name: Archive Release
       uses: thedoctor0/zip-release@0.7.5
