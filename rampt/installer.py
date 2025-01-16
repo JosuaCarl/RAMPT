@@ -19,13 +19,11 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter.ttk import Frame, Label, Button, Checkbutton, Progressbar
 
-from icecream import ic
 
 type StrPath = str
 
 
-project_license = \
-"""
+project_license = """
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
@@ -703,473 +701,503 @@ Public License instead of this License.  But first, please read
 
 """
 
-def create_symlink(target_file, symlink_path):
-	"""
-	Create a symbolic link pointing to the target file.
 
-	:param target_file: The path to the file to be linked to (the target).
-	:param symlink_path: The path for the symbolic link to be created.
-	"""
-	try:
-		# Create the symbolic link
-		os.symlink(target_file, symlink_path)
-		print(f"Symbolic link created: {symlink_path} -> {target_file}")
-	except FileExistsError:
-		print(f"Error: The file '{symlink_path}' already exists. Cancelling.")
-	except OSError as e:
-		print(f"Error creating symbolic link: {e}")
+def create_symlink(target_file, symlink_path):
+    """
+    Create a symbolic link pointing to the target file.
+
+    :param target_file: The path to the file to be linked to (the target).
+    :param symlink_path: The path for the symbolic link to be created.
+    """
+    try:
+        # Create the symbolic link
+        os.symlink(target_file, symlink_path)
+        print(f"Symbolic link created: {symlink_path} -> {target_file}")
+    except FileExistsError:
+        print(f"Error: The file '{symlink_path}' already exists. Cancelling.")
+    except OSError as e:
+        print(f"Error creating symbolic link: {e}")
 
 
 def tool_available(executable: str) -> bool:
-	"""
-	Tool can be accessed in environment.
-	"""
-	if isinstance(executable, str):
-		return shutil.which(executable)
-	else:
-		return None
+    """
+    Tool can be accessed in environment.
+    """
+    if isinstance(executable, str):
+        return shutil.which(executable)
+    else:
+        return None
 
 
 def calculate_file_hash(file: StrPath | io.BufferedReader, hashing_algorithm: str = "sha256"):
-	if isinstance(file, StrPath):
-		file = open(file, "rb")
+    if isinstance(file, StrPath):
+        file = open(file, "rb")
 
-	# Read the file in 64KB chunks to efficiently handle large files.
-	hasher = hashlib.new(name=hashing_algorithm)
-	data = True
-	while data:
-		data = file.read(65536)
-		hasher.update(data)
+    # Read the file in 64KB chunks to efficiently handle large files.
+    hasher = hashlib.new(name=hashing_algorithm)
+    data = True
+    while data:
+        data = file.read(65536)
+        hasher.update(data)
 
-	file.close()
-	return hasher.hexdigest()
+    file.close()
+    return hasher.hexdigest()
 
 
 def verify_hash(downloaded_file: StrPath | io.BufferedReader, expected_hash: str):
-	calculated_hash = calculate_file_hash(downloaded_file)
-	return calculated_hash == expected_hash
+    calculated_hash = calculate_file_hash(downloaded_file)
+    return calculated_hash == expected_hash
 
 
 def download_extract(
-	url: str, target_path: StrPath, expected_hash: str = None, extraction_method: str = "zip"
+    url: str, target_path: StrPath, expected_hash: str = None, extraction_method: str = "zip"
 ):
-	"""
-	Download a compressed file and extract its contents to target_path.
-	"""
-	response = requests.get(url)
-	if expected_hash is None or verify_hash(io.BytesIO(response.content), expected_hash):
-		match extraction_method:
-			case "zip":
-				with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
-					zip_file.extractall(path=target_path)
-			case "tar.bz2":
-				with tarfile.open(fileobj=io.BytesIO(response.content)) as tar_file:
-					tar_file.extractall(target_path)
-	else:
-		raise (ValueError("Wrong hashing value of file."))
+    """
+    Download a compressed file and extract its contents to target_path.
+    """
+    response = requests.get(url)
+    if expected_hash is None or verify_hash(io.BytesIO(response.content), expected_hash):
+        match extraction_method:
+            case "zip":
+                with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
+                    zip_file.extractall(path=target_path)
+            case "tar.bz2":
+                with tarfile.open(fileobj=io.BytesIO(response.content)) as tar_file:
+                    tar_file.extractall(target_path)
+    else:
+        raise (ValueError("Wrong hashing value of file."))
+
+
+def is_in_path(directory_or_program: StrPath) -> bool:
+    """
+    Check if a directory or program is in the PATH environment variable.
+
+        :param directory_or_program: Directory, that should be a direct entry in PATH, or program, that should be resolved by PATH.
+        :type directory_or_program: StrPath
+        :return: Whether it is on PATH
+        :rtype: bool
+    """
+    # Get the PATH environment variable
+    path_dirs = os.environ.get("PATH", "").split(os.pathsep)
+
+    # Normalize the input path
+    target = Path(directory_or_program).resolve()
+
+    # Check if it's a directory
+    if target.is_dir():
+        return any(Path(p).resolve() == target for p in path_dirs)
+
+    # Check if it's a program (file in any PATH directory)
+    if target.is_file():
+        return any((Path(p) / target.name).is_file() for p in path_dirs)
+
+    return False
 
 
 def add_to_path(op_sys: str, path: str):
-	exported_to_path = False
-	if "windows" in op_sys:
-		current_path = os.environ.get("PATH", "")
-		if str(path) not in current_path:
-			subprocess.run(
-				["setx", "PATH", f"{path};{current_path}"],
-				check=True
-			)		
-		exported_to_path = True
-	else:
-		for shell_profile in [".profile", ".bashrc", ".zshrc", os.path.join(".config", "fish", "config.fish"), "~/.cshrc", "~/.tcshrc"]:
-			shell_profile = Path.home() / shell_profile
-			if shell_profile.exists():
-				export_line = 'export PATH="$HOME/.local/bin:$PATH"'
-				with shell_profile.open("a") as file:
-					file.write(f"\n# Ensure ~/.local/bin is in PATH\n{export_line}\n")
-				exported_to_path = True
-				print(f"Added ~/.local/bin to PATH in {shell_profile}")
-	if not exported_to_path:
-		warnings.warn("No shell rc was found to export ~/.local/bin to PATH. You might have to do it yourself.")
+    exported_to_path = False
+    if "windows" in op_sys:
+        current_path = os.environ.get("PATH", "")
+        if str(path) not in current_path:
+            subprocess.run(["setx", "PATH", f"{path};{current_path}"], check=True)
+        exported_to_path = True
+    else:
+        for shell_profile in [
+            ".profile",
+            ".bashrc",
+            ".zshrc",
+            os.path.join(".config", "fish", "config.fish"),
+            "~/.cshrc",
+            "~/.tcshrc",
+        ]:
+            shell_profile = Path.home() / shell_profile
+            if shell_profile.exists():
+                export_line = 'export PATH="$HOME/.local/bin:$PATH"'
+                with shell_profile.open("a") as file:
+                    file.write(f"\n# Ensure ~/.local/bin is in PATH\n{export_line}\n")
+                exported_to_path = True
+                print(f"Added ~/.local/bin to PATH in {shell_profile}")
+    if not exported_to_path:
+        warnings.warn(
+            "No shell rc was found to export ~/.local/bin to PATH. You might have to do it yourself."
+        )
 
 
 def register_program(op_sys: str, program_path: StrPath, name: str):
-	if "windows" in op_sys:
-		local_bin = Path(os.environ["USERPROFILE"]) / ".local" / "bin"
-		local_bin.mkdir(parents=True, exist_ok=True)
+    if "windows" in op_sys:
+        local_bin = Path(os.environ["USERPROFILE"]) / ".local" / "bin"
+        local_bin.mkdir(parents=True, exist_ok=True)
 
-		# Create a batch file as a shortcut
-		batch_file = local_bin / f"{name}.bat"
-		with batch_file.open("w") as file:
-			file.write(f'@echo off\n"{program_path}" %*\n')
-		print(f"Batch file created: {batch_file}")
-	else:
-		# Ensure ~/.local/bin exists
-		local_bin = Path.home() / ".local" / "bin"
-		local_bin.mkdir(parents=True, exist_ok=True)
+        # Create a batch file as a shortcut
+        batch_file = local_bin / f"{name}.bat"
+        with batch_file.open("w") as file:
+            file.write(f'@echo off\n"{program_path}" %*\n')
+        print(f"Batch file created: {batch_file}")
+    else:
+        # Ensure ~/.local/bin exists
+        local_bin = Path.home() / ".local" / "bin"
+        local_bin.mkdir(parents=True, exist_ok=True)
 
-		# Create the symlink
-		symlink_path = local_bin / name
-		if symlink_path.exists() or symlink_path.is_symlink():
-			symlink_path.unlink()
-		symlink_path.symlink_to(program_path)
-		print(f"Symlink created: {symlink_path} -> {program_path}")
-	add_to_path(op_sys=op_sys, path=local_bin)
-		
+        # Create the symlink
+        symlink_path = local_bin / name
+        if symlink_path.exists() or symlink_path.is_symlink():
+            symlink_path.unlink()
+        symlink_path.symlink_to(program_path)
+        print(f"Symlink created: {symlink_path} -> {program_path}")
+    add_to_path(op_sys=op_sys, path=local_bin)
 
 
 class Installer(tk.Tk):
-	def __init__(self):
-		self.op_sys = pf.system().lower()
+    def __init__(self):
+        self.op_sys = pf.system().lower()
 
-		if "mac" in self.op_sys:
-			standard_install_path = "/Application/"
-		elif "windows" in self.op_sys:
-			standard_install_path = os.getenv("ProgramFiles")
-		else:
-			standard_install_path = "~/programs"
+        if "mac" in self.op_sys:
+            standard_install_path = "/Application/"
+        elif "windows" in self.op_sys:
+            standard_install_path = os.getenv("ProgramFiles")
+        else:
+            standard_install_path = "~/programs"
 
-		self.install_path = standard_install_path
-		self.license = project_license
-		self.name = "rampt"
-		self.urls = {
-			"MSconvert": {
-				"win64": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt83/3339046/pwiz-bin-windows-x86_64-vc143-release-3_0_25011_8ace8f0.tar.bz2",
-				"win32": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt36/2440017/pwiz-bin-windows-x86-vc143-release-3_0_23129_dfd6c0a.tar.bz2",
-				"mac": None,
-				"linux": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt17/3339048/pwiz-bin-linux-x86_64-gcc7-release-3_0_25011_8ace8f0.tar.bz2",
-			},
-			"MZmine": {
-				"win64": "https://github.com/mzmine/mzmine/releases/download/v4.4.3/mzmine_Windows_portable-4.4.3.zip",
-				"win32": "https://github.com/mzmine/mzmine/releases/download/v4.4.3/mzmine_Windows_portable-4.4.3.zip",
-				"mac": "https://github.com/mzmine/mzmine/releases/download/v4.4.3/mzmine_macOS_portable_academia-4.4.3.zip",
-				"linux": "https://github.com/mzmine/mzmine/releases/download/v4.4.3/mzmine_Linux_portable-4.4.3.zip",
-			},
-			"Sirius": {
-				"win64": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-win64.zip",
-				"win32": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-win64.zip",
-				"mac": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-osx64.zip",
-				"linux": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-linux64.zip",
-			},
-		}
+        self.install_path = standard_install_path
+        self.license = project_license
+        self.name = "rampt"
+        self.urls = {
+            "MSconvert": {
+                "win64": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt83/3339046/pwiz-bin-windows-x86_64-vc143-release-3_0_25011_8ace8f0.tar.bz2",
+                "win32": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt36/2440017/pwiz-bin-windows-x86-vc143-release-3_0_23129_dfd6c0a.tar.bz2",
+                "mac": None,
+                "linux": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt17/3339048/pwiz-bin-linux-x86_64-gcc7-release-3_0_25011_8ace8f0.tar.bz2",
+            },
+            "MZmine": {
+                "win64": "https://github.com/mzmine/mzmine/releases/download/v4.4.3/mzmine_Windows_portable-4.4.3.zip",
+                "win32": "https://github.com/mzmine/mzmine/releases/download/v4.4.3/mzmine_Windows_portable-4.4.3.zip",
+                "mac": "https://github.com/mzmine/mzmine/releases/download/v4.4.3/mzmine_macOS_portable_academia-4.4.3.zip",
+                "linux": "https://github.com/mzmine/mzmine/releases/download/v4.4.3/mzmine_Linux_portable-4.4.3.zip",
+            },
+            "Sirius": {
+                "win64": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-win64.zip",
+                "win32": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-win64.zip",
+                "mac": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-osx64.zip",
+                "linux": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-linux64.zip",
+            },
+        }
 
-	def install_uv(self):
-		if "windows" in self.op_sys:
-						ps = subprocess.Popen(
-							["powershell", "-ExecutionPolicy", "ByPass", "-c", "irm https://astral.sh/uv/install.ps1 | iex"]
-						)
-						ps.wait()
-		else:
-			ps = subprocess.Popen(
-				["wget", "-qO-", "https://astral.sh/uv/install.sh"],
-				stdout=subprocess.PIPE
-			)
-			subprocess.check_output(
-				["sh"],
-				stdin=ps.stdout
-			)	
-			ps.wait()
+    def install_uv(self):
+        if "windows" in self.op_sys:
+            ps = subprocess.Popen(
+                [
+                    "powershell",
+                    "-ExecutionPolicy",
+                    "ByPass",
+                    "-c",
+                    "irm https://astral.sh/uv/install.ps1 | iex",
+                ]
+            )
+            ps.wait()
+        else:
+            ps = subprocess.Popen(
+                ["wget", "-qO-", "https://astral.sh/uv/install.sh"], stdout=subprocess.PIPE
+            )
+            subprocess.check_output(["sh"], stdin=ps.stdout)
+            ps.wait()
 
-	def install_component(
-			self,
-			name: str,
-			urls: dict|StrPath,
-			install_path: StrPath,
-			bin_path: str = None,
-			extraction_method: str = "zip",
-			hash_url_addendum: StrPath = None,
-			command: str = None,
-			force: bool = False,
-		):
-		# Check for command availability
-		path_to_tool = tool_available(command)
-		if command and path_to_tool and not force:
-			return path_to_tool
-		else:
-			if isinstance(urls, dict): 
-				if "mac" in self.op_sys:
-					url = urls.get("mac")
-				elif "windows" in self.op_sys:
-					if "64" in pf.architecture()[0]:
-						url = urls.get("win64")
-					else:
-						url = urls.get("win32")
-				else:
-					url = urls.get("linux")
-			else:
-				url = urls
+    def install_component(
+        self,
+        name: str,
+        urls: dict | StrPath,
+        install_path: StrPath,
+        bin_path: str = None,
+        extraction_method: str = "zip",
+        hash_url_addendum: StrPath = None,
+        command: str = None,
+        force: bool = False,
+    ):
+        # Check for command availability
+        path_to_tool = tool_available(command)
+        if command and path_to_tool and not force:
+            return path_to_tool
+        else:
+            if isinstance(urls, dict):
+                if "mac" in self.op_sys:
+                    url = urls.get("mac")
+                elif "windows" in self.op_sys:
+                    if "64" in pf.architecture()[0]:
+                        url = urls.get("win64")
+                    else:
+                        url = urls.get("win32")
+                else:
+                    url = urls.get("linux")
+            else:
+                url = urls
 
-			# Warning,
-			if not url:
-				warnings.warn(
-					UserWarning(
-						f"{name} is not available for {self.op_sys}."+
-						"To use it, please  find a way to install and add it to PATH yourself."
-					)
-				)
+            # Warning,
+            if not url:
+                warnings.warn(
+                    UserWarning(
+                        f"{name} is not available for {self.op_sys}."
+                        + "To use it, please  find a way to install and add it to PATH yourself."
+                    )
+                )
 
-			# Hash check
-			if hash_url_addendum:
-				response = requests.get(url + hash_url_addendum)
-				expected_hash = response.content
-			else:
-				expected_hash = None
+            # Hash check
+            if hash_url_addendum:
+                response = requests.get(url + hash_url_addendum)
+                expected_hash = response.content
+            else:
+                expected_hash = None
 
-			# Download and extraction
-			install_path = join(install_path, name)
-			download_extract(
-				url=url,
-				target_path=install_path,
-				expected_hash=expected_hash,
-				extraction_method=extraction_method,
-			)
+            # Download and extraction
+            install_path = join(install_path, name)
+            download_extract(
+                url=url,
+                target_path=install_path,
+                expected_hash=expected_hash,
+                extraction_method=extraction_method,
+            )
 
-			if bin_path:
-				add_to_path(op_sys=self.op_sys, path=join(install_path, bin_path))
-			
-			return os.path.abspath(install_path)
+            if bin_path:
+                add_to_path(op_sys=self.op_sys, path=join(install_path, bin_path))
 
+            return os.path.abspath(install_path)
 
-	def install_components(self, components: list, force: bool = False):
-		super().__init__()
-		# Progress bar
-		self.progress_label = tk.Label(self, text="Installing components...")
-		self.progress_label.pack(pady=10)
+    def install_components(self, components: list, force: bool = False):
+        super().__init__()
+        # Progress bar
+        self.progress_label = tk.Label(self, text="Installing components...")
+        self.progress_label.pack(pady=10)
 
-		self.progress = Progressbar(self, orient="horizontal", length=300, mode="determinate")
-		self.progress.pack(pady=20)
+        self.progress = Progressbar(self, orient="horizontal", length=300, mode="determinate")
+        self.progress.pack(pady=20)
 
-		# TODO: Add second progress bar for individual progress
+        # TODO: Add second progress bar for individual progress
 
-		urls = self.urls
+        urls = self.urls
 
-		for i, component in enumerate([self.name] + components, 1):
-			match component:
-				case self.name:
-					self.install_uv()
-					
-					install_path = self.install_component(
-						name=self.name,
-						urls="https://codeload.github.com/JosuaCarl/mine2sirius_pipe/zip/refs/heads/main",
-						install_path=self.install_path,
-						force=force,
-					)
-					
-					subprocess.call(f'cd "{install_path}" && uv sync --no-dev')
-					
-					python_path = join(install_path, ".venv", "bin", "python")
-					if "windows" in self.op_sys:
-						path_executable = join(install_path, f'{self.name}.bat')
-						execution_script = f'@echo off\n"{python_path}" -m module %*'
-						with open(path_executable, "w") as file:
-							file.write(execution_script)
-					else:
-						path_executable = join(install_path, self.name)
-						execution_script = f'#!/usr/bin/sh\n"{python_path}" -m module'
-						with open(path_executable, "w") as file:
-							file.write(execution_script)
+        for i, component in enumerate([self.name] + components, 1):
+            match component:
+                case self.name:
+                    self.install_uv()
 
-					register_program(op_sys=self.op_sys, program_path=path_executable, name=self.name)
+                    install_path = self.install_component(
+                        name=self.name,
+                        urls="https://codeload.github.com/JosuaCarl/mine2sirius_pipe/zip/refs/heads/main",
+                        install_path=self.install_path,
+                        force=force,
+                    )
 
-				case "MSconvert":
-					self.install_component(
-						name=component,
-						urls=urls.get(component),
-						install_path=self.install_path,
-						extraction_method="tar.bz2",
-						bin_path=install_path,
-						command="msconvert",
-					)
+                    subprocess.call(f'cd "{install_path}" && uv sync --no-dev')
 
-				case "MZmine":
-					self.install_component(
-						name="MZmine",
-						urls=urls.get(component),
-						install_path=self.install_path,
-						bin_path="bin",
-						command="mzmine",
-					)
+                    python_path = join(install_path, ".venv", "bin", "python")
+                    if "windows" in self.op_sys:
+                        path_executable = join(install_path, f"{self.name}.bat")
+                        execution_script = f'@echo off\n"{python_path}" -m module %*'
+                        with open(path_executable, "w") as file:
+                            file.write(execution_script)
+                    else:
+                        path_executable = join(install_path, self.name)
+                        execution_script = f'#!/usr/bin/sh\n"{python_path}" -m module'
+                        with open(path_executable, "w") as file:
+                            file.write(execution_script)
 
-				case "Sirius":
-					self.install_component(
-						name="Sirius",
-						urls=urls.get(component),
-						install_path=self.install_path,
-						hash_url_addendum=".sha256",
-						bin_path=join("sirius", "bin"),
-						command="sirius",
-					)
+                    register_program(
+                        op_sys=self.op_sys, program_path=path_executable, name=self.name
+                    )
 
-			self.progress["value"] = (i / len(components)) * 100
-			self.progress_label.config(text=f"Installing {component}...")
+                case "MSconvert":
+                    self.install_component(
+                        name=component,
+                        urls=urls.get(component),
+                        install_path=self.install_path,
+                        extraction_method="tar.bz2",
+                        bin_path=install_path,
+                        command="msconvert",
+                    )
 
-		self.progress_label.config(text="Installation complete!")
+                case "MZmine":
+                    self.install_component(
+                        name="MZmine",
+                        urls=urls.get(component),
+                        install_path=self.install_path,
+                        bin_path="bin",
+                        command="mzmine",
+                    )
 
+                case "Sirius":
+                    self.install_component(
+                        name="Sirius",
+                        urls=urls.get(component),
+                        install_path=self.install_path,
+                        hash_url_addendum=".sha256",
+                        bin_path=join("sirius", "bin"),
+                        command="sirius",
+                    )
+
+            self.progress["value"] = (i / len(components)) * 100
+            self.progress_label.config(text=f"Installing {component}...")
+
+        self.progress_label.config(text="Installation complete!")
 
 
 class InstallerApp(tk.Tk):
-	def __init__(self, root):
-		self.installer = Installer()
-		self.name = self.installer.name
-		self.root = root
+    def __init__(self, root):
+        self.installer = Installer()
+        self.name = self.installer.name
+        self.root = root
 
-		self.root.title("Installer")
-		self.root.geometry("600x400")
-		# Initialize variables
-		self.current_page = 0
+        self.root.title("Installer")
+        self.root.geometry("600x400")
+        # Initialize variables
+        self.current_page = 0
 
-		self.install_path = tk.StringVar(
-			value=join(self.installer.install_path, self.name)
-		)  # Default installation directory
+        self.install_path = tk.StringVar(
+            value=join(self.installer.install_path, self.name)
+        )  # Default installation directory
 
-		self.accept_var = tk.BooleanVar()
-		self.force = tk.BooleanVar()
+        self.accept_var = tk.BooleanVar()
+        self.force = tk.BooleanVar()
 
-		self.component_vars = {
-			"MSconvert": tk.BooleanVar(value=True),
-			"MZmine": tk.BooleanVar(value=False),
-			"SIRIUS": tk.BooleanVar(value=False),
-		}
+        self.component_vars = {
+            "MSconvert": tk.BooleanVar(value=True),
+            "MZmine": tk.BooleanVar(value=False),
+            "SIRIUS": tk.BooleanVar(value=False),
+        }
 
-		# List of pages
-		self.pages = [
-			self.create_license_page,
-			self.create_component_page,
-			self.create_installation_location_page,
-		]
+        # List of pages
+        self.pages = [
+            self.create_license_page,
+            self.create_component_page,
+            self.create_installation_location_page,
+        ]
 
-		# Main frame for dynamic content
-		self.main_frame = Frame(root)
-		self.main_frame.pack(fill=tk.BOTH, expand=True)
+        # Main frame for dynamic content
+        self.main_frame = Frame(root)
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
 
-		# Navigation buttons
-		self.nav_frame = Frame(root)
-		self.nav_frame.pack(fill=tk.X, pady=10)
+        # Navigation buttons
+        self.nav_frame = Frame(root)
+        self.nav_frame.pack(fill=tk.X, pady=10)
 
-		self.prev_button = Button(
-			self.nav_frame, text="Previous", command=self.previous_page, state=tk.DISABLED
-		)
-		self.prev_button.pack(side=tk.LEFT, padx=5)
+        self.prev_button = Button(
+            self.nav_frame, text="Previous", command=self.previous_page, state=tk.DISABLED
+        )
+        self.prev_button.pack(side=tk.LEFT, padx=5)
 
-		self.next_button = Button(self.nav_frame, text="Next", command=self.next_page)
-		self.next_button.pack(side=tk.RIGHT, padx=5)
+        self.next_button = Button(self.nav_frame, text="Next", command=self.next_page)
+        self.next_button.pack(side=tk.RIGHT, padx=5)
 
-		# Load the first page
-		self.load_page()
+        # Load the first page
+        self.load_page()
 
+    def load_page(self):
+        """
+        Clears the main frame and loads the current page.
+        """
+        for widget in self.main_frame.winfo_children():
+            widget.destroy()
+        self.pages[self.current_page]()
 
-	def load_page(self):
-		"""
-		Clears the main frame and loads the current page.
-		"""
-		for widget in self.main_frame.winfo_children():
-			widget.destroy()
-		self.pages[self.current_page]()
+        # Update navigation button states
+        self.prev_button.config(state=tk.NORMAL if self.current_page > 0 else tk.DISABLED)
+        self.next_button.config(
+            text="Install" if self.current_page == len(self.pages) - 1 else "Next"
+        )
 
-		# Update navigation button states
-		self.prev_button.config(state=tk.NORMAL if self.current_page > 0 else tk.DISABLED)
-		self.next_button.config(
-			text="Install" if self.current_page == len(self.pages) - 1 else "Next"
-		)
+    def next_page(self):
+        """
+        Handles navigation to the next page.
+        """
+        if self.current_page == 0 and self.accept_var.get() or self.current_page > 0:
+            if self.current_page < len(self.pages) - 1:
+                self.current_page += 1
+                self.load_page()
+            else:
+                self.install()
 
-	def next_page(self):
-		"""
-		Handles navigation to the next page.
-		"""
-		if self.current_page == 0 and self.accept_var.get() or self.current_page > 0:
-			if self.current_page < len(self.pages) - 1:
-				self.current_page += 1
-				self.load_page()
-			else:
-				self.install()
+    def previous_page(self):
+        """Handles navigation to the previous page."""
+        if self.current_page > 0:
+            self.current_page -= 1
+            self.load_page()
 
-	def previous_page(self):
-		"""Handles navigation to the previous page."""
-		if self.current_page > 0:
-			self.current_page -= 1
-			self.load_page()
+    def change_accept(self):
+        if self.accept_var.get():
+            self.next_button["state"] = tk.NORMAL
+        else:
+            self.next_button["state"] = tk.DISABLED
 
-	def change_accept(self):
-		if self.accept_var.get():
-			self.next_button["state"] = tk.NORMAL
-		else:
-			self.next_button["state"] = tk.DISABLED
+    def create_license_page(self):
+        """Creates the license agreement page."""
+        Label(self.main_frame, text="License Agreement", font=("Arial", 14, "bold")).pack(pady=10)
 
+        license_text = tk.Text(self.main_frame, height=10, wrap=tk.WORD)
+        license_text.insert(
+            tk.END, f"Please read the license agreement.\n\n{self.installer.license}"
+        )
+        license_text.config(state=tk.DISABLED)
+        license_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-	def create_license_page(self):
-		"""Creates the license agreement page."""
-		Label(self.main_frame, text="License Agreement", font=("Arial", 14, "bold")).pack(pady=10)
+        Checkbutton(
+            self.main_frame,
+            text="I accept the license agreement",
+            variable=self.accept_var,
+            command=self.change_accept,
+        ).pack(pady=5)
 
-		license_text = tk.Text(self.main_frame, height=10, wrap=tk.WORD)
-		license_text.insert(tk.END, f"Please read the license agreement.\n\n{self.installer.license}")
-		license_text.config(state=tk.DISABLED)
-		license_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+    def create_component_page(self):
+        """Creates the component selection page."""
+        Label(
+            self.main_frame,
+            text="Select optional components for installation",
+            font=("Arial", 14, "bold"),
+        ).pack(pady=10)
 
-		Checkbutton(
-			self.main_frame,
-			text="I accept the license agreement",
-			variable=self.accept_var,
-			command=self.change_accept,
-		).pack(pady=5)
+        for component, var in self.component_vars.items():
+            Checkbutton(self.main_frame, text=component, variable=var).pack(anchor="w", padx=20)
 
+        Label(
+            self.main_frame,
+            text="If the component is not selected, it should be install by the user and accessible in PATH.",
+            font=("Arial", 14, "bold"),
+        ).pack(pady=10)
 
-	def create_component_page(self):
-		"""Creates the component selection page."""
-		Label(
-			self.main_frame,
-			text="Select optional components for installation",
-			font=("Arial", 14, "bold"),
-		).pack(pady=10)
+        Checkbutton(
+            self.main_frame, text="Force installation of components", variable=self.force
+        ).pack(anchor="w", pady=20)
 
-		for component, var in self.component_vars.items():
-			Checkbutton(self.main_frame, text=component, variable=var).pack(anchor="w", padx=20)
+    def create_installation_location_page(self):
+        """Creates the installation location selection page."""
+        Label(
+            self.main_frame, text="Select Installation Location", font=("Arial", 14, "bold")
+        ).pack(pady=10)
 
-		Label(
-			self.main_frame,
-			text="If the component is not selected, it should be install by the user and accessible in PATH.",
-			font=("Arial", 14, "bold"),
-		).pack(pady=10)
+        # Display current installation directory
+        entry = tk.Entry(self.main_frame, textvariable=self.install_path, width=40)
+        entry.pack(pady=5, padx=10)
 
-		Checkbutton(
-			self.main_frame, text="Force installation of components", variable=self.force
-		).pack(anchor="w", pady=20)
+        # Button to browse for a directory
+        browse_button = Button(self.main_frame, text="Browse", command=self.browse_directory)
+        browse_button.pack(pady=5)
 
+    def browse_directory(self):
+        """Opens a file dialog to select the installation directory."""
+        directory = filedialog.askdirectory(
+            initialdir=self.install_path.get(), title="Select Installation Directory"
+        )
+        if directory:
+            self.install_path.set(join(directory, self.name))
+            self.installer.install_path = self.install_path.get()
 
-	def create_installation_location_page(self):
-		"""Creates the installation location selection page."""
-		Label(
-			self.main_frame, text="Select Installation Location", font=("Arial", 14, "bold")
-		).pack(pady=10)
+    def install(self):
+        """Final installation process."""
+        selected_components = [name for name, var in self.component_vars.items() if var.get()]
 
-		# Display current installation directory
-		entry = tk.Entry(self.main_frame, textvariable=self.install_path, width=40)
-		entry.pack(pady=5, padx=10)
+        self.installer.install_components(selected_components)
 
-		# Button to browse for a directory
-		browse_button = Button(self.main_frame, text="Browse", command=self.browse_directory)
-		browse_button.pack(pady=5)
-
-
-	def browse_directory(self):
-		"""Opens a file dialog to select the installation directory."""
-		directory = filedialog.askdirectory(
-			initialdir=self.install_path.get(), title="Select Installation Directory"
-		)
-		if directory:
-			self.install_path.set(join(directory, self.name))
-			self.installer.install_path = self.install_path.get()
-
-
-	def install(self):
-		"""Final installation process."""
-		selected_components = [name for name, var in self.component_vars.items() if var.get()]
-
-		self.installer.install_components(selected_components)
-
-		self.root.quit()
+        self.root.quit()
 
 
 # Run the application
 if __name__ == "__main__":
-	root = tk.Tk()
-	app = InstallerApp(root)
-	root.mainloop()
+    root = tk.Tk()
+    app = InstallerApp(root)
+    root.mainloop()

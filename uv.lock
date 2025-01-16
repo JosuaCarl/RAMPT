@@ -547,17 +547,6 @@ wheels = [
 ]
 
 [[package]]
-name = "dload"
-version = "0.6"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "requests" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/fc/30/41da7ccf08389e9e262dfef55d68acc5e066ab85bfdd26c9039fef57ead9/dload-0.6-py3-none-any.whl", hash = "sha256:40113d7a77ad782b40ea2713f8fe17cbdfe49dbd63db6061eb80ca91c1000e9e", size = 8141 },
-]
-
-[[package]]
 name = "dnspython"
 version = "2.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1677,15 +1666,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pex"
-version = "2.28.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/e9/e0/cfb5c2fd7728e4170eccb518ba16043e3524d5421c3bb0d48f08a62cfcf8/pex-2.28.1.tar.gz", hash = "sha256:faa881efd52940f089c2df3aec5ad721bab225af24e06728be932e36db07248f", size = 4563899 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/f3/c0/ba1a30293a442cb6b86abdce7f5870993efb8110c4344f37df5dd2d5709a/pex-2.28.1-py2.py3-none-any.whl", hash = "sha256:0a971a528f756a5f31b158c5306c872cc774a25329790f72512110cf7670f30b", size = 3581924 },
-]
-
-[[package]]
 name = "pexpect"
 version = "4.9.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2106,9 +2086,7 @@ version = "2025.0.1a0"
 source = { editable = "." }
 dependencies = [
     { name = "argparse" },
-    { name = "auto-py-to-exe" },
     { name = "dask" },
-    { name = "dload" },
     { name = "icecream" },
     { name = "lxml" },
     { name = "multipledispatch" },
@@ -2127,15 +2105,13 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "auto-py-to-exe" },
     { name = "beautifulsoup4" },
     { name = "pydata-sphinx-theme" },
     { name = "pyopenms" },
     { name = "pytest" },
     { name = "ruff" },
     { name = "sphinx" },
-]
-installer = [
-    { name = "pex" },
 ]
 notebook = [
     { name = "jupyter" },
@@ -2146,9 +2122,7 @@ notebook = [
 [package.metadata]
 requires-dist = [
     { name = "argparse", specifier = ">=1.4.0,<2.0.0" },
-    { name = "auto-py-to-exe", specifier = ">=2.45.1" },
     { name = "dask", specifier = ">=2024.9.1,<2025.0.0" },
-    { name = "dload", specifier = ">=0.6" },
     { name = "icecream", specifier = ">=2.1.3,<3.0.0" },
     { name = "lxml", specifier = ">=5.3.0" },
     { name = "multipledispatch", specifier = ">=1.0.0,<2.0.0" },
@@ -2167,6 +2141,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "auto-py-to-exe", specifier = ">=2.45.1" },
     { name = "beautifulsoup4", specifier = ">=4.12.3,<5.0.0" },
     { name = "pydata-sphinx-theme", specifier = ">=0.15.4,<1.0.0" },
     { name = "pyopenms", specifier = "==3.2.0" },
@@ -2174,7 +2149,6 @@ dev = [
     { name = "ruff", specifier = ">=0.8.1,<1.0.0" },
     { name = "sphinx", specifier = ">=7,<8" },
 ]
-installer = [{ name = "pex", specifier = ">=2.28.1" }]
 notebook = [
     { name = "jupyter", specifier = ">=1.1.1,<2.0.0" },
     { name = "plotly", specifier = ">=5.24.1,<6.0.0" },
