@@ -33,9 +33,11 @@ urls = {
     },
 }
 
+
 def test_create_symlink():
     create_symlink(join(mock_path, "empty_file"), join(out_path, "empty_file"))
     assert os.path.isfile(join(out_path, "empty_file"))
+
 
 def test_tool_available():
     assert tool_available("which")
@@ -56,8 +58,10 @@ def test_install_msconvert(recwarn):
 
     if "mac" in installer.op_sys:
         assert len(recwarn) == 1
-        user_warning = f"{name} is not available for {installer.op_sys}." + \
-                        "To use it, please  find a way to install and add it to PATH yourself."
+        user_warning = (
+            f"{name} is not available for {installer.op_sys}."
+            + "To use it, please  find a way to install and add it to PATH yourself."
+        )
         assert recwarn[0].message.args[0].endswith(user_warning)
     else:
         assert install_path == join(out_path, name)
@@ -71,10 +75,7 @@ def test_install_mzmine():
     name = "MZmine"
 
     install_path = installer.install_component(
-        name=name,
-        urls=urls.get(name),
-        install_path=out_path,
-        bin_path="bin",
+        name=name, urls=urls.get(name), install_path=out_path, bin_path="bin"
     )
 
     assert install_path == join(out_path, name)
@@ -88,10 +89,7 @@ def test_install_sirius():
     name = "Sirius"
 
     install_path = installer.install_component(
-        name=name,
-        urls=urls.get(name),
-        install_path=out_path,
-        bin_path=join("sirius", "bin"),
+        name=name, urls=urls.get(name), install_path=out_path, bin_path=join("sirius", "bin")
     )
 
     assert install_path == join(out_path, name)

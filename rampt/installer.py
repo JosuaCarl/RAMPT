@@ -822,7 +822,7 @@ def add_to_path(op_sys: str, path: str):
         if not exported_to_path:
             warnings.warn(
                 "No shell rc was found to export ~/.local/bin to PATH. You might have to do it yourself."
-        )
+            )
 
 
 def register_program(op_sys: str, program_path: StrPath, name: str):
