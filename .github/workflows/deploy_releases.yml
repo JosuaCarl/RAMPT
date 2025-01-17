@@ -23,17 +23,13 @@ jobs:
         path: ./rampt.zip
   
   build_installer:
-    env:
-      os_name: None
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
+        os_name: [ linux, windows, macos ]
     steps:
     - uses: actions/checkout@master
-
-    - name: Adjust os name
-      run: echo "os_name=$(echo "${{ matrix.os }}" | cut -d "-" -f 1)" >> $GITHUB_ENV
 
     - name: Install uv
       uses: astral-sh/setup-uv@v5
@@ -52,12 +48,12 @@ jobs:
 
     - name: "Make installer"
       run: |
-        uv run pyinstaller --noconfirm --clean --onefile --windowed --name installer_${{ env.os_name }} --contents-directory .  rampt/installer.py
+        uv run pyinstaller --noconfirm --clean --onefile --windowed --name installer_${{ matrix.os_name }} --contents-directory .  rampt/installer.py
       
     - uses: actions/upload-artifact@v4
       with:
-        name: rampt_installer_${{ env.os_name }}
-        path: dist/installer_${{ env.os_name }}
+        name: rampt_installer_${{ matrix.os_name }}
+        path: dist/installer_${{ matrix.os_name }}
 
   deploy:
     needs: [ build, build_installer ]
@@ -74,7 +70,7 @@ jobs:
 
     - uses: actions/download-artifact@v4
       with:
-        name: rampt_installer_ubuntu
+        name: rampt_installer_linux
         path: dist/rampt_installer_linux
     
 
@@ -87,8 +83,6 @@ jobs:
       with:
         name: rampt_installer_windows
         path: dist/rampt_installer_windows.exe
-
-
 
     - name: Upload Release
       uses: ncipollo/release-action@v1
