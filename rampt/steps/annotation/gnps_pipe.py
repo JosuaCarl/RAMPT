@@ -142,15 +142,21 @@ class GNPS_Runner(Pipe_Step):
         # Submit job
         url = "https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking"
 
-        log(message=f"POSTing request to  {url}", minimum_verbosity=2, verbosity=self.verbosity)
+        log(message=f"POSTing request to {url}", minimum_verbosity=2, verbosity=self.verbosity)
 
-        response = requests.api.post(url, data=parameters, files=files)
+        response = requests.api.post(url, data=parameters, files=files, timeout=120.0)
 
-        log(
-            message=f"POST request {response.request.url} returned status code {response.status_code}",
-            minimum_verbosity=2,
-            verbosity=self.verbosity,
-        )
+        if response.status_code == 200:
+            log(
+                message=f"POST request {response.request.url} returned status code {response.status_code}",
+                minimum_verbosity=2,
+                verbosity=self.verbosity,
+            )
+        else:
+            error(
+                message=f"POST request {response.request.url} returned status code {response.status_code}",
+                error_type=ConnectionError,
+            )
 
         # Check for finish
         task_id, status = self.check_task_finished(gnps_response=response.json())

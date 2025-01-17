@@ -335,6 +335,6 @@ ms_analysis_config = Config.configure_scenario(
             annotate_sirius_config,
             summarize_annotations_config,
             analyze_difference_config,
-        ],
+        ]
     },
 )
