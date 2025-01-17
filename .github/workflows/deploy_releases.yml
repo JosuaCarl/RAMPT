@@ -23,11 +23,10 @@ jobs:
         path: ./rampt.zip
   
   build_installer:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
-        os_name: [ linux, windows, macos ]
+        os: [ {os: ubuntu-latest, name: linux}, {os: windows-latest, name: windows}, {os: macos-latest, name: macos} ]
     steps:
     - uses: actions/checkout@master
 
@@ -48,12 +47,12 @@ jobs:
 
     - name: "Make installer"
       run: |
-        uv run pyinstaller --noconfirm --clean --onefile --windowed --name installer_${{ matrix.os_name }} --contents-directory .  rampt/installer.py
+        uv run pyinstaller --noconfirm --clean --onefile --windowed --name installer_${{ matrix.os.name }} --contents-directory .  rampt/installer.py
       
     - uses: actions/upload-artifact@v4
       with:
-        name: rampt_installer_${{ matrix.os_name }}
-        path: dist/installer_${{ matrix.os_name }}
+        name: rampt_installer_${{ matrix.os.name }}
+        path: dist/installer_${{ matrix.os.name }}
 
   deploy:
     needs: [ build, build_installer ]
