@@ -1,14 +1,28 @@
-# RAMPT
+
+![logo_rampt](https://github.com/JosuaCarl/RAMPT/blob/main/statics/share/rampt.png?raw=true)
+
+# RAMPT 
 A "Raw to annotation metabolomics pipline tool"
 
 ## Features
-- setup.py will be configured to 
 
+| Feature                                       | Status |
+|-----------------------------------------------|--------|
+| Convert raw to community formats (.mz(X)ML)   | ✅      |
+| MZmine batch file to find features            | ✅      |
+| Formula, molecule, ... annotation with SIRIUS | ✅      |
+| FBMN annotation with GNPS                     | ✅      |
+| Summary in compact table                      | ✅      |
+| Analysis trough simple operations (z-score)   | 🛠️      |
+| Dynamic visualization of data                 | 🛠️      |
+
+For planned improvements, please refer to [Contribute.md](./Contribute.md).
 
 ## Installing
 1. Download latest release for your platform [here](https://github.com/JosuaCarl/RAMPT/releases)
 2. Run the installer
 3. The program should be available on PATH
+
 
 ### Build from source
 1. `git clone https://github.com/JosuaCarl/RAMPT.git`
@@ -22,6 +36,8 @@ Note, that this requires the following dependencies to be installed and availibl
 - MSconvert
 - Sirius
 
+### Usage
+For detailed information about usage, please refer to the [documentation](https://josuacarl.github.io/RAMPT/)
 
 ## Contributing
-Please refer to [Contribute.md](./Contribute.md) for further information about how to contribute to the project
+Please refer to [Contribute.md](./Contribute.md) for further information about how to contribute to the project.

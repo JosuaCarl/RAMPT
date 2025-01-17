@@ -21,7 +21,6 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter.ttk import Frame, Label, Button, Checkbutton, Progressbar, Scrollbar
 
-
 type StrPath = str
 
 
@@ -860,7 +859,7 @@ class InstallerApp(tk.Tk):
         elif "windows" in self.op_sys:
             standard_install_path = os.getenv("ProgramFiles")
         else:
-            standard_install_path = "~/programs"
+            standard_install_path = str(Path.home() / "programs")
 
         self.primary_progressbar = None
         self.install_status = None
@@ -948,7 +947,8 @@ class InstallerApp(tk.Tk):
             ps.wait()
         else:
             ps = subprocess.Popen(
-                ["wget", "-qO-", "https://astral.sh/uv/install.sh"], stdout=subprocess.PIPE
+                ["wget", "-qO-", "https://astral.sh/uv/install.sh"],
+                stdout=subprocess.PIPE,
             )
             subprocess.check_output(["sh"], stdin=ps.stdout)
             ps.wait()
@@ -975,17 +975,24 @@ class InstallerApp(tk.Tk):
 
         self.install_uv()
 
-        subprocess.Popen(["uv", "sync", "--no-dev"], cwd=install_path)
-
-        python_path = join(install_path, ".venv", "bin", "python")
+        subprocess.Popen(
+            ["uv", "sync", "--no-dev"],
+            cwd=install_path
+        )
+        process = subprocess.Popen(
+            ["uv", "run", "python", "-c", "import shutil; print(shutil.which('python'))"],
+            cwd=install_path,
+            stdout=subprocess.PIPE,
+        )
+        python_path = process.stdout.read().decode()
         if "windows" in self.op_sys:
             path_executable = join(install_path, f"{self.name}.bat")
-            execution_script = f'@echo off\n"{python_path}" -m module %*'
+            execution_script = f'@echo off\n"{python_path}" -m rampt %*'
             with open(path_executable, "w") as file:
                 file.write(execution_script)
         else:
             path_executable = join(install_path, f"{self.name}.sh")
-            execution_script = f'#!/usr/bin/sh\n"{python_path}" -m module'
+            execution_script = f'#!/usr/bin/sh\n"{python_path}" -m rampt'
             with open(path_executable, "w") as file:
                 file.write(execution_script)
 
@@ -1194,14 +1201,14 @@ class InstallerApp(tk.Tk):
         )
         if directory:
             self.install_path.set(directory)
-            self.install_path = self.install_path.get()
 
     def update_primary_progress(self, install_name, total_installs):
-        current_progress = self.primary_progressbar["value"]
-        self.primary_progressbar["value"] = current_progress + 100 / total_installs
-        self.install_status.insert(tk.END, f"{install_name} installation completed.\n")
-        if self.primary_progressbar["value"] >= 100:
-            self.install_status.insert(tk.END, "Installation complete")
+        if self.primary_progressbar:
+          self.primary_progressbar["value"] = self.primary_progressbar["value"] + 100 / total_installs
+          self.install_status.insert(tk.END, f"{install_name} installation completed.\n")
+          if self.primary_progressbar["value"] >= 100:
+              self.install_status.insert(tk.END, "Installation complete")
+
 
     def install(self):
         """Final installation process."""
@@ -1227,9 +1234,8 @@ class InstallerApp(tk.Tk):
         self.install_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         selected_components = [name for name, var in self.component_vars.items() if var.get()]
-        self.install_path = str(self.install_path)
+        self.install_path = self.install_path.get()
 
-        ()
         Thread(
             target=self.install_components, kwargs={"components": selected_components}, daemon=True
         ).start()

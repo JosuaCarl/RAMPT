@@ -30,11 +30,11 @@ processed_data_config = Config.configure_in_memory_data_node(
 )
 
 gnps_annotations_config = Config.configure_json_data_node(
-    id="gnps_annotations", scope=Scope.SCENARIO
+    id="gnps_annotations", scope=Scope.SCENARIO, default_path=None
 )
 
 sirius_annotations_config = Config.configure_csv_data_node(
-    id="sirius_annotations", scope=Scope.SCENARIO
+    id="sirius_annotations", scope=Scope.SCENARIO, default_path=None
 )
 
 summary_config = Config.configure_csv_data_node(id="summary_data", scope=Scope.SCENARIO)
@@ -337,16 +337,3 @@ ms_analysis_config = Config.configure_scenario(
         "analyze": [analyze_difference_config],
     },
 )
-
-
-# CORE
-"""
-core_config = Config.configure_core(
-                                    root_folder=".process/",
-                                    storage_folder=".out/",
-                                    read_entity_retry=2,
-                                    mode="experiment",
-                                    version_number="1.0.0",
-                                    application_name="mine2sirius",
-                                )
-"""

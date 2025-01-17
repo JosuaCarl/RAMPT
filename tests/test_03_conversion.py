@@ -183,7 +183,7 @@ def test_msconv_pipe_main():
     assert os.path.isfile(join(out_path, "minimal file.mzXML"))
     assert os.path.isfile(join(out_path, "nested_test_folder", "minimal_file.mzXML"))
 
-    with open(construct_path(filepath, "..", "out", "minimal file.mzXML")) as f:
+    with open(construct_path(out_path, "minimal file.mzXML")) as f:
         data = f.read()
         data = BeautifulSoup(data, "xml")
         file = data.find_all("parentFile")[-1]

@@ -47,7 +47,7 @@ jobs:
 
     - name: "Make installer"
       run: |
-        uv run pyinstaller --noconfirm --clean --onefile --windowed --name installer_${{ matrix.os.name }} --contents-directory .  rampt/installer.py
+        uv run pyinstaller --noconfirm --clean --onefile --windowed --name installer_${{ matrix.os.name }} --icon statics/share/ramp.ico --contents-directory .  rampt/installer.py
       
     - uses: actions/upload-artifact@v4
       with:

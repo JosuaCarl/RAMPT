@@ -36,6 +36,7 @@ jobs:
   
     - name: Sphinx apidoc
       run: |
+          mkdir -p ./docs
           uv run sphinx-apidoc --remove-old -o docs . plz-out .taipy
           cp "./statics/docs/index.rst" ./docs
 

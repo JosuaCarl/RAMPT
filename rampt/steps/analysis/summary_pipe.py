@@ -136,23 +136,25 @@ class Summary_Runner(Pipe_Step):
         :return: Paths to files
         :rtype:  dict[str, StrPath]
         """
-        for root, dirs, files in os.walk(dir):
-            for file in files:
-                if not canopus_formula_summary_file and file == "canopus_formula_summary.tsv":
-                    canopus_formula_summary_file = join(root, file)
-                elif not canopus_structure_summary_file and file == "canopus_structure_summary.tsv":
-                    canopus_structure_summary_file = join(root, file)
-                elif (
-                    not denovo_structure_identifications_file
-                    and file == "denovo_structure_identifications.tsv"
-                ):
-                    denovo_structure_identifications_file = join(root, file)
-                elif not formula_identifications_file and file == "formula_identifications.tsv":
-                    formula_identifications_file = join(root, file)
-                elif not structure_identifications_file and file == "structure_identifications.tsv":
-                    structure_identifications_file = join(root, file)
-                elif not gnps_annotations and file.endswith("_gnps_all_db_annotations.json"):
-                    gnps_annotations = join(root, file)
+        dirs = dir if isinstance(dir, list) or isinstance(dir, tuple) else [dir]
+        for dir in dirs:
+            for root, dirs, files in os.walk(dir):
+                for file in files:
+                    if not canopus_formula_summary_file and file == "canopus_formula_summary.tsv":
+                        canopus_formula_summary_file = join(root, file)
+                    elif not canopus_structure_summary_file and file == "canopus_structure_summary.tsv":
+                        canopus_structure_summary_file = join(root, file)
+                    elif (
+                        not denovo_structure_identifications_file
+                        and file == "denovo_structure_identifications.tsv"
+                    ):
+                        denovo_structure_identifications_file = join(root, file)
+                    elif not formula_identifications_file and file == "formula_identifications.tsv":
+                        formula_identifications_file = join(root, file)
+                    elif not structure_identifications_file and file == "structure_identifications.tsv":
+                        structure_identifications_file = join(root, file)
+                    elif not gnps_annotations and file.endswith("_gnps_all_db_annotations.json"):
+                        gnps_annotations = join(root, file)
         return {
             "formula_identifications_file": formula_identifications_file,
             "canopus_formula_summary_file": canopus_formula_summary_file,
@@ -351,23 +353,32 @@ class Summary_Runner(Pipe_Step):
         quantification_file: StrPath = None,
         annotation_files: dict[str, StrPath] = None,
         summary: pd.DataFrame = None,
-    ):
-        in_path_quantification = in_path.get("quantification")
-        in_path_annotation = in_path.get("annotation")
+    ):  
+        in_path_annotation = None
+        if isinstance(in_path, dict):
+            in_path_quantification = in_path.get("quantification")
+            in_path_annotation = in_path.get("annotation")
+        elif isinstance(in_path, str):
+            in_path_quantification = in_path
+        else:
+            in_path_quantification = in_path[0]
+            in_path_annotation = in_path[1]
+
         # TODO: Deal properly with GNPS and SIRIUS input
         if isinstance(in_path_annotation, list):
             in_path_annotation = in_path_annotation[0]
 
         # Case run_single
-        if annotation_file_type:
+        if annotation_file_type or not in_path_annotation:
             summary = self.add_quantification(
                 quantification_file=in_path_quantification, summary=summary
             )
-            summary = self.add_annotation(
-                annotation_file=in_path_annotation,
-                annotation_file_type=annotation_file_type,
-                summary=summary,
-            )
+            if in_path_annotation:
+                summary = self.add_annotation(
+                    annotation_file=in_path_annotation,
+                    annotation_file_type=annotation_file_type,
+                    summary=summary,
+                )
         else:
             if not quantification_file:
                 quantification_file = self.search_quantification_file(dir=in_path_quantification)
@@ -377,6 +388,7 @@ class Summary_Runner(Pipe_Step):
             summary = self.add_quantification(
                 quantification_file=quantification_file, summary=summary
             )
+
             summary = self.add_annotations(annotation_files=annotation_files, summary=summary)
 
         summary.to_csv(out_path, sep="\t")
