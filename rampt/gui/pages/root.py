@@ -251,7 +251,9 @@ with tgb.Page(style=style) as root:
                 show_properties=False,
                 show_tags=False,
                 show_sequences=True,
-                on_submission_change=lambda state, submission, details: notify(state, "info",  f"{submission.get_label()} submitted.")
+                on_submission_change=lambda state, submission, details: notify(
+                    state, "info", f"{submission.get_label()} submitted."
+                ),
             )
             tgb.scenario_dag("{scenario}")
 
