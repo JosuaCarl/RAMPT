@@ -91,6 +91,6 @@ jobs:
     - name: Upload Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "dist/*"
+        artifacts: "dist/rampt_installer_linux,dist/rampt_installer_windows.exe,dist/rampt_installer_macos,dist/rampt.zip"
         bodyFile: "CHANGELOG.md"
         token: ${{ secrets.GITHUB_TOKEN }}
