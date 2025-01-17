@@ -2,8 +2,9 @@ name: Deployment of executables
 
 on: 
   push:
-    tags:
-      - 'v*'
+    branches: [ "main" ]
+    #tags:
+    #  - 'v*'
 
 jobs:
   build:
@@ -26,19 +27,24 @@ jobs:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
     steps:
     - uses: actions/checkout@master
+    
+    - name: Check matrix os
+      run: echo ${{ matrix.os }} 
 
     - name: Adjust os name linux
-      if: ${{ matrix.os }} == "ubuntu-latest"
+      if: ${{ matrix.os }} == ubuntu-latest
       run: echo "os_name=linux" >> $GITHUB_ENV
-    - name: Adjust os name mac
-      if: ${{ matrix.os }} == "macos-latest"
-      run: echo "os_name=macos" >> $GITHUB_ENV
-    - name: Adjust os name windows
-      if: ${{ matrix.os }} == "windows-latest"
-      run: echo "os_name=windows" >> $GITHUB_ENV
 
-    - name: "Test OSNAME"
-      run: echo "${{ env.os_name }}"
+    - name: Adjust os name mac
+      if: ${{ matrix.os }} == macos-latest
+      run: echo "os_name=macos" >> $GITHUB_ENV
+
+    - name: Adjust os name windows
+      if: ${{ matrix.os }} == windows-latest
+      run: echo "os_name=windows" >> $GITHUB_ENV
+      
+    - name: Check os
+      run: echo ${{ env.os_name }}
 
     - name: Install uv
       uses: astral-sh/setup-uv@v5
