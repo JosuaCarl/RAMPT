@@ -17,6 +17,7 @@ from rampt.helpers.types import *
 from rampt.helpers.logging import *
 
 
+
 # File operations
 def get_internal_filepath(file: str) -> StrPath:
     """
@@ -28,6 +29,16 @@ def get_internal_filepath(file: str) -> StrPath:
     :rtype: StrPath
     """
     return os.path.abspath(file)
+
+
+### ROOT Directory
+ROOT_DIR = os.path.abspath(
+    os.path.join(
+        os.path.dirname(get_internal_filepath(__file__)),
+        "..",
+        "..",
+    )
+)
 
 
 def construct_path(*args: list[StrPath]) -> StrPath:

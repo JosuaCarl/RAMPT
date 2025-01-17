@@ -5,7 +5,12 @@ from rampt.gui.pages.common_parts import *
 
 from rampt.steps.annotation.sirius_pipe import Sirius_Runner
 
+
 sirius_params = Sirius_Runner()
+sirius_params.config = os.path.join(
+    ROOT_DIR,
+    "statics", "batch_files", "sirius_default_config.txt"
+)
 
 
 def create_sirius():

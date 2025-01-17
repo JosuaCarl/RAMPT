@@ -13,6 +13,10 @@ out_path, mock_path, example_path, batch_path, installs_path = contruct_common_p
 make_out(out_path)
 
 
+def test_ROOT_DIR():
+    assert ROOT_DIR == os.path.abspath(join(filepath, "..", ".."))
+
+
 # String operations
 def test_change_case_str():
     assert change_case_str("abc", slice(1, 3), "upper") == "aBC"
