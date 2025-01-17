@@ -68,7 +68,7 @@ def test_install_project():
 
 
 def test_install_msconvert(recwarn):
-    clean_out(out_path) 
+    clean_out(out_path)
     root = tk.Tk()
     installer = InstallerApp(root)
     name = "MSconvert"

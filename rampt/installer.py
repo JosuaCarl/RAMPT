@@ -947,8 +947,7 @@ class InstallerApp(tk.Tk):
             ps.wait()
         else:
             ps = subprocess.Popen(
-                ["wget", "-qO-", "https://astral.sh/uv/install.sh"],
-                stdout=subprocess.PIPE,
+                ["wget", "-qO-", "https://astral.sh/uv/install.sh"], stdout=subprocess.PIPE
             )
             subprocess.check_output(["sh"], stdin=ps.stdout)
             ps.wait()
@@ -975,10 +974,7 @@ class InstallerApp(tk.Tk):
 
         self.install_uv()
 
-        subprocess.Popen(
-            ["uv", "sync", "--no-dev"],
-            cwd=install_path
-        )
+        subprocess.Popen(["uv", "sync", "--no-dev"], cwd=install_path)
         process = subprocess.Popen(
             ["uv", "run", "python", "-c", "import shutil; print(shutil.which('python'))"],
             cwd=install_path,
@@ -1204,11 +1200,12 @@ class InstallerApp(tk.Tk):
 
     def update_primary_progress(self, install_name, total_installs):
         if self.primary_progressbar:
-          self.primary_progressbar["value"] = self.primary_progressbar["value"] + 100 / total_installs
-          self.install_status.insert(tk.END, f"{install_name} installation completed.\n")
-          if self.primary_progressbar["value"] >= 100:
-              self.install_status.insert(tk.END, "Installation complete")
-
+            self.primary_progressbar["value"] = (
+                self.primary_progressbar["value"] + 100 / total_installs
+            )
+            self.install_status.insert(tk.END, f"{install_name} installation completed.\n")
+            if self.primary_progressbar["value"] >= 100:
+                self.install_status.insert(tk.END, "Installation complete")
 
     def install(self):
         """Final installation process."""

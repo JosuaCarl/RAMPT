@@ -142,7 +142,10 @@ class Summary_Runner(Pipe_Step):
                 for file in files:
                     if not canopus_formula_summary_file and file == "canopus_formula_summary.tsv":
                         canopus_formula_summary_file = join(root, file)
-                    elif not canopus_structure_summary_file and file == "canopus_structure_summary.tsv":
+                    elif (
+                        not canopus_structure_summary_file
+                        and file == "canopus_structure_summary.tsv"
+                    ):
                         canopus_structure_summary_file = join(root, file)
                     elif (
                         not denovo_structure_identifications_file
@@ -151,7 +154,10 @@ class Summary_Runner(Pipe_Step):
                         denovo_structure_identifications_file = join(root, file)
                     elif not formula_identifications_file and file == "formula_identifications.tsv":
                         formula_identifications_file = join(root, file)
-                    elif not structure_identifications_file and file == "structure_identifications.tsv":
+                    elif (
+                        not structure_identifications_file
+                        and file == "structure_identifications.tsv"
+                    ):
                         structure_identifications_file = join(root, file)
                     elif not gnps_annotations and file.endswith("_gnps_all_db_annotations.json"):
                         gnps_annotations = join(root, file)
@@ -353,7 +359,7 @@ class Summary_Runner(Pipe_Step):
         quantification_file: StrPath = None,
         annotation_files: dict[str, StrPath] = None,
         summary: pd.DataFrame = None,
-    ):  
+    ):
         in_path_annotation = None
         if isinstance(in_path, dict):
             in_path_quantification = in_path.get("quantification")
