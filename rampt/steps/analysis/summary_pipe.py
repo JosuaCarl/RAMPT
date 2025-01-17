@@ -138,6 +138,8 @@ class Summary_Runner(Pipe_Step):
         """
         dirs = dir if isinstance(dir, list) or isinstance(dir, tuple) else [dir]
         for dir in dirs:
+            if not dir:
+                continue
             for root, dirs, files in os.walk(dir):
                 for file in files:
                     if not canopus_formula_summary_file and file == "canopus_formula_summary.tsv":

@@ -168,7 +168,7 @@ def create_list_selection(
             new_path if new_path else get_attribute_recursive(state, f"list_uploaded.{selector_id}")
         )
 
-        if new_path != ".":
+        if new_path:
             if new_path not in list_options:
                 list_options[selector_id].append(new_path)
             set_attribute_recursive(state, f"list_options.{selector_id}", list_options[selector_id])

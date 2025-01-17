@@ -6,6 +6,7 @@ import json
 
 import taipy as tp
 import taipy.gui.builder as tgb
+from taipy.gui import notify
 
 # Submodules
 from rampt.gui.pages.analysis.analysis import *
@@ -124,6 +125,8 @@ optional_data_nodes = [
     "sirius_out",
     "summary_out",
     "analysis_out",
+    "sirius_annotations",
+    "gnps_annotations",
 ]
 
 
@@ -243,7 +246,13 @@ with tgb.Page(style=style) as root:
 
             # Pipeline showcasing
             tgb.text("## 🎬 Scenario management", mode="markdown")
-            tgb.scenario("{scenario}", show_properties=False, show_tags=False, show_sequences=True)
+            tgb.scenario(
+                "{scenario}",
+                show_properties=False,
+                show_tags=False,
+                show_sequences=True,
+                on_submission_change=lambda state, submission, details: notify(state, "info",  f"{submission.get_label()} submitted.")
+            )
             tgb.scenario_dag("{scenario}")
 
             tgb.text("## 📊 Data", mode="markdown")

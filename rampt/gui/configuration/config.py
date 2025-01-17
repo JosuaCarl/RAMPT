@@ -30,11 +30,11 @@ processed_data_config = Config.configure_in_memory_data_node(
 )
 
 gnps_annotations_config = Config.configure_json_data_node(
-    id="gnps_annotations", scope=Scope.SCENARIO, default_path=None
+    id="gnps_annotations", scope=Scope.SCENARIO, default_path=""
 )
 
 sirius_annotations_config = Config.configure_csv_data_node(
-    id="sirius_annotations", scope=Scope.SCENARIO, default_path=None
+    id="sirius_annotations", scope=Scope.SCENARIO, default_path=""
 )
 
 summary_config = Config.configure_csv_data_node(id="summary_data", scope=Scope.SCENARIO)
