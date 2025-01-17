@@ -2,9 +2,8 @@ name: Deployment of executables
 
 on: 
   push:
-    branches: [ "main" ]
-    #tags:
-    #  - 'v*'
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -27,15 +26,9 @@ jobs:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
     steps:
     - uses: actions/checkout@master
-    
-    - name: Check matrix os
-      run: echo ${{ matrix.os }} 
 
     - name: Adjust os name
       run: echo "os_name=$(echo "${{ matrix.os }}" | cut -d "-" -f 1)" >> $GITHUB_ENV
-      
-    - name: Check os
-      run: echo ${{ env.os_name }}
 
     - name: Install uv
       uses: astral-sh/setup-uv@v5
