@@ -70,12 +70,13 @@ jobs:
     - uses: actions/download-artifact@v4
       with:
         name: rampt.zip
-        path: ./rampt.zip
+        path: dist/rampt.zip
 
     - uses: actions/download-artifact@v4
       with:
-        name: rampt_installer_linux
+        name: rampt_installer_ubuntu
         path: dist/rampt_installer_linux
+    
 
     - uses: actions/download-artifact@v4
       with:
@@ -85,11 +86,13 @@ jobs:
     - uses: actions/download-artifact@v4
       with:
         name: rampt_installer_windows
-        path: dist/rampt_installer_windows
+        path: dist/rampt_installer_windows.exe
+
+
 
     - name: Upload Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "rampt_installer_linux,rampt_installer_macos,rampt_installer_windows,rampt.zip"
+        artifacts: "dist/*"
         bodyFile: "CHANGELOG.md"
         token: ${{ secrets.GITHUB_TOKEN }}
