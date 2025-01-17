@@ -850,6 +850,7 @@ def register_program(op_sys: str, program_path: StrPath, name: str):
         print(f"Symlink created: {symlink_path} -> {program_path}")
     add_to_path(op_sys=op_sys, path=local_bin)
 
+
 class InstallerApp(tk.Tk):
     def __init__(self, root):
         self.op_sys = pf.system().lower()
@@ -860,7 +861,7 @@ class InstallerApp(tk.Tk):
             standard_install_path = os.getenv("ProgramFiles")
         else:
             standard_install_path = "~/programs"
-      
+
         self.primary_progressbar = None
         self.install_status = None
 
@@ -896,9 +897,7 @@ class InstallerApp(tk.Tk):
         # Initialize variables
         self.current_page = 0
 
-        self.install_path = tk.StringVar(
-            value=self.install_path
-        )  # Default installation directory
+        self.install_path = tk.StringVar(value=self.install_path)  # Default installation directory
 
         self.accept_var = tk.BooleanVar()
         self.force = tk.BooleanVar()
@@ -934,7 +933,6 @@ class InstallerApp(tk.Tk):
 
         # Load the first page
         self.load_page()
-
 
     def install_uv(self):
         if "windows" in self.op_sys:
@@ -1098,11 +1096,8 @@ class InstallerApp(tk.Tk):
                         command="sirius",
                         force=force,
                     )
-              
-            self.update_primary_progress(
-                install_name=component,
-                total_installs=len(components) + 1,
-            )
+
+            self.update_primary_progress(install_name=component, total_installs=len(components) + 1)
 
     def load_page(self):
         """
@@ -1117,7 +1112,6 @@ class InstallerApp(tk.Tk):
         self.next_button.config(
             text="Install" if self.current_page == len(self.pages) - 1 else "Next"
         )
-
 
     def next_page(self):
         """
@@ -1142,15 +1136,12 @@ class InstallerApp(tk.Tk):
         else:
             self.next_button["state"] = tk.DISABLED
 
-
     def create_license_page(self):
         """Creates the license agreement page."""
         Label(self.main_frame, text="License Agreement", font=("Arial", 14, "bold")).pack(pady=10)
 
         license_text = tk.Text(self.main_frame, height=10, wrap=tk.WORD)
-        license_text.insert(
-            tk.END, f"Please read the license agreement.\n\n{self.license}"
-        )
+        license_text.insert(tk.END, f"Please read the license agreement.\n\n{self.license}")
         license_text.config(state=tk.DISABLED)
         license_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
@@ -1160,7 +1151,6 @@ class InstallerApp(tk.Tk):
             variable=self.accept_var,
             command=self.change_accept,
         ).pack(pady=5)
-
 
     def create_component_page(self):
         """Creates the component selection page."""
@@ -1183,7 +1173,6 @@ class InstallerApp(tk.Tk):
             self.main_frame, text="Force installation of components", variable=self.force
         ).pack(anchor="w", pady=20)
 
-
     def create_installation_location_page(self):
         """Creates the installation location selection page."""
         Label(
@@ -1198,7 +1187,6 @@ class InstallerApp(tk.Tk):
         browse_button = Button(self.main_frame, text="Browse", command=self.browse_directory)
         browse_button.pack(pady=5)
 
-
     def browse_directory(self):
         """Opens a file dialog to select the installation directory."""
         directory = filedialog.askdirectory(
@@ -1208,13 +1196,12 @@ class InstallerApp(tk.Tk):
             self.install_path.set(directory)
             self.install_path = self.install_path.get()
 
-
     def update_primary_progress(self, install_name, total_installs):
         current_progress = self.primary_progressbar["value"]
         self.primary_progressbar["value"] = current_progress + 100 / total_installs
         self.install_status.insert(tk.END, f"{install_name} installation completed.\n")
         if self.primary_progressbar["value"] >= 100:
-          self.install_status.insert(tk.END, "Installation complete")
+            self.install_status.insert(tk.END, "Installation complete")
 
     def install(self):
         """Final installation process."""
@@ -1223,7 +1210,6 @@ class InstallerApp(tk.Tk):
         self.primary_progressbar = Progressbar(root, length=300, mode="determinate")
         self.primary_progressbar.pack(pady=10)
 
-        
         frame = Frame(root)
         frame.pack(pady=10, fill=tk.BOTH, expand=True)
 
@@ -1231,23 +1217,22 @@ class InstallerApp(tk.Tk):
         self.install_scrollbar = Scrollbar(frame, orient=tk.VERTICAL)
 
         # Scrollable text field
-        self.install_status = tk.Text(frame, wrap=tk.WORD, yscrollcommand=self.install_scrollbar.set, height=10, width=40)
+        self.install_status = tk.Text(
+            frame, wrap=tk.WORD, yscrollcommand=self.install_scrollbar.set, height=10, width=40
+        )
         self.install_status.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Configure scrollbar to work with text field
         self.install_scrollbar.config(command=self.install_status.yview)
         self.install_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        
+
         selected_components = [name for name, var in self.component_vars.items() if var.get()]
         self.install_path = str(self.install_path)
-        
+
         ()
         Thread(
-            target=self.install_components,
-            kwargs={"components": selected_components},
-            daemon=True,
+            target=self.install_components, kwargs={"components": selected_components}, daemon=True
         ).start()
-
 
 
 # Run the application
