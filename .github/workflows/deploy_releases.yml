@@ -16,6 +16,11 @@ jobs:
         type: 'zip'
         filename: 'rampt.zip'
         exclusions: '*.git* /*github/* /*tests/* /*docs/* uv.lock Contribute.md'
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: rampt.zip
+        path: ./rampt.zip
   
   build_installer:
     env:
@@ -65,7 +70,7 @@ jobs:
     - uses: actions/download-artifact@v4
       with:
         name: rampt.zip
-        path: rampt.zip
+        path: ./rampt.zip
 
     - uses: actions/download-artifact@v4
       with:
