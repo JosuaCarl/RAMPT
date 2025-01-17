@@ -54,6 +54,11 @@ jobs:
         name: rampt_installer_${{ matrix.os.name }}
         path: dist/installer_${{ matrix.os.name }}
 
+    - uses: actions/upload-artifact@v4
+      with:
+        name: rampt_installer_${{ matrix.os.name }}
+        path: dist/installer_${{ matrix.os.name }}.exe
+
   deploy:
     needs: [ build, build_installer ]
     runs-on: ubuntu-latest
