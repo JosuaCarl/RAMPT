@@ -20,7 +20,7 @@ jobs:
       with:
         type: 'zip'
         filename: 'rampt.zip'
-        exclusions: '*.git* /*github/* /*tests/* /*docs/* Contribute.md'
+        exclusions: '*.git* /*github/* /*tests/* /*docs/* uv.lock Contribute.md'
 
     - name: Upload Release
       uses: ncipollo/release-action@v1
