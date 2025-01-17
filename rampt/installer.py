@@ -15,9 +15,11 @@ import platform as pf
 
 import subprocess
 
+from threading import Thread
+
 import tkinter as tk
 from tkinter import filedialog
-from tkinter.ttk import Frame, Label, Button, Checkbutton, Progressbar
+from tkinter.ttk import Frame, Label, Button, Checkbutton, Progressbar, Scrollbar
 
 
 type StrPath = str
@@ -848,9 +850,8 @@ def register_program(op_sys: str, program_path: StrPath, name: str):
         print(f"Symlink created: {symlink_path} -> {program_path}")
     add_to_path(op_sys=op_sys, path=local_bin)
 
-
-class Installer(tk.Tk):
-    def __init__(self):
+class InstallerApp(tk.Tk):
+    def __init__(self, root):
         self.op_sys = pf.system().lower()
 
         if "mac" in self.op_sys:
@@ -859,6 +860,9 @@ class Installer(tk.Tk):
             standard_install_path = os.getenv("ProgramFiles")
         else:
             standard_install_path = "~/programs"
+      
+        self.primary_progressbar = None
+        self.install_status = None
 
         self.install_path = standard_install_path
         self.license = project_license
@@ -883,6 +887,54 @@ class Installer(tk.Tk):
                 "linux": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-linux64.zip",
             },
         }
+
+        ## TKINTER stuff
+        self.root = root
+
+        self.root.title("Installer")
+        self.root.geometry("600x400")
+        # Initialize variables
+        self.current_page = 0
+
+        self.install_path = tk.StringVar(
+            value=self.install_path
+        )  # Default installation directory
+
+        self.accept_var = tk.BooleanVar()
+        self.force = tk.BooleanVar()
+
+        self.component_vars = {
+            "MSconvert": tk.BooleanVar(value=True),
+            "MZmine": tk.BooleanVar(value=False),
+            "SIRIUS": tk.BooleanVar(value=False),
+        }
+
+        # List of pages
+        self.pages = [
+            self.create_license_page,
+            self.create_component_page,
+            self.create_installation_location_page,
+        ]
+
+        # Main frame for dynamic content
+        self.main_frame = Frame(root)
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Navigation buttons
+        self.nav_frame = Frame(root)
+        self.nav_frame.pack(fill=tk.X, pady=10)
+
+        self.prev_button = Button(
+            self.nav_frame, text="Previous", command=self.previous_page, state=tk.DISABLED
+        )
+        self.prev_button.pack(side=tk.LEFT, padx=5)
+
+        self.next_button = Button(self.nav_frame, text="Next", command=self.next_page)
+        self.next_button.pack(side=tk.RIGHT, padx=5)
+
+        # Load the first page
+        self.load_page()
+
 
     def install_uv(self):
         if "windows" in self.op_sys:
@@ -1003,19 +1055,10 @@ class Installer(tk.Tk):
             return os.path.abspath(install_path)
 
     def install_components(self, components: list, force: bool = False):
-        super().__init__()
-        # Progress bar
-        self.progress_label = tk.Label(self, text="Installing components...")
-        self.progress_label.pack(pady=10)
-
-        self.progress = Progressbar(self, orient="horizontal", length=300, mode="determinate")
-        self.progress.pack(pady=20)
-
-        # TODO: Add second progress bar for individual progress
-
         urls = self.urls
 
-        for i, component in enumerate([self.name] + components, 1):
+        for component in [self.name] + components:
+            print(f"Installing {component}")
             match component:
                 case self.name:
                     self.install_project(
@@ -1032,6 +1075,7 @@ class Installer(tk.Tk):
                         extraction_method="tar.bz2",
                         bin_path="",
                         command="msconvert",
+                        force=force,
                     )
 
                 case "MZmine":
@@ -1041,6 +1085,7 @@ class Installer(tk.Tk):
                         install_path=self.install_path,
                         bin_path="bin",
                         command="mzmine",
+                        force=force,
                     )
 
                 case "Sirius":
@@ -1051,63 +1096,13 @@ class Installer(tk.Tk):
                         hash_url_addendum=".sha256",
                         bin_path=join("sirius", "bin"),
                         command="sirius",
+                        force=force,
                     )
-
-            self.progress["value"] = (i / len(components)) * 100
-            self.progress_label.config(text=f"Installing {component}...")
-
-        self.progress_label.config(text="Installation complete!")
-
-
-class InstallerApp(tk.Tk):
-    def __init__(self, root):
-        self.installer = Installer()
-        self.name = self.installer.name
-        self.root = root
-
-        self.root.title("Installer")
-        self.root.geometry("600x400")
-        # Initialize variables
-        self.current_page = 0
-
-        self.install_path = tk.StringVar(
-            value=self.installer.install_path
-        )  # Default installation directory
-
-        self.accept_var = tk.BooleanVar()
-        self.force = tk.BooleanVar()
-
-        self.component_vars = {
-            "MSconvert": tk.BooleanVar(value=True),
-            "MZmine": tk.BooleanVar(value=False),
-            "SIRIUS": tk.BooleanVar(value=False),
-        }
-
-        # List of pages
-        self.pages = [
-            self.create_license_page,
-            self.create_component_page,
-            self.create_installation_location_page,
-        ]
-
-        # Main frame for dynamic content
-        self.main_frame = Frame(root)
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
-
-        # Navigation buttons
-        self.nav_frame = Frame(root)
-        self.nav_frame.pack(fill=tk.X, pady=10)
-
-        self.prev_button = Button(
-            self.nav_frame, text="Previous", command=self.previous_page, state=tk.DISABLED
-        )
-        self.prev_button.pack(side=tk.LEFT, padx=5)
-
-        self.next_button = Button(self.nav_frame, text="Next", command=self.next_page)
-        self.next_button.pack(side=tk.RIGHT, padx=5)
-
-        # Load the first page
-        self.load_page()
+              
+            self.update_primary_progress(
+                install_name=component,
+                total_installs=len(components) + 1,
+            )
 
     def load_page(self):
         """
@@ -1122,6 +1117,7 @@ class InstallerApp(tk.Tk):
         self.next_button.config(
             text="Install" if self.current_page == len(self.pages) - 1 else "Next"
         )
+
 
     def next_page(self):
         """
@@ -1146,13 +1142,14 @@ class InstallerApp(tk.Tk):
         else:
             self.next_button["state"] = tk.DISABLED
 
+
     def create_license_page(self):
         """Creates the license agreement page."""
         Label(self.main_frame, text="License Agreement", font=("Arial", 14, "bold")).pack(pady=10)
 
         license_text = tk.Text(self.main_frame, height=10, wrap=tk.WORD)
         license_text.insert(
-            tk.END, f"Please read the license agreement.\n\n{self.installer.license}"
+            tk.END, f"Please read the license agreement.\n\n{self.license}"
         )
         license_text.config(state=tk.DISABLED)
         license_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -1163,6 +1160,7 @@ class InstallerApp(tk.Tk):
             variable=self.accept_var,
             command=self.change_accept,
         ).pack(pady=5)
+
 
     def create_component_page(self):
         """Creates the component selection page."""
@@ -1185,6 +1183,7 @@ class InstallerApp(tk.Tk):
             self.main_frame, text="Force installation of components", variable=self.force
         ).pack(anchor="w", pady=20)
 
+
     def create_installation_location_page(self):
         """Creates the installation location selection page."""
         Label(
@@ -1199,6 +1198,7 @@ class InstallerApp(tk.Tk):
         browse_button = Button(self.main_frame, text="Browse", command=self.browse_directory)
         browse_button.pack(pady=5)
 
+
     def browse_directory(self):
         """Opens a file dialog to select the installation directory."""
         directory = filedialog.askdirectory(
@@ -1206,15 +1206,48 @@ class InstallerApp(tk.Tk):
         )
         if directory:
             self.install_path.set(directory)
-            self.installer.install_path = self.install_path.get()
+            self.install_path = self.install_path.get()
+
+
+    def update_primary_progress(self, install_name, total_installs):
+        current_progress = self.primary_progressbar["value"]
+        self.primary_progressbar["value"] = current_progress + 100 / total_installs
+        self.install_status.insert(tk.END, f"{install_name} installation completed.\n")
+        if self.primary_progressbar["value"] >= 100:
+          self.install_status.insert(tk.END, "Installation complete")
 
     def install(self):
         """Final installation process."""
+        # Primary progress bar (overall progress)
+        Label(root, text="Overall Progress:").pack(pady=(10, 0))
+        self.primary_progressbar = Progressbar(root, length=300, mode="determinate")
+        self.primary_progressbar.pack(pady=10)
+
+        
+        frame = Frame(root)
+        frame.pack(pady=10, fill=tk.BOTH, expand=True)
+
+        # Scrollbar
+        self.install_scrollbar = Scrollbar(frame, orient=tk.VERTICAL)
+
+        # Scrollable text field
+        self.install_status = tk.Text(frame, wrap=tk.WORD, yscrollcommand=self.install_scrollbar.set, height=10, width=40)
+        self.install_status.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # Configure scrollbar to work with text field
+        self.install_scrollbar.config(command=self.install_status.yview)
+        self.install_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
         selected_components = [name for name, var in self.component_vars.items() if var.get()]
+        self.install_path = str(self.install_path)
+        
+        ()
+        Thread(
+            target=self.install_components,
+            kwargs={"components": selected_components},
+            daemon=True,
+        ).start()
 
-        self.installer.install_components(selected_components)
-
-        self.root.quit()
 
 
 # Run the application
