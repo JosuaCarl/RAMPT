@@ -6,8 +6,8 @@ A "Raw to annotation metabolomics pipline tool"
 
 
 ## Installing
-This requires roughly 1.3 GB of free space, wherever you might install it.
-
+1. Download latest release for your platform here []()
+### Alternatively
 1. `git clone https://github.com/JosuaCarl/RAMPT.git`
 2. `cd RAMPT`
 3. Install uv [https://docs.astral.sh/uv/getting-started/installation/](https://docs.astral.sh/uv/getting-started/installation/)

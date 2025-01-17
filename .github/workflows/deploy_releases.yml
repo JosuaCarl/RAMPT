@@ -62,6 +62,26 @@ jobs:
     steps:
     - uses: actions/checkout@master
     
+    - uses: actions/download-artifact@v4
+      with:
+        name: rampt.zip
+        path: rampt.zip
+
+    - uses: actions/download-artifact@v4
+      with:
+        name: rampt_installer_linux
+        path: dist/rampt_installer_linux
+
+    - uses: actions/download-artifact@v4
+      with:
+        name: rampt_installer_macos
+        path: dist/rampt_installer_macos
+
+    - uses: actions/download-artifact@v4
+      with:
+        name: rampt_installer_windows
+        path: dist/rampt_installer_windows
+
     - name: Upload Release
       uses: ncipollo/release-action@v1
       with:
