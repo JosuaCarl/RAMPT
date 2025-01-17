@@ -29,4 +29,5 @@ def main():
         async_mode="threading",
         run_browser=False,
         debug=False,
+        favicon=os.path.join(ROOT_DIR, "statics", "share", "ramp.ico"),
     )

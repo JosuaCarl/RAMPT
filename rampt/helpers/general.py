@@ -373,8 +373,8 @@ def execute_verbose_command(
     process = tee_subprocess.run(
         cmd,
         shell=True,
-        stdout=None if verbosity >= 3 else subprocess.DEVNULL,
-        stderr=None if verbosity >= 2 else subprocess.DEVNULL,
+        stdout=None if verbosity >= 4 else subprocess.DEVNULL,
+        stderr=None if verbosity >= 3 else subprocess.DEVNULL,
         text=decode_text,
         capture_output=True,
     )

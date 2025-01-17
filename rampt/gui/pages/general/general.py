@@ -53,6 +53,6 @@ def create_general():
                 "{global_params.verbosity}",
                 label="Verbosity",
                 min=0,
-                max=3,
+                max=4,
                 hover_text="Level of verbosity during operations.",
             )

@@ -457,7 +457,7 @@ class Pipe_Step(Step_Configuration):
         """
         log(
             message=f"Started {self.__class__.__name__} step",
-            minimum_verbosity=2,
+            minimum_verbosity=1,
             verbosity=self.verbosity,
         )
 
@@ -495,7 +495,7 @@ class Pipe_Step(Step_Configuration):
 
             log(
                 message=f"Processing {in_path} -> {out_path}",
-                minimum_verbosity=3,
+                minimum_verbosity=2,
                 verbosity=self.verbosity,
             )
 
@@ -524,7 +524,7 @@ class Pipe_Step(Step_Configuration):
 
             log(
                 message=f"Processed {in_path} -> {out_path}",
-                minimum_verbosity=3,
+                minimum_verbosity=2,
                 verbosity=self.verbosity,
             )
 
@@ -538,7 +538,7 @@ class Pipe_Step(Step_Configuration):
 
         log(
             message=f"Finished {self.__class__.__name__} step",
-            minimum_verbosity=2,
+            minimum_verbosity=1,
             verbosity=self.verbosity,
         )
 
