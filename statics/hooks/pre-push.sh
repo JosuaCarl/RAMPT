@@ -1,10 +1,5 @@
 #!/usr/bin/bash
 PROJECTFILE=$1
-# Use ruff for formatting
-uv run ruff format
-
-# Use ruff for linting
-uv run ruff check --fix
 
 # Update tag from pyproject.toml
 get_toml_value() {
@@ -48,4 +43,5 @@ if grep -q "$VERSION" <<< "$(git tag -l | cat)"; then
 else
   echo "Tagging this as new version"
   git tag -a $VERSION -m "Tagged new version"
+  git push --tags
 fi
