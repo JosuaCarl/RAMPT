@@ -56,7 +56,7 @@ jobs:
 
     - uses: actions/upload-artifact@v4
       with:
-        name: rampt_installer_${{ matrix.os.name }}
+        name: rampt_installer_${{ matrix.os.name }}.exe
         path: dist/installer_${{ matrix.os.name }}.exe
 
   deploy:
@@ -70,27 +70,27 @@ jobs:
     - uses: actions/download-artifact@v4
       with:
         name: rampt.zip
-        path: dist/rampt.zip
+        path: dist
 
     - uses: actions/download-artifact@v4
       with:
         name: rampt_installer_linux
-        path: dist/rampt_installer_linux
+        path: dist
     
 
     - uses: actions/download-artifact@v4
       with:
         name: rampt_installer_macos
-        path: dist/rampt_installer_macos
+        path: dist
 
     - uses: actions/download-artifact@v4
       with:
-        name: rampt_installer_windows
-        path: dist/rampt_installer_windows.exe
+        name: rampt_installer_windows.exe
+        path: dist
 
     - name: Upload Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "dist/rampt_installer_linux,dist/rampt_installer_windows.exe,dist/rampt_installer_macos,dist/rampt.zip"
+        artifacts: "dist/*"
         bodyFile: "CHANGELOG.md"
         token: ${{ secrets.GITHUB_TOKEN }}
