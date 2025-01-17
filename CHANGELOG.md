@@ -1,4 +1,4 @@
 # Changes
 
 ## Release
-✨yay✨
+- Released installers
