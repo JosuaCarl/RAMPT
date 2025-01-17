@@ -18,15 +18,14 @@ stylekit = {"color_paper_light": "#EFE6F1", "color_background_light": "#EBE5EC"}
 
 
 def main():
-    ic(os.path.join(ROOT_DIR, "statics", "share", "rampt.png"))
     gui = Gui(pages=pages_dict, css_file="main.css")
 
     orchestrator = tp.Orchestrator()
 
-    orchestrator.run()
+    orchestrator.run(force_restart=True)
     gui.run(
-        title="mine2sirius",
-        favicon=os.path.join(ROOT_DIR, "statics", "share", "rampt.png"),
+        title="rampt",
+        favicon=os.path.join("..", "rampt.ico"),
         port=5001,
         stylekit=stylekit,
         run_browser=True,

@@ -92,13 +92,23 @@ match_data_node = {
         "conversion_params.processed_out",
     ],
     "processed_data": [
+        "summary_params.scheduled_in['quantification']",
         "gnps_params.scheduled_in",
         "sirius_params.scheduled_in",
         "feature_finding_params.processed_out",
     ],
-    "gnps_annotations": ["gnps_params.processed_out"],
-    "sirius_annotations": ["sirius_params.processed_out"],
-    "summary_data": ["analysis_params.scheduled_in", "summary_params.processed_out"],
+    "gnps_annotations": [
+        "summary_params.scheduled_in['annotation']",
+        "gnps_params.processed_out",
+    ],
+    "sirius_annotations": [
+        "summary_params.scheduled_in['annotation']",
+        "sirius_params.processed_out",
+    ],
+    "summary_data": [
+        "analysis_params.scheduled_in",
+        "summary_params.processed_out",
+    ],
     "analysis_data": ["analysis_params.processed_out"],
     # Out Data
     "conversion_out": ["conversion_params.scheduled_out", "feature_finding_params.scheduled_in"],
@@ -134,21 +144,51 @@ def lock_scenario(state):
     global scenario
     scenario = state.scenario
 
+    # Retrieve parameters
     params = construct_params_dict(state)
     data_nodes = params.copy()
 
+    # Iterate over all possible matches
     for data_node_key, attribute_keys in match_data_node.items():
-        for state_attribute in attribute_keys:
-            attribute_split = state_attribute.split(".")
-            value = params.get(attribute_split[0]).get(attribute_split[1])
+
+        # Iterate over all possible places, where data nodes info could come from
+        for i, state_attribute in enumerate(attribute_keys):
+            # Split to get attributes
+            attribute_split = regex.split(r"\.|(?:\[[\"\'](.*?)[\"\']\])", state_attribute)
+
+            # Filter empty strings out
+            attribute_split = [part for part in attribute_split if part]
+
+            # Get final value
+            value = params
+            for key_part in attribute_split:
+                # Case there is a list of values that needs to be passed from dict entry
+                if isinstance(value, list):
+                    value = [entry.get(key_part) for entry in value]
+                else:
+                    value = value.get(key_part)
+                ic(value)
+            
+            # Check whether the value is written or optional
             if value or data_node_key in optional_data_nodes:
+                
+                # Write value to node directory
                 for state_attribute in attribute_keys:
                     set_attribute_recursive(state, state_attribute, value, refresh=True)
                 data_nodes[data_node_key] = value
+    
+    # Write Nones to optional nodes
+    for optional_data_node in optional_data_nodes:
+        ic(optional_data_node)
+        scenario.data_nodes.get(optional_data_node).write(None)
 
+    # Write values to data node
     for key, data_node in scenario.data_nodes.items():
-        if data_nodes.get(key) or key in optional_data_nodes:
+        ic(key)
+        ic(data_nodes.get(key))
+        if data_nodes.get(key) is not None:
             data_node.write(data_nodes.get(key))
+
 
     state.scenario = scenario
     state.refresh("scenario")

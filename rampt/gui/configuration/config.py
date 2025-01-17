@@ -102,11 +102,18 @@ def generic_step(
     return_attributes: list = ["processed_out"],
     **kwargs,
 ) -> tuple[Any] | Any:
+    ic(in_paths)
     # Fixate parameters
     global_params.pop("patterns")
     global_params.pop("additional_args")
     step_params.update(global_params)
     step_instance = step_class(**step_params)
+
+    log(
+        f"Starting {step_instance.name} step",
+        minimum_verbosity=3,
+        verbosity=global_params.get("verbosity", 0)
+    )
 
     # Overwrite scheduled, when new in_path is given
     if in_paths:
@@ -119,22 +126,27 @@ def generic_step(
             raise_error=False,
         )
 
+    # TODO: Make out_paths explicit (So nodes can be more than memory nodes)
+
     # Add out_paths as relatives to in_path if none is given
     if out_paths:
         out_paths = to_list(out_paths)
         step_instance.scheduled_out = []
     else:
         out_paths = []
+        ic(in_paths)
         for in_path in in_paths:
             if isinstance(in_path, dict):
-                in_path = in_path.values()[0]
+                in_path = list(in_path.values())[-1]
             elif isinstance(in_path, list) or isinstance(in_path, tuple):
-                in_path = in_path[0]
+                in_path = in_path[-1]
             in_dir = get_directory(in_path)
             out_paths.append(os.path.normpath(os.path.join(in_dir, out_path_target)))
 
     # Run step
     step_instance.run(in_paths=in_paths, out_paths=out_paths, **kwargs)
+    
+    # TODO: Return [paths -> in memory data_nodes] + [results -> should go in non-memory data_nodes]
 
     # Return results
     results = [getattr(step_instance, attr) for attr in return_attributes]
@@ -336,6 +348,24 @@ ms_analysis_config = Config.configure_scenario(
             find_features_config,
             annotate_sirius_config,
             summarize_annotations_config,
+            analyze_difference_config,
+        ],
+        "Convert": [
+            convert_files_config,
+        ],
+        "Find features": [
+            find_features_config,
+        ],
+        "Sirius annotation": [
+            annotate_sirius_config,
+        ],
+        "GNPS annotation": [
+            annotate_gnps_config,
+        ],
+        "Summarize": [
+            summarize_annotations_config,
+        ],
+        "Analyze": [
             analyze_difference_config,
         ]
     },
