@@ -112,7 +112,7 @@ def generic_step(
     log(
         f"Starting {step_instance.name} step",
         minimum_verbosity=3,
-        verbosity=global_params.get("verbosity", 0)
+        verbosity=global_params.get("verbosity", 0),
     )
 
     # Overwrite scheduled, when new in_path is given
@@ -145,7 +145,7 @@ def generic_step(
 
     # Run step
     step_instance.run(in_paths=in_paths, out_paths=out_paths, **kwargs)
-    
+
     # TODO: Return [paths -> in memory data_nodes] + [results -> should go in non-memory data_nodes]
 
     # Return results
@@ -350,23 +350,11 @@ ms_analysis_config = Config.configure_scenario(
             summarize_annotations_config,
             analyze_difference_config,
         ],
-        "Convert": [
-            convert_files_config,
-        ],
-        "Find features": [
-            find_features_config,
-        ],
-        "Sirius annotation": [
-            annotate_sirius_config,
-        ],
-        "GNPS annotation": [
-            annotate_gnps_config,
-        ],
-        "Summarize": [
-            summarize_annotations_config,
-        ],
-        "Analyze": [
-            analyze_difference_config,
-        ]
+        "Convert": [convert_files_config],
+        "Find features": [find_features_config],
+        "Sirius annotation": [annotate_sirius_config],
+        "GNPS annotation": [annotate_gnps_config],
+        "Summarize": [summarize_annotations_config],
+        "Analyze": [analyze_difference_config],
     },
 )

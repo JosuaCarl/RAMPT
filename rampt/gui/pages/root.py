@@ -97,18 +97,12 @@ match_data_node = {
         "sirius_params.scheduled_in",
         "feature_finding_params.processed_out",
     ],
-    "gnps_annotations": [
-        "summary_params.scheduled_in['annotation']",
-        "gnps_params.processed_out",
-    ],
+    "gnps_annotations": ["summary_params.scheduled_in['annotation']", "gnps_params.processed_out"],
     "sirius_annotations": [
         "summary_params.scheduled_in['annotation']",
         "sirius_params.processed_out",
     ],
-    "summary_data": [
-        "analysis_params.scheduled_in",
-        "summary_params.processed_out",
-    ],
+    "summary_data": ["analysis_params.scheduled_in", "summary_params.processed_out"],
     "analysis_data": ["analysis_params.processed_out"],
     # Out Data
     "conversion_out": ["conversion_params.scheduled_out", "feature_finding_params.scheduled_in"],
@@ -150,7 +144,6 @@ def lock_scenario(state):
 
     # Iterate over all possible matches
     for data_node_key, attribute_keys in match_data_node.items():
-
         # Iterate over all possible places, where data nodes info could come from
         for i, state_attribute in enumerate(attribute_keys):
             # Split to get attributes
@@ -168,15 +161,14 @@ def lock_scenario(state):
                 else:
                     value = value.get(key_part)
                 ic(value)
-            
+
             # Check whether the value is written or optional
             if value or data_node_key in optional_data_nodes:
-                
                 # Write value to node directory
                 for state_attribute in attribute_keys:
                     set_attribute_recursive(state, state_attribute, value, refresh=True)
                 data_nodes[data_node_key] = value
-    
+
     # Write Nones to optional nodes
     for optional_data_node in optional_data_nodes:
         ic(optional_data_node)
@@ -188,7 +180,6 @@ def lock_scenario(state):
         ic(data_nodes.get(key))
         if data_nodes.get(key) is not None:
             data_node.write(data_nodes.get(key))
-
 
     state.scenario = scenario
     state.refresh("scenario")
