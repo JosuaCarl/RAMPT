@@ -32,7 +32,7 @@ jobs:
       run: echo ${{ matrix.os }} 
 
     - name: Adjust os name
-      run: echo "os_name=$(echo "${{ matrix.os }}" | cut -d "-" -f 1" >> $GITHUB_ENV
+      run: echo "os_name=$(echo "${{ matrix.os }}" | cut -d "-" -f 1)" >> $GITHUB_ENV
       
     - name: Check os
       run: echo ${{ env.os_name }}
