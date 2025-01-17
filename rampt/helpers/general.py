@@ -370,6 +370,11 @@ def execute_verbose_command(
     :return: Stdout, Stderr
     :rtype: tuple[str,str]
     """
+    log(
+        f"Starting command: {cmd}",
+        minimum_verbosity=3,
+        verbosity=verbosity,
+    )
     process = tee_subprocess.run(
         cmd,
         shell=True,

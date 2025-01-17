@@ -103,6 +103,8 @@ def generic_step(
     **kwargs,
 ) -> tuple[Any] | Any:
     # Fixate parameters
+    global_params.pop("patterns")
+    global_params.pop("additional_args")
     step_params.update(global_params)
     step_instance = step_class(**step_params)
 
@@ -129,7 +131,7 @@ def generic_step(
             elif isinstance(in_path, list) or isinstance(in_path, tuple):
                 in_path = in_path[0]
             in_dir = get_directory(in_path)
-            out_paths.append(os.path.join(in_dir, out_path_target))
+            out_paths.append(os.path.normpath(os.path.join(in_dir, out_path_target)))
 
     # Run step
     step_instance.run(in_paths=in_paths, out_paths=out_paths, **kwargs)

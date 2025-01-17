@@ -36,14 +36,12 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
     nested = get_value(args, "nested", False)
     n_workers = get_value(args, "workers", 1)
     save_log = get_value(args, "save_log", False)
-    platform = get_value(args, "platform", "windows")
     verbosity = get_value(args, "verbosity", 1)
     additional_args = get_value(args, "msconv_arguments")
     additional_args = additional_args if additional_args else unknown_args
 
     # Conversion
     msconvert_runner = MSconvert_Runner(
-        platform=platform,
         target_format=target_format,
         pattern=pattern,
         suffix=suffix,
@@ -70,7 +68,6 @@ class MSconvert_Runner(Pipe_Step):
     def __init__(
         self,
         exec_path: StrPath = "msconvert",
-        platform: str = "windows",
         target_format: str = "mzML",
         pattern: str = r".*",
         suffix: str = None,
@@ -88,8 +85,6 @@ class MSconvert_Runner(Pipe_Step):
 
         :param exec_path: Path of executive
         :type exec_path: StrPath
-        :param platform: Operational system/platform of computation, defaults to "windows"
-        :type platform: str, optional
         :param target_format: _description_, defaults to "mzML"
         :type target_format: str, optional
         :param pattern: Pattern for folder matching, defaults to ""
@@ -113,7 +108,6 @@ class MSconvert_Runner(Pipe_Step):
         """
         super().__init__(
             exec_path=exec_path,
-            platform=platform,
             patterns={"in": pattern},
             save_log=save_log,
             additional_args=additional_args,
@@ -278,7 +272,6 @@ if __name__ == "__main__":
     parser.add_argument("-n", "--nested", required=False, action="store_true")
     parser.add_argument("-w", "--workers", required=False, type=int)
     parser.add_argument("-s", "--save_log", required=False, action="store_true")
-    parser.add_argument("-plat", "--platform", required=False)
     parser.add_argument("-v", "--verbosity", required=False, type=int)
     parser.add_argument("-msconv", "--msconv_arguments", required=False, nargs=argparse.REMAINDER)
 

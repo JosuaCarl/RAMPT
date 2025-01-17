@@ -82,7 +82,7 @@ class Sirius_Runner(Pipe_Step):
         :type verbosity: int, optional
         """
         super().__init__(
-            patterns={"in": r"_sirius.mgf$"},
+            patterns={"in": r".*_sirius.mgf$"},
             save_log=save_log,
             additional_args=additional_args,
             verbosity=verbosity,
@@ -136,7 +136,7 @@ class Sirius_Runner(Pipe_Step):
             config = self.config
         config = self.extract_config(config=config)
 
-        cmd = rf'"{self.exec_path}" --project {join(projectspace, "projectspace")} --input {in_path} config {config} write-summaries --output {out_path} {" ".join(self.additional_args)}'
+        cmd = rf'"{self.exec_path}" --project "{join(projectspace, "projectspace.sirius")}" --input "{in_path}" config {config} write-summaries --output "{out_path}"{" ".join(self.additional_args)}'
 
         self.compute(
             step_function=execute_verbose_command,

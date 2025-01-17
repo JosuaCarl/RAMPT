@@ -20,7 +20,7 @@ def get_now() -> str:
     return str(datetime.now().replace(microsecond=0))
 
 
-def debug_msg(*args, **kwargs):
+def debug(*args, **kwargs):
     """
     Icecream debugging.
     """
