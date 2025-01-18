@@ -286,10 +286,7 @@ class GNPS_Runner(Pipe_Step):
                     feature_ms2_file=feature_ms2_file,
                     feature_quantification_file=feature_quantification_file,
                 )
-                gnps_response = self.submit_to_gnps(feature_ms2_file, feature_quantification_file)
-                task_id, status = self.check_task_finished(
-                    mzmine_log=mzmine_log, gnps_response=gnps_response
-                )
+                task_id, status = self.submit_to_gnps(feature_ms2_file, feature_quantification_file)
             else:
                 error(message=str(ve), error_type=ValueError)
 
@@ -305,8 +302,8 @@ class GNPS_Runner(Pipe_Step):
             in_path = gnps_response if gnps_response else mzmine_log if mzmine_log else in_path
 
             log(
-                f"Fetched gnps results from {in_path}",
-                minimum_verbosity=1,
+                f"Successful GNPS run with data from {in_path}",
+                minimum_verbosity=2,
                 verbosity=self.verbosity,
             )
 
