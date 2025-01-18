@@ -27,16 +27,23 @@ For planned improvements, please refer to [Contribute.md](./Contribute.md).
 
 
 ### Build from source
-1. `git clone https://github.com/JosuaCarl/RAMPT.git`
-2. `cd RAMPT`
-3. Install uv [https://docs.astral.sh/uv/getting-started/installation/](https://docs.astral.sh/uv/getting-started/installation/)
-4. `uv sync`
-5. Run with `uv run python -m rampt`
 
-Note, that this requires the following dependencies to be installed and availible on PATH:
-- MZmine
-- MSconvert
-- Sirius
+#### Prerequisites:
+- Install [git](https://git-scm.com/downloads)
+- Install [uv](https://docs.astral.sh/uv/getting-started/installation/)
+
+```sh
+git clone https://github.com/JosuaCarl/RAMPT.git
+cd RAMPT
+uv sync
+```
+
+Run with `uv run python -m rampt`
+
+Note that for the following dependencies are required to be installed and availible on PATH for functionality:
+- [MZmine](https://mzio.io/mzmine-news/)
+- [MSconvert/ProteoWizard](https://proteowizard.sourceforge.io/)
+- [Sirius](https://bio.informatik.uni-jena.de/software/sirius/)
 
 ### Usage
 For detailed information about usage, please refer to the [documentation](https://josuacarl.github.io/RAMPT/)
