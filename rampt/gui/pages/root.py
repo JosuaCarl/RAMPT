@@ -237,8 +237,6 @@ with tgb.Page(style=style) as configuration:
             # Scenario selector
             tgb.text("#### Scenarios", mode="markdown")
             tgb.scenario_selector("{scenario}", on_creation=add_scenario, on_change=change_scenario)
-            tgb.text("#### Data", mode="markdown")
-            tgb.data_node_selector("{data_node}")
 
         # Middle part
         with tgb.part():
@@ -308,7 +306,6 @@ representable_data_nodes = {
 
 
 def filter_representable(data_node: tp.DataNode | str) -> bool:
-    ic(data_node)
     if data_node:
         if isinstance(data_node, str):
             config_id = data_node
@@ -353,7 +350,6 @@ def populate_data_node(state, *args):
         data_node_config.default_path = path
 
         # Create structure to pass
-        ic(type(data_node_config))
         if data_node_config.storage_type in ["csv", "excel"]:
             sep = "\t" if "tsv" in path else None
             content = pd.read_csv(path, sep=sep)
@@ -382,10 +378,6 @@ with tgb.Page(style=style) as analysis:
             tgb.text("#### Data paths", mode="markdown")
             tgb.data_node_selector("{path_data_node}", scenario="{scenario}")
 
-            tgb.text("## 🗃️ Path selection", mode="markdown")
-            tgb.selector("{path_to_data}", lov="{path_data_node.read()}", dropdown=True)
-
-            tgb.button("🖼️ Show data from path", on_action=populate_data_node)
 
         # Middle part
         with tgb.part():
@@ -394,5 +386,10 @@ with tgb.Page(style=style) as analysis:
 
         # Right part
         with tgb.part():
+            tgb.text("## 🗃️ Path selection", mode="markdown")
+            tgb.selector("{path_to_data}", lov="{path_data_node.read()}", dropdown=True)
+
+            tgb.button("🖼️ Show data from path", on_action=populate_data_node)
+
             tgb.text("#### Populated data", mode="markdown")
             tgb.data_node_selector("{data_node}", datanodes="{populated_data_nodes}")

@@ -131,8 +131,6 @@ def generic_step(
     return_attributes: list = ["processed_out"],
     **kwargs,
 ) -> tuple[Any] | Any:
-    ic(global_params)
-    ic(in_paths)
     # Fixate parameters
     global_params.pop("patterns")
     global_params.pop("additional_args")
@@ -162,11 +160,8 @@ def generic_step(
         step_instance.scheduled_out = []
     else:
         out_paths = []
-        ic(in_paths)
         for in_path in in_paths:
-            ic(in_path)
             in_path = flatten_values(in_path)[-1]
-            ic(in_path)
             in_dir = get_directory(in_path)
             out_paths.append(os.path.normpath(os.path.join(in_dir, out_path_target)))
 
@@ -249,18 +244,20 @@ def annotate_sirius(
 
 def summarize_annotations(
     processed_data_paths: StrPath,
-    gnps_annotated_data_paths: StrPath,
-    sirius_annotated_data_paths: StrPath,
+    gnps_annotation_paths: StrPath,
+    sirius_annotation_paths: StrPath,
     summary_out_paths: StrPath,
     step_params: dict,
     global_params: dict,
 ):
     return generic_step(
         step_class=Summary_Runner,
-        in_paths={
-            "quantification": processed_data_paths,
-            "annotation": [sirius_annotated_data_paths, gnps_annotated_data_paths],
-        },
+        in_paths=stretch_to_list_of_dicts(
+            {
+                "quantification": [processed_data_paths],
+                "annotation": [sirius_annotation_paths, gnps_annotation_paths],
+            }
+        ),
         out_paths=summary_out_paths,
         out_path_target=os.path.join("..", "analysis"),
         step_params=step_params,

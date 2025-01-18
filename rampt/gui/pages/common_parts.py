@@ -73,11 +73,9 @@ def create_file_selection(
             set_attribute_recursive(state, f"selection_trees_pruned.{selector_id}", pruned_tree)
 
     def update_selection(state, name, value):
-        ic(value)
         selected_labels = [
             element.get("label") if isinstance(element, dict) else element for element in value
         ]
-        ic(selected_labels)
         if execution_key_in:
             in_list = get_attribute_recursive(state, f"{process}_params.{param_attribute_in}")
             dictionary = in_list[0] if in_list else {}
@@ -86,7 +84,6 @@ def create_file_selection(
         set_attribute_recursive(
             state, f"{process}_params.{param_attribute_in}", selected_labels, refresh=True
         )
-        ic(get_attribute_recursive(state, f"{process}_params.{param_attribute_in}"))
 
     with tgb.layout(columns="1 2 2", columns__mobile="1", gap="5%"):
         # In

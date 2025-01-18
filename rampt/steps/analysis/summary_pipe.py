@@ -14,6 +14,7 @@ import pandas as pd
 import numpy as np
 import json
 
+from rampt.helpers.general import *
 from rampt.helpers.logging import *
 from rampt.helpers.types import StrPath
 from rampt.steps.general import Pipe_Step, get_value
@@ -83,7 +84,7 @@ class Summary_Runner(Pipe_Step):
         if kwargs:
             self.update(kwargs)
         self.overwrite = overwrite
-        self.name = "analysis"
+        self.name = "summary"
         self.summary = None
 
     def search_quantification_file(
@@ -99,6 +100,8 @@ class Summary_Runner(Pipe_Step):
         :return: Paths to file
         :rtype:  StrPath
         """
+        if os.path.isfile(dir):
+            return dir
         for root, dirs, files in os.walk(dir):
             for file in files:
                 if not quantification_file and file.endswith("_quant.csv"):
@@ -363,44 +366,48 @@ class Summary_Runner(Pipe_Step):
         quantification_file: StrPath = None,
         annotation_files: dict[str, StrPath] = None,
         summary: pd.DataFrame = None,
-    ):
-        in_path_annotation = None
+    ):  
+        # Separate arguments of in_path
+        in_paths_annotation = None
         if isinstance(in_path, dict):
             in_path_quantification = in_path.get("quantification")
-            in_path_annotation = in_path.get("annotation")
+            in_paths_annotation = in_path.get("annotation")
         elif isinstance(in_path, str):
             in_path_quantification = in_path
         else:
             in_path_quantification = in_path[0]
-            in_path_annotation = in_path[1]
+            in_paths_annotation = in_path[1]
 
-        # TODO: Deal properly with GNPS and SIRIUS input
-        if isinstance(in_path_annotation, list):
-            in_path_annotation = in_path_annotation[0]
-
-        # Case run_single
-        if annotation_file_type or not in_path_annotation:
-            summary = self.add_quantification(
-                quantification_file=in_path_quantification, summary=summary
-            )
-            if in_path_annotation:
-                summary = self.add_annotation(
-                    annotation_file=in_path_annotation,
-                    annotation_file_type=annotation_file_type,
-                    summary=summary,
-                )
+        # Make quantification table as base
+        if not quantification_file:
+            quantification_file = self.search_quantification_file(dir=in_path_quantification)
+        summary = self.add_quantification(
+            quantification_file=quantification_file, summary=summary
+        )
+          # Add annotations
+        if annotation_files:
+            summary = self.add_annotations(
+                        annotation_files=annotation_files,
+                        summary=summary
+                    )
         else:
-            if not quantification_file:
-                quantification_file = self.search_quantification_file(dir=in_path_quantification)
-            if not annotation_files:
+            for in_path_annotation in set(to_list(in_paths_annotation)):
                 annotation_files = self.search_annotation_files(dir=in_path_annotation)
+                
+                # Case run_single
+                if annotation_file_type:
+                    summary = self.add_annotation(
+                        annotation_file=in_path_annotation,
+                        annotation_file_type=annotation_file_type,
+                        summary=summary,
+                    )
+                else:
+                    summary = self.add_annotations(
+                        annotation_files=annotation_files,
+                        summary=summary
+                    )
 
-            summary = self.add_quantification(
-                quantification_file=quantification_file, summary=summary
-            )
-
-            summary = self.add_annotations(annotation_files=annotation_files, summary=summary)
-
+        # Export summary
         summary.to_csv(out_path, sep="\t")
 
         log(
@@ -464,13 +471,13 @@ class Summary_Runner(Pipe_Step):
         summary = summary if summary else self.summary
 
         # Determine paths
-        in_path_quantification, in_path_annotation = self.sort_in_paths(in_paths=in_path)
+        in_path_quantification, in_paths_annotation = self.sort_in_paths(in_paths=in_path)
         out_path = join(out_path, "summary.tsv") if os.path.isdir(out_path) else out_path
 
         self.compute(
             step_function=capture_and_log,
             func=self.add_quantification_annotation_s,
-            in_path={"quantification": in_path_quantification, "annotation": in_path_annotation},
+            in_path={"quantification": in_path_quantification, "annotation": in_paths_annotation},
             out_path=out_path,
             quantification_file=quantification_file,
             annotation_files=annotation_files,

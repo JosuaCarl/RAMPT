@@ -134,6 +134,7 @@ def insert_unlinked_list(arr: list, index: int, object) -> list:
     return arr_new
 
 
+# Dict operations
 def flatten_values(obj: Any) -> list:
     """
     Flatten values in dictionaries and lists in lists to one list of values.
@@ -152,6 +153,58 @@ def flatten_values(obj: Any) -> list:
         return accumulator
     else:
         return [obj]
+
+def stretch_to_list_of_dicts(dictionary: dict) -> list:
+    """
+    Stretch a dictionary with a list of lists as entry to a list of dictionaries with a single entry from the list.
+
+    :param dictionary: Dictionary with list of lists
+    :type dictionary: dict
+    :return: Stretched list
+    :rtype: list
+    """
+    # Extract lists
+    lists_in_dict = []
+    keys_in_dict = []
+    for key, value in dictionary.items():
+        for list_in_dict in value:
+            lists_in_dict.append(list_in_dict)
+            keys_in_dict.append(key)
+
+    # Find maximum length
+    max_lenght = 0
+    for list in lists_in_dict:
+        max_lenght = max(max_lenght, len(list))
+
+    # Populated stretched list
+    stretched_list = []
+    for i in range(max_lenght):
+        single_dict = {}
+        listed_keys = []
+
+        for j, key in enumerate(keys_in_dict):
+            # Fill with None, if the length of the list is not sufficient
+            if i < len(lists_in_dict[j]):
+                element = lists_in_dict[j][i]
+            else:
+                element = None
+
+            # Use keys to populate single dict
+            if key not in single_dict:
+                single_dict[key] = element
+            elif key not in listed_keys:
+                single_dict[key] = [single_dict[key]] + [element]
+                listed_keys.append(key)
+            else:
+                single_dict[key] = single_dict[key] + [element]
+
+        stretched_list.append(single_dict)
+        
+    return stretched_list
+
+
+
+
 
 
 # String operations
