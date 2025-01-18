@@ -13,8 +13,10 @@ A "Raw to annotation metabolomics pipline tool"
 | Formula, molecule, ... annotation with SIRIUS | ✅      |
 | FBMN annotation with GNPS                     | ✅      |
 | Summary in compact table                      | ✅      |
-| Analysis trough simple operations (z-score)   | 🛠️      |
-| Dynamic visualization of data                 | 🛠️      |
+| Analysis through simple operations (z-score)  | ✅      |
+| Dynamic visualization of data                 | ✅      |
+| Adaptive analysis                             | 🛠️      |
+| Adaptive visualization                        | 🛠️      |
 
 For planned improvements, please refer to [Contribute.md](./Contribute.md).
 

@@ -8,7 +8,10 @@ RAMPT documentation
 
 Welcome to RAMPT's documentation!
 =================================================================
-The aim of this project is to construct a integrated pipeline from conversion of proprietory formats to the feature finding, networking and annotation of novel metabolites.
+The aim of this project is to construct a integrated pipeline from conversion of proprietory formats to the feature finding,
+networking and annotation of novel metabolites.
+For detailed infomation about installation and usage, please refer to the `README.md <https://github.com/JosuaCarl/RAMPT/blob/main/README.md>`
+at the github repository.
 
 
 .. toctree::
