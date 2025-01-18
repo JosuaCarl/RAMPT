@@ -13,16 +13,16 @@ A "Raw to annotation metabolomics pipline tool"
 
 | Feature                                       | Status |
 |-----------------------------------------------|--------|
-| Convert raw to community formats (.mz(X)ML)   | ✅      |
-| MZmine batch file to find features            | ✅      |
-| Formula, molecule, ... annotation with SIRIUS | ✅      |
-| FBMN annotation with GNPS                     | ✅      |
-| Summary in compact table                      | ✅      |
-| Analysis through simple operations (z-score)  | ✅      |
-| Dynamic visualization of data                 | ✅      |
-| Adaptive analysis                             | 🛠️      |
-| Adaptive visualization                        | 🛠️      |
-| Release as a python package                   | 🛞      |
+| Convert raw to community formats (.mz(X)ML)   | ✅     |
+| MZmine batch file to find features            | ✅     |
+| Formula, molecule, ... annotation with SIRIUS | ✅     |
+| FBMN annotation with GNPS                     | ✅     |
+| Summary in compact table                      | ✅     |
+| Analysis through simple operations (z-score)  | ✅     |
+| Dynamic visualization of data                 | ✅     |
+| Adaptive analysis                             | 🛠️     |
+| Adaptive visualization                        | 🛠️     |
+| Release as a python package                   | 🛞     |
 
 For planned improvements, please refer to [Contribute.md](./Contribute.md).
 

@@ -802,7 +802,11 @@ def add_to_path(op_sys: str, path: str):
         if "windows" in op_sys:
             current_path = os.environ.get("PATH", "")
             if str(path) not in current_path:
-                subprocess.run(["setx", "PATH", f"{path};{current_path}"], check=True)
+                subprocess.run(
+                    ["setx", "PATH", f"{path};{current_path}"],
+                    check=True,
+                    stdout=subprocess.DEVNULL,
+                )
             exported_to_path = True
         else:
             for shell_profile in [
@@ -942,12 +946,14 @@ class InstallerApp(tk.Tk):
                     "ByPass",
                     "-c",
                     "irm https://astral.sh/uv/install.ps1 | iex",
-                ]
+                ],
+                stdout=subprocess.DEVNULL
             )
             ps.wait()
         else:
             ps = subprocess.Popen(
-                ["wget", "-qO-", "https://astral.sh/uv/install.sh"], stdout=subprocess.PIPE
+                ["wget", "-qO-", "https://astral.sh/uv/install.sh"],
+                stdout=subprocess.PIPE
             )
             subprocess.check_output(["sh"], stdin=ps.stdout)
             ps.wait()
@@ -974,7 +980,11 @@ class InstallerApp(tk.Tk):
 
         self.install_uv()
 
-        subprocess.Popen(["uv", "sync", "--no-dev"], cwd=install_path)
+        subprocess.Popen(
+            ["uv", "sync", "--no-dev"],
+            cwd=install_path, 
+            stdout=subprocess.DEVNULL,
+        )
         process = subprocess.Popen(
             ["uv", "run", "python", "-c", "import shutil; print(shutil.which('python'))"],
             cwd=install_path,
