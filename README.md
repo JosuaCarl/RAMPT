@@ -1,5 +1,10 @@
-
-![logo_rampt](https://github.com/JosuaCarl/RAMPT/blob/main/statics/share/rampt.png?raw=true)
+<div align="center">
+  <a href="https://github.com/JosuaCarl/RAMPT" target="_blank">
+  <picture>
+    <img alt="Taipy" src="https://github.com/JosuaCarl/RAMPT/blob/main/statics/share/rampt.png?raw=true" width="200" />
+  </picture>
+  </a>
+</div>
 
 # RAMPT 
 A "Raw to annotation metabolomics pipline tool"
