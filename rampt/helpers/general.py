@@ -134,6 +134,27 @@ def insert_unlinked_list(arr: list, index: int, object) -> list:
     return arr_new
 
 
+def flatten_values(obj: Any) -> list:
+    """
+    Flatten values in dictionaries and lists in lists to one list of values.
+
+    :param obj: Object to be flattened
+    :type obj: Any
+    :return: Flat list
+    :rtype: list
+    """
+    if isinstance(obj, dict):
+        return flatten_values(list(obj.values()))
+    elif isinstance(obj, list) or isinstance(obj, tuple):
+        accumulator = []
+        for x in obj:
+            accumulator += flatten_values(obj=x)
+        return accumulator
+    else:
+        return [obj]
+            
+
+
 # String operations
 def change_case_str(s: str, range, conversion: str) -> str:
     """

@@ -114,7 +114,7 @@ class Summary_Runner(Pipe_Step):
         denovo_structure_identifications_file: StrPath = None,
         formula_identifications_file: StrPath = None,
         structure_identifications_file: StrPath = None,
-        gnps_annotations: StrPath = None,
+        gnps_annotations_path: StrPath = None,
     ) -> dict[str, StrPath]:
         """
         Check for annotation files.
@@ -131,8 +131,8 @@ class Summary_Runner(Pipe_Step):
         :type formula_identifications_file: StrPath, optional
         :param structure_identifications_file: Structure identifications table path, defaults to None
         :type structure_identifications_file: StrPath, optional
-        :param gnps_annotations: Annotations of GNPS molecular feature finding, defaults to None
-        :type gnps_annotations: StrPath, optional
+        :param gnps_annotations_path: Annotations of GNPS molecular feature finding, defaults to None
+        :type gnps_annotations_path: StrPath, optional
         :return: Paths to files
         :rtype:  dict[str, StrPath]
         """
@@ -161,15 +161,15 @@ class Summary_Runner(Pipe_Step):
                         and file == "structure_identifications.tsv"
                     ):
                         structure_identifications_file = join(root, file)
-                    elif not gnps_annotations and file.endswith("_gnps_all_db_annotations.json"):
-                        gnps_annotations = join(root, file)
+                    elif not gnps_annotations_path and file.endswith("_gnps_all_db_annotations.json"):
+                        gnps_annotations_path = join(root, file)
         return {
             "formula_identifications_file": formula_identifications_file,
             "canopus_formula_summary_file": canopus_formula_summary_file,
             "structure_identifications_file": structure_identifications_file,
             "canopus_structure_summary_file": canopus_structure_summary_file,
             "denovo_structure_identifications_file": denovo_structure_identifications_file,
-            "gnps_annotations": gnps_annotations,
+            "gnps_annotations_path": gnps_annotations_path,
         }
 
     def read_sirius_df(self, file_path: StrPath, filter_columns: list | str) -> pd.DataFrame:
@@ -298,7 +298,7 @@ class Summary_Runner(Pipe_Step):
                     }
                 )
 
-            case "gnps_annotations":
+            case "gnps_annotations_path":
                 with open(annotation_file, "r") as file:
                     hit_dicts = json.load(file)["blockData"]
                 df = pd.DataFrame(hit_dicts)[
@@ -326,7 +326,7 @@ class Summary_Runner(Pipe_Step):
             "structure_identifications_file",
             "canopus_structure_summary_file",
             "denovo_structure_identifications_file",
-            "gnps_annotations",
+            "gnps_annotations_path",
         ]
         annotation_files_ordered = dict()
         for key in order_list:

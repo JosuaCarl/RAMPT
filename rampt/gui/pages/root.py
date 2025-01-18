@@ -85,36 +85,36 @@ scenario = tp.create_scenario(ms_analysis_config, name="Default")
 match_data_node = {
     # Used to decide which values (the last in the list) are used in case of conflicts
     # Processed chained Inputs are preffered to scheduled targets
-    # In Data
-    "raw_data": ["conversion_params.scheduled_in"],
-    "community_formatted_data": [
+    # In Data Paths
+    "raw_data_paths": ["conversion_params.scheduled_in"],
+    "community_formatted_data_paths": [
         "feature_finding_params.scheduled_in",
         "conversion_params.processed_out",
     ],
-    "processed_data": [
+    "processed_data_paths": [
         "summary_params.scheduled_in['quantification']",
         "gnps_params.scheduled_in",
         "sirius_params.scheduled_in",
         "feature_finding_params.processed_out",
     ],
-    "gnps_annotations": ["summary_params.scheduled_in['annotation']", "gnps_params.processed_out"],
-    "sirius_annotations": [
+    "gnps_annotation_paths": ["summary_params.scheduled_in['annotation']", "gnps_params.processed_out"],
+    "sirius_annotation_paths": [
         "summary_params.scheduled_in['annotation']",
         "sirius_params.processed_out",
     ],
-    "summary_data": ["analysis_params.scheduled_in", "summary_params.processed_out"],
-    "analysis_data": ["analysis_params.processed_out"],
+    "summary_data_paths": ["analysis_params.scheduled_in", "summary_params.processed_out"],
+    "analysis_data_paths": ["analysis_params.processed_out"],
     # Out Data
-    "conversion_out": ["conversion_params.scheduled_out", "feature_finding_params.scheduled_in"],
-    "feature_finding_out": [
+    "conversion_out_paths": ["conversion_params.scheduled_out", "feature_finding_params.scheduled_in"],
+    "feature_finding_out_paths": [
         "feature_finding_params.scheduled_out",
         "gnps_params.scheduled_in",
         "sirius_params.scheduled_in",
     ],
-    "gnps_out": ["gnps_params.scheduled_out"],
-    "sirius_out": ["sirius_params.scheduled_out"],
-    "summary_out": ["summary_params.scheduled_out", "analysis_params.scheduled_in"],
-    "analysis_out": ["analysis_params.scheduled_out"],
+    "gnps_out_paths": ["gnps_params.scheduled_out"],
+    "sirius_out_paths": ["sirius_params.scheduled_out"],
+    "summary_out_paths": ["summary_params.scheduled_out", "analysis_params.scheduled_in"],
+    "analysis_out_paths": ["analysis_params.scheduled_out"],
     # Batches and more
     "mzmine_batch": ["feature_finding_params.batch"],
     "mzmine_log": ["feature_finding_params.log_paths", "gnps_params.mzmine_log"],
@@ -123,14 +123,14 @@ match_data_node = {
 }
 
 optional_data_nodes = [
-    "conversion_out",
-    "feature_finding_out",
-    "gnps_out",
-    "sirius_out",
-    "summary_out",
-    "analysis_out",
-    "sirius_annotations",
-    "gnps_annotations",
+    "conversion_out_paths",
+    "feature_finding_out_paths",
+    "gnps_out_paths",
+    "sirius_out_paths",
+    "summary_out_paths",
+    "analysis_out_paths",
+    "sirius_annotation_paths",
+    "gnps_annotation_paths",
 ]
 
 
@@ -160,24 +160,20 @@ def lock_scenario(state):
                     value = [entry.get(key_part) for entry in value]
                 else:
                     value = value.get(key_part)
-                ic(value)
 
             # Check whether the value is written or optional
-            if value or data_node_key in optional_data_nodes:
+            if value:
                 # Write value to node directory
                 for state_attribute in attribute_keys:
                     set_attribute_recursive(state, state_attribute, value, refresh=True)
                 data_nodes[data_node_key] = value
-
+                
     # Write Nones to optional nodes
     for optional_data_node in optional_data_nodes:
-        ic(optional_data_node)
         scenario.data_nodes.get(optional_data_node).write(None)
 
     # Write values to data node
     for key, data_node in scenario.data_nodes.items():
-        ic(key)
-        ic(data_nodes.get(key))
         if data_nodes.get(key) is not None:
             data_node.write(data_nodes.get(key))
 
@@ -208,13 +204,9 @@ def change_scenario(state, id, scenario_name):
 job = None
 
 
-# DATA
-data_node = None
-
-
 style = {".sticky-part": {"position": "sticky", "align-self": "flex-start", "top": "10px"}}
 
-with tgb.Page(style=style) as root:
+with tgb.Page(style=style) as configuration:
     with tgb.layout(columns="1 3 1", columns__mobile="1", gap="2.5%"):
         # Left part
         with tgb.part(class_name="sticky-part"):
@@ -288,12 +280,144 @@ with tgb.Page(style=style) as root:
             )
             tgb.scenario_dag("{scenario}")
 
-            tgb.text("## 📊 Data", mode="markdown")
-            tgb.data_node("{data_node}")
-
             tgb.text("## 🐝 Jobs", mode="markdown")
             tgb.job_selector("{job}")
 
         # Right part
         with tgb.part():
             pass
+
+
+
+# DATA
+path_data_node = None
+path_to_data = None
+data_node = None
+
+representable_data_nodes = {
+    "gnps_annotation": gnps_annotations_config,
+    "sirius_annotation": sirius_annotations_config,
+    "summary_data": summary_data_config,
+    "analysis_data": analysis_data_config,
+}
+
+def filter_representable(data_node: tp.DataNode|str) -> bool:
+    ic(data_node)
+    if data_node:
+        if isinstance(data_node, str):
+            config_id = data_node
+        else:
+            config_id = data_node.config_id
+        return config_id.replace("_paths", "") in representable_data_nodes.keys()
+    else:
+        return False
+
+populated_data_nodes = []
+populate_data_node_ids = {}
+
+def populate_data_node(state, *args):
+    path_node_name = get_attribute_recursive(state, "path_data_node").get_simple_label()
+    data_node_name = path_node_name.replace("_paths", "")
+
+    path = get_attribute_recursive(state, "path_to_data")
+
+    # Modify path
+    if os.path.isdir(path):
+        path = open_file_folder(
+                        multiple=False,
+                        select_folder=False,
+                        title="Please select file",
+                        initialdir=path
+                    ),
+
+    # Write Check if path
+    if os.path.isfile(path):
+            
+        # Get original config
+        data_node_config = representable_data_nodes.get(data_node_name)
+
+        # Modify id to allow duplicates
+        if data_node_name in populate_data_node_ids:
+            populate_data_node_ids[data_node_name] += 1
+        else:
+            populate_data_node_ids[data_node_name] = 1
+        name = "_".join(os.path.split(path)[1].split("."))
+        data_node_name = f"{name}_{populate_data_node_ids[data_node_name]}"
+        data_node_config.id = data_node_name
+        data_node_config.default_path = path
+        
+        # Create structure to pass
+        ic(type(data_node_config))
+        if data_node_config.storage_type in ["csv", "excel"]:
+            sep = "\t" if "tsv" in path else None
+            content = pd.read_csv(path, sep=sep)
+        elif data_node_config.storage_type in ["json"]:
+            with open(path, "r") as file:
+                content = json.load(file)
+        # Create data_node
+        data_node = tp.create_global_data_node(data_node_config)
+        data_node.write(content)
+    else:
+        warn(
+            f"{path} is no path to a file."
+        )
+
+    # Save information
+    populated_data_nodes.append(data_node)
+    set_attribute_recursive(
+        state,
+        "data_node",
+        data_node,
+    )
+    set_attribute_recursive(
+        state,
+        "populated_data_nodes",
+        populated_data_nodes,
+    )
+    
+
+
+with tgb.Page(style=style) as analysis:
+    with tgb.layout(columns="1 3 1", columns__mobile="1", gap="2.5%"):
+        # Left part
+        with tgb.part(class_name="sticky-part"):
+            tgb.text("#### Scenarios", mode="markdown")
+            tgb.scenario_selector(
+                "{scenario}",
+                show_add_button=False,
+                on_change=change_scenario
+            )
+
+            tgb.text("#### Data paths", mode="markdown")
+            tgb.data_node_selector(
+                "{path_data_node}",
+                scenario="{scenario}",
+            )
+
+            tgb.text("## 🗃️ Path selection", mode="markdown")
+            tgb.selector(
+                "{path_to_data}",
+                lov="{path_data_node.read()}",
+                dropdown=True,
+            )
+        
+            tgb.button(
+                "🖼️ Show data from path",
+                on_action=populate_data_node
+            )
+
+        # Middle part
+        with tgb.part():
+            tgb.text("## 📊 Data", mode="markdown")
+            tgb.data_node(
+                "{data_node}"
+            )
+
+        
+        # Right part
+        with tgb.part():
+            tgb.text("#### Populated data", mode="markdown")
+            tgb.data_node_selector(
+                "{data_node}",
+                datanodes="{populated_data_nodes}"
+            )

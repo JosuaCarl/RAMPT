@@ -114,8 +114,8 @@ def test_taipy_simple_scenario():
     # write out nodes
     scenario.data_nodes.get("conversion_out").write(None)
     scenario.data_nodes.get("feature_finding_out").write(None)
-    scenario.data_nodes.get("gnps_out").write(None)
-    scenario.data_nodes.get("sirius_out").write(None)
+    scenario.data_nodes.get("gnps_out_paths").write(None)
+    scenario.data_nodes.get("sirius_out_paths").write(None)
     scenario.data_nodes.get("results_out").write(None)
 
     # Submit steps
@@ -204,8 +204,8 @@ def test_taipy_scenario_out_change():
     # write out nodes
     scenario.data_nodes.get("conversion_out").write([os.path.join(out_path, "converted_explicit")])
     scenario.data_nodes.get("feature_finding_out").write([os.path.join(out_path, "")])
-    scenario.data_nodes.get("gnps_out").write([os.path.join(out_path, "annotated_explicit")])
-    scenario.data_nodes.get("sirius_out").write([os.path.join(out_path, "annotated_explicit")])
+    scenario.data_nodes.get("gnps_out_paths").write([os.path.join(out_path, "annotated_explicit")])
+    scenario.data_nodes.get("sirius_out_paths").write([os.path.join(out_path, "annotated_explicit")])
     scenario.data_nodes.get("results_out").write([os.path.join(out_path, "results_explicit")])
 
     # Submit steps
@@ -274,8 +274,8 @@ def test_taipy_nested_parallel_scenario():
     # write out nodes
     scenario.data_nodes.get("conversion_out").write(None)
     scenario.data_nodes.get("feature_finding_out").write(None)
-    scenario.data_nodes.get("gnps_out").write(None)
-    scenario.data_nodes.get("sirius_out").write(None)
+    scenario.data_nodes.get("gnps_out_paths").write(None)
+    scenario.data_nodes.get("sirius_out_paths").write(None)
     scenario.data_nodes.get("results_out").write(None)
 
     # Submit scenario

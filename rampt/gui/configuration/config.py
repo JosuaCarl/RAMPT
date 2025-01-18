@@ -13,80 +13,128 @@ from rampt.steps.conversion.msconv_pipe import MSconvert_Runner
 from rampt.steps.annotation.sirius_pipe import Sirius_Runner
 from rampt.steps.annotation.gnps_pipe import GNPS_Runner
 from rampt.steps.analysis.summary_pipe import Summary_Runner
+from rampt.steps.analysis.analysis_pipe import Analysis_Runner
 
 from typing import Any
 
 
 # Data nodes
 ## Data paths
-raw_data_config = Config.configure_in_memory_data_node(id="raw_data", scope=Scope.SCENARIO)
-
-community_formatted_data_config = Config.configure_in_memory_data_node(
-    id="community_formatted_data", scope=Scope.SCENARIO
+raw_data_paths_config = Config.configure_in_memory_data_node(
+    id="raw_data_paths", scope=Scope.SCENARIO,
 )
 
-processed_data_config = Config.configure_in_memory_data_node(
-    id="processed_data", scope=Scope.SCENARIO
+community_formatted_data_paths_config = Config.configure_in_memory_data_node(
+    id="community_formatted_data_paths", scope=Scope.SCENARIO,
 )
 
+processed_data_paths_config = Config.configure_in_memory_data_node(
+    id="processed_data_paths", scope=Scope.SCENARIO,
+)
+
+gnps_annotation_paths_config = Config.configure_in_memory_data_node(
+    id="gnps_annotation_paths", scope=Scope.SCENARIO, default_value=None,
+)
+
+sirius_annotation_paths_config = Config.configure_in_memory_data_node(
+    id="sirius_annotation_paths", scope=Scope.SCENARIO, default_value=None,
+)
+
+summary_data_paths_config = Config.configure_in_memory_data_node(
+    id="summary_data_paths", scope=Scope.SCENARIO,
+)
+
+analysis_data_paths_config = Config.configure_in_memory_data_node(
+    id="analysis_data_paths", scope=Scope.SCENARIO,
+)
+
+
+
+## Real-time data nodes
 gnps_annotations_config = Config.configure_json_data_node(
-    id="gnps_annotations", scope=Scope.SCENARIO, default_path=""
+    id="gnps_annotation", scope=Scope.GLOBAL, default_path=""
 )
 
 sirius_annotations_config = Config.configure_csv_data_node(
-    id="sirius_annotations", scope=Scope.SCENARIO, default_path=""
+    id="sirius_annotation", scope=Scope.GLOBAL, default_path=""
 )
 
-summary_config = Config.configure_csv_data_node(id="summary_data", scope=Scope.SCENARIO)
+summary_data_config = Config.configure_csv_data_node(
+    id="summary_data", scope=Scope.GLOBAL,
+)
 
-analysis_config = Config.configure_csv_data_node(id="analysis_data", scope=Scope.SCENARIO)
+analysis_data_config = Config.configure_csv_data_node(
+    id="analysis_data", scope=Scope.GLOBAL,
+)
 
 
 ## Output paths
-conversion_out_config = Config.configure_in_memory_data_node(
-    id="conversion_out", scope=Scope.SCENARIO
+conversion_out_paths_config = Config.configure_in_memory_data_node(
+    id="conversion_out_paths", scope=Scope.SCENARIO,
 )
 
-feature_finding_out_config = Config.configure_in_memory_data_node(
-    id="feature_finding_out", scope=Scope.SCENARIO
+feature_finding_out_paths_config = Config.configure_in_memory_data_node(
+    id="feature_finding_out_paths", scope=Scope.SCENARIO,
 )
 
-gnps_out_config = Config.configure_in_memory_data_node(id="gnps_out", scope=Scope.SCENARIO)
+gnps_out_paths_config = Config.configure_in_memory_data_node(
+    id="gnps_out_paths", scope=Scope.SCENARIO,
+)
 
-sirius_out_config = Config.configure_in_memory_data_node(id="sirius_out", scope=Scope.SCENARIO)
+sirius_out_paths_config = Config.configure_in_memory_data_node(
+    id="sirius_out_paths", scope=Scope.SCENARIO,
+)
 
-summary_out_config = Config.configure_in_memory_data_node(id="summary_out", scope=Scope.SCENARIO)
+summary_out_paths_config = Config.configure_in_memory_data_node(
+    id="summary_out_paths", scope=Scope.SCENARIO,
+)
 
-analysis_out_config = Config.configure_in_memory_data_node(id="analysis_out", scope=Scope.SCENARIO)
+analysis_out_paths_config = Config.configure_in_memory_data_node(
+    id="analysis_out_paths", scope=Scope.SCENARIO,
+)
 
 
 ## Parameters
-global_params_config = Config.configure_json_data_node(id="global_params", scope=Scope.SCENARIO)
+global_params_config = Config.configure_json_data_node(
+    id="global_params", scope=Scope.SCENARIO,
+)
 
 conversion_params_config = Config.configure_json_data_node(
-    id="conversion_params", scope=Scope.SCENARIO
+    id="conversion_params", scope=Scope.SCENARIO,
 )
 
 feature_finding_params_config = Config.configure_json_data_node(
-    id="feature_finding_params", scope=Scope.SCENARIO
+    id="feature_finding_params", scope=Scope.SCENARIO,
 )
 
-gnps_params_config = Config.configure_json_data_node(id="gnps_params", scope=Scope.SCENARIO)
+gnps_params_config = Config.configure_json_data_node(
+    id="gnps_params", scope=Scope.SCENARIO,
+)
 
-sirius_params_config = Config.configure_json_data_node(id="sirius_params", scope=Scope.SCENARIO)
+sirius_params_config = Config.configure_json_data_node(
+    id="sirius_params", scope=Scope.SCENARIO,
+)
 
-summary_params_config = Config.configure_json_data_node(id="summary_params", scope=Scope.SCENARIO)
+summary_params_config = Config.configure_json_data_node(
+    id="summary_params", scope=Scope.SCENARIO,
+)
 
-analysis_params_config = Config.configure_json_data_node(id="analysis_params", scope=Scope.SCENARIO)
+analysis_params_config = Config.configure_json_data_node(
+    id="analysis_params", scope=Scope.SCENARIO,
+)
 
 
 # Batch file nodes
-mzmine_batch_config = Config.configure_in_memory_data_node(id="mzmine_batch", scope=Scope.SCENARIO)
+mzmine_batch_config = Config.configure_in_memory_data_node(
+    id="mzmine_batch", scope=Scope.SCENARIO,
+)
 
-mzmine_log_config = Config.configure_in_memory_data_node(id="mzmine_log", scope=Scope.SCENARIO)
+mzmine_log_config = Config.configure_in_memory_data_node(
+    id="mzmine_log", scope=Scope.SCENARIO,
+)
 
 sirius_config_config = Config.configure_in_memory_data_node(
-    id="sirius_config", scope=Scope.SCENARIO
+    id="sirius_config", scope=Scope.SCENARIO,
 )
 
 
@@ -102,6 +150,7 @@ def generic_step(
     return_attributes: list = ["processed_out"],
     **kwargs,
 ) -> tuple[Any] | Any:
+    ic(global_params)
     ic(in_paths)
     # Fixate parameters
     global_params.pop("patterns")
@@ -126,8 +175,6 @@ def generic_step(
             raise_error=False,
         )
 
-    # TODO: Make out_paths explicit (So nodes can be more than memory nodes)
-
     # Add out_paths as relatives to in_path if none is given
     if out_paths:
         out_paths = to_list(out_paths)
@@ -136,17 +183,14 @@ def generic_step(
         out_paths = []
         ic(in_paths)
         for in_path in in_paths:
-            if isinstance(in_path, dict):
-                in_path = list(in_path.values())[-1]
-            elif isinstance(in_path, list) or isinstance(in_path, tuple):
-                in_path = in_path[-1]
+            ic(in_path)
+            in_path = flatten_values(in_path)[-1]
+            ic(in_path)
             in_dir = get_directory(in_path)
             out_paths.append(os.path.normpath(os.path.join(in_dir, out_path_target)))
 
     # Run step
     step_instance.run(in_paths=in_paths, out_paths=out_paths, **kwargs)
-
-    # TODO: Return [paths -> in memory data_nodes] + [results -> should go in non-memory data_nodes]
 
     # Return results
     results = [getattr(step_instance, attr) for attr in return_attributes]
@@ -155,12 +199,12 @@ def generic_step(
 
 
 def convert_files(
-    raw_data: StrPath, conversion_out: StrPath, step_params: dict, global_params: dict
+    raw_data_paths: StrPath, conversion_out_paths: StrPath, step_params: dict, global_params: dict
 ):
     return generic_step(
         step_class=MSconvert_Runner,
-        in_paths=raw_data,
-        out_paths=conversion_out,
+        in_paths=raw_data_paths,
+        out_paths=conversion_out_paths,
         out_path_target=os.path.join("..", "converted"),
         step_params=step_params,
         global_params=global_params,
@@ -168,16 +212,16 @@ def convert_files(
 
 
 def find_features(
-    community_formatted_data: StrPath,
-    feature_finding_out: StrPath,
+    community_formatted_data_paths: StrPath,
+    feature_finding_out_paths: StrPath,
     mzmine_batch: StrPath,
     step_params: dict,
     global_params: dict,
 ):
     return generic_step(
         step_class=MZmine_Runner,
-        in_paths=community_formatted_data,
-        out_paths=feature_finding_out,
+        in_paths=community_formatted_data_paths,
+        out_paths=feature_finding_out_paths,
         out_path_target=os.path.join("..", "processed"),
         step_params=step_params,
         global_params=global_params,
@@ -187,16 +231,16 @@ def find_features(
 
 
 def annotate_gnps(
-    processed_data: StrPath,
+    processed_data_paths: StrPath,
     mzmine_log: StrPath,
-    gnps_out: StrPath,
+    gnps_out_paths: StrPath,
     step_params: dict,
     global_params: dict,
 ):
     return generic_step(
         step_class=GNPS_Runner,
-        in_paths=processed_data,
-        out_paths=gnps_out,
+        in_paths=processed_data_paths,
+        out_paths=gnps_out_paths,
         out_path_target=os.path.join("..", "annotated"),
         step_params=step_params,
         global_params=global_params,
@@ -205,16 +249,16 @@ def annotate_gnps(
 
 
 def annotate_sirius(
-    processed_data: StrPath,
-    sirius_out: StrPath,
+    processed_data_paths: StrPath,
+    sirius_out_paths: StrPath,
     config: StrPath,
     step_params: dict,
     global_params: dict,
 ):
     return generic_step(
         step_class=Sirius_Runner,
-        in_paths=processed_data,
-        out_paths=sirius_out,
+        in_paths=processed_data_paths,
+        out_paths=sirius_out_paths,
         out_path_target=os.path.join("..", "annotated"),
         step_params=step_params,
         global_params=global_params,
@@ -223,20 +267,20 @@ def annotate_sirius(
 
 
 def summarize_annotations(
-    processed_data: StrPath,
-    gnps_annotated_data: StrPath,
-    sirius_annotated_data: StrPath,
-    summary_out: StrPath,
+    processed_data_paths: StrPath,
+    gnps_annotated_data_paths: StrPath,
+    sirius_annotated_data_paths: StrPath,
+    summary_out_paths: StrPath,
     step_params: dict,
     global_params: dict,
 ):
     return generic_step(
         step_class=Summary_Runner,
         in_paths={
-            "quantification": processed_data,
-            "annotation": [sirius_annotated_data, gnps_annotated_data],
+            "quantification": processed_data_paths,
+            "annotation": [sirius_annotated_data_paths, gnps_annotated_data_paths],
         },
-        out_paths=summary_out,
+        out_paths=summary_out_paths,
         out_path_target=os.path.join("..", "analysis"),
         step_params=step_params,
         global_params=global_params,
@@ -244,12 +288,12 @@ def summarize_annotations(
 
 
 def analyze_difference(
-    summary_data: StrPath, analysis_out: StrPath, step_params: dict, global_params: dict
+    summary_data_paths: StrPath, analysis_out_paths: StrPath, step_params: dict, global_params: dict
 ):
     return generic_step(
-        step_class=Summary_Runner,
-        in_paths=summary_data,
-        out_paths=analysis_out,
+        step_class=Analysis_Runner,
+        in_paths=summary_data_paths,
+        out_paths=analysis_out_paths,
         out_path_target=os.path.join("..", "analysis"),
         step_params=step_params,
         global_params=global_params,
@@ -260,8 +304,8 @@ def analyze_difference(
 convert_files_config = Config.configure_task(
     "convert_files",
     function=convert_files,
-    input=[raw_data_config, conversion_out_config, conversion_params_config, global_params_config],
-    output=community_formatted_data_config,
+    input=[raw_data_paths_config, conversion_out_paths_config, conversion_params_config, global_params_config],
+    output=community_formatted_data_paths_config,
     skippable=False,
 )
 
@@ -269,13 +313,13 @@ find_features_config = Config.configure_task(
     "find_features",
     function=find_features,
     input=[
-        community_formatted_data_config,
-        feature_finding_out_config,
+        community_formatted_data_paths_config,
+        feature_finding_out_paths_config,
         mzmine_batch_config,
         feature_finding_params_config,
         global_params_config,
     ],
-    output=[processed_data_config, mzmine_log_config],
+    output=[processed_data_paths_config, mzmine_log_config],
     skippable=False,
 )
 
@@ -283,13 +327,13 @@ annotate_gnps_config = Config.configure_task(
     "annotate_gnps",
     function=annotate_gnps,
     input=[
-        processed_data_config,
+        processed_data_paths_config,
         mzmine_log_config,
-        gnps_out_config,
+        gnps_out_paths_config,
         gnps_params_config,
         global_params_config,
     ],
-    output=gnps_annotations_config,
+    output=gnps_annotation_paths_config,
     skippable=True,
 )
 
@@ -297,13 +341,13 @@ annotate_sirius_config = Config.configure_task(
     "annotate_sirius",
     function=annotate_sirius,
     input=[
-        processed_data_config,
-        sirius_out_config,
+        processed_data_paths_config,
+        sirius_out_paths_config,
         sirius_config_config,
         sirius_params_config,
         global_params_config,
     ],
-    output=sirius_annotations_config,
+    output=sirius_annotation_paths_config,
     skippable=False,
 )
 
@@ -311,22 +355,27 @@ summarize_annotations_config = Config.configure_task(
     "summarize_annotations",
     function=summarize_annotations,
     input=[
-        processed_data_config,
-        gnps_annotations_config,
-        sirius_annotations_config,
-        summary_out_config,
+        processed_data_paths_config,
+        gnps_annotation_paths_config,
+        sirius_annotation_paths_config,
+        summary_out_paths_config,
         summary_params_config,
         global_params_config,
     ],
-    output=summary_config,
+    output=summary_data_paths_config,
     skippable=False,
 )
 
 analyze_difference_config = Config.configure_task(
     "analyze_difference",
     function=analyze_difference,
-    input=[summary_config, analysis_out_config, analysis_params_config, global_params_config],
-    output=analysis_config,
+    input=[
+        summary_data_paths_config,
+        analysis_out_paths_config,
+        analysis_params_config,
+        global_params_config
+    ],
+    output=analysis_data_paths_config,
     skippable=False,
 )
 

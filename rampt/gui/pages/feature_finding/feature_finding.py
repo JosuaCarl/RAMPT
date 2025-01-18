@@ -11,7 +11,7 @@ feature_finding_params = MZmine_Runner()
 
 def create_feature_finding(process="feature_finding"):
     tgb.text("###### File selection", mode="markdown")
-    create_file_selection(process="feature_finding", out_node="processed_data")
+    create_file_selection(process="feature_finding", out_node="processed_data_paths")
 
     tgb.html("br")
 

@@ -11,4 +11,4 @@ analysis_params = Analysis_Runner()
 # TODO: Implement analysis
 def create_analysis():
     tgb.text("###### File selection", mode="markdown")
-    create_file_selection(process="analysis", out_node="analysis_data")
+    create_file_selection(process="analysis", out_node="analysis_data_paths")

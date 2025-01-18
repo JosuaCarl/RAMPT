@@ -12,7 +12,7 @@ sirius_params.config = os.path.join(ROOT_DIR, "statics", "batch_files", "sirius_
 
 def create_sirius():
     tgb.text("###### File selection", mode="markdown")
-    create_file_selection(process="sirius", out_node="sirius_annotations")
+    create_file_selection(process="sirius", out_node="sirius_annotation_paths")
 
     tgb.html("br")
 
