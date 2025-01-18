@@ -12,5 +12,6 @@
 ## TODO
 - Improvement of Documentation
 - Integration testing
+    - test_90_taipy.py is not complete
 - Testing of scripts that require non-python dependencies in Action workflow
     - Attention: MS conv can not be tested from MacOS (if statement to skip the job)

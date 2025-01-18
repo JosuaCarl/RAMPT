@@ -386,7 +386,7 @@ with tgb.Page(style=style) as analysis:
         # Right part
         with tgb.part():
             tgb.html("br")
-            
+
             tgb.text("## 🗃️ Path selection", mode="markdown")
             tgb.selector("{path_to_data}", lov="{path_data_node.read()}", dropdown=True)
 
