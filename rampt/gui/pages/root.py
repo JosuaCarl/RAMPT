@@ -328,10 +328,11 @@ def populate_data_node(state, *args):
 
     # Modify path
     if os.path.isdir(path):
-        path = (
-            open_file_folder(
-                multiple=False, select_folder=False, title="Please select file", initialdir=path
-            ),
+        path = open_file_folder(
+                select_folder=False,
+                multiple=False, 
+                title="Please select file",
+                initialdir=path,
         )
 
     # Write Check if path
@@ -368,7 +369,7 @@ def populate_data_node(state, *args):
     set_attribute_recursive(state, "populated_data_nodes", populated_data_nodes)
 
 
-with tgb.Page(style=style) as analysis:
+with tgb.Page(style=style) as visualization:
     with tgb.layout(columns="1 3 1", columns__mobile="1", gap="2.5%"):
         # Left part
         with tgb.part(class_name="sticky-part"):
@@ -387,8 +388,10 @@ with tgb.Page(style=style) as analysis:
         with tgb.part():
             tgb.html("br")
 
-            tgb.text("## 🗃️ Path selection", mode="markdown")
+            tgb.text("#### 🗃️ Path selection", mode="markdown")
             tgb.selector("{path_to_data}", lov="{path_data_node.read()}", dropdown=True)
+
+            tgb.html("br")
 
             tgb.button("🖼️ Show data from path", on_action=populate_data_node)
 

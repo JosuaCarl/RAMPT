@@ -382,11 +382,13 @@ class Summary_Runner(Pipe_Step):
         if not quantification_file:
             quantification_file = self.search_quantification_file(dir=in_path_quantification)
         summary = self.add_quantification(quantification_file=quantification_file, summary=summary)
+
         # Add annotations
         if annotation_files:
             summary = self.add_annotations(annotation_files=annotation_files, summary=summary)
         else:
-            for in_path_annotation in set(to_list(in_paths_annotation)):
+            # Filter out duplicates and None
+            for in_path_annotation in [ipa for ipa in set(to_list(in_paths_annotation)) if ipa]:
                 annotation_files = self.search_annotation_files(dir=in_path_annotation)
 
                 # Case run_single
@@ -404,11 +406,18 @@ class Summary_Runner(Pipe_Step):
         # Export summary
         summary.to_csv(out_path, sep="\t")
 
-        log(
-            f"Added annotation from {in_path_annotation} to {in_path_quantification}.Exported to {out_path}.",
-            minimum_verbosity=1,
-            verbosity=self.verbosity,
-        )
+        if in_paths_annotation:
+            log(
+                f"Added annotation from {in_paths_annotation} to {in_path_quantification}.Exported to {out_path}.",
+                minimum_verbosity=1,
+                verbosity=self.verbosity,
+            )
+        else:
+            log(
+                f"No annotation received. {in_path_quantification} exported to {out_path}.",
+                minimum_verbosity=1,
+                verbosity=self.verbosity,
+            )
 
     def run_single(
         self,

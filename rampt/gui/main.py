@@ -10,9 +10,9 @@ from rampt.gui.pages.root import *
 
 
 pages_dict = {
-    "/": '<|toggle|theme|><center><|navbar|lov={[("/configuration", "Configuration"), ("/analysis", "Analysis"), ("https://josuacarl.github.io/RAMPT", "Documentation")]}|></center>',
+    "/": '<|toggle|theme|><center><|navbar|lov={[("/configuration", "Configuration"), ("/visualization", "Visualization"), ("https://josuacarl.github.io/RAMPT", "Documentation")]}|></center>',
     "configuration": configuration,
-    "analysis": analysis,
+    "analysis": visualization,
 }
 
 stylekit = {"color_paper_light": "#EFE6F1", "color_background_light": "#EBE5EC"}

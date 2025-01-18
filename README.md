@@ -17,6 +17,7 @@ A "Raw to annotation metabolomics pipline tool"
 | Dynamic visualization of data                 | ✅      |
 | Adaptive analysis                             | 🛠️      |
 | Adaptive visualization                        | 🛠️      |
+| Release as a python package                   | 🛞      |
 
 For planned improvements, please refer to [Contribute.md](./Contribute.md).
 
@@ -46,7 +47,17 @@ Note that for the following dependencies are required to be installed and availi
 - [Sirius](https://bio.informatik.uni-jena.de/software/sirius/)
 
 ### Usage
-For detailed information about usage, please refer to the [documentation](https://josuacarl.github.io/RAMPT/)
+In principle you need two things for RAMPT to be able to run a complete pipeline:
+1. A batch file form MZmine
+2. Data upon which to perform the pipeline
+
+If those two are entered, you can execute the steps in the scenario one-by-one or as a whole.
+
+After this, you may go to the Analysis tab (up top) and look at your data.
+
+You can always look at the detailed documentation of methods
+
+For detailed information about usage, please refer to the [Manual](./Manual.md)
 
 ## Contributing
 Please refer to [Contribute.md](./Contribute.md) for further information about how to contribute to the project.

@@ -161,8 +161,12 @@ def generic_step(
     else:
         out_paths = []
         for in_path in in_paths:
-            in_path = flatten_values(in_path)[-1]
-            in_dir = get_directory(in_path)
+            # Get random in_path entry to determine a suitable out_path
+            for path in flatten_values(in_path):
+                if path:
+                    in_path_example = path
+                    break
+            in_dir = get_directory(in_path_example)
             out_paths.append(os.path.normpath(os.path.join(in_dir, out_path_target)))
 
     # Run step
