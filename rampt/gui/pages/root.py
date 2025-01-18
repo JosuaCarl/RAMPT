@@ -329,10 +329,7 @@ def populate_data_node(state, *args):
     # Modify path
     if os.path.isdir(path):
         path = open_file_folder(
-                select_folder=False,
-                multiple=False, 
-                title="Please select file",
-                initialdir=path,
+            select_folder=False, multiple=False, title="Please select file", initialdir=path
         )
 
     # Write Check if path
