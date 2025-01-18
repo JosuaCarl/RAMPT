@@ -23,7 +23,7 @@ uv sync
 ### Run the workflow
 Enter a valid mzmine batch file and raw data. Go.
 
-https://github.com/JosuaCarl/RAMPT/blob/main/statics/share/rampt_usage_simple.mov
+![](https://github.com/JosuaCarl/RAMPT/blob/main/statics/share/rampt_usage_simple.mov)
 
 ### Inspect data
 1. Click on Visualization
@@ -32,3 +32,5 @@ https://github.com/JosuaCarl/RAMPT/blob/main/statics/share/rampt_usage_simple.mo
 4. "Show data form path"
 5. Select file
 6. Play
+
+![](https://github.com/JosuaCarl/RAMPT/blob/main/statics/share/visualization_simple.mov)
