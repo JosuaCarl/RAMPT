@@ -37,7 +37,7 @@ def test_search_files():
         "denovo_structure_identifications_file": join(
             example_path, "denovo_structure_identifications.tsv"
         ),
-        "gnps_annotations": join(example_path, "example_files_gnps_all_db_annotations.json"),
+        "gnps_annotations_path": join(example_path, "example_files_gnps_all_db_annotations.json"),
     }
 
 
@@ -68,7 +68,7 @@ def test_summary_add_annotation():
     )
     summary = summary_runner.add_annotation(
         annotation_file=join(example_path, "example_files_gnps_all_db_annotations.json"),
-        annotation_file_type="gnps_annotations",
+        annotation_file_type="gnps_annotations_path",
         summary=summary,
     )
 
@@ -123,7 +123,7 @@ def test_summary_pipe_run_single():
             join(example_path, "example_files_gnps_all_db_annotations.json"),
         ),
         out_path=out_path,
-        annotation_file_type="gnps_annotations",
+        annotation_file_type="gnps_annotations_path",
     )
 
     assert os.path.isfile(join(out_path, "summary.tsv"))
