@@ -205,7 +205,9 @@ def test_taipy_scenario_out_change():
     scenario.data_nodes.get("conversion_out").write([os.path.join(out_path, "converted_explicit")])
     scenario.data_nodes.get("feature_finding_out").write([os.path.join(out_path, "")])
     scenario.data_nodes.get("gnps_out_paths").write([os.path.join(out_path, "annotated_explicit")])
-    scenario.data_nodes.get("sirius_out_paths").write([os.path.join(out_path, "annotated_explicit")])
+    scenario.data_nodes.get("sirius_out_paths").write(
+        [os.path.join(out_path, "annotated_explicit")]
+    )
     scenario.data_nodes.get("results_out").write([os.path.join(out_path, "results_explicit")])
 
     # Submit steps

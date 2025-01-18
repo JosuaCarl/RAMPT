@@ -152,7 +152,6 @@ def flatten_values(obj: Any) -> list:
         return accumulator
     else:
         return [obj]
-            
 
 
 # String operations

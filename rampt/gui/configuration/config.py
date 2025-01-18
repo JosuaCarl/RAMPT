@@ -21,33 +21,32 @@ from typing import Any
 # Data nodes
 ## Data paths
 raw_data_paths_config = Config.configure_in_memory_data_node(
-    id="raw_data_paths", scope=Scope.SCENARIO,
+    id="raw_data_paths", scope=Scope.SCENARIO
 )
 
 community_formatted_data_paths_config = Config.configure_in_memory_data_node(
-    id="community_formatted_data_paths", scope=Scope.SCENARIO,
+    id="community_formatted_data_paths", scope=Scope.SCENARIO
 )
 
 processed_data_paths_config = Config.configure_in_memory_data_node(
-    id="processed_data_paths", scope=Scope.SCENARIO,
+    id="processed_data_paths", scope=Scope.SCENARIO
 )
 
 gnps_annotation_paths_config = Config.configure_in_memory_data_node(
-    id="gnps_annotation_paths", scope=Scope.SCENARIO, default_value=None,
+    id="gnps_annotation_paths", scope=Scope.SCENARIO, default_value=None
 )
 
 sirius_annotation_paths_config = Config.configure_in_memory_data_node(
-    id="sirius_annotation_paths", scope=Scope.SCENARIO, default_value=None,
+    id="sirius_annotation_paths", scope=Scope.SCENARIO, default_value=None
 )
 
 summary_data_paths_config = Config.configure_in_memory_data_node(
-    id="summary_data_paths", scope=Scope.SCENARIO,
+    id="summary_data_paths", scope=Scope.SCENARIO
 )
 
 analysis_data_paths_config = Config.configure_in_memory_data_node(
-    id="analysis_data_paths", scope=Scope.SCENARIO,
+    id="analysis_data_paths", scope=Scope.SCENARIO
 )
-
 
 
 ## Real-time data nodes
@@ -59,82 +58,64 @@ sirius_annotations_config = Config.configure_csv_data_node(
     id="sirius_annotation", scope=Scope.GLOBAL, default_path=""
 )
 
-summary_data_config = Config.configure_csv_data_node(
-    id="summary_data", scope=Scope.GLOBAL,
-)
+summary_data_config = Config.configure_csv_data_node(id="summary_data", scope=Scope.GLOBAL)
 
-analysis_data_config = Config.configure_csv_data_node(
-    id="analysis_data", scope=Scope.GLOBAL,
-)
+analysis_data_config = Config.configure_csv_data_node(id="analysis_data", scope=Scope.GLOBAL)
 
 
 ## Output paths
 conversion_out_paths_config = Config.configure_in_memory_data_node(
-    id="conversion_out_paths", scope=Scope.SCENARIO,
+    id="conversion_out_paths", scope=Scope.SCENARIO
 )
 
 feature_finding_out_paths_config = Config.configure_in_memory_data_node(
-    id="feature_finding_out_paths", scope=Scope.SCENARIO,
+    id="feature_finding_out_paths", scope=Scope.SCENARIO
 )
 
 gnps_out_paths_config = Config.configure_in_memory_data_node(
-    id="gnps_out_paths", scope=Scope.SCENARIO,
+    id="gnps_out_paths", scope=Scope.SCENARIO
 )
 
 sirius_out_paths_config = Config.configure_in_memory_data_node(
-    id="sirius_out_paths", scope=Scope.SCENARIO,
+    id="sirius_out_paths", scope=Scope.SCENARIO
 )
 
 summary_out_paths_config = Config.configure_in_memory_data_node(
-    id="summary_out_paths", scope=Scope.SCENARIO,
+    id="summary_out_paths", scope=Scope.SCENARIO
 )
 
 analysis_out_paths_config = Config.configure_in_memory_data_node(
-    id="analysis_out_paths", scope=Scope.SCENARIO,
+    id="analysis_out_paths", scope=Scope.SCENARIO
 )
 
 
 ## Parameters
-global_params_config = Config.configure_json_data_node(
-    id="global_params", scope=Scope.SCENARIO,
-)
+global_params_config = Config.configure_json_data_node(id="global_params", scope=Scope.SCENARIO)
 
 conversion_params_config = Config.configure_json_data_node(
-    id="conversion_params", scope=Scope.SCENARIO,
+    id="conversion_params", scope=Scope.SCENARIO
 )
 
 feature_finding_params_config = Config.configure_json_data_node(
-    id="feature_finding_params", scope=Scope.SCENARIO,
+    id="feature_finding_params", scope=Scope.SCENARIO
 )
 
-gnps_params_config = Config.configure_json_data_node(
-    id="gnps_params", scope=Scope.SCENARIO,
-)
+gnps_params_config = Config.configure_json_data_node(id="gnps_params", scope=Scope.SCENARIO)
 
-sirius_params_config = Config.configure_json_data_node(
-    id="sirius_params", scope=Scope.SCENARIO,
-)
+sirius_params_config = Config.configure_json_data_node(id="sirius_params", scope=Scope.SCENARIO)
 
-summary_params_config = Config.configure_json_data_node(
-    id="summary_params", scope=Scope.SCENARIO,
-)
+summary_params_config = Config.configure_json_data_node(id="summary_params", scope=Scope.SCENARIO)
 
-analysis_params_config = Config.configure_json_data_node(
-    id="analysis_params", scope=Scope.SCENARIO,
-)
+analysis_params_config = Config.configure_json_data_node(id="analysis_params", scope=Scope.SCENARIO)
 
 
 # Batch file nodes
-mzmine_batch_config = Config.configure_in_memory_data_node(
-    id="mzmine_batch", scope=Scope.SCENARIO,
-)
+mzmine_batch_config = Config.configure_in_memory_data_node(id="mzmine_batch", scope=Scope.SCENARIO)
 
-mzmine_log_config = Config.configure_in_memory_data_node(
-    id="mzmine_log", scope=Scope.SCENARIO,
-)
+mzmine_log_config = Config.configure_in_memory_data_node(id="mzmine_log", scope=Scope.SCENARIO)
 
 sirius_config_config = Config.configure_in_memory_data_node(
-    id="sirius_config", scope=Scope.SCENARIO,
+    id="sirius_config", scope=Scope.SCENARIO
 )
 
 
@@ -304,7 +285,12 @@ def analyze_difference(
 convert_files_config = Config.configure_task(
     "convert_files",
     function=convert_files,
-    input=[raw_data_paths_config, conversion_out_paths_config, conversion_params_config, global_params_config],
+    input=[
+        raw_data_paths_config,
+        conversion_out_paths_config,
+        conversion_params_config,
+        global_params_config,
+    ],
     output=community_formatted_data_paths_config,
     skippable=False,
 )
@@ -373,7 +359,7 @@ analyze_difference_config = Config.configure_task(
         summary_data_paths_config,
         analysis_out_paths_config,
         analysis_params_config,
-        global_params_config
+        global_params_config,
     ],
     output=analysis_data_paths_config,
     skippable=False,

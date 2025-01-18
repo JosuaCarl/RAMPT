@@ -161,7 +161,9 @@ class Summary_Runner(Pipe_Step):
                         and file == "structure_identifications.tsv"
                     ):
                         structure_identifications_file = join(root, file)
-                    elif not gnps_annotations_path and file.endswith("_gnps_all_db_annotations.json"):
+                    elif not gnps_annotations_path and file.endswith(
+                        "_gnps_all_db_annotations.json"
+                    ):
                         gnps_annotations_path = join(root, file)
         return {
             "formula_identifications_file": formula_identifications_file,

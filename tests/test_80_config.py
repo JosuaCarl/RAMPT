@@ -20,9 +20,7 @@ minimal_global_patterns = {"patterns": None, "additional_args": None}
 def test_generic_step():
     try:
         generic_step(
-            step_class=Pipe_Step,
-            step_params={},
-            global_params=minimal_global_patterns.copy(),
+            step_class=Pipe_Step, step_params={}, global_params=minimal_global_patterns.copy()
         )
     except TypeError:
         assert True
@@ -32,7 +30,7 @@ def test_generic_step():
             step_class=Pipe_Step,
             step_params={},
             global_params=minimal_global_patterns.copy(),
-            in_paths=[mock_path]
+            in_paths=[mock_path],
         )
     except NotImplementedError:
         assert True
@@ -109,7 +107,10 @@ def test_summarize_annotations():
 
 def test_analyze_difference():
     analyze_difference(
-        summary_data_paths=example_path, analysis_out_paths=out_path, step_params={}, global_params=minimal_global_patterns.copy()
+        summary_data_paths=example_path,
+        analysis_out_paths=out_path,
+        step_params={},
+        global_params=minimal_global_patterns.copy(),
     )
 
     assert os.path.isfile(join(out_path, "analysis.tsv"))
