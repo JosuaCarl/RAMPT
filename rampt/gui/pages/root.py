@@ -378,7 +378,6 @@ with tgb.Page(style=style) as analysis:
             tgb.text("#### Data paths", mode="markdown")
             tgb.data_node_selector("{path_data_node}", scenario="{scenario}")
 
-
         # Middle part
         with tgb.part():
             tgb.text("## 📊 Data", mode="markdown")

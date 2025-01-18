@@ -154,6 +154,7 @@ def flatten_values(obj: Any) -> list:
     else:
         return [obj]
 
+
 def stretch_to_list_of_dicts(dictionary: dict) -> list:
     """
     Stretch a dictionary with a list of lists as entry to a list of dictionaries with a single entry from the list.
@@ -199,12 +200,8 @@ def stretch_to_list_of_dicts(dictionary: dict) -> list:
                 single_dict[key] = single_dict[key] + [element]
 
         stretched_list.append(single_dict)
-        
+
     return stretched_list
-
-
-
-
 
 
 # String operations

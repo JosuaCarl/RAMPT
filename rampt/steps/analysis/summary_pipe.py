@@ -366,7 +366,7 @@ class Summary_Runner(Pipe_Step):
         quantification_file: StrPath = None,
         annotation_files: dict[str, StrPath] = None,
         summary: pd.DataFrame = None,
-    ):  
+    ):
         # Separate arguments of in_path
         in_paths_annotation = None
         if isinstance(in_path, dict):
@@ -381,19 +381,14 @@ class Summary_Runner(Pipe_Step):
         # Make quantification table as base
         if not quantification_file:
             quantification_file = self.search_quantification_file(dir=in_path_quantification)
-        summary = self.add_quantification(
-            quantification_file=quantification_file, summary=summary
-        )
-          # Add annotations
+        summary = self.add_quantification(quantification_file=quantification_file, summary=summary)
+        # Add annotations
         if annotation_files:
-            summary = self.add_annotations(
-                        annotation_files=annotation_files,
-                        summary=summary
-                    )
+            summary = self.add_annotations(annotation_files=annotation_files, summary=summary)
         else:
             for in_path_annotation in set(to_list(in_paths_annotation)):
                 annotation_files = self.search_annotation_files(dir=in_path_annotation)
-                
+
                 # Case run_single
                 if annotation_file_type:
                     summary = self.add_annotation(
@@ -403,8 +398,7 @@ class Summary_Runner(Pipe_Step):
                     )
                 else:
                     summary = self.add_annotations(
-                        annotation_files=annotation_files,
-                        summary=summary
+                        annotation_files=annotation_files, summary=summary
                     )
 
         # Export summary
