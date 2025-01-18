@@ -947,13 +947,12 @@ class InstallerApp(tk.Tk):
                     "-c",
                     "irm https://astral.sh/uv/install.ps1 | iex",
                 ],
-                stdout=subprocess.DEVNULL
+                stdout=subprocess.DEVNULL,
             )
             ps.wait()
         else:
             ps = subprocess.Popen(
-                ["wget", "-qO-", "https://astral.sh/uv/install.sh"],
-                stdout=subprocess.PIPE
+                ["wget", "-qO-", "https://astral.sh/uv/install.sh"], stdout=subprocess.PIPE
             )
             subprocess.check_output(["sh"], stdin=ps.stdout)
             ps.wait()
@@ -980,11 +979,7 @@ class InstallerApp(tk.Tk):
 
         self.install_uv()
 
-        subprocess.Popen(
-            ["uv", "sync", "--no-dev"],
-            cwd=install_path, 
-            stdout=subprocess.DEVNULL,
-        )
+        subprocess.Popen(["uv", "sync", "--no-dev"], cwd=install_path, stdout=subprocess.DEVNULL)
         process = subprocess.Popen(
             ["uv", "run", "python", "-c", "import shutil; print(shutil.which('python'))"],
             cwd=install_path,
