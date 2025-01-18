@@ -201,3 +201,7 @@ plz-out
 
 # UV
 uv.lock
+
+
+# docs
+docs/*.rst

@@ -129,11 +129,11 @@ def capture_and_log(
     :param func: Function to execute
     :type func: Callable
     :param *args: Arguments without keywords for the function
-    :type *args: *args
+    :type *args: args
     :param log_path: Path to logfile
     :type log_path: StrPath
     :param **kwargs: Keyword arguments
-    :type **kwargs: **kwargs
+    :type **kwargs: kwargs
     :return: Standard output and standard error
     :rtype: tuple[list, list, Any]
     """
