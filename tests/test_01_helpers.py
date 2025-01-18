@@ -67,6 +67,49 @@ def test_to_list():
     assert to_list(["w", "x"]) == ["w", "x"]
 
 
+
+# Dict operations
+def test_flatten_values():
+    assert flatten_values({"A": [1,2,3]}) == [1,2,3]
+    assert flatten_values({"A": [1,2,3]}) == [1,2,3]
+
+
+def test_stretch_to_list_of_dicts():
+    stretched_dict = stretch_to_list_of_dicts(
+        {"chuck": [1]}
+    )
+    assert stretched_dict == [
+        {"chuck": 1}
+    ]
+
+    stretched_dict = stretch_to_list_of_dicts(
+        {"chuck": [[1,2]], "norris": [[1,2]]}
+    )
+    assert stretched_dict == [
+        {"chuck": 1, "norris": 1},
+        {"chuck": 2, "norris": 2},
+    ]
+
+    
+    stretched_dict = stretch_to_list_of_dicts(
+        {"chuck": [[1,2,3]], "norris": [[1,2], [1]]}
+    )
+    assert stretched_dict == [
+         {"chuck": 1, "norris": [1, 1]},
+         {"chuck": 2, "norris": [2, None]},
+         {"chuck": 3, "norris": [None, None]},
+    ]
+
+    stretched_dict = stretch_to_list_of_dicts(
+        {"chuck": [[1,2]], "norris": [[1], [1,2,3]]}
+    )
+    assert stretched_dict == [
+         {"chuck": 1, "norris": [1, 1]},
+         {"chuck": 2, "norris": [None, 2]},
+         {"chuck": None, "norris": [None, 3]},
+    ]
+
+
 # Directory operations
 def test_make_new_dir():
     clean_out(out_path)

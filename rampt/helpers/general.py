@@ -174,8 +174,9 @@ def stretch_to_list_of_dicts(dictionary: dict) -> list:
 
     # Find maximum length
     max_lenght = 0
-    for list in lists_in_dict:
-        max_lenght = max(max_lenght, len(list))
+    for list_in_dict in lists_in_dict:
+        length = len(list_in_dict) if isinstance(list_in_dict, list) else 1
+        max_lenght = max(max_lenght, length)
 
     # Populated stretched list
     stretched_list = []
@@ -185,7 +186,12 @@ def stretch_to_list_of_dicts(dictionary: dict) -> list:
 
         for j, key in enumerate(keys_in_dict):
             # Fill with None, if the length of the list is not sufficient
-            if i < len(lists_in_dict[j]):
+            if not isinstance(lists_in_dict[j], list):
+                if i == 0:
+                    element = lists_in_dict[j]
+                else:
+                    element = None
+            elif i < len(lists_in_dict[j]):
                 element = lists_in_dict[j][i]
             else:
                 element = None
