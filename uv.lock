@@ -2082,7 +2082,7 @@ wheels = [
 
 [[package]]
 name = "rampt"
-version = "2025.1.14a0"
+version = "2025.1.0b0"
 source = { editable = "." }
 dependencies = [
     { name = "argparse" },
@@ -2092,6 +2092,7 @@ dependencies = [
     { name = "multipledispatch" },
     { name = "numpy" },
     { name = "pandas" },
+    { name = "plotly" },
     { name = "pyopenms" },
     { name = "regex" },
     { name = "requests" },
@@ -2128,6 +2129,7 @@ requires-dist = [
     { name = "multipledispatch", specifier = ">=1.0.0,<2.0.0" },
     { name = "numpy", specifier = ">=1.26.4,<2.0.0" },
     { name = "pandas", specifier = ">=2.2.2,<3.0.0" },
+    { name = "plotly", specifier = ">=5.24.1" },
     { name = "pyopenms", specifier = ">=3.2.0,<4.0.0" },
     { name = "regex", specifier = ">=2024.9.11,<2025.0.0" },
     { name = "requests", specifier = ">=2.32.3,<3.0.0" },

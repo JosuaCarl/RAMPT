@@ -836,25 +836,34 @@ def register_program(op_sys: str, program_path: StrPath, name: str):
         os.makedirs(local_bin, exist_ok=True)
 
         # Create a shortcut
-        icon_path = os.path.normpath( join(program_path, "..", "statics", "share", "rampt.ico") )
-        shortcut_script_path = os.path.normpath( join(program_path, "..", "statics", "scripts", "shortcut.bat") )
+        icon_path = os.path.normpath(join(program_path, "..", "statics", "share", "rampt.ico"))
+        shortcut_script_path = os.path.normpath(
+            join(program_path, "..", "statics", "scripts", "shortcut.bat")
+        )
         shortcut_path = join(local_bin, f"{name}.lnk")
-        shortcut_script = r'set SCRIPT="%TEMP%\%RANDOM%-%RANDOM%-%RANDOM%-%RANDOM%.vbs"' + "\n" + \
-        "echo Set oWS = WScript.CreateObject(\"WScript.Shell\") >> %SCRIPT%" + "\n" + \
-        f"echo sLinkFile = \"{shortcut_path}\" >> %SCRIPT%" + "\n" + \
-        "echo Set oLink = oWS.CreateShortcut(sLinkFile) >> %SCRIPT%" + "\n" + \
-        f"echo oLink.TargetPath = \"{program_path}\" >> %SCRIPT%" + "\n" + \
-        f"echo oLink.IconLocation = \"{icon_path}\" >> %SCRIPT%" + "\n" + \
-        "echo oLink.Save >> %SCRIPT%" + "\n" + \
-        "cscript /nologo %SCRIPT%" + "\n" + \
-        "del %SCRIPT%"
+        shortcut_script = (
+            r'set SCRIPT="%TEMP%\%RANDOM%-%RANDOM%-%RANDOM%-%RANDOM%.vbs"'
+            + "\n"
+            + 'echo Set oWS = WScript.CreateObject("WScript.Shell") >> %SCRIPT%'
+            + "\n"
+            + f'echo sLinkFile = "{shortcut_path}" >> %SCRIPT%'
+            + "\n"
+            + "echo Set oLink = oWS.CreateShortcut(sLinkFile) >> %SCRIPT%"
+            + "\n"
+            + f'echo oLink.TargetPath = "{program_path}" >> %SCRIPT%'
+            + "\n"
+            + f'echo oLink.IconLocation = "{icon_path}" >> %SCRIPT%'
+            + "\n"
+            + "echo oLink.Save >> %SCRIPT%"
+            + "\n"
+            + "cscript /nologo %SCRIPT%"
+            + "\n"
+            + "del %SCRIPT%"
+        )
 
         with open(shortcut_script_path, "w") as file:
             file.write(shortcut_script)
-        subprocess.Popen(
-            [shortcut_script_path],
-            stdout=subprocess.DEVNULL
-        )
+        subprocess.Popen([shortcut_script_path], stdout=subprocess.DEVNULL)
         print(f"Shortcut created: {shortcut_path} -> {program_path}")
     else:
         # Ensure ~/.local/bin exists

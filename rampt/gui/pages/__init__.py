@@ -7,6 +7,7 @@ __all__ = [
     "feature_finding",
     "annotation",
     "analysis",
+    "visualization",
     "common_parts",
     "root",
 ]

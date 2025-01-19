@@ -5,10 +5,18 @@ Analyze the statistical significance of a population.
 """
 
 # Imports
+import pandas as pd
+import numpy as np
+
 from scipy import stats
 from statsmodels.sandbox.stats.multicomp import multipletests
 from rampt.helpers.types import Array
 from rampt.helpers.logging import *
+
+
+
+def calculate_zscores(df: pd.DataFrame|np.ndarray, axis: int = 1, **kwargs):
+    return stats.zscore(df, axis=axis, **kwargs)
 
 
 def choose_test(X: Array, groups: Array = None, paired: bool = False) -> str:
