@@ -838,7 +838,7 @@ def register_program(op_sys: str, program_path: StrPath, name: str):
         # Create a shortcut
         icon_path = os.path.normpath(join(program_path, "..", "statics", "share", "rampt.ico"))
         shortcut_script_path = os.path.normpath(
-            join(program_path, "..", "statics", "scripts", "shortcut.bat")
+            join(program_path, "..", "statics", "make_shortcut.bat")
         )
         shortcut_path = join(local_bin, f"{name}.lnk")
         shortcut_script = (
