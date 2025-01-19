@@ -832,14 +832,30 @@ def add_to_path(op_sys: str, path: str):
 
 def register_program(op_sys: str, program_path: StrPath, name: str):
     if "windows" in op_sys:
-        local_bin = Path(os.environ["USERPROFILE"]) / ".local" / "bin"
-        local_bin.mkdir(parents=True, exist_ok=True)
+        local_bin = os.path.normpath(join(os.environ["USERPROFILE"], ".local", "bin"))
+        os.makedirs(local_bin, exist_ok=True)
 
-        # Create a batch file as a shortcut
-        batch_file = local_bin / f"{name}.bat"
-        with batch_file.open("w") as file:
-            file.write(f'@echo off\n"{program_path}" %*\n')
-        print(f"Batch file created: {batch_file}")
+        # Create a shortcut
+        icon_path = os.path.normpath( join(program_path, "..", "statics", "share", "rampt.ico") )
+        shortcut_script_path = os.path.normpath( join(program_path, "..", "statics", "scripts", "shortcut.bat") )
+        shortcut_path = join(local_bin, f"{name}.lnk")
+        shortcut_script = r'set SCRIPT="%TEMP%\%RANDOM%-%RANDOM%-%RANDOM%-%RANDOM%.vbs"' + "\n" + \
+        "echo Set oWS = WScript.CreateObject(\"WScript.Shell\") >> %SCRIPT%" + "\n" + \
+        f"echo sLinkFile = \"{shortcut_path}\" >> %SCRIPT%" + "\n" + \
+        "echo Set oLink = oWS.CreateShortcut(sLinkFile) >> %SCRIPT%" + "\n" + \
+        f"echo oLink.TargetPath = \"{program_path}\" >> %SCRIPT%" + "\n" + \
+        f"echo oLink.IconLocation = \"{icon_path}\" >> %SCRIPT%" + "\n" + \
+        "echo oLink.Save >> %SCRIPT%" + "\n" + \
+        "cscript /nologo %SCRIPT%" + "\n" + \
+        "del %SCRIPT%"
+
+        with open(shortcut_script_path, "w") as file:
+            file.write(shortcut_script)
+        subprocess.Popen(
+            [shortcut_script_path],
+            stdout=subprocess.DEVNULL
+        )
+        print(f"Shortcut created: {shortcut_path} -> {program_path}")
     else:
         # Ensure ~/.local/bin exists
         local_bin = Path.home() / ".local" / "bin"
@@ -861,7 +877,7 @@ class InstallerApp(tk.Tk):
         if "mac" in self.op_sys:
             standard_install_path = "/Application/"
         elif "windows" in self.op_sys:
-            standard_install_path = os.getenv("ProgramFiles")
+            standard_install_path = Path.home()
         else:
             standard_install_path = str(Path.home() / "programs")
 
@@ -907,8 +923,8 @@ class InstallerApp(tk.Tk):
 
         self.component_vars = {
             "MSconvert": tk.BooleanVar(value=True),
-            "MZmine": tk.BooleanVar(value=False),
-            "SIRIUS": tk.BooleanVar(value=False),
+            "MZmine": tk.BooleanVar(value=True),
+            "SIRIUS": tk.BooleanVar(value=True),
         }
 
         # List of pages
@@ -985,10 +1001,10 @@ class InstallerApp(tk.Tk):
             cwd=install_path,
             stdout=subprocess.PIPE,
         )
-        python_path = process.stdout.read().decode()
+        python_path = process.stdout.read().decode().strip()
         if "windows" in self.op_sys:
             path_executable = join(install_path, f"{self.name}.bat")
-            execution_script = f'@echo off\n"{python_path}" -m rampt %*'
+            execution_script = f'"{python_path}" -m rampt %*'
             with open(path_executable, "w") as file:
                 file.write(execution_script)
         else:
