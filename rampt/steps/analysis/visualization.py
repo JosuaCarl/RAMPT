@@ -27,7 +27,9 @@ def read_df(path: StrPath) -> pd.DataFrame:
 
 
 def get_peaks_df(df: pd.DataFrame, index_col=None) -> pd.DataFrame:
-    peaks_df = df[[col for col in df.columns if "peak area" in col.lower() or "peak height" in col.lower()]]
+    peaks_df = df[
+        [col for col in df.columns if "peak area" in col.lower() or "peak height" in col.lower()]
+    ]
     if index_col and index_col in df.columns:
         peaks_df.index = df[index_col].sort_values()
     return peaks_df
