@@ -64,5 +64,8 @@ You can always look at the detailed documentation of methods
 
 For detailed information about usage, please refer to the [Manual](./Manual.md)
 
+### Documentation
+For module documentation and more please refer to [https://josuacarl.github.io/RAMPT/](https://josuacarl.github.io/RAMPT/)
+
 ## Contributing
 Please refer to [Contribute.md](./Contribute.md) for further information about how to contribute to the project.
