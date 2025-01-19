@@ -2,6 +2,7 @@
 """
 Visualize metabolomic data
 """
+
 import json
 
 import taipy as tp
@@ -15,29 +16,25 @@ from rampt.steps.analysis.visualization import *
 
 from rampt.gui.configuration.config import *
 
+
 # COMMON
 def read_data_node(state, data_node: str) -> bool:
     data_node = state.scenario.data_nodes.get(data_node)
     if data_node.is_ready_for_reading:
         return data_node.read()
     else:
-        warn(
-            f"Path node {data_node} is not readable. Probably not yet written."
-		)
-        notify(
-            f"Path node {data_node} is not readable. Probably not yet written."
-		)
+        warn(f"Path node {data_node} is not readable. Probably not yet written.")
+        notify(f"Path node {data_node} is not readable. Probably not yet written.")
         return None
 
 
 def ask_filepath(path: StrPath) -> StrPath:
-	# Modify path
+    # Modify path
     if os.path.isdir(path):
         path = open_file_folder(
             select_folder=False, multiple=False, title="Please select file", initialdir=path
         )
     return path
-
 
 
 # DATA
@@ -66,6 +63,7 @@ def filter_representable(data_node: tp.DataNode | str) -> bool:
 
 populated_data_nodes = []
 populate_data_node_ids = {}
+
 
 def populate_data_node(state, *args):
     path_node_name = get_attribute_recursive(state, "path_data_node").get_simple_label()
@@ -107,13 +105,17 @@ def populate_data_node(state, *args):
     set_attribute_recursive(state, "populated_data_nodes", populated_data_nodes)
 
 
-
 # FIGURE PLOTTING
 figure = None
 figure_id = None
 figure_path = None
 
-figure_possibilities = ["values heatmap", "zscore heatmap", "zscore cutoff accumulation", "signal intensity distribution"]
+figure_possibilities = [
+    "values heatmap",
+    "zscore heatmap",
+    "zscore cutoff accumulation",
+    "signal intensity distribution",
+]
 figure_path_possibilities = []
 
 
@@ -129,39 +131,29 @@ def prepare_figure_path(state, name, figure_id: str):
             path_node = "analysis_data_paths"
     figure_path_possibilities = read_data_node(state, path_node)
     if figure_path_possibilities:
-        set_attribute_recursive(
-            state,
-            "figure_path_possibilities",
-            figure_path_possibilities
-        )
-    
+        set_attribute_recursive(state, "figure_path_possibilities", figure_path_possibilities)
+
 
 def set_figure(state, name, figure_path: StrPath):
     figure_path = ask_filepath(figure_path)
     figure_id = get_attribute_recursive(state, "figure_id")
-    
-	# Extract dataframe
+
+    # Extract dataframe
     df = read_df(figure_path)
     df = get_peaks_df(df, index_col="m/z")
     match figure_id:
         case "values heatmap":
             figure = plot_quantification_heatmap(df)
-            
+
         case "zscore heatmap":
-            figure = plot_heatmap(
-                df,
-                range=(-15.0, 15.0),
-                x=df.columns,
-                y=df.index
-            )
-            
+            figure = plot_heatmap(df, range=(-15.0, 15.0), x=df.columns, y=df.index)
+
         case "zscore cutoff accumulation":
-            figure = plot_cutoff_accumulation(df, cutoff_range=(3, 10), axis=1,)
-            
+            figure = plot_cutoff_accumulation(df, cutoff_range=(3, 10), axis=1)
+
         case "signal intensity distribution":
             figure = plot_quantification_heatmap(df)
     set_attribute_recursive(state, "figure", figure)
-    
 
 
 # VISUALIZATION PAGE
@@ -179,32 +171,29 @@ def create_visualization():
         with tgb.part():
             tgb.text("## 📊 Data", mode="markdown")
             tgb.data_node("{data_node}")
-			
+
             tgb.text("## 🖌️ Visualization", mode="markdown")
             tgb.selector(
-				"{figure_id}",
+                "{figure_id}",
                 lov="{figure_possibilities}",
                 dropdown=True,
-                on_change=prepare_figure_path
+                on_change=prepare_figure_path,
             )
             tgb.selector(
-				"{figure_path}",
+                "{figure_path}",
                 lov="{figure_path_possibilities}",
                 dropdown=True,
-                on_change=set_figure
-            ) 
-            tgb.chart(
-                figure="{figure}",
-                rebuild=True
+                on_change=set_figure,
             )
+            tgb.chart(figure="{figure}", rebuild=True)
 
-		# Right part
+        # Right part
         with tgb.part():
             tgb.html("br")
 
             tgb.text("#### 🗃️ Path selection", mode="markdown")
             tgb.selector("{path_to_data}", lov="{path_data_node.read()}", dropdown=True)
-            
+
             tgb.html("br")
 
             tgb.button("🖼️ Show data from path", on_action=populate_data_node)

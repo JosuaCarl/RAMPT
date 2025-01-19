@@ -295,4 +295,3 @@ with tgb.Page(style=style) as configuration:
 
 with tgb.Page(style=style) as visualization:
     create_visualization()
-    

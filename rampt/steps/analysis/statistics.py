@@ -14,8 +14,7 @@ from rampt.helpers.types import Array
 from rampt.helpers.logging import *
 
 
-
-def calculate_zscores(df: pd.DataFrame|np.ndarray, axis: int = 1, **kwargs):
+def calculate_zscores(df: pd.DataFrame | np.ndarray, axis: int = 1, **kwargs):
     return stats.zscore(df, axis=axis, **kwargs)
 
 
