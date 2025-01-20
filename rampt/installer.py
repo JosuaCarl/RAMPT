@@ -700,17 +700,16 @@ Public License instead of this License.  But first, please read
 
 """
 
+
 class Logger:
-    def __init__(self, log_file_path:str):
+    def __init__(self, log_file_path: str):
         self.out = ""
         self.err = ""
         self.log_file_path = log_file_path
         self.log(f"Saving log file to {log_file_path}")
-    
 
     def get_now(self) -> str:
         return str(datetime.now().replace(microsecond=0))
-
 
     def log(self, message: str, log_file_path: str = None):
         message = f"[{self.get_now()}][rampt_install][INFO]\t{message}"
@@ -723,7 +722,6 @@ class Logger:
         warnings.warn(UserWarning((message)))
         self.err += message
         self.write_log_file(message, log_file_path=log_file_path)
-    
 
     def error(self, error, log_file_path: str = None):
         message = f"[{self.get_now()}][rampt_install][ERROR]\t{str(error)}"
@@ -731,9 +729,10 @@ class Logger:
         self.err += message
         self.write_log_file(message, log_file_path=log_file_path)
         raise error
-    
 
-    def execute_command(self, cmd: str | list, wait: bool = True, text:bool = False, shell:bool = False, **kwargs) -> subprocess.Popen:
+    def execute_command(
+        self, cmd: str | list, wait: bool = True, text: bool = False, shell: bool = False, **kwargs
+    ) -> subprocess.Popen:
         """
         Execute a command with the adequate verbosity.
 
@@ -744,12 +743,7 @@ class Logger:
         """
         self.log(f"Starting command: {cmd}")
         process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=text,
-            shell=shell,
-            **kwargs
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=text, shell=shell, **kwargs
         )
 
         if wait:
@@ -770,16 +764,15 @@ class Logger:
 
         return process
 
-
     def write_log_file(self, output: str, log_file_path: str = None):
         if not log_file_path:
             log_file_path = self.log_file_path
         with open(log_file_path, "a") as log_file:
             log_file.write("\n" + output)
 
+
 log_file_path = os.path.normpath(os.path.join(Path.home(), "rampt_installer_log.txt"))
 logger = Logger(log_file_path)
-
 
 
 def create_symlink(target_file, symlink_path):
@@ -886,9 +879,7 @@ def add_to_path(op_sys: str, path: str):
         if "windows" in op_sys:
             current_path = os.environ.get("PATH", "")
             if str(path) not in current_path:
-                logger.execute_command(
-                    ["setx", "PATH", f"{path};{current_path}"]
-                )
+                logger.execute_command(["setx", "PATH", f"{path};{current_path}"])
             exported_to_path = True
         else:
             for shell_profile in [
@@ -946,9 +937,7 @@ def register_program(op_sys: str, program_path: str, name: str):
         with open(shortcut_script_path, "w") as file:
             file.write(shortcut_script)
 
-        logger.execute_command(
-            [shortcut_script_path]
-        )
+        logger.execute_command([shortcut_script_path])
         logger.log(f"Shortcut created: {shortcut_path} -> {program_path}")
     else:
         # Ensure ~/.local/bin exists
@@ -962,7 +951,8 @@ def register_program(op_sys: str, program_path: str, name: str):
         symlink_path.symlink_to(program_path)
         logger.log(f"Symlink created: {symlink_path} -> {program_path}")
     add_to_path(op_sys=op_sys, path=local_bin)
-    
+
+
 class InstallerApp(tk.Tk):
     def __init__(self, root):
         self.op_sys = pf.system().lower()
@@ -1061,21 +1051,13 @@ class InstallerApp(tk.Tk):
                 )
             else:
                 process = logger.execute_command(
-                    ["wget", "-qO-", "https://astral.sh/uv/install.sh"],
+                    ["wget", "-qO-", "https://astral.sh/uv/install.sh"]
                 )
-                process = logger.execute_command(
-                    ["sh"],
-                    stdin=process.stdout
-                )
+                process = logger.execute_command(["sh"], stdin=process.stdout)
         logger.log("Installed uv")
 
-
     def install_project(
-        self,
-        name: str,
-        url: dict | str,
-        install_path: str,
-        hash_url_addendum: str = None,
+        self, name: str, url: dict | str, install_path: str, hash_url_addendum: str = None
     ):
         # Hash check
         if hash_url_addendum:
@@ -1089,13 +1071,10 @@ class InstallerApp(tk.Tk):
         download_extract(
             url=url, target_path=install_path, expected_hash=expected_hash, extraction_method="zip"
         )
-        
+
         self.install_uv()
 
-        logger.execute_command(
-            ["uv", "sync", "--no-dev"],
-            cwd=install_path,
-        )
+        logger.execute_command(["uv", "sync", "--no-dev"], cwd=install_path)
 
         if "windows" in self.op_sys:
             python_path = os.path.join(install_path, ".venv", "Scripts", "python")
@@ -1148,8 +1127,8 @@ class InstallerApp(tk.Tk):
             # Warning,
             if not url:
                 logger.warn(
-                        f"{name} is not available for {self.op_sys}."
-                        + "To use it, please  find a way to install and add it to PATH yourself."
+                    f"{name} is not available for {self.op_sys}."
+                    + "To use it, please  find a way to install and add it to PATH yourself."
                 )
 
             # Hash check
@@ -1353,6 +1332,7 @@ class InstallerApp(tk.Tk):
 
         self.install_components(components=selected_components)
         logger.log("All done")
+
 
 # Run the application
 if __name__ == "__main__":
