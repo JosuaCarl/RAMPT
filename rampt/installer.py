@@ -731,7 +731,7 @@ class Logger:
         raise error
 
     def execute_command(
-        self, cmd: str | list, wait: bool = True, text: bool = False, shell: bool = False, **kwargs
+        self, cmd: str | list, wait: bool = True, text: bool = True, shell: bool = False, **kwargs
     ) -> subprocess.Popen:
         """
         Execute a command with the adequate verbosity.
@@ -1051,7 +1051,8 @@ class InstallerApp(tk.Tk):
                 )
             else:
                 process = logger.execute_command(
-                    ["wget", "-qO-", "https://astral.sh/uv/install.sh"]
+                    ["wget", "-qO-", "https://astral.sh/uv/install.sh"],
+                    text=False,
                 )
                 process = logger.execute_command(["sh"], stdin=process.stdout)
         logger.log("Installed uv")
