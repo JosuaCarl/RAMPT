@@ -13,7 +13,7 @@ from icecream import ic
 from rampt.helpers.types import StrPath
 
 
-program_name = "m2s"
+program_name = "rampt"
 
 
 def get_now() -> str:

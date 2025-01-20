@@ -4,6 +4,8 @@ from os.path import join
 import shutil
 import warnings
 
+from datetime import datetime
+
 import requests
 import hashlib
 import tarfile
@@ -15,13 +17,9 @@ import platform as pf
 
 import subprocess
 
-from threading import Thread
-
 import tkinter as tk
 from tkinter import filedialog
 from tkinter.ttk import Frame, Label, Button, Checkbutton, Progressbar, Scrollbar
-
-type StrPath = str
 
 
 project_license = """
@@ -702,6 +700,87 @@ Public License instead of this License.  But first, please read
 
 """
 
+class Logger:
+    def __init__(self, log_file_path:str):
+        self.out = ""
+        self.err = ""
+        self.log_file_path = log_file_path
+        self.log(f"Saving log file to {log_file_path}")
+    
+
+    def get_now(self) -> str:
+        return str(datetime.now().replace(microsecond=0))
+
+
+    def log(self, message: str, log_file_path: str = None):
+        message = f"[{self.get_now()}][rampt_install][INFO]\t{message}"
+        print(message)
+        self.out += message
+        self.write_log_file(message, log_file_path=log_file_path)
+
+    def warn(self, message: str, log_file_path: str = None):
+        message = f"[{self.get_now()}][rampt_install][WARNING]\t{message}"
+        warnings.warn(UserWarning((message)))
+        self.err += message
+        self.write_log_file(message, log_file_path=log_file_path)
+    
+
+    def error(self, error, log_file_path: str = None):
+        message = f"[{self.get_now()}][rampt_install][ERROR]\t{str(error)}"
+        print(message)
+        self.err += message
+        self.write_log_file(message, log_file_path=log_file_path)
+        raise error
+    
+
+    def execute_command(self, cmd: str | list, wait: bool = True, text:bool = False, shell:bool = False, **kwargs) -> subprocess.Popen:
+        """
+        Execute a command with the adequate verbosity.
+
+        :param cmd: Command as a string or list
+        :type cmd: str|list
+        :return: Stdout, Stderr
+        :rtype: tuple[str,str]
+        """
+        self.log(f"Starting command: {cmd}")
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=text,
+            shell=shell,
+            **kwargs
+        )
+
+        if wait:
+            process.wait()
+
+        out = process.stdout.read()
+        err = process.stderr.read()
+
+        if not text:
+            out, err = (out.decode(), err.decode())
+
+        self.out += out
+        self.err += err
+
+        self.write_log_file("\n" + out + "\n" + err)
+
+        self.log(f"Command {cmd} finished.")
+
+        return process
+
+
+    def write_log_file(self, output: str, log_file_path: str = None):
+        if not log_file_path:
+            log_file_path = self.log_file_path
+        with open(log_file_path, "a") as log_file:
+            log_file.write("\n" + output)
+
+log_file_path = os.path.normpath(os.path.join(Path.home(), "rampt_installer_log.txt"))
+logger = Logger(log_file_path)
+
+
 
 def create_symlink(target_file, symlink_path):
     """
@@ -713,11 +792,11 @@ def create_symlink(target_file, symlink_path):
     try:
         # Create the symbolic link
         os.symlink(target_file, symlink_path)
-        print(f"Symbolic link created: {symlink_path} -> {target_file}")
-    except FileExistsError:
-        print(f"Error: The file '{symlink_path}' already exists. Cancelling.")
+        logger.log(f"Symbolic link created: {symlink_path} -> {target_file}")
+    except FileExistsError as e:
+        logger.error(e)
     except OSError as e:
-        print(f"Error creating symbolic link: {e}")
+        logger.error(e)
 
 
 def tool_available(executable: str) -> bool:
@@ -725,13 +804,16 @@ def tool_available(executable: str) -> bool:
     Tool can be accessed in environment.
     """
     if isinstance(executable, str):
+        which = shutil.which(executable)
+        if which:
+            logger.log(f"Tool {executable} already available.")
         return shutil.which(executable)
     else:
         return None
 
 
-def calculate_file_hash(file: StrPath | io.BufferedReader, hashing_algorithm: str = "sha256"):
-    if isinstance(file, StrPath):
+def calculate_file_hash(file: str | io.BufferedReader, hashing_algorithm: str = "sha256"):
+    if isinstance(file, str):
         file = open(file, "rb")
 
     # Read the file in 64KB chunks to efficiently handle large files.
@@ -745,13 +827,13 @@ def calculate_file_hash(file: StrPath | io.BufferedReader, hashing_algorithm: st
     return hasher.hexdigest()
 
 
-def verify_hash(downloaded_file: StrPath | io.BufferedReader, expected_hash: str):
+def verify_hash(downloaded_file: str | io.BufferedReader, expected_hash: str):
     calculated_hash = calculate_file_hash(downloaded_file)
     return calculated_hash == expected_hash
 
 
 def download_extract(
-    url: str, target_path: StrPath, expected_hash: str = None, extraction_method: str = "zip"
+    url: str, target_path: str, expected_hash: str = None, extraction_method: str = "zip"
 ):
     """
     Download a compressed file and extract its contents to target_path.
@@ -765,17 +847,17 @@ def download_extract(
             with tarfile.open(fileobj=io.BytesIO(response.content)) as tar_file:
                 tar_file.extractall(target_path)
     else:
-        raise (ValueError("Wrong hashing value of file."))
+        logger.error(ValueError("Wrong hashing value of file."))
 
 
-def is_in_path(directory_or_program: StrPath) -> bool:
+def is_in_path(directory_or_program: str) -> bool:
     """
     Check if a directory or program is in the PATH environment variable.
 
-        :param directory_or_program: Directory, that should be a direct entry in PATH, or program, that should be resolved by PATH.
-        :type directory_or_program: StrPath
-        :return: Whether it is on PATH
-        :rtype: bool
+    :param directory_or_program: Directory, that should be a direct entry in PATH, or program, that should be resolved by PATH.
+    :type directory_or_program: StrPath
+    :return: Whether it is on PATH
+    :rtype: bool
     """
     # Get the PATH environment variable
     path_dirs = os.environ.get("PATH", "").split(os.pathsep)
@@ -783,29 +865,29 @@ def is_in_path(directory_or_program: StrPath) -> bool:
     # Normalize the input path
     target = Path(directory_or_program).resolve()
 
+    on_path = False
     # Check if it's a directory
     if target.is_dir():
-        return any(Path(p).resolve() == target for p in path_dirs)
+        on_path = any(Path(p).resolve() == target for p in path_dirs)
 
     # Check if it's a program (file in any PATH directory)
     if target.is_file():
-        return any((Path(p) / target.name).is_file() for p in path_dirs)
+        on_path = any((Path(p) / target.name).is_file() for p in path_dirs)
 
-    return False
+    if on_path:
+        logger.log(f"{directory_or_program} is already on PATH")
+
+    return on_path
 
 
 def add_to_path(op_sys: str, path: str):
-    if is_in_path(path):
-        print(f"{path} already in PATH.")
-    else:
+    if not is_in_path(path):
         exported_to_path = False
         if "windows" in op_sys:
             current_path = os.environ.get("PATH", "")
             if str(path) not in current_path:
-                subprocess.run(
-                    ["setx", "PATH", f"{path};{current_path}"],
-                    check=True,
-                    stdout=subprocess.DEVNULL,
+                logger.execute_command(
+                    ["setx", "PATH", f"{path};{current_path}"]
                 )
             exported_to_path = True
         else:
@@ -823,14 +905,14 @@ def add_to_path(op_sys: str, path: str):
                     with shell_profile.open("a") as file:
                         file.write(f"\n# Ensure ~/.local/bin is in PATH\n{export_line}\n")
                     exported_to_path = True
-                    print(f"Added ~/.local/bin to PATH in {shell_profile}")
+                    logger.log(f"Added ~/.local/bin to PATH in {shell_profile}")
         if not exported_to_path:
-            warnings.warn(
+            logger.warn(
                 "No shell rc was found to export ~/.local/bin to PATH. You might have to do it yourself."
             )
 
 
-def register_program(op_sys: str, program_path: StrPath, name: str):
+def register_program(op_sys: str, program_path: str, name: str):
     if "windows" in op_sys:
         local_bin = os.path.normpath(join(os.environ["USERPROFILE"], ".local", "bin"))
         os.makedirs(local_bin, exist_ok=True)
@@ -863,8 +945,11 @@ def register_program(op_sys: str, program_path: StrPath, name: str):
 
         with open(shortcut_script_path, "w") as file:
             file.write(shortcut_script)
-        subprocess.Popen([shortcut_script_path], stdout=subprocess.DEVNULL)
-        print(f"Shortcut created: {shortcut_path} -> {program_path}")
+
+        logger.execute_command(
+            [shortcut_script_path]
+        )
+        logger.log(f"Shortcut created: {shortcut_path} -> {program_path}")
     else:
         # Ensure ~/.local/bin exists
         local_bin = Path.home() / ".local" / "bin"
@@ -875,10 +960,9 @@ def register_program(op_sys: str, program_path: StrPath, name: str):
         if symlink_path.exists() or symlink_path.is_symlink():
             symlink_path.unlink()
         symlink_path.symlink_to(program_path)
-        print(f"Symlink created: {symlink_path} -> {program_path}")
+        logger.log(f"Symlink created: {symlink_path} -> {program_path}")
     add_to_path(op_sys=op_sys, path=local_bin)
-
-
+    
 class InstallerApp(tk.Tk):
     def __init__(self, root):
         self.op_sys = pf.system().lower()
@@ -963,31 +1047,35 @@ class InstallerApp(tk.Tk):
         self.load_page()
 
     def install_uv(self):
-        if "windows" in self.op_sys:
-            ps = subprocess.Popen(
-                [
-                    "powershell",
-                    "-ExecutionPolicy",
-                    "ByPass",
-                    "-c",
-                    "irm https://astral.sh/uv/install.ps1 | iex",
-                ],
-                stdout=subprocess.DEVNULL,
-            )
-            ps.wait()
-        else:
-            ps = subprocess.Popen(
-                ["wget", "-qO-", "https://astral.sh/uv/install.sh"], stdout=subprocess.PIPE
-            )
-            subprocess.check_output(["sh"], stdin=ps.stdout)
-            ps.wait()
+        logger.log("Installing uv")
+        if not tool_available("uv"):
+            if "windows" in self.op_sys:
+                process = logger.execute_command(
+                    [
+                        "powershell",
+                        "-ExecutionPolicy",
+                        "ByPass",
+                        "-c",
+                        "irm https://astral.sh/uv/install.ps1 | iex",
+                    ]
+                )
+            else:
+                process = logger.execute_command(
+                    ["wget", "-qO-", "https://astral.sh/uv/install.sh"],
+                )
+                process = logger.execute_command(
+                    ["sh"],
+                    stdin=process.stdout
+                )
+        logger.log("Installed uv")
+
 
     def install_project(
         self,
         name: str,
-        url: dict | StrPath,
-        install_path: StrPath,
-        hash_url_addendum: StrPath = None,
+        url: dict | str,
+        install_path: str,
+        hash_url_addendum: str = None,
     ):
         # Hash check
         if hash_url_addendum:
@@ -1001,22 +1089,24 @@ class InstallerApp(tk.Tk):
         download_extract(
             url=url, target_path=install_path, expected_hash=expected_hash, extraction_method="zip"
         )
-
+        
         self.install_uv()
 
-        subprocess.Popen(["uv", "sync", "--no-dev"], cwd=install_path, stdout=subprocess.DEVNULL)
-        process = subprocess.Popen(
-            ["uv", "run", "python", "-c", "import shutil; print(shutil.which('python'))"],
+        logger.execute_command(
+            ["uv", "sync", "--no-dev"],
             cwd=install_path,
-            stdout=subprocess.PIPE,
         )
-        python_path = process.stdout.read().decode().strip()
+
         if "windows" in self.op_sys:
+            python_path = os.path.join(install_path, ".venv", "Scripts", "python")
+            logger.log(f"Python path: {python_path}")
             path_executable = join(install_path, f"{self.name}.bat")
             execution_script = f'"{python_path}" -m rampt %*'
             with open(path_executable, "w") as file:
                 file.write(execution_script)
         else:
+            python_path = os.path.join(install_path, ".venv", "bin", "python")
+            logger.log(f"Python path: {python_path}")
             path_executable = join(install_path, f"{self.name}.sh")
             execution_script = f'#!/usr/bin/sh\n"{python_path}" -m rampt'
             with open(path_executable, "w") as file:
@@ -1029,11 +1119,11 @@ class InstallerApp(tk.Tk):
     def install_component(
         self,
         name: str,
-        urls: dict | StrPath,
-        install_path: StrPath,
+        urls: dict | str,
+        install_path: str,
         bin_path: str = None,
         extraction_method: str = "zip",
-        hash_url_addendum: StrPath = None,
+        hash_url_addendum: str = None,
         command: str = None,
         force: bool = False,
     ):
@@ -1057,11 +1147,9 @@ class InstallerApp(tk.Tk):
 
             # Warning,
             if not url:
-                warnings.warn(
-                    UserWarning(
+                logger.warn(
                         f"{name} is not available for {self.op_sys}."
                         + "To use it, please  find a way to install and add it to PATH yourself."
-                    )
                 )
 
             # Hash check
@@ -1089,7 +1177,7 @@ class InstallerApp(tk.Tk):
         urls = self.urls
 
         for component in [self.name] + components:
-            print(f"Installing {component}")
+            logger.log(f"Installing {component}")
             match component:
                 case self.name:
                     self.install_project(
@@ -1263,10 +1351,8 @@ class InstallerApp(tk.Tk):
         selected_components = [name for name, var in self.component_vars.items() if var.get()]
         self.install_path = self.install_path.get()
 
-        Thread(
-            target=self.install_components, kwargs={"components": selected_components}, daemon=True
-        ).start()
-
+        self.install_components(components=selected_components)
+        logger.log("All done")
 
 # Run the application
 if __name__ == "__main__":
