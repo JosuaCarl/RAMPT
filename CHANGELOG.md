@@ -1,9 +1,8 @@
 # Changes
 
 ## 🔧Fixes🔧
-- Installer not detecting python
+- Installer uv not on path during install
 
 ## ⏫Improvements⏫
-- Installer logging
 
 ## ✨New✨

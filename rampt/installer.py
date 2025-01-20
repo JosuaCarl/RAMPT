@@ -792,7 +792,7 @@ def create_symlink(target_file, symlink_path):
         logger.error(e)
 
 
-def tool_available(executable: str|list) -> bool:
+def tool_available(executable: str | list) -> bool:
     """
     Tool can be accessed in environment.
     """
@@ -802,10 +802,10 @@ def tool_available(executable: str|list) -> bool:
             logger.log(f"Tool {executable} already available.")
         return which
     if isinstance(executable, list):
-            whiches = [shutil.which(exe) for exe in executable]
-            if any(whiches):
-                logger.log(f"Tool {executable} already available.")
-            return whiches
+        whiches = [shutil.which(exe) for exe in executable]
+        if any(whiches):
+            logger.log(f"Tool {executable} already available.")
+        return whiches
     else:
         return None
 
@@ -884,10 +884,7 @@ def add_to_path(op_sys: str, path: str):
         if "windows" in op_sys:
             current_path = os.environ.get("PATH", "")
             if str(path) not in current_path:
-                logger.execute_command(
-                    ["setx", "PATH", f"{path};{current_path}"],
-                    wait=True,
-                )
+                logger.execute_command(["setx", "PATH", f"{path};{current_path}"], wait=True)
             exported_to_path = True
         else:
             for shell_profile in [
@@ -900,7 +897,7 @@ def add_to_path(op_sys: str, path: str):
             ]:
                 shell_profile = Path.home() / shell_profile
                 if shell_profile.exists():
-                    export_line = f'export PATH=\"{path}:$PATH\"'
+                    export_line = f'export PATH="{path}:$PATH"'
                     with shell_profile.open("a") as file:
                         file.write(f"\n# Ensure {path} is on PATH\n{export_line}\n")
                     exported_to_path = True
@@ -1077,12 +1074,8 @@ class InstallerApp(tk.Tk):
 
         self.install_uv()
 
-        
-        local_bin = os.path.normpath(os.path.join(Path().home(), '.local', 'bin'))
-        logger.execute_command(
-            [f"{local_bin}/uv", "sync", "--no-dev"],
-            cwd=install_path,
-        )
+        local_bin = os.path.normpath(os.path.join(Path().home(), ".local", "bin"))
+        logger.execute_command([f"{local_bin}/uv", "sync", "--no-dev"], cwd=install_path)
 
         if "windows" in self.op_sys:
             python_path = os.path.join(install_path, ".venv", "Scripts", "python")
@@ -1111,7 +1104,7 @@ class InstallerApp(tk.Tk):
         bin_path: str = None,
         extraction_method: str = "zip",
         hash_url_addendum: str = None,
-        command: str|list = None,
+        command: str | list = None,
         force: bool = False,
     ):
         # Check for command availability
@@ -1345,8 +1338,8 @@ class InstallerApp(tk.Tk):
 # Run the application
 if __name__ == "__main__":
     try:
-      root = tk.Tk()
-      app = InstallerApp(root)
-      root.mainloop()
+        root = tk.Tk()
+        app = InstallerApp(root)
+        root.mainloop()
     except Exception as e:
         logger.error(e)
