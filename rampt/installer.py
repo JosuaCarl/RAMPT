@@ -792,7 +792,7 @@ def create_symlink(target_file, symlink_path):
         logger.error(e)
 
 
-def tool_available(executable: str) -> bool:
+def tool_available(executable: str|list) -> bool:
     """
     Tool can be accessed in environment.
     """
@@ -800,7 +800,12 @@ def tool_available(executable: str) -> bool:
         which = shutil.which(executable)
         if which:
             logger.log(f"Tool {executable} already available.")
-        return shutil.which(executable)
+        return which
+    if isinstance(executable, list):
+            whiches = [shutil.which(exe) for exe in executable]
+            if any(whiches):
+                logger.log(f"Tool {executable} already available.")
+            return whiches
     else:
         return None
 
@@ -879,7 +884,10 @@ def add_to_path(op_sys: str, path: str):
         if "windows" in op_sys:
             current_path = os.environ.get("PATH", "")
             if str(path) not in current_path:
-                logger.execute_command(["setx", "PATH", f"{path};{current_path}"])
+                logger.execute_command(
+                    ["setx", "PATH", f"{path};{current_path}"],
+                    wait=True,
+                )
             exported_to_path = True
         else:
             for shell_profile in [
@@ -892,22 +900,21 @@ def add_to_path(op_sys: str, path: str):
             ]:
                 shell_profile = Path.home() / shell_profile
                 if shell_profile.exists():
-                    export_line = 'export PATH="$HOME/.local/bin:$PATH"'
+                    export_line = f'export PATH=\"{path}:$PATH\"'
                     with shell_profile.open("a") as file:
-                        file.write(f"\n# Ensure ~/.local/bin is in PATH\n{export_line}\n")
+                        file.write(f"\n# Ensure {path} is on PATH\n{export_line}\n")
                     exported_to_path = True
-                    logger.log(f"Added ~/.local/bin to PATH in {shell_profile}")
+                    logger.log(f"Added {path} to PATH in {shell_profile}")
         if not exported_to_path:
             logger.warn(
                 "No shell rc was found to export ~/.local/bin to PATH. You might have to do it yourself."
             )
 
 
-def register_program(op_sys: str, program_path: str, name: str):
+def link_program(op_sys: str, program_path: str, name: str):
+    local_bin = os.path.normpath(join(Path.home(), ".local", "bin"))
+    os.makedirs(local_bin, exist_ok=True)
     if "windows" in op_sys:
-        local_bin = os.path.normpath(join(os.environ["USERPROFILE"], ".local", "bin"))
-        os.makedirs(local_bin, exist_ok=True)
-
         # Create a shortcut
         icon_path = os.path.normpath(join(program_path, "..", "statics", "share", "rampt.ico"))
         shortcut_script_path = os.path.normpath(
@@ -940,10 +947,6 @@ def register_program(op_sys: str, program_path: str, name: str):
         logger.execute_command([shortcut_script_path])
         logger.log(f"Shortcut created: {shortcut_path} -> {program_path}")
     else:
-        # Ensure ~/.local/bin exists
-        local_bin = Path.home() / ".local" / "bin"
-        local_bin.mkdir(parents=True, exist_ok=True)
-
         # Create the symlink
         symlink_path = local_bin / name
         if symlink_path.exists() or symlink_path.is_symlink():
@@ -1074,7 +1077,12 @@ class InstallerApp(tk.Tk):
 
         self.install_uv()
 
-        logger.execute_command(["uv", "sync", "--no-dev"], cwd=install_path)
+        
+        local_bin = os.path.normpath(os.path.join(Path().home(), '.local', 'bin'))
+        logger.execute_command(
+            [f"{local_bin}/uv", "sync", "--no-dev"],
+            cwd=install_path,
+        )
 
         if "windows" in self.op_sys:
             python_path = os.path.join(install_path, ".venv", "Scripts", "python")
@@ -1091,7 +1099,7 @@ class InstallerApp(tk.Tk):
             with open(path_executable, "w") as file:
                 file.write(execution_script)
 
-        register_program(op_sys=self.op_sys, program_path=path_executable, name=self.name)
+        link_program(op_sys=self.op_sys, program_path=path_executable, name=self.name)
 
         return os.path.abspath(install_path)
 
@@ -1103,7 +1111,7 @@ class InstallerApp(tk.Tk):
         bin_path: str = None,
         extraction_method: str = "zip",
         hash_url_addendum: str = None,
-        command: str = None,
+        command: str|list = None,
         force: bool = False,
     ):
         # Check for command availability
@@ -1182,7 +1190,7 @@ class InstallerApp(tk.Tk):
                         urls=urls.get(component),
                         install_path=self.install_path,
                         bin_path="bin",
-                        command="mzmine",
+                        command=["mzmine", "mzmine_console"],
                         force=force,
                     )
 
@@ -1336,6 +1344,9 @@ class InstallerApp(tk.Tk):
 
 # Run the application
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = InstallerApp(root)
-    root.mainloop()
+    try:
+      root = tk.Tk()
+      app = InstallerApp(root)
+      root.mainloop()
+    except Exception as e:
+        logger.error(e)
