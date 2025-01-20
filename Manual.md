@@ -23,7 +23,7 @@ uv sync
 ### Run the workflow
 Enter a valid mzmine batch file and raw data. Go.
 
-![Short Video on workflow usage](https://github.com/JosuaCarl/RAMPT/blob/main/statics/share/rampt_usage_simple.mov)
+![Short Video on workflow usage](./statics/videos/rampt_usage_simple.mov)
 
 ### Inspect data
 1. Click on Visualization
@@ -33,4 +33,8 @@ Enter a valid mzmine batch file and raw data. Go.
 5. Select file
 6. Play
 
-![Short Video on vizualization usage](https://github.com/JosuaCarl/RAMPT/blob/main/statics/share/visualization_simple.mov)
+![Short Video on vizualization usage](./statics/videos/visualization_simple.mov)
+
+
+#### Additional remarks
+Further videos can be found in ./statics/videos/

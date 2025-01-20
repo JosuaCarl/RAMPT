@@ -39,10 +39,12 @@ def ask_filepath(path: StrPath) -> StrPath:
 
 # DATA
 path_data_node = None
+paths_to_data = []
 path_to_data = None
 data_node = None
 
-representable_data_nodes = {
+representable_data_nodes = []
+representable_data_node_mapping = {
     "gnps_annotation": gnps_annotations_config,
     "sirius_annotation": sirius_annotations_config,
     "summary_data": summary_data_config,
@@ -50,32 +52,39 @@ representable_data_nodes = {
 }
 
 
-def filter_representable(data_node: tp.DataNode | str) -> bool:
-    if data_node:
-        if isinstance(data_node, str):
-            config_id = data_node
-        else:
-            config_id = data_node.config_id
-        return config_id.replace("_paths", "") in representable_data_nodes.keys()
-    else:
-        return False
+def filter_representable(state, id, scenario_name) -> bool:
+    representable_data_nodes = []
+    for name, node in state.scenario.data_nodes.items():
+        if name.replace("_paths", "") in representable_data_node_mapping \
+        and node.is_ready_for_reading and node.read():
+            representable_data_nodes.append(node)
+    set_attribute_recursive(state, "representable_data_nodes", representable_data_nodes)
+    
+
+def fill_path_selection(state, *args):
+    path_data_node = get_attribute_recursive(state, "path_data_node")
+    set_attribute_recursive(state, "paths_to_data", path_data_node.read())
+    set_attribute_recursive(state, "path_to_data", path_data_node.read()[0])
 
 
 populated_data_nodes = []
 populate_data_node_ids = {}
 
 
+
 def populate_data_node(state, *args):
+    ic("HERE")
     path_node_name = get_attribute_recursive(state, "path_data_node").get_simple_label()
     data_node_name = path_node_name.replace("_paths", "")
 
     path = get_attribute_recursive(state, "path_to_data")
+    ic(path)
     path = ask_filepath(path)
 
     # Write Check if path
     if os.path.isfile(path):
         # Get original config
-        data_node_config = representable_data_nodes.get(data_node_name)
+        data_node_config = representable_data_node_mapping.get(data_node_name)
 
         # Modify id to allow duplicates
         if data_node_name in populate_data_node_ids:
@@ -132,6 +141,7 @@ def prepare_figure_path(state, name, figure_id: str):
     figure_path_possibilities = read_data_node(state, path_node)
     if figure_path_possibilities:
         set_attribute_recursive(state, "figure_path_possibilities", figure_path_possibilities)
+        set_attribute_recursive(state, "figure_path", figure_path_possibilities[0])
 
 
 def set_figure(state, name, figure_path: StrPath):
@@ -162,10 +172,24 @@ def create_visualization():
         # Left part
         with tgb.part(class_name="sticky-part"):
             tgb.text("#### Scenarios", mode="markdown")
-            tgb.scenario_selector("{scenario}", show_add_button=False)
+            tgb.scenario_selector("{scenario}", show_add_button=False, on_change=filter_representable)
 
-            tgb.text("#### Data paths", mode="markdown")
-            tgb.data_node_selector("{path_data_node}", scenario="{scenario}")
+            tgb.text("#### 🕸️ Data path nodes", mode="markdown")
+            tgb.data_node_selector(
+                "{path_data_node}",
+                scenario="{scenario}",
+                datanodes="{representable_data_nodes}",
+                on_change=fill_path_selection
+            )
+
+            tgb.text("#### 🗃️ Path selection", mode="markdown")
+            tgb.selector(
+                "{path_to_data}",
+                lov="{paths_to_data}",
+                dropdown=True,
+            )
+            
+            tgb.button("📊 Show data", on_action=populate_data_node)
 
         # Middle part
         with tgb.part():
@@ -189,14 +213,5 @@ def create_visualization():
 
         # Right part
         with tgb.part():
-            tgb.html("br")
-
-            tgb.text("#### 🗃️ Path selection", mode="markdown")
-            tgb.selector("{path_to_data}", lov="{path_data_node.read()}", dropdown=True)
-
-            tgb.html("br")
-
-            tgb.button("🖼️ Show data from path", on_action=populate_data_node)
-
             tgb.text("#### Populated data", mode="markdown")
             tgb.data_node_selector("{data_node}", datanodes="{populated_data_nodes}")

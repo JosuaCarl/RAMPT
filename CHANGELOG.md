@@ -1,8 +1,10 @@
 # Changes
 
 ## 🔧Fixes🔧
-- Installer uv not on path during install
+- No longer showing non-representable data nodes in visualization mode
 
 ## ⏫Improvements⏫
+- Improved visualization
 
 ## ✨New✨
+- Additional manual videos
