@@ -55,11 +55,14 @@ representable_data_node_mapping = {
 def filter_representable(state, id, scenario_name) -> bool:
     representable_data_nodes = []
     for name, node in state.scenario.data_nodes.items():
-        if name.replace("_paths", "") in representable_data_node_mapping \
-        and node.is_ready_for_reading and node.read():
+        if (
+            name.replace("_paths", "") in representable_data_node_mapping
+            and node.is_ready_for_reading
+            and node.read()
+        ):
             representable_data_nodes.append(node)
     set_attribute_recursive(state, "representable_data_nodes", representable_data_nodes)
-    
+
 
 def fill_path_selection(state, *args):
     path_data_node = get_attribute_recursive(state, "path_data_node")
@@ -69,7 +72,6 @@ def fill_path_selection(state, *args):
 
 populated_data_nodes = []
 populate_data_node_ids = {}
-
 
 
 def populate_data_node(state, *args):
@@ -172,23 +174,21 @@ def create_visualization():
         # Left part
         with tgb.part(class_name="sticky-part"):
             tgb.text("#### Scenarios", mode="markdown")
-            tgb.scenario_selector("{scenario}", show_add_button=False, on_change=filter_representable)
+            tgb.scenario_selector(
+                "{scenario}", show_add_button=False, on_change=filter_representable
+            )
 
             tgb.text("#### 🕸️ Data path nodes", mode="markdown")
             tgb.data_node_selector(
                 "{path_data_node}",
                 scenario="{scenario}",
                 datanodes="{representable_data_nodes}",
-                on_change=fill_path_selection
+                on_change=fill_path_selection,
             )
 
             tgb.text("#### 🗃️ Path selection", mode="markdown")
-            tgb.selector(
-                "{path_to_data}",
-                lov="{paths_to_data}",
-                dropdown=True,
-            )
-            
+            tgb.selector("{path_to_data}", lov="{paths_to_data}", dropdown=True)
+
             tgb.button("📊 Show data", on_action=populate_data_node)
 
         # Middle part
