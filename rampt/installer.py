@@ -1051,8 +1051,7 @@ class InstallerApp(tk.Tk):
                 )
             else:
                 process = logger.execute_command(
-                    ["wget", "-qO-", "https://astral.sh/uv/install.sh"],
-                    text=False,
+                    ["wget", "-qO-", "https://astral.sh/uv/install.sh"], text=False
                 )
                 process = logger.execute_command(["sh"], stdin=process.stdout)
         logger.log("Installed uv")
