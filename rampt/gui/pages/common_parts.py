@@ -16,7 +16,7 @@ selected = {}
 
 
 def create_expandable_setting(
-    create_methods: dict, title: str, hover_text: str = "", expanded=False, **kwargs
+    create_methods: dict, title: str, hover_text: str = "", expanded=False, logger: Logger = Logger(), **kwargs
 ):
     with tgb.expandable(title=title, hover_text=hover_text, expanded=expanded, **kwargs):
         with tgb.layout(columns="0.02 1 0.02", gap="2%"):
@@ -26,7 +26,7 @@ def create_expandable_setting(
                     with tgb.part(class_name="segment-box"):
                         if title:
                             tgb.text(f"##### {title}", mode="markdown")
-                        create_method()
+                        create_method(logger=logger)
                     tgb.html("br")
             tgb.part()
 
@@ -42,6 +42,7 @@ def create_file_selection(
     param_attribute_in: str = "scheduled_in",
     execution_key_in: str = None,
     out_node: str = "",
+    logger: Logger = Logger()
 ):
     naming_list = (
         [process, param_attribute_in, execution_key_in]
@@ -140,7 +141,7 @@ def create_file_selection(
                         active=f"{{scenario.data_nodes['{out_node}'].is_ready_for_reading}}",
                         label="Download results",
                         on_action=lambda state, id, payload: download_data_node_files(
-                            state, out_node
+                            state, out_node, logger=logger,
                         ),
                     )
 
@@ -211,14 +212,22 @@ def create_list_selection(
         )
 
 
+def set_if_chosen(state, attribute: str, ):
+    selected_path = open_file_folder(multiple=False)
+    if selected_path:
+        set_attribute_recursive(
+            state,
+            attribute,
+            refresh=True
+        )
+
+
 def create_exec_selection(process: str, exec_name: str, exec_attribute="exec_path"):
     with tgb.layout(columns="1 1 1 1", columns__mobile="1", gap="5%"):
         tgb.button(
             "Select executable",
             active="{local}",
-            on_action=lambda state: set_attribute_recursive(
-                state, f"{process}_params.exec_path", open_file_folder(multiple=False), refresh=True
-            ),
+            on_action=lambda state: set_if_chosen(state, f"{process}_params.exec_path")
         )
         tgb.input(
             f"{{{process}_params.{exec_attribute}}}",

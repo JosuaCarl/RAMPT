@@ -1,10 +1,10 @@
 # Changes
 
 ## 🔧Fixes🔧
-- No longer showing non-representable data nodes in visualization mode
+- Processing .d folders as viable for conversion
 
 ## ⏫Improvements⏫
-- Improved visualization
+- Batch files are now read to search for output information (including metadata)
 
 ## ✨New✨
-- Additional manual videos
+- Added logger class to facilitate handling output and debugging

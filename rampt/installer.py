@@ -945,7 +945,7 @@ def link_program(op_sys: str, program_path: str, name: str):
         logger.log(f"Shortcut created: {shortcut_path} -> {program_path}")
     else:
         # Create the symlink
-        symlink_path = local_bin / name
+        symlink_path = os.path.join(local_bin, name)
         if symlink_path.exists() or symlink_path.is_symlink():
             symlink_path.unlink()
         symlink_path.symlink_to(program_path)
@@ -962,7 +962,7 @@ class InstallerApp(tk.Tk):
         elif "windows" in self.op_sys:
             standard_install_path = Path.home()
         else:
-            standard_install_path = str(Path.home() / "programs")
+            standard_install_path = os.path.join(str(Path.home()), "programs")
 
         self.primary_progressbar = None
         self.install_status = None

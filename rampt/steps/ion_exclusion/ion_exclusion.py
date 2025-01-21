@@ -41,6 +41,8 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
     additional_args = get_value(args, "ion_exclusion_args", unknown_args)
     additional_args = additional_args if additional_args else unknown_args
 
+    logger = Logger()
+
     ion_exclusion_runner = Ion_exclusion_Runner(
         relative_tolerance=relative_tolerance,
         absolute_tolerance=absolute_tolerance,
@@ -56,7 +58,7 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         )
         compute_scheduled(futures=futures, num_workers=n_workers, verbose=verbosity >= 1)
     else:
-        ion_exclusion_runner.check_ms2_presence(in_dir=in_dir, out_dir=out_dir, data_dir=data_dir)
+        ion_exclusion_runner.check_ms2_presence(in_dir=in_dir, out_dir=out_dir, data_dir=data_dir, logger=logger)
 
     return ion_exclusion_runner.processed_out
 
@@ -106,7 +108,7 @@ class Ion_exclusion_Runner(Pipe_Step):
         self.file_handler = OpenMS_File_Handler()
 
     def check_ms2_presence(
-        self, in_dir: StrPath, out_dir: StrPath, data_dir: StrPath, annotation_file: StrPath = None
+        self, in_dir: StrPath, out_dir: StrPath, data_dir: StrPath, annotation_file: StrPath = None, logger:Logger = Logger()
     ):
         """
         Check for MS2 fractioning precursors in aligned features.
@@ -120,7 +122,7 @@ class Ion_exclusion_Runner(Pipe_Step):
         :param annotation_file: Path to annotation file (as csv), defaults to None
         :type annotation_file: StrPath, optional
         """
-        experiments = self.file_handler.load_experiments_df(data_dir, file_ending=".mzML")
+        experiments = self.file_handler.load_experiments_df(data_dir, file_ending=".mzML", logger=logger)
 
         precursor_infos_files = {}
         for i, row in experiments.iterrows():
@@ -198,6 +200,7 @@ class Ion_exclusion_Runner(Pipe_Step):
         out_root_dir: StrPath,
         futures: list = [],
         recusion_level: int = 0,
+        logger:Logger = Logger(),
     ) -> list:
         """
         Check for MS2 presence in a nested fashion.
@@ -244,6 +247,7 @@ class Ion_exclusion_Runner(Pipe_Step):
                     out_dir=out_root_dir,
                     data_dir=data_root_dir,
                     annotation_file=annot_file,
+                    logger=logger,
                 )
             )
         if futures:

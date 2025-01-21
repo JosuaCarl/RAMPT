@@ -18,12 +18,12 @@ from rampt.gui.configuration.config import *
 
 
 # COMMON
-def read_data_node(state, data_node: str) -> bool:
+def read_data_node(state, data_node: str, logger: Logger = Logger()) -> bool:
     data_node = state.scenario.data_nodes.get(data_node)
     if data_node.is_ready_for_reading:
         return data_node.read()
     else:
-        warn(f"Path node {data_node} is not readable. Probably not yet written.")
+        logger.warn(f"Path node {data_node} is not readable. Probably not yet written.")
         notify(f"Path node {data_node} is not readable. Probably not yet written.")
         return None
 
@@ -74,7 +74,7 @@ populated_data_nodes = []
 populate_data_node_ids = {}
 
 
-def populate_data_node(state, *args):
+def populate_data_node(state, logger: Logger = Logger(), *args):
     ic("HERE")
     path_node_name = get_attribute_recursive(state, "path_data_node").get_simple_label()
     data_node_name = path_node_name.replace("_paths", "")
@@ -108,7 +108,7 @@ def populate_data_node(state, *args):
         data_node = tp.create_global_data_node(data_node_config)
         data_node.write(content)
     else:
-        warn(f"{path} is no path to a file.")
+        logger.warn(f"{path} is no path to a file.")
 
     # Save information
     populated_data_nodes.append(data_node)
@@ -130,7 +130,7 @@ figure_possibilities = [
 figure_path_possibilities = []
 
 
-def prepare_figure_path(state, name, figure_id: str):
+def prepare_figure_path(state, name, figure_id: str, logger: Logger = Logger()):
     match figure_id:
         case "values heatmap":
             path_node = "summary_data_paths"
@@ -140,7 +140,7 @@ def prepare_figure_path(state, name, figure_id: str):
             path_node = "analysis_data_paths"
         case "zscore cutoff accumulation":
             path_node = "analysis_data_paths"
-    figure_path_possibilities = read_data_node(state, path_node)
+    figure_path_possibilities = read_data_node(state, path_node, logger=logger)
     if figure_path_possibilities:
         set_attribute_recursive(state, "figure_path_possibilities", figure_path_possibilities)
         set_attribute_recursive(state, "figure_path", figure_path_possibilities[0])
@@ -169,7 +169,7 @@ def set_figure(state, name, figure_path: StrPath):
 
 
 # VISUALIZATION PAGE
-def create_visualization():
+def create_visualization(logger: Logger = Logger()):
     with tgb.layout(columns="1 3 1", columns__mobile="1", gap="2.5%"):
         # Left part
         with tgb.part(class_name="sticky-part"):
@@ -189,7 +189,9 @@ def create_visualization():
             tgb.text("#### 🗃️ Path selection", mode="markdown")
             tgb.selector("{path_to_data}", lov="{paths_to_data}", dropdown=True)
 
-            tgb.button("📊 Show data", on_action=populate_data_node)
+            tgb.button(
+                "📊 Show data",
+                on_action=lambda state, id, payload: populate_data_node(state, logger=logger))
 
         # Middle part
         with tgb.part():
@@ -201,7 +203,12 @@ def create_visualization():
                 "{figure_id}",
                 lov="{figure_possibilities}",
                 dropdown=True,
-                on_change=prepare_figure_path,
+                on_change=lambda state, name, value: prepare_figure_path(
+                    state=state,
+                    name=name,
+                    figure_id=value,
+                    logger=logger
+                ),
             )
             tgb.selector(
                 "{figure_path}",

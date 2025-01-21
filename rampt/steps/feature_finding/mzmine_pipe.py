@@ -31,39 +31,20 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
     valid_formats = get_value(args, "valid_formats", ["mzML", "mzXML", "imzML"])
     user = get_value(args, "user", None)
     nested = get_value(args, "nested", False)
-    platform = get_value(args, "platform", "windows")
     save_log = get_value(args, "save_log", False)
     verbosity = get_value(args, "verbosity", 1)
     additional_args = get_value(args, "mzmine_arguments", unknown_args)
     additional_args = additional_args if additional_args else unknown_args
 
     if not exec_path:
-        match Substring(platform.lower()):
-            case "linux":
-                exec_path = r"/opt/mzmine-linux-installer/bin/mzmine"
-            case "windows":
-                exec_path = r"C:\Program Files\mzmine\mzmine_console.exe"
-            case "mac":
-                exec_path = r"/Applications/mzmine.app/Contents/MacOS/mzmine"
-            case _:
-                exec_path = r"mzmine"
+        exec_path = r"mzmine"
 
-    if user:
-        if user == "console":
-            login = "--login-console"
-        else:
-            login = f"--user {user}"
-    else:
-        log(
-            message="You did not provide a user. You will be prompted to login by mzmine.\
-                      For future use please find your user file under $USER/.mzmine/users/ after completing the login."
-        )
-        login = "--login"
+    
 
     mzmine_runner = MZmine_Runner(
         exec_path=exec_path,
         batch=batch,
-        login=login,
+        user=user,
         valid_formats=valid_formats,
         save_log=save_log,
         additional_args=additional_args,
@@ -85,10 +66,12 @@ class MZmine_Runner(Pipe_Step):
         exec_path: StrPath = "mzmine",
         batch: StrPath = "",
         login: str = "-login",
+        user: str = None,
         valid_formats: list = ["mzML", "mzXML", "imzML"],
         save_log: bool = False,
         additional_args: list = [],
         verbosity: int = 1,
+        logger: Logger = Logger(),
         **kwargs,
     ):
         """
@@ -100,6 +83,8 @@ class MZmine_Runner(Pipe_Step):
         :type batch: StrPath
         :param login: Login or user command, defaults to "-login"
         :type login: str, optional
+        :param user: User command, defaults to None
+        :type user: str, optional
         :param valid_formats: Formats to search for as valid endings, defaults to ["mzML", "mzXML", "imzML"]
         :type valid_formats: list, optional
         :param save_log: Whether to save the output(s).
@@ -119,14 +104,26 @@ class MZmine_Runner(Pipe_Step):
             self.update(kwargs)
         self.common_execs = ["mzmine", "mzmine.exe", "mzmine_console"]
         self.exec_path = self.check_execs(exec_path=exec_path)
-        self.login = login
         self.batch = batch
         self.valid_formats = valid_formats
         self.name = "mzmine"
+        self.logger = logger
+
+        # Handle login to mzmine
+        if user:
+            self.login = f"--user {user}"
+        elif "console" in login.lower():
+            self.login = "--login-console"   
+        else:
+            self.logger.log(
+                message="You did not provide a user. You will be prompted to login by mzmine.\
+                        For future use please find your user file under $USER/.mzmine/users/ after completing the login."
+            )
+            self.login = "--login"
 
     def check_attributes(self):
         if not os.path.isfile(self.batch):
-            error(
+            self.logger.error(
                 message=f"Batch path {self.batch} is no file. Please point to a valid mzbatch file.",
                 error_type=ValueError,
             )
@@ -235,7 +232,6 @@ if __name__ == "__main__":
     parser.add_argument("-formats", "--valid_formats", required=False, nargs="+")
     parser.add_argument("-u", "--user", required=False)
     parser.add_argument("-n", "--nested", required=False, action="store_true")
-    parser.add_argument("-p", "--platform", required=False)
     parser.add_argument("-s", "--save_log", required=False, action="store_true")
     parser.add_argument("-v", "--verbosity", required=False, type=int)
     parser.add_argument("-mzmine", "--mzmine_arguments", required=False, nargs=argparse.REMAINDER)

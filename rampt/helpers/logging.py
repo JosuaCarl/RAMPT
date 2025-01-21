@@ -3,6 +3,7 @@
 Make logging, warnings and error messages more consistent and expressive.
 """
 
+import os
 import sys
 import warnings
 from datetime import datetime
@@ -25,67 +26,6 @@ def debug(*args, **kwargs):
     Icecream debugging.
     """
     ic(*args, **kwargs)
-
-
-def log(
-    message: str = "Info",
-    program: str = program_name,
-    minimum_verbosity: int = 0,
-    verbosity: int = 0,
-    *args,
-    **kwargs,
-):
-    """
-    Print a log message.
-
-    :param message: Message, defaults to "Info"
-    :type message: str, optional
-    :param program: Name of the program to report for, defaults to program_name
-    :type program: str, optional
-    :param minimum_verbosity: Minimum required verbosity to show message, defaults to 0
-    :type minimum_verbosity: int, optional
-    :param verbosity: Current verbosity setting, defaults to 0
-    :type verbosity: int, optional
-    """
-    if verbosity >= minimum_verbosity:
-        print(
-            f"[{get_now()}][{program}][INFO (V>={minimum_verbosity})]\t{message}", *args, **kwargs
-        )
-
-
-def warn(message: str = "Warning", program: str = program_name, *args, **kwargs):
-    """
-    Print a warning.
-
-    :param message: Warning message, defaults to "Warning"
-    :type message: str, optional
-    :param program: Name of the program to report for, defaults to program_name
-    :type program: str, optional
-    """
-    warnings.warn(f"[{get_now()}][{program}][WARNING]\t{message}", *args, **kwargs)
-
-
-def error(
-    message: str = "Error",
-    error_type=ValueError,
-    raise_error: bool = True,
-    program: str = program_name,
-    *args,
-):
-    """
-    Pass an error to raise at approporiate place, or raise.
-
-    :param message: Error message, defaults to "Error"
-    :type message: str, optional
-    :param error_type: Error class
-    :type error_type: Error
-    :param program: Name of the program to report for, defaults to program_name
-    :type program: str, optional
-    """
-    if raise_error:
-        raise error_type(f"[{get_now()}][{program}][ERROR]\t{message}", *args)
-    else:
-        return error_type(f"[{get_now()}][{program}][ERROR]\t{message}", *args)
 
 
 class TeeStream:
@@ -160,3 +100,99 @@ def capture_and_log(
     sys.stderr = original_stderr
 
     return results, out, err
+
+
+class Logger:
+    def __init__(self, log_file_path: str = None):
+        self.out = ""
+        self.err = ""
+        if log_file_path:
+            self.log_file_path = os.path.abspath(log_file_path)
+        else:
+            self.log_file_path = None
+        self.log(f"Saving log file to {log_file_path}")
+
+    def to_out(self, output: str):
+        self.out += output
+        self.write_log_file(output=output)
+
+    def to_err(self, output: str):
+        self.err += output
+        self.write_log_file(output=output)
+
+    def write_log_file(self, output: str, log_file_path: str = None):
+        if not log_file_path:
+            log_file_path = self.log_file_path
+        if log_file_path:
+            with open(log_file_path, "a") as log_file:
+                log_file.write("\n" + output)
+
+    def log(
+        self,
+        message: str = "Info",
+        program: str = program_name,
+        minimum_verbosity: int = 0,
+        verbosity: int = 0,
+        *args,
+        **kwargs,
+    ):
+        """
+        Print a log message.
+
+        :param message: Message, defaults to "Info"
+        :type message: str, optional
+        :param program: Name of the program to report for, defaults to program_name
+        :type program: str, optional
+        :param minimum_verbosity: Minimum required verbosity to show message, defaults to 0
+        :type minimum_verbosity: int, optional
+        :param verbosity: Current verbosity setting, defaults to 0
+        :type verbosity: int, optional
+        """
+        self.to_out(output=message)
+        if verbosity >= minimum_verbosity:
+            print(
+                f"[{get_now()}][{program}][INFO (V>={minimum_verbosity})]\t{message}", *args, **kwargs
+            )
+
+
+    def warn(
+            self,
+            message: str = "Warning",
+            program: str = program_name,
+            *args,
+            **kwargs):
+        """
+        Print a warning.
+
+        :param message: Warning message, defaults to "Warning"
+        :type message: str, optional
+        :param program: Name of the program to report for, defaults to program_name
+        :type program: str, optional
+        """
+        self.to_out(output=message)
+        warnings.warn(f"[{get_now()}][{program}][WARNING]\t{message}", *args, **kwargs)
+
+
+    def error(
+        self,
+        message: str = "Error",
+        error_type=ValueError,
+        raise_error: bool = True,
+        program: str = program_name,
+        *args,
+    ):
+        """
+        Pass an error to raise at approporiate place, or raise.
+
+        :param message: Error message, defaults to "Error"
+        :type message: str, optional
+        :param error_type: Error class
+        :type error_type: Error
+        :param program: Name of the program to report for, defaults to program_name
+        :type program: str, optional
+        """
+        self.to_err(output=message)
+        if raise_error:
+            raise error_type(f"[{get_now()}][{program}][ERROR]\t{message}", *args)
+        else:
+            return error_type(f"[{get_now()}][{program}][ERROR]\t{message}", *args)

@@ -119,7 +119,7 @@ class MSconvert_Runner(Pipe_Step):
         self.overwrite = overwrite
         self.target_format = target_format if target_format.startswith(".") else f".{target_format}"
         self.target_format = change_case_str(
-            s=self.target_format, range=slice(3, len(self.target_format)), conversion="upper"
+            s=self.target_format, range=slice(3, len(self.target_format)), conversion="upper", logger=self.logger
         )
         self.pattern = pattern
         self.suffix = suffix
@@ -162,7 +162,7 @@ class MSconvert_Runner(Pipe_Step):
             self.overwrite
             or (not os.path.isfile(out_path))
             or os.path.getsize(out_path) < float(self.redo_threshold)
-            or not regex.search("^</.*>$", open_last_line_with_content(filepath=out_path))
+            or not regex.search("^</.*>$", open_last_line_with_content(filepath=out_path, logger=self.logger))
         )
 
         return in_valid, out_valid

@@ -19,6 +19,11 @@ from typing import Any
 
 
 # Data nodes
+# Logger node
+logger_config = Config.configure_in_memory_data_node(
+    id="logger", scope=Scope.GLOBAL, default_data=Logger(),
+)
+
 ## Data paths
 raw_data_paths_config = Config.configure_in_memory_data_node(
     id="raw_data_paths", scope=Scope.SCENARIO
@@ -129,15 +134,16 @@ def generic_step(
     out_paths: str | list = None,
     out_path_target: StrPath = ".",
     return_attributes: list = ["processed_out"],
+    logger: Logger = Logger(),
     **kwargs,
 ) -> tuple[Any] | Any:
     # Fixate parameters
     global_params.pop("patterns")
     global_params.pop("additional_args")
     step_params.update(global_params)
-    step_instance = step_class(**step_params)
+    step_instance = step_class(**step_params, logger=logger)
 
-    log(
+    logger.log(
         f"Starting {step_instance.name} step",
         minimum_verbosity=3,
         verbosity=global_params.get("verbosity", 0),
@@ -148,7 +154,7 @@ def generic_step(
         in_paths = to_list(in_paths)
         step_instance.scheduled_in = []
     elif not step_instance.scheduled_in:
-        raise error(
+        raise logger.error(
             message=f"No input in in_paths and {step_instance.__class__.__name__}.scheduled_in",
             error_type=TypeError,
             raise_error=False,
@@ -166,7 +172,7 @@ def generic_step(
                 if path:
                     in_path_example = path
                     break
-            in_dir = get_directory(in_path_example)
+            in_dir = get_directory(in_path_example, logger=logger)
             out_paths.append(os.path.normpath(os.path.join(in_dir, out_path_target)))
 
     # Run step
@@ -179,7 +185,7 @@ def generic_step(
 
 
 def convert_files(
-    raw_data_paths: StrPath, conversion_out_paths: StrPath, step_params: dict, global_params: dict
+    raw_data_paths: StrPath, conversion_out_paths: StrPath, step_params: dict, global_params: dict, logger: Logger = Logger()
 ):
     return generic_step(
         step_class=MSconvert_Runner,
@@ -188,6 +194,7 @@ def convert_files(
         out_path_target=os.path.join("..", "converted"),
         step_params=step_params,
         global_params=global_params,
+        logger=logger
     )
 
 
@@ -197,6 +204,7 @@ def find_features(
     mzmine_batch: StrPath,
     step_params: dict,
     global_params: dict,
+    logger: Logger = Logger(), 
 ):
     return generic_step(
         step_class=MZmine_Runner,
@@ -207,6 +215,7 @@ def find_features(
         global_params=global_params,
         return_attributes=["processed_out", "log_paths"],
         batch=mzmine_batch,
+        logger=logger
     )
 
 
@@ -216,6 +225,7 @@ def annotate_gnps(
     gnps_out_paths: StrPath,
     step_params: dict,
     global_params: dict,
+    logger: Logger = Logger(), 
 ):
     return generic_step(
         step_class=GNPS_Runner,
@@ -225,6 +235,7 @@ def annotate_gnps(
         step_params=step_params,
         global_params=global_params,
         mzmine_log=mzmine_log,
+        logger=logger,
     )
 
 
@@ -234,6 +245,7 @@ def annotate_sirius(
     config: StrPath,
     step_params: dict,
     global_params: dict,
+    logger: Logger = Logger(), 
 ):
     return generic_step(
         step_class=Sirius_Runner,
@@ -243,6 +255,7 @@ def annotate_sirius(
         step_params=step_params,
         global_params=global_params,
         config=config,
+        logger=logger,
     )
 
 
@@ -253,6 +266,7 @@ def summarize_annotations(
     summary_out_paths: StrPath,
     step_params: dict,
     global_params: dict,
+    logger: Logger = Logger(), 
 ):
     return generic_step(
         step_class=Summary_Runner,
@@ -266,11 +280,12 @@ def summarize_annotations(
         out_path_target=os.path.join("..", "analysis"),
         step_params=step_params,
         global_params=global_params,
+        logger=logger,
     )
 
 
 def analyze_difference(
-    summary_data_paths: StrPath, analysis_out_paths: StrPath, step_params: dict, global_params: dict
+    summary_data_paths: StrPath, analysis_out_paths: StrPath, step_params: dict, global_params: dict, logger: Logger = Logger(), 
 ):
     return generic_step(
         step_class=Analysis_Runner,
@@ -279,6 +294,7 @@ def analyze_difference(
         out_path_target=os.path.join("..", "analysis"),
         step_params=step_params,
         global_params=global_params,
+        logger=logger,
     )
 
 
@@ -291,6 +307,7 @@ convert_files_config = Config.configure_task(
         conversion_out_paths_config,
         conversion_params_config,
         global_params_config,
+        logger_config,
     ],
     output=community_formatted_data_paths_config,
     skippable=False,
@@ -305,6 +322,7 @@ find_features_config = Config.configure_task(
         mzmine_batch_config,
         feature_finding_params_config,
         global_params_config,
+        logger_config,
     ],
     output=[processed_data_paths_config, mzmine_log_config],
     skippable=False,
@@ -319,6 +337,7 @@ annotate_gnps_config = Config.configure_task(
         gnps_out_paths_config,
         gnps_params_config,
         global_params_config,
+        logger_config,
     ],
     output=gnps_annotation_paths_config,
     skippable=True,
@@ -333,6 +352,7 @@ annotate_sirius_config = Config.configure_task(
         sirius_config_config,
         sirius_params_config,
         global_params_config,
+        logger_config,
     ],
     output=sirius_annotation_paths_config,
     skippable=False,
@@ -348,6 +368,7 @@ summarize_annotations_config = Config.configure_task(
         summary_out_paths_config,
         summary_params_config,
         global_params_config,
+        logger_config,
     ],
     output=summary_data_paths_config,
     skippable=False,
@@ -361,6 +382,7 @@ analyze_difference_config = Config.configure_task(
         analysis_out_paths_config,
         analysis_params_config,
         global_params_config,
+        logger_config,
     ],
     output=analysis_data_paths_config,
     skippable=False,

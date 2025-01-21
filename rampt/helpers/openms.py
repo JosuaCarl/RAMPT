@@ -215,6 +215,7 @@ class OpenMS_File_Handler:
         separator: str = "\t",
         data_load: bool = True,
         table_backend=pd,
+        logger: Logger = Logger(),
     ) -> pd.DataFrame:
         """
         Load a Flow injection analysis dataframe, defining important properties.
@@ -232,11 +233,11 @@ class OpenMS_File_Handler:
         :return: _description_
         :rtype: Union[pandas.DataFrame]
         """
-        log("Loading names:", minimum_verbosity=2, verbosity=self.verbosity)
+        logger.log("Loading names:", minimum_verbosity=2, verbosity=self.verbosity)
         names = self.load_names_batch(data_dir, file_ending)
         samples = [name.split("_")[:-1] for name in names]
         polarities = [{"pos": 1, "neg": -1}.get(name.split("_")[-1]) for name in names]
-        log("Loading experiments:", minimum_verbosity=2, verbosity=self.verbosity)
+        logger.log("Loading experiments:", minimum_verbosity=2, verbosity=self.verbosity)
         experiments = self.load_experiments(
             data_dir, file_ending, separator=separator, data_load=data_load
         )

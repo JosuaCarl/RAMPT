@@ -44,6 +44,7 @@ def execute_test(
     alternative_hypothesis: str = "two-sided",
     cutoff: float = 0.05,
     multiple_testing_correction: str = "bonferroni",
+    logger: Logger = Logger(),
     *args,
 ) -> bool:
     match test:
@@ -57,11 +58,11 @@ def execute_test(
             )
         case "One-sample t-test":
             if y:
-                warn("Passed y vector for a one-sample test.", UserWarning)
+                logger.warn("Passed y vector for a one-sample test.", UserWarning)
             p_values = stats.ttest_1samp(x, axis=axis, alternative=alternative_hypothesis)
         case "Wilcoxon matched pairs test":
             if y:
-                warn("Passed y vector for a one-sample test.", UserWarning)
+                logger.warn("Passed y vector for a one-sample test.", UserWarning)
             p_values = stats.wilcoxon(x, axis=axis, alternative=alternative_hypothesis, *args)
 
     if multiple_testing_correction:

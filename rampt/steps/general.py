@@ -64,7 +64,7 @@ def get_value(instance: object | dict, key, default):  # noqa: F811
             return default
 
 
-def set_value(instance: object | dict, key, new_value, add_key: bool):
+def set_value(instance: object | dict, key, new_value, add_key: bool, logger: Logger = Logger()):
     """
     Set the value of an attribute or dictionary entry.
 
@@ -90,7 +90,7 @@ def set_value(instance: object | dict, key, new_value, add_key: bool):
         elif add_key:
             setattr(instance, key, new_value)
         else:
-            error(
+            logger.error(
                 message=f"The key={key} is not found in instance={instance} and add_key={add_key}.",
                 error_type=ValueError,
             )
@@ -114,6 +114,7 @@ class Step_Configuration:
         save_log: bool = True,
         verbosity: int = 1,
         additional_args: list = [],
+        logger: Logger = Logger(),
     ):
         """
         Initialize the pipeline step configuration. Used for pattern matching.
@@ -131,10 +132,12 @@ class Step_Configuration:
         :type patterns: dict[str,str], optional
         :param save_log: Whether to save the output(s), defaults to True.
         :type save_log: bool, optional
-        :param additional_args: Additional arguments for mzmine, defaults to []
-        :type additional_args: list, optional
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
+        :param additional_args: Additional arguments for mzmine, defaults to []
+        :type additional_args: list, optional
+        :param logger: Logger class to handle output, defaults to Logger()
+        :type logger: Logger
         """
         self.name = name
         self.platform = platform
@@ -145,6 +148,7 @@ class Step_Configuration:
         self.save_log = save_log
         self.verbosity = verbosity
         self.additional_args = additional_args
+        self.logger = logger
 
     def update(self, attributions: dict):
         """
@@ -198,6 +202,7 @@ class Pipe_Step(Step_Configuration):
         save_log: bool = False,
         verbosity: int = 1,
         additional_args: list = [],
+        logger: Logger = Logger(),
     ):
         """
         Initialize the pipeline step. Used for pattern matching.
@@ -219,10 +224,12 @@ class Pipe_Step(Step_Configuration):
         :type patterns: dict[str,str], optional
         :param save_log: Whether to save the output(s).
         :type save_log: bool, optional
-        :param additional_args: Additional arguments for mzmine, defaults to []
-        :type additional_args: list, optional
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
+        :param additional_args: Additional arguments for mzmine, defaults to []
+        :type additional_args: list, optional
+        :param additional_args: Additional arguments for mzmine, defaults to []
+        :type additional_args: list, optional
         """
         super().__init__(
             name=name,
@@ -234,6 +241,7 @@ class Pipe_Step(Step_Configuration):
             save_log=save_log,
             verbosity=verbosity,
             additional_args=additional_args,
+            logger=logger
         )
 
         self.common_execs = []
@@ -280,7 +288,7 @@ class Pipe_Step(Step_Configuration):
                 break
 
         if valid_exec and valid_exec != exec_path:
-            warn(f"{self.name} exec_path is set to {self.exec_path}")
+            self.logger.warn(f"{self.name} exec_path is set to {self.exec_path}")
 
         return valid_exec
 
@@ -299,7 +307,7 @@ class Pipe_Step(Step_Configuration):
 
     def get_log_path(self, out_path: StrPath) -> StrPath:
         log_path = (
-            os.path.join(get_directory(out_path), f"{self.name}_log.txt") if self.save_log else None
+            os.path.join(get_directory(out_path, logger=self.logger), f"{self.name}_log.txt") if self.save_log else None
         )
 
         return log_path
@@ -413,7 +421,7 @@ class Pipe_Step(Step_Configuration):
         :param kwargs: Dictionary of additional arguments for computation
         :type kwargs: ...
         """
-        error(
+        self.logger.error(
             message="The run_single function seems to be missing in local implementation",
             error_type=NotImplementedError,
         )
@@ -425,7 +433,7 @@ class Pipe_Step(Step_Configuration):
         :param kwargs: Dictionary of additional arguments for computation
         :type kwargs: ...
         """
-        error(
+        self.logger.error(
             message="The run_directory function seems to be missing in local implementation",
             error_type=NotImplementedError,
         )
@@ -437,7 +445,7 @@ class Pipe_Step(Step_Configuration):
         :param kwargs: Dictionary of additional arguments for computation
         :type kwargs: ...
         """
-        error(
+        self.logger.error(
             message="The run_nested function seems to be missing in local implementation",
             error_type=NotImplementedError,
         )
@@ -450,12 +458,14 @@ class Pipe_Step(Step_Configuration):
         :type in_paths: list|StrPath
         :param out_paths: Output paths
         :type out_paths: list|StrPath
+        :param logger: Logger class to handle output, defaults to Logger()
+        :type logger: Logger
         :param kwargs: Dictionary of additional arguments for computation
         :type kwargs: ...
         :return: Output that was processed
         :rtype: list
         """
-        log(
+        self.logger.log(
             message=f"Started {self.__class__.__name__} step",
             minimum_verbosity=1,
             verbosity=self.verbosity,
@@ -493,7 +503,7 @@ class Pipe_Step(Step_Configuration):
             for target_path in target_paths:
                 os.makedirs(target_path, exist_ok=True)
 
-            log(
+            self.logger.log(
                 message=f"Processing {in_path} -> {out_path}",
                 minimum_verbosity=2,
                 verbosity=self.verbosity,
@@ -516,7 +526,7 @@ class Pipe_Step(Step_Configuration):
             else:
                 self.run_single(in_path=in_path, out_path=out_path, **additional_arguments)
 
-            log(
+            self.logger.log(
                 message=f"Processed {in_path} -> {out_path}",
                 minimum_verbosity=2,
                 verbosity=self.verbosity,
@@ -530,7 +540,7 @@ class Pipe_Step(Step_Configuration):
         self.scheduled_in = []
         self.scheduled_out = []
 
-        log(
+        self.logger.log(
             message=f"Finished {self.__class__.__name__} step",
             minimum_verbosity=1,
             verbosity=self.verbosity,

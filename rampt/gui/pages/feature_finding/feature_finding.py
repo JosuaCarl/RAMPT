@@ -9,9 +9,9 @@ from rampt.steps.feature_finding.mzmine_pipe import MZmine_Runner
 feature_finding_params = MZmine_Runner()
 
 
-def create_feature_finding(process="feature_finding"):
+def create_feature_finding(logger: Logger = Logger()):
     tgb.text("###### File selection", mode="markdown")
-    create_file_selection(process="feature_finding", out_node="processed_data_paths")
+    create_file_selection(process="feature_finding", out_node="processed_data_paths", logger=logger)
 
     tgb.html("br")
 

@@ -61,7 +61,7 @@ def make_new_dir(dir: StrPath) -> bool:
     return False
 
 
-def get_directory(path: StrPath) -> StrPath:
+def get_directory(path: StrPath, logger:Logger = Logger()) -> StrPath:
     """
     Extract directory path from file or directory path.
 
@@ -78,7 +78,7 @@ def get_directory(path: StrPath) -> StrPath:
     if os.path.isdir(directory):
         return directory
     else:
-        error(message=f"{path} is not a file or directory", error_type=ValueError)
+        logger.error(message=f"{path} is not a file or directory", error_type=ValueError)
 
 
 # List operations
@@ -211,7 +211,7 @@ def stretch_to_list_of_dicts(dictionary: dict) -> list:
 
 
 # String operations
-def change_case_str(s: str, range, conversion: str) -> str:
+def change_case_str(s: str, range, conversion: str, logger: Logger = Logger()) -> str:
     """
     Change the case of part of a string.
 
@@ -233,7 +233,7 @@ def change_case_str(s: str, range, conversion: str) -> str:
         case "lower":
             selection = selection.lower()
         case _:
-            error(
+            logger.error(
                 message=f"conversion {conversion} is invalid. Choose upper/lower as a valid conversion.",
                 error_type=ValueError,
             )
@@ -382,7 +382,7 @@ def open_last_n_line(filepath: str, n: int = 1) -> str:
         return f.readline().decode()
 
 
-def open_last_line_with_content(filepath: str) -> str:
+def open_last_line_with_content(filepath: str, logger:Logger = Logger()) -> str:
     """
     Extract the last line which does not only contain whitespace from a file.
 
@@ -396,7 +396,7 @@ def open_last_line_with_content(filepath: str) -> str:
         try:
             line = open_last_n_line(filepath=filepath, n=n)
         except OSError as e:
-            raise error(
+            raise logger.error(
                 message=f"File {filepath} does not contain a line with content",
                 error_type=ValueError,
                 raise_error=False,
@@ -404,7 +404,7 @@ def open_last_line_with_content(filepath: str) -> str:
         if regex.search(r".*\S.*", line):
             return line
         n += 1
-    error(
+    logger.error(
         message=f"File {filepath} does not contain a line with content for 1000 lines",
         error_type=ValueError,
     )
@@ -430,6 +430,7 @@ def execute_verbose_command(
     verbosity: int = 1,
     log_path: StrPath = None,
     decode_text: bool = True,
+    logger: Logger = Logger(),
     **kwargs,
 ) -> tuple[str, str]:
     """
@@ -443,10 +444,12 @@ def execute_verbose_command(
     :type log_path: StrPath
     :param decode_text: Whether to decode the text, defaults to True
     :type decode_text: bool
+    :param logger: Logger class to handle output, defaults to Logger()
+    :type logger: Logger
     :return: Stdout, Stderr
     :rtype: tuple[str,str]
     """
-    log(f"Starting command: {cmd}", minimum_verbosity=3, verbosity=verbosity)
+    logger.log(f"Starting command: {cmd}", minimum_verbosity=3, verbosity=verbosity)
     process = tee_subprocess.run(
         cmd,
         shell=True,
@@ -500,6 +503,7 @@ def check_for_str_request(
     allowed_fails: int = 5,
     retry_time: float = 20.0,
     verbosity: int = 1,
+    logger: Logger = Logger(),
     **kwargs,
 ) -> bool:
     """
@@ -521,6 +525,8 @@ def check_for_str_request(
     :type retry_time: float, optional
     :param verbosity: Level of verbosity, defaults to 1
     :type verbosity: int, optional
+    :param logger: Logger class to handle output, defaults to Logger()
+    :type logger: Logger
     :param kwargs: Additional arguments, passed on to requests.get()
     :type kwargs: any, optional
     :return: Query found ?
@@ -532,7 +538,7 @@ def check_for_str_request(
 
         if response.status_code == 200:
             if query_success in str(response.content):
-                log(
+                logger.log(
                     message=f"Request succeeded ({query_success} in response).",
                     minimum_verbosity=3,
                     verbosity=verbosity,
@@ -540,21 +546,21 @@ def check_for_str_request(
                 return True
 
             elif query_failed and query_failed in str(response.content):
-                log(
+                logger.log(
                     message=f"Request failed ({query_failed} in response).",
                     minimum_verbosity=3,
                     verbosity=verbosity,
                 )
                 return False
             elif query_running and query_running in str(response.content):
-                log(
+                logger.log(
                     message=f"Request still running ({query_running} in response).",
                     minimum_verbosity=3,
                     verbosity=verbosity,
                 )
         else:
             fails.append(response.status_code)
-            warn(
+            logger.warn(
                 f"{url} returned status code {response.status_code} after {i} retries.\
                     Requesting this URL will be terminated after further {allowed_fails - len(fails)} failed requests.",
                 category=UserWarning,
@@ -567,7 +573,7 @@ def check_for_str_request(
             )
 
         # Retry
-        log(
+        logger.log(
             message=f"{query_success} not found at {url}. Retrying in {retry_time}s.",
             minimum_verbosity=2,
             verbosity=verbosity,

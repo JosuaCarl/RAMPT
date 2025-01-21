@@ -9,9 +9,9 @@ from rampt.steps.conversion.msconv_pipe import MSconvert_Runner
 conversion_params = MSconvert_Runner()
 
 
-def create_conversion():
+def create_conversion(logger: Logger = Logger()):
     tgb.text("###### File selection", mode="markdown")
-    create_file_selection(process="conversion", out_node="community_formatted_data_paths")
+    create_file_selection(process="conversion", out_node="community_formatted_data_paths", logger=logger)
 
     create_advanced_settings()
 

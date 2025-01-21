@@ -3,6 +3,7 @@
 import os
 import tempfile
 import json
+from pathlib import Path
 
 import taipy as tp
 import taipy.gui.builder as tgb
@@ -22,10 +23,15 @@ from rampt.gui.pages.general.general import *
 from rampt.gui.configuration.config import *
 
 
+# Logger
+log_path = os.path.abspath(
+    os.path.join(Path().home(), "rampt_log.txt")
+)
+logger = Logger(log_path)
+
 # Working directory
 local = True
 work_dir_root = tempfile.gettempdir()
-
 
 # SYNCHRONISATION (First GUI, then Scenario)
 ## Synchronisation of GUI
@@ -60,7 +66,7 @@ def save_params(state, path: StrPath = None, scenario_name: str = None):
     elif save_path:
         path = save_path
     else:
-        warn(f"Saving to default path: {os.path.join(work_dir_root, 'Default_config.json')}")
+        logger.warn(f"Saving to default path: {os.path.join(work_dir_root, 'Default_config.json')}")
         path = os.path.join(work_dir_root, "Default_config.json")
 
     with open(path, "w") as file:
@@ -246,30 +252,35 @@ with tgb.Page(style=style) as configuration:
                 create_methods={"": create_general},
                 title="🌐 General",
                 hover_text="General settings, that are applied globally.",
+                logger=logger,
             )
 
             create_expandable_setting(
                 create_methods={"": create_conversion},
                 title="↔️ Conversion",
                 hover_text="Convert manufacturer files into community formats.",
+                logger=logger,
             )
 
             create_expandable_setting(
                 create_methods={"": create_feature_finding},
                 title="🔍 Feature finding",
                 hover_text="Find features with MZmine through applying steps via a batch file.",
+                logger=logger,
             )
 
             create_expandable_setting(
                 create_methods={"GNPS": create_gnps, "Sirius": create_sirius},
                 title="✒️ Annotation",
                 hover_text="Annotation of data with GNPS and Sirius.",
+                logger=logger,
             )
 
             create_expandable_setting(
                 create_methods={"Summary": create_summary, "Analysis": create_analysis},
                 title="📈 Analysis",
                 hover_text="Statistical analysis of annotated features.",
+                logger=logger,
             )
 
             # Pipeline showcasing
@@ -294,4 +305,4 @@ with tgb.Page(style=style) as configuration:
 
 
 with tgb.Page(style=style) as visualization:
-    create_visualization()
+    create_visualization(logger=logger)

@@ -62,6 +62,7 @@ class GNPS_Runner(Pipe_Step):
         save_log: bool = False,
         additional_args: list = [],
         verbosity: int = 1,
+        logger: Logger = Logger(),
         **kwargs,
     ):
         """
@@ -77,8 +78,10 @@ class GNPS_Runner(Pipe_Step):
         :type additional_args: list, optional
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
+        :param logger: Logger class to handle output, defaults to Logger()
+        :type logger: Logger
         """
-        super().__init__(save_log=save_log, additional_args=additional_args, verbosity=verbosity)
+        super().__init__(save_log=save_log, additional_args=additional_args, verbosity=verbosity, logger=logger)
         if kwargs:
             self.update(kwargs)
         self.mzmine_log_query = "io.github.mzmine.modules.io.export_features_gnps.GNPSUtils submitFbmnJob GNPS FBMN/IIMN response: "
@@ -101,7 +104,7 @@ class GNPS_Runner(Pipe_Step):
             if query in line:
                 response_json = re.search(r"{.*}", line.replace(query, ""))[0]
                 return json.loads(response_json)
-        error(
+        self.logger.error(
             message=f"Query <{query}> was not found in mzmine_log: Please provide a valid string or path.",
             error_type=ValueError,
         )
@@ -142,18 +145,18 @@ class GNPS_Runner(Pipe_Step):
         # Submit job
         url = "https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking"
 
-        log(message=f"POSTing request to {url}", minimum_verbosity=2, verbosity=self.verbosity)
+        self.logger.log(message=f"POSTing request to {url}", minimum_verbosity=2, verbosity=self.verbosity)
 
         response = requests.api.post(url, data=parameters, files=files, timeout=120.0)
 
         if response.status_code == 200:
-            log(
+            self.logger.log(
                 message=f"POST request {response.request.url} returned status code {response.status_code}",
                 minimum_verbosity=2,
                 verbosity=self.verbosity,
             )
         else:
-            error(
+            self.logger.error(
                 message=f"POST request {response.request.url} returned status code {response.status_code}",
                 error_type=ConnectionError,
             )
@@ -184,7 +187,7 @@ class GNPS_Runner(Pipe_Step):
         if gnps_response["status"] == "Success":
             task_id = gnps_response["task_id"]
         else:
-            error(
+            self.logger.error(
                 message="mzmine_log reports an unsuccessful job submission to GNPS by mzmine.",
                 error_type=ValueError,
             )
@@ -288,12 +291,12 @@ class GNPS_Runner(Pipe_Step):
                 )
                 task_id, status = self.submit_to_gnps(feature_ms2_file, feature_quantification_file)
             else:
-                error(message=str(ve), error_type=ValueError)
+                self.logger.error(message=str(ve), error_type=ValueError)
 
         if status:
             results_dict = self.fetch_results(task_id=task_id, out_path=out_path)
 
-            log(
+            self.logger.log(
                 message=f"GNPS results {basename(in_path)}:\ntask_id:{task_id}\n{results_dict}",
                 minimum_verbosity=4,
                 verbosity=self.verbosity,
@@ -301,7 +304,7 @@ class GNPS_Runner(Pipe_Step):
 
             in_path = gnps_response if gnps_response else mzmine_log if mzmine_log else in_path
 
-            log(
+            self.logger.log(
                 f"Successful GNPS run with data from {in_path}",
                 minimum_verbosity=2,
                 verbosity=self.verbosity,
@@ -338,7 +341,7 @@ class GNPS_Runner(Pipe_Step):
         if not mzmine_log:
             mzmine_log = self.mzmine_log if self.mzmine_log else in_path
         if out_path:
-            dir_name = basename(get_directory(in_path))
+            dir_name = basename(get_directory(in_path, logger=self.logger))
             out_path = join(out_path, f"{dir_name}_gnps_all_db_annotations.json")
 
         self.compute(
