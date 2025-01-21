@@ -191,7 +191,8 @@ def create_visualization(logger: Logger = Logger()):
 
             tgb.button(
                 "📊 Show data",
-                on_action=lambda state, id, payload: populate_data_node(state, logger=logger))
+                on_action=lambda state, id, payload: populate_data_node(state, logger=logger),
+            )
 
         # Middle part
         with tgb.part():
@@ -204,10 +205,7 @@ def create_visualization(logger: Logger = Logger()):
                 lov="{figure_possibilities}",
                 dropdown=True,
                 on_change=lambda state, name, value: prepare_figure_path(
-                    state=state,
-                    name=name,
-                    figure_id=value,
-                    logger=logger
+                    state=state, name=name, figure_id=value, logger=logger
                 ),
             )
             tgb.selector(

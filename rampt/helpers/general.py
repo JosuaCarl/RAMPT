@@ -61,7 +61,7 @@ def make_new_dir(dir: StrPath) -> bool:
     return False
 
 
-def get_directory(path: StrPath, logger:Logger = Logger()) -> StrPath:
+def get_directory(path: StrPath, logger: Logger = Logger()) -> StrPath:
     """
     Extract directory path from file or directory path.
 
@@ -382,7 +382,7 @@ def open_last_n_line(filepath: str, n: int = 1) -> str:
         return f.readline().decode()
 
 
-def open_last_line_with_content(filepath: str, logger:Logger = Logger()) -> str:
+def open_last_line_with_content(filepath: str, logger: Logger = Logger()) -> str:
     """
     Extract the last line which does not only contain whitespace from a file.
 

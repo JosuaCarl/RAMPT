@@ -21,7 +21,7 @@ from typing import Any
 # Data nodes
 # Logger node
 logger_config = Config.configure_in_memory_data_node(
-    id="logger", scope=Scope.GLOBAL, default_data=Logger(),
+    id="logger", scope=Scope.GLOBAL, default_data=Logger()
 )
 
 ## Data paths
@@ -185,7 +185,11 @@ def generic_step(
 
 
 def convert_files(
-    raw_data_paths: StrPath, conversion_out_paths: StrPath, step_params: dict, global_params: dict, logger: Logger = Logger()
+    raw_data_paths: StrPath,
+    conversion_out_paths: StrPath,
+    step_params: dict,
+    global_params: dict,
+    logger: Logger = Logger(),
 ):
     return generic_step(
         step_class=MSconvert_Runner,
@@ -194,7 +198,7 @@ def convert_files(
         out_path_target=os.path.join("..", "converted"),
         step_params=step_params,
         global_params=global_params,
-        logger=logger
+        logger=logger,
     )
 
 
@@ -204,7 +208,7 @@ def find_features(
     mzmine_batch: StrPath,
     step_params: dict,
     global_params: dict,
-    logger: Logger = Logger(), 
+    logger: Logger = Logger(),
 ):
     return generic_step(
         step_class=MZmine_Runner,
@@ -215,7 +219,7 @@ def find_features(
         global_params=global_params,
         return_attributes=["processed_out", "log_paths"],
         batch=mzmine_batch,
-        logger=logger
+        logger=logger,
     )
 
 
@@ -225,7 +229,7 @@ def annotate_gnps(
     gnps_out_paths: StrPath,
     step_params: dict,
     global_params: dict,
-    logger: Logger = Logger(), 
+    logger: Logger = Logger(),
 ):
     return generic_step(
         step_class=GNPS_Runner,
@@ -245,7 +249,7 @@ def annotate_sirius(
     config: StrPath,
     step_params: dict,
     global_params: dict,
-    logger: Logger = Logger(), 
+    logger: Logger = Logger(),
 ):
     return generic_step(
         step_class=Sirius_Runner,
@@ -266,7 +270,7 @@ def summarize_annotations(
     summary_out_paths: StrPath,
     step_params: dict,
     global_params: dict,
-    logger: Logger = Logger(), 
+    logger: Logger = Logger(),
 ):
     return generic_step(
         step_class=Summary_Runner,
@@ -285,7 +289,11 @@ def summarize_annotations(
 
 
 def analyze_difference(
-    summary_data_paths: StrPath, analysis_out_paths: StrPath, step_params: dict, global_params: dict, logger: Logger = Logger(), 
+    summary_data_paths: StrPath,
+    analysis_out_paths: StrPath,
+    step_params: dict,
+    global_params: dict,
+    logger: Logger = Logger(),
 ):
     return generic_step(
         step_class=Analysis_Runner,

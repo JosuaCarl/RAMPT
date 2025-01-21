@@ -151,16 +151,12 @@ class Logger:
         self.to_out(output=message)
         if verbosity >= minimum_verbosity:
             print(
-                f"[{get_now()}][{program}][INFO (V>={minimum_verbosity})]\t{message}", *args, **kwargs
+                f"[{get_now()}][{program}][INFO (V>={minimum_verbosity})]\t{message}",
+                *args,
+                **kwargs,
             )
 
-
-    def warn(
-            self,
-            message: str = "Warning",
-            program: str = program_name,
-            *args,
-            **kwargs):
+    def warn(self, message: str = "Warning", program: str = program_name, *args, **kwargs):
         """
         Print a warning.
 
@@ -171,7 +167,6 @@ class Logger:
         """
         self.to_out(output=message)
         warnings.warn(f"[{get_now()}][{program}][WARNING]\t{message}", *args, **kwargs)
-
 
     def error(
         self,

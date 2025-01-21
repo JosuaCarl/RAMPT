@@ -83,7 +83,9 @@ class Summary_Runner(Pipe_Step):
         :param logger: Logger class to handle output, defaults to Logger()
         :type logger: Logger
         """
-        super().__init__(save_log=save_log, additional_args=additional_args, verbosity=verbosity, logger=logger)
+        super().__init__(
+            save_log=save_log, additional_args=additional_args, verbosity=verbosity, logger=logger
+        )
         if kwargs:
             self.update(kwargs)
         self.overwrite = overwrite

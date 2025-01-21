@@ -24,9 +24,7 @@ from rampt.gui.configuration.config import *
 
 
 # Logger
-log_path = os.path.abspath(
-    os.path.join(Path().home(), "rampt_log.txt")
-)
+log_path = os.path.abspath(os.path.join(Path().home(), "rampt_log.txt"))
 logger = Logger(log_path)
 
 # Working directory

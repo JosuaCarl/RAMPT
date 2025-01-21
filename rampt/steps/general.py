@@ -241,7 +241,7 @@ class Pipe_Step(Step_Configuration):
             save_log=save_log,
             verbosity=verbosity,
             additional_args=additional_args,
-            logger=logger
+            logger=logger,
         )
 
         self.common_execs = []
@@ -307,7 +307,9 @@ class Pipe_Step(Step_Configuration):
 
     def get_log_path(self, out_path: StrPath) -> StrPath:
         log_path = (
-            os.path.join(get_directory(out_path, logger=self.logger), f"{self.name}_log.txt") if self.save_log else None
+            os.path.join(get_directory(out_path, logger=self.logger), f"{self.name}_log.txt")
+            if self.save_log
+            else None
         )
 
         return log_path

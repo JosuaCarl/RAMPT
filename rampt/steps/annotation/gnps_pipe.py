@@ -81,7 +81,9 @@ class GNPS_Runner(Pipe_Step):
         :param logger: Logger class to handle output, defaults to Logger()
         :type logger: Logger
         """
-        super().__init__(save_log=save_log, additional_args=additional_args, verbosity=verbosity, logger=logger)
+        super().__init__(
+            save_log=save_log, additional_args=additional_args, verbosity=verbosity, logger=logger
+        )
         if kwargs:
             self.update(kwargs)
         self.mzmine_log_query = "io.github.mzmine.modules.io.export_features_gnps.GNPSUtils submitFbmnJob GNPS FBMN/IIMN response: "
@@ -145,7 +147,9 @@ class GNPS_Runner(Pipe_Step):
         # Submit job
         url = "https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking"
 
-        self.logger.log(message=f"POSTing request to {url}", minimum_verbosity=2, verbosity=self.verbosity)
+        self.logger.log(
+            message=f"POSTing request to {url}", minimum_verbosity=2, verbosity=self.verbosity
+        )
 
         response = requests.api.post(url, data=parameters, files=files, timeout=120.0)
 

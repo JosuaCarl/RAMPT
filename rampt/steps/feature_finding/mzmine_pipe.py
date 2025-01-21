@@ -39,8 +39,6 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
     if not exec_path:
         exec_path = r"mzmine"
 
-    
-
     mzmine_runner = MZmine_Runner(
         exec_path=exec_path,
         batch=batch,
@@ -113,7 +111,7 @@ class MZmine_Runner(Pipe_Step):
         if user:
             self.login = f"--user {user}"
         elif "console" in login.lower():
-            self.login = "--login-console"   
+            self.login = "--login-console"
         else:
             self.logger.log(
                 message="You did not provide a user. You will be prompted to login by mzmine.\

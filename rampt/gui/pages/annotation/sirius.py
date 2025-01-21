@@ -18,7 +18,7 @@ def create_sirius(logger: Logger = Logger()):
 
     tgb.text("###### Config selection", mode="markdown")
     create_list_selection(
-        process="sirius", attribute="config", extensions="*", name="configuration",
+        process="sirius", attribute="config", extensions="*", name="configuration"
     )
 
     create_advanced_settings()
