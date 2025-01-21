@@ -205,6 +205,9 @@ class MSconvert_Runner(Pipe_Step):
         :type out_path: str
         """
         verbose_tqdm = self.verbosity >= 2
+        # Case Agilent folder:
+        if in_path.endswith(".d"):
+            self.run_single(in_path=in_path, out_path=out_path)
         for entry in tqdm(os.listdir(in_path), disable=verbose_tqdm, desc="Converting folder"):
             entry_path = join(in_path, entry)
             hypothetical_out_path = join(out_path, replace_file_ending(entry, self.target_format))
