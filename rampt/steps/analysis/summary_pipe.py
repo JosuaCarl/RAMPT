@@ -66,7 +66,6 @@ class Summary_Runner(Pipe_Step):
         save_log=False,
         additional_args: list = [],
         verbosity=1,
-        logger: Logger = Logger(),
         **kwargs,
     ):
         """
@@ -80,11 +79,9 @@ class Summary_Runner(Pipe_Step):
         :type additional_args: list, optional
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
-        :param logger: Logger class to handle output, defaults to Logger()
-        :type logger: Logger
         """
         super().__init__(
-            save_log=save_log, additional_args=additional_args, verbosity=verbosity, logger=logger
+            save_log=save_log, additional_args=additional_args, verbosity=verbosity, 
         )
         if kwargs:
             self.update(kwargs)
@@ -412,13 +409,13 @@ class Summary_Runner(Pipe_Step):
         summary.to_csv(out_path, sep="\t")
 
         if in_paths_annotation:
-            self.logger.log(
+            logger.log(
                 f"Added annotation from {in_paths_annotation} to {in_path_quantification}.Exported to {out_path}.",
                 minimum_verbosity=1,
                 verbosity=self.verbosity,
             )
         else:
-            self.logger.log(
+            logger.log(
                 f"No annotation received. {in_path_quantification} exported to {out_path}.",
                 minimum_verbosity=1,
                 verbosity=self.verbosity,

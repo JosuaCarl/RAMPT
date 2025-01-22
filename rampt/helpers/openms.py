@@ -215,7 +215,7 @@ class OpenMS_File_Handler:
         separator: str = "\t",
         data_load: bool = True,
         table_backend=pd,
-        logger: Logger = Logger(),
+        ,
     ) -> pd.DataFrame:
         """
         Load a Flow injection analysis dataframe, defining important properties.

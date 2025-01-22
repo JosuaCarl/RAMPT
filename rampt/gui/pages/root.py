@@ -24,8 +24,10 @@ from rampt.gui.configuration.config import *
 
 
 # Logger
-log_path = os.path.abspath(os.path.join(Path().home(), "rampt_log.txt"))
-logger = Logger(log_path)
+rampt_user_path = os.path.abspath(os.path.join(Path.home(), ".rampt"))
+os.makedirs(rampt_user_path, exist_ok=True)
+log_path = os.path.abspath(os.path.join(rampt_user_path, "rampt_log.txt"))
+logger.log_file_path = log_path
 
 # Working directory
 local = True
@@ -250,35 +252,30 @@ with tgb.Page(style=style) as configuration:
                 create_methods={"": create_general},
                 title="🌐 General",
                 hover_text="General settings, that are applied globally.",
-                logger=logger,
             )
 
             create_expandable_setting(
                 create_methods={"": create_conversion},
                 title="↔️ Conversion",
                 hover_text="Convert manufacturer files into community formats.",
-                logger=logger,
             )
 
             create_expandable_setting(
                 create_methods={"": create_feature_finding},
                 title="🔍 Feature finding",
                 hover_text="Find features with MZmine through applying steps via a batch file.",
-                logger=logger,
             )
 
             create_expandable_setting(
                 create_methods={"GNPS": create_gnps, "Sirius": create_sirius},
                 title="✒️ Annotation",
                 hover_text="Annotation of data with GNPS and Sirius.",
-                logger=logger,
             )
 
             create_expandable_setting(
                 create_methods={"Summary": create_summary, "Analysis": create_analysis},
                 title="📈 Analysis",
                 hover_text="Statistical analysis of annotated features.",
-                logger=logger,
             )
 
             # Pipeline showcasing
@@ -303,4 +300,4 @@ with tgb.Page(style=style) as configuration:
 
 
 with tgb.Page(style=style) as visualization:
-    create_visualization(logger=logger)
+    create_visualization()

@@ -18,7 +18,7 @@ from rampt.gui.configuration.config import *
 
 
 # COMMON
-def read_data_node(state, data_node: str, logger: Logger = Logger()) -> bool:
+def read_data_node(state, data_node: str, ) -> bool:
     data_node = state.scenario.data_nodes.get(data_node)
     if data_node.is_ready_for_reading:
         return data_node.read()
@@ -74,13 +74,11 @@ populated_data_nodes = []
 populate_data_node_ids = {}
 
 
-def populate_data_node(state, logger: Logger = Logger(), *args):
-    ic("HERE")
+def populate_data_node(state, *args):
     path_node_name = get_attribute_recursive(state, "path_data_node").get_simple_label()
     data_node_name = path_node_name.replace("_paths", "")
 
     path = get_attribute_recursive(state, "path_to_data")
-    ic(path)
     path = ask_filepath(path)
 
     # Write Check if path
@@ -130,7 +128,7 @@ figure_possibilities = [
 figure_path_possibilities = []
 
 
-def prepare_figure_path(state, name, figure_id: str, logger: Logger = Logger()):
+def prepare_figure_path(state, name, figure_id: str, ):
     match figure_id:
         case "values heatmap":
             path_node = "summary_data_paths"
@@ -140,7 +138,7 @@ def prepare_figure_path(state, name, figure_id: str, logger: Logger = Logger()):
             path_node = "analysis_data_paths"
         case "zscore cutoff accumulation":
             path_node = "analysis_data_paths"
-    figure_path_possibilities = read_data_node(state, path_node, logger=logger)
+    figure_path_possibilities = read_data_node(state, path_node, )
     if figure_path_possibilities:
         set_attribute_recursive(state, "figure_path_possibilities", figure_path_possibilities)
         set_attribute_recursive(state, "figure_path", figure_path_possibilities[0])
@@ -169,7 +167,7 @@ def set_figure(state, name, figure_path: StrPath):
 
 
 # VISUALIZATION PAGE
-def create_visualization(logger: Logger = Logger()):
+def create_visualization():
     with tgb.layout(columns="1 3 1", columns__mobile="1", gap="2.5%"):
         # Left part
         with tgb.part(class_name="sticky-part"):
@@ -181,7 +179,6 @@ def create_visualization(logger: Logger = Logger()):
             tgb.text("#### 🕸️ Data path nodes", mode="markdown")
             tgb.data_node_selector(
                 "{path_data_node}",
-                scenario="{scenario}",
                 datanodes="{representable_data_nodes}",
                 on_change=fill_path_selection,
             )
@@ -191,21 +188,33 @@ def create_visualization(logger: Logger = Logger()):
 
             tgb.button(
                 "📊 Show data",
-                on_action=lambda state, id, payload: populate_data_node(state, logger=logger),
+                on_action=populate_data_node,
             )
 
         # Middle part
         with tgb.part():
             tgb.text("## 📊 Data", mode="markdown")
-            tgb.data_node("{data_node}")
+            tgb.data_node("{data_node}", chart_configs={"type": "scatter"})
+
+            tgb.html("br")
 
             tgb.text("## 🖌️ Visualization", mode="markdown")
+            tgb.chart(figure="{figure}", rebuild=True)
+
+        # Right part
+        with tgb.part():
+            tgb.text("#### Populated data", mode="markdown")
+            tgb.data_node_selector("{data_node}", datanodes="{populated_data_nodes}")
+
+            tgb.html("br")
+
+            tgb.text("#### Visualization options", mode="markdown")
             tgb.selector(
                 "{figure_id}",
                 lov="{figure_possibilities}",
                 dropdown=True,
                 on_change=lambda state, name, value: prepare_figure_path(
-                    state=state, name=name, figure_id=value, logger=logger
+                    state=state, name=name, figure_id=value, 
                 ),
             )
             tgb.selector(
@@ -214,9 +223,3 @@ def create_visualization(logger: Logger = Logger()):
                 dropdown=True,
                 on_change=set_figure,
             )
-            tgb.chart(figure="{figure}", rebuild=True)
-
-        # Right part
-        with tgb.part():
-            tgb.text("#### Populated data", mode="markdown")
-            tgb.data_node_selector("{data_node}", datanodes="{populated_data_nodes}")

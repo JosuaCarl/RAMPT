@@ -63,7 +63,6 @@ class Sirius_Runner(Pipe_Step):
         save_log: bool = False,
         additional_args: list = [],
         verbosity: int = 1,
-        logger: Logger = Logger(),
         **kwargs,
     ):
         """
@@ -81,15 +80,12 @@ class Sirius_Runner(Pipe_Step):
         :type additional_args: list, optional
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
-        :param logger: Logger class to handle output, defaults to Logger()
-        :type logger: Logger
         """
         super().__init__(
             patterns={"in": r".*_sirius.mgf$"},
             save_log=save_log,
             additional_args=additional_args,
             verbosity=verbosity,
-            logger=logger,
         )
         if kwargs:
             self.update(kwargs)
@@ -103,7 +99,7 @@ class Sirius_Runner(Pipe_Step):
             if os.path.isfile(join(config, "sirius_config.txt")):
                 config = join(config, "sirius_config.txt")
             else:
-                self.logger.error(
+                logger.error(
                     message=f"{config} directory does not contain sirius_config.txt",
                     error_type=ValueError,
                 )

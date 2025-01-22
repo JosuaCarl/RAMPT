@@ -43,7 +43,7 @@ def contruct_common_paths(filepath):
 
 
 # Timing
-def wait(counter: float, unit: str = "s"):
+def wait(counter: float, unit: str = "s", logger: Logger = Logger()):
     if unit == "s" or unit.startswith("second"):
         time.sleep(counter)
     elif unit == "m" or unit.startswith("min"):
@@ -53,6 +53,6 @@ def wait(counter: float, unit: str = "s"):
     elif unit == "d" or unit.startswith("day"):
         time.sleep(counter * 60 * 60 * 24)
     else:
-        error(
+        logger.error(
             message=f"unit {unit} is invalid, please choose between d/h/m/s.", error_type=ValueError
         )

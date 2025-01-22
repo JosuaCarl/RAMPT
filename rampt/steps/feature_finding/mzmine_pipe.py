@@ -69,7 +69,6 @@ class MZmine_Runner(Pipe_Step):
         save_log: bool = False,
         additional_args: list = [],
         verbosity: int = 1,
-        logger: Logger = Logger(),
         **kwargs,
     ):
         """
@@ -105,7 +104,6 @@ class MZmine_Runner(Pipe_Step):
         self.batch = batch
         self.valid_formats = valid_formats
         self.name = "mzmine"
-        self.logger = logger
 
         # Handle login to mzmine
         if user:
@@ -113,15 +111,17 @@ class MZmine_Runner(Pipe_Step):
         elif "console" in login.lower():
             self.login = "--login-console"
         else:
-            self.logger.log(
+            logger.log(
                 message="You did not provide a user. You will be prompted to login by mzmine.\
-                        For future use please find your user file under $USER/.mzmine/users/ after completing the login."
+                        For future use please find your user file under $USER/.mzmine/users/ after completing the login.",
+                minimum_verbosity=2,
+                verbosity=self.verbosity
             )
             self.login = "--login"
 
     def check_attributes(self):
         if not os.path.isfile(self.batch):
-            self.logger.error(
+            logger.error(
                 message=f"Batch path {self.batch} is no file. Please point to a valid mzbatch file.",
                 error_type=ValueError,
             )

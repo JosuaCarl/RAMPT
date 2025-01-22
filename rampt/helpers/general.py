@@ -61,7 +61,7 @@ def make_new_dir(dir: StrPath) -> bool:
     return False
 
 
-def get_directory(path: StrPath, logger: Logger = Logger()) -> StrPath:
+def get_directory(path: StrPath, ) -> StrPath:
     """
     Extract directory path from file or directory path.
 
@@ -211,7 +211,7 @@ def stretch_to_list_of_dicts(dictionary: dict) -> list:
 
 
 # String operations
-def change_case_str(s: str, range, conversion: str, logger: Logger = Logger()) -> str:
+def change_case_str(s: str, range, conversion: str, ) -> str:
     """
     Change the case of part of a string.
 
@@ -382,7 +382,7 @@ def open_last_n_line(filepath: str, n: int = 1) -> str:
         return f.readline().decode()
 
 
-def open_last_line_with_content(filepath: str, logger: Logger = Logger()) -> str:
+def open_last_line_with_content(filepath: str, ) -> str:
     """
     Extract the last line which does not only contain whitespace from a file.
 
@@ -430,7 +430,6 @@ def execute_verbose_command(
     verbosity: int = 1,
     log_path: StrPath = None,
     decode_text: bool = True,
-    logger: Logger = Logger(),
     **kwargs,
 ) -> tuple[str, str]:
     """
@@ -444,8 +443,6 @@ def execute_verbose_command(
     :type log_path: StrPath
     :param decode_text: Whether to decode the text, defaults to True
     :type decode_text: bool
-    :param logger: Logger class to handle output, defaults to Logger()
-    :type logger: Logger
     :return: Stdout, Stderr
     :rtype: tuple[str,str]
     """
@@ -503,7 +500,6 @@ def check_for_str_request(
     allowed_fails: int = 5,
     retry_time: float = 20.0,
     verbosity: int = 1,
-    logger: Logger = Logger(),
     **kwargs,
 ) -> bool:
     """
@@ -525,8 +521,6 @@ def check_for_str_request(
     :type retry_time: float, optional
     :param verbosity: Level of verbosity, defaults to 1
     :type verbosity: int, optional
-    :param logger: Logger class to handle output, defaults to Logger()
-    :type logger: Logger
     :param kwargs: Additional arguments, passed on to requests.get()
     :type kwargs: any, optional
     :return: Query found ?

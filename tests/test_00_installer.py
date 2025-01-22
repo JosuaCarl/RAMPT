@@ -6,7 +6,7 @@ Test installation of project.
 from tests.common import *
 from rampt.installer import *
 
-platform = get_platform()
+platform = get_platform().lower()
 filepath = get_internal_filepath(__file__)
 out_path, mock_path, example_path, batch_path, installer_path = contruct_common_paths(filepath)
 make_out(out_path)
@@ -115,11 +115,11 @@ def test_install_mzmine():
     )
 
     assert install_path == join(out_path, name)
-    assert tool_available(name.lower())
-    if "windows" in platform:
-        assert os.path.isdir(join(out_path, f"{name}_console"))
-    else:
-        assert os.path.isdir(join(out_path, name))
+    
+    ic(os.environ.get(["PATH"], ""))
+    ic(tool_available([name.lower(), f"{name.lower()}_console"]))
+    assert tool_available([name.lower(), f"{name.lower()}_console"])
+    assert os.path.isdir(join(out_path, name))
 
 
 def test_install_sirius():
@@ -133,6 +133,7 @@ def test_install_sirius():
     )
 
     assert install_path == join(out_path, name)
+    ic(tool_available(name.lower()))
     assert tool_available(name.lower())
     assert os.path.isdir(join(out_path, name))
 

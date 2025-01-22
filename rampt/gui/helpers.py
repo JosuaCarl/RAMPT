@@ -3,6 +3,8 @@ from icecream import ic as ic
 import os
 import tempfile
 
+from pathlib import Path as Path
+
 import tkinter.filedialog as fd
 
 from taipy.gui import download
@@ -29,7 +31,7 @@ def evaluate_dialog(state, payload_pressed, option_list):
 
 
 ## Working directory
-def change_work_dir_root(gui, new_root: StrPath = None, logger: Logger = Logger()):
+def change_work_dir_root(gui, new_root: StrPath = None):
     global work_dir_root
     if new_root:
         if os.path.isdir(new_root):
@@ -62,7 +64,7 @@ def download_directory(state, dir):
 
 
 def download_data_node_files(
-    state, data_node_name, files_attribute: str = "scenario.data_nodes", logger: Logger = Logger()
+    state, data_node_name, files_attribute: str = "scenario.data_nodes"
 ):
     entries = get_attribute_recursive(state, files_attribute)
     if data_node_name:

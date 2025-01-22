@@ -44,7 +44,6 @@ def execute_test(
     alternative_hypothesis: str = "two-sided",
     cutoff: float = 0.05,
     multiple_testing_correction: str = "bonferroni",
-    logger: Logger = Logger(),
     *args,
 ) -> bool:
     match test:

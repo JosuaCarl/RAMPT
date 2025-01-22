@@ -15,16 +15,13 @@ out_path, mock_path, example_path, batch_path, installs_path = contruct_common_p
 make_out(out_path)
 
 user = "joca"  # NEEDS TO BE EDITED FOR TESTING TO WORK
-login = f"--user {user}"
 
 
 def test_mzmine_pipe_run_single():
     clean_out(out_path)
 
     # Superficial testing of run_single
-    mzmine_runner = MZmine_Runner(
-        batch=join(batch_path, "minimal.mzbatch"), login=login, verbosity=3
-    )
+    mzmine_runner = MZmine_Runner(batch=join(batch_path, "minimal.mzbatch"), user=user, verbosity=3)
 
     mzmine_runner.run_single(in_path=join(example_path, "minimal.mzML"), out_path=out_path)
 
@@ -35,7 +32,7 @@ def test_mzmine_pipe_run_single():
 def test_mzmine_pipe_run_directory():
     clean_out(out_path)
     # Supoerficial testing of run_directory
-    mzmine_runner = MZmine_Runner(batch=join(batch_path, "minimal.mzbatch"), login=login)
+    mzmine_runner = MZmine_Runner(batch=join(batch_path, "minimal.mzbatch"), user=user)
 
     mzmine_runner.run_directory(in_path=example_path, out_path=out_path)
 
@@ -46,7 +43,7 @@ def test_mzmine_pipe_run_directory():
 def test_mzmine_pipe_run_nested():
     clean_out(out_path)
     # Superficial testing of run_nested
-    mzmine_runner = MZmine_Runner(batch=join(batch_path, "minimal.mzbatch"), login=login)
+    mzmine_runner = MZmine_Runner(batch=join(batch_path, "minimal.mzbatch"), user=user)
 
     mzmine_runner.run_nested(example_path, out_path)
 
@@ -67,7 +64,7 @@ def test_mzmine_pipe_run():
     clean_out(out_path)
 
     # Superficial testing of run
-    mzmine_runner = MZmine_Runner(batch=join(batch_path, "minimal.mzbatch"), login=login, workers=2)
+    mzmine_runner = MZmine_Runner(batch=join(batch_path, "minimal.mzbatch"), user=user, workers=2)
 
     mzmine_runner.run(in_paths=[example_path], out_paths=[out_path])
     mzmine_runner.compute_futures()

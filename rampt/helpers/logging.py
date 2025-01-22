@@ -101,16 +101,24 @@ def capture_and_log(
 
     return results, out, err
 
-
 class Logger:
     def __init__(self, log_file_path: str = None):
         self.out = ""
         self.err = ""
         if log_file_path:
             self.log_file_path = os.path.abspath(log_file_path)
+            self.log(f"Saving log file to {log_file_path}")
         else:
             self.log_file_path = None
-        self.log(f"Saving log file to {log_file_path}")
+
+    def to_dict(self):
+        dict_representation = {
+            "out": self.out,
+            "err": self.err,
+            "log_file_path": self.log_file_path
+        }
+        return dict_representation
+
 
     def to_out(self, output: str):
         self.out += output
@@ -191,3 +199,6 @@ class Logger:
             raise error_type(f"[{get_now()}][{program}][ERROR]\t{message}", *args)
         else:
             return error_type(f"[{get_now()}][{program}][ERROR]\t{message}", *args)
+
+
+logger = Logger()

@@ -706,7 +706,9 @@ class Logger:
         self.out = ""
         self.err = ""
         self.log_file_path = log_file_path
-        self.log(f"Saving log file to {log_file_path}")
+        self.log(
+            f"Saving log file to {log_file_path}",
+        )
 
     def get_now(self) -> str:
         return str(datetime.now().replace(microsecond=0))
@@ -778,7 +780,7 @@ logger = Logger(log_file_path)
 
 
 # PATH CHECKING
-def tool_available(executable: str | list) -> bool:
+def tool_available(executable: str | list) -> str:
     """
     Tool can be accessed in environment.
     """
@@ -834,7 +836,7 @@ def add_to_local_path(new_path: str):
 
 
 def add_to_path(op_sys: str, path: str, local_only: bool = False):
-    if local_only or not is_in_path(path):
+    if not local_only and not is_in_path(path):
         exported_to_path = False
         if "windows" in op_sys:
             current_path = os.environ.get("PATH", "")

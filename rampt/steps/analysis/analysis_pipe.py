@@ -62,7 +62,6 @@ class Analysis_Runner(Pipe_Step):
         save_log=False,
         additional_args: list = [],
         verbosity=1,
-        logger: Logger = Logger(),
         **kwargs,
     ):
         """
@@ -76,11 +75,9 @@ class Analysis_Runner(Pipe_Step):
         :type additional_args: list, optional
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
-        :param logger: Logger class to handle output, defaults to Logger()
-        :type logger: Logger
         """
         super().__init__(
-            save_log=save_log, additional_args=additional_args, verbosity=verbosity, logger=logger
+            save_log=save_log, additional_args=additional_args, verbosity=verbosity, 
         )
         if kwargs:
             self.update(kwargs)
@@ -157,7 +154,7 @@ class Analysis_Runner(Pipe_Step):
 
     def z_score(self, summary: pd.DataFrame, peak_mode_columns: list) -> pd.DataFrame:
         if len(peak_mode_columns) < 2:
-            self.logger.warn(
+            logger.warn(
                 "Data must contain at least 2 columns with peak information to calculate z-scores between samples. Returning unchanged."
             )
             return summary[peak_mode_columns]
@@ -189,7 +186,7 @@ class Analysis_Runner(Pipe_Step):
 
         self.export_results(analysis=self.analysis, peak_columns=peak_columns, out_path=out_path)
 
-        self.logger.log(
+        logger.log(
             f"Analyzed {in_path}, saved to {out_path}",
             minimum_verbosity=1,
             verbosity=self.verbosity,

@@ -8,9 +8,9 @@ from rampt.steps.annotation.gnps_pipe import GNPS_Runner
 gnps_params = GNPS_Runner()
 
 
-def create_gnps(logger: Logger = Logger()):
+def create_gnps():
     tgb.text("###### File selection", mode="markdown")
-    create_file_selection(process="gnps", out_node="gnps_annotation_paths", logger=logger)
+    create_file_selection(process="gnps", out_node="gnps_annotation_paths", )
 
     tgb.html("br")
 

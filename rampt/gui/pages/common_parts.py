@@ -20,7 +20,6 @@ def create_expandable_setting(
     title: str,
     hover_text: str = "",
     expanded=False,
-    logger: Logger = Logger(),
     **kwargs,
 ):
     with tgb.expandable(title=title, hover_text=hover_text, expanded=expanded, **kwargs):
@@ -31,7 +30,7 @@ def create_expandable_setting(
                     with tgb.part(class_name="segment-box"):
                         if title:
                             tgb.text(f"##### {title}", mode="markdown")
-                        create_method(logger=logger)
+                        create_method()
                     tgb.html("br")
             tgb.part()
 
@@ -47,7 +46,6 @@ def create_file_selection(
     param_attribute_in: str = "scheduled_in",
     execution_key_in: str = None,
     out_node: str = "",
-    logger: Logger = Logger(),
 ):
     naming_list = (
         [process, param_attribute_in, execution_key_in]
@@ -65,6 +63,14 @@ def create_file_selection(
     selected.update({selector_id: []})
 
     def construct_selection_tree(state, new_path: StrPath = None):
+        """
+        Make the selection tree
+
+        :param state: State of taipy
+        :type state: State
+        :param new_path: Added path (selected in file_selector), defaults to None
+        :type new_path: StrPath, optional
+        """
         new_path = (
             new_path
             if new_path
@@ -117,6 +123,7 @@ def create_file_selection(
                 )
             tgb.toggle(f"{{select_folders.{selector_id}}}", label="Select folder")
 
+        # Selection tree
         tgb.tree(
             f"{{selected.{selector_id}}}",
             lov=f"{{selection_trees_pruned.{selector_id}}}",
@@ -129,26 +136,25 @@ def create_file_selection(
 
         # Out
         with tgb.part():
-            with tgb.part():
-                with tgb.part(render="{local}"):
-                    tgb.button(
-                        "Select out",
-                        on_action=lambda state: set_attribute_recursive(
-                            state,
-                            f"{process}_params.scheduled_out",
-                            open_file_folder(select_folder=True),
-                            refresh=True,
-                        ),
-                    )
-                with tgb.part(render="{not local}"):
-                    tgb.file_download(
-                        "{None}",
-                        active=f"{{scenario.data_nodes['{out_node}'].is_ready_for_reading}}",
-                        label="Download results",
-                        on_action=lambda state, id, payload: download_data_node_files(
-                            state, out_node, logger=logger
-                        ),
-                    )
+            with tgb.part(render="{local}"):
+                tgb.button(
+                    "Select out",
+                    on_action=lambda state: set_attribute_recursive(
+                        state,
+                        f"{process}_params.scheduled_out",
+                        open_file_folder(select_folder=True),
+                        refresh=True,
+                    ),
+                )
+            with tgb.part(render="{not local}"):
+                tgb.file_download(
+                    "{None}",
+                    active=f"{{scenario.data_nodes['{out_node}'].is_ready_for_reading}}",
+                    label="Download results",
+                    on_action=lambda state, id, payload: download_data_node_files(
+                        state, out_node, 
+                    ),
+                )
 
 
 # List selectors
@@ -162,7 +168,7 @@ def create_list_selection(
     attribute: str = "batch",
     extensions: str = "*",
     name: str = "batch file",
-    default_value=None,
+    default_value=Path.home(),
 ):
     selector_id = f"{process}_{attribute}"
     list_options.update({selector_id: []})
@@ -193,6 +199,7 @@ def create_list_selection(
                         filetypes=[
                             (f"{ext[1:]} files", f"*{ext}") for ext in extensions.split(",")
                         ],
+                        initaldir=get_directory(default_value),
                     ),
                 ),
             )
