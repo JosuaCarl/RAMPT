@@ -40,7 +40,7 @@ def test_create_symlink():
             shortcut_script_path=join(out_path, "create_shorcut.bat"),
             target_path=join(mock_path, "empty_file"),
             shortcut_path=join(out_path, "empty_file.lnk"),
-            icon_path=join(mock_path, "icon.ico")
+            icon_path=join(mock_path, "icon.ico"),
         )
         assert os.path.isfile(join(out_path, "empty_file.lnk"))
     else:

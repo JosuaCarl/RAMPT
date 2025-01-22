@@ -795,6 +795,7 @@ def tool_available(executable: str | list) -> bool:
     else:
         return None
 
+
 def is_in_path(directory_or_program: str) -> bool:
     """
     Check if a directory or program is in the PATH environment variable.
@@ -824,13 +825,12 @@ def is_in_path(directory_or_program: str) -> bool:
 
     return on_path
 
+
 # PATH APPENDING
 def add_to_local_path(new_path: str):
     current_path = os.environ.get("PATH", "")
     os.environ["PATH"] = f"{current_path}{os.pathsep}{new_path}"
-    logger.log(
-        f"Linked {new_path} to local python environment."
-    )
+    logger.log(f"Linked {new_path} to local python environment.")
 
 
 def add_to_path(op_sys: str, path: str, local_only: bool = False):
@@ -862,7 +862,6 @@ def add_to_path(op_sys: str, path: str, local_only: bool = False):
                 "No shell rc was found to export ~/.local/bin to PATH. You might have to do it yourself."
             )
     add_to_local_path(path)
-
 
 
 # PROGRAM INSTALLATION
@@ -904,7 +903,6 @@ def download_extract(
         logger.error(ValueError("Wrong hashing value of file."))
 
 
-
 # LINK PROGRAM
 def create_symlink(target_file, symlink_path):
     """
@@ -917,32 +915,36 @@ def create_symlink(target_file, symlink_path):
         if os.path.islink(symlink_path):
             os.remove(symlink_path)
         else:
-            logger.error(Exception(f"{symlink_path} leads to a directory or file that is no symbolic link."))
+            logger.error(
+                Exception(f"{symlink_path} leads to a directory or file that is no symbolic link.")
+            )
     os.symlink(target_file, symlink_path)
     logger.log(f"Symbolic link created: {symlink_path} -> {target_file}")
 
 
-def create_shortcut_windows(shortcut_script_path: str, target_path: str, shortcut_path: str, icon_path: str):
+def create_shortcut_windows(
+    shortcut_script_path: str, target_path: str, shortcut_path: str, icon_path: str
+):
     if not os.path.isfile(shortcut_script_path):
         shortcut_script = (
-                r'set SCRIPT="%TEMP%\%RANDOM%-%RANDOM%-%RANDOM%-%RANDOM%.vbs"'
-                + "\n"
-                + 'echo Set oWS = WScript.CreateObject("WScript.Shell") >> %SCRIPT%'
-                + "\n"
-                + f'echo sLinkFile = "{shortcut_path}" >> %SCRIPT%'
-                + "\n"
-                + "echo Set oLink = oWS.CreateShortcut(sLinkFile) >> %SCRIPT%"
-                + "\n"
-                + f'echo oLink.TargetPath = "{target_path}" >> %SCRIPT%'
-                + "\n"
-                + f'echo oLink.IconLocation = "{icon_path}" >> %SCRIPT%'
-                + "\n"
-                + "echo oLink.Save >> %SCRIPT%"
-                + "\n"
-                + "cscript /nologo %SCRIPT%"
-                + "\n"
-                + "del %SCRIPT%"
-            )
+            r'set SCRIPT="%TEMP%\%RANDOM%-%RANDOM%-%RANDOM%-%RANDOM%.vbs"'
+            + "\n"
+            + 'echo Set oWS = WScript.CreateObject("WScript.Shell") >> %SCRIPT%'
+            + "\n"
+            + f'echo sLinkFile = "{shortcut_path}" >> %SCRIPT%'
+            + "\n"
+            + "echo Set oLink = oWS.CreateShortcut(sLinkFile) >> %SCRIPT%"
+            + "\n"
+            + f'echo oLink.TargetPath = "{target_path}" >> %SCRIPT%'
+            + "\n"
+            + f'echo oLink.IconLocation = "{icon_path}" >> %SCRIPT%'
+            + "\n"
+            + "echo oLink.Save >> %SCRIPT%"
+            + "\n"
+            + "cscript /nologo %SCRIPT%"
+            + "\n"
+            + "del %SCRIPT%"
+        )
         with open(shortcut_script_path, "w") as file:
             file.write(shortcut_script)
 
@@ -951,12 +953,12 @@ def create_shortcut_windows(shortcut_script_path: str, target_path: str, shortcu
 
 
 def link_rampt(
-        op_sys: str,
-        program_path: str,
-        name: str,
-        out_folder: str = join(Path.home(), ".local", "bin"),
-        local_only: bool = False,
-    ):
+    op_sys: str,
+    program_path: str,
+    name: str,
+    out_folder: str = join(Path.home(), ".local", "bin"),
+    local_only: bool = False,
+):
     os.makedirs(out_folder, exist_ok=True)
     if "windows" in op_sys:
         shortcut_script_path = os.path.normpath(
@@ -974,7 +976,6 @@ def link_rampt(
         symlink_path = os.path.join(out_folder, name)
         create_symlink(target_file=program_path, symlink_path=symlink_path)
     add_to_path(op_sys=op_sys, path=out_folder, local_only=local_only)
-
 
 
 class InstallerApp(tk.Tk):
@@ -1115,7 +1116,7 @@ class InstallerApp(tk.Tk):
             execution_script = f'#!/usr/bin/sh\n"{python_path}" -m rampt'
             with open(path_executable, "w") as file:
                 file.write(execution_script)
-        
+
         logger.log(f"Python path: {python_path}")
         add_to_path(op_sys=self.op_sys, path=install_path, local_only=self.local_only)
 
@@ -1124,7 +1125,7 @@ class InstallerApp(tk.Tk):
             program_path=path_executable,
             name=self.name,
             out_folder=local_bin,
-            local_only=self.local_only
+            local_only=self.local_only,
         )
 
         return os.path.abspath(install_path)
@@ -1184,10 +1185,16 @@ class InstallerApp(tk.Tk):
             if bin_path:
                 if isinstance(bin_path, dict):
                     bin_path = bin_path.get("*", None)
-                    bin_path_matches = [value for key, value in bin_path.items() if key in self.op_sys]
+                    bin_path_matches = [
+                        value for key, value in bin_path.items() if key in self.op_sys
+                    ]
                     if bin_path_matches:
                         bin_path = bin_path_matches[0]
-                add_to_path(op_sys=self.op_sys, path=join(install_path, bin_path), local_only=self.local_only)
+                add_to_path(
+                    op_sys=self.op_sys,
+                    path=join(install_path, bin_path),
+                    local_only=self.local_only,
+                )
 
             return os.path.abspath(install_path)
 
@@ -1220,7 +1227,7 @@ class InstallerApp(tk.Tk):
                         name="MZmine",
                         urls=urls.get(component),
                         install_path=self.install_path,
-                        bin_paths={"windows" : "", "*": "bin"},
+                        bin_paths={"windows": "", "*": "bin"},
                         command=["mzmine", "mzmine_console"],
                         force=force,
                     )
