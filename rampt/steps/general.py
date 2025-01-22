@@ -64,7 +64,7 @@ def get_value(instance: object | dict, key, default):  # noqa: F811
             return default
 
 
-def set_value(instance: object | dict, key, new_value, add_key: bool, ):
+def set_value(instance: object | dict, key, new_value, add_key: bool):
     """
     Set the value of an attribute or dictionary entry.
 
@@ -301,9 +301,7 @@ class Pipe_Step(Step_Configuration):
 
     def get_log_path(self, out_path: StrPath) -> StrPath:
         log_path = (
-            os.path.join(get_directory(out_path), f"{self.name}_log.txt")
-            if self.save_log
-            else None
+            os.path.join(get_directory(out_path), f"{self.name}_log.txt") if self.save_log else None
         )
 
         return log_path

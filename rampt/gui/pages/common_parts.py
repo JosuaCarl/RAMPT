@@ -16,11 +16,7 @@ selected = {}
 
 
 def create_expandable_setting(
-    create_methods: dict,
-    title: str,
-    hover_text: str = "",
-    expanded=False,
-    **kwargs,
+    create_methods: dict, title: str, hover_text: str = "", expanded=False, **kwargs
 ):
     with tgb.expandable(title=title, hover_text=hover_text, expanded=expanded, **kwargs):
         with tgb.layout(columns="0.02 1 0.02", gap="2%"):
@@ -151,9 +147,7 @@ def create_file_selection(
                     "{None}",
                     active=f"{{scenario.data_nodes['{out_node}'].is_ready_for_reading}}",
                     label="Download results",
-                    on_action=lambda state, id, payload: download_data_node_files(
-                        state, out_node, 
-                    ),
+                    on_action=lambda state, id, payload: download_data_node_files(state, out_node),
                 )
 
 

@@ -10,7 +10,7 @@ gnps_params = GNPS_Runner()
 
 def create_gnps():
     tgb.text("###### File selection", mode="markdown")
-    create_file_selection(process="gnps", out_node="gnps_annotation_paths", )
+    create_file_selection(process="gnps", out_node="gnps_annotation_paths")
 
     tgb.html("br")
 

@@ -706,9 +706,7 @@ class Logger:
         self.out = ""
         self.err = ""
         self.log_file_path = log_file_path
-        self.log(
-            f"Saving log file to {log_file_path}",
-        )
+        self.log(f"Saving log file to {log_file_path}")
 
     def get_now(self) -> str:
         return str(datetime.now().replace(microsecond=0))

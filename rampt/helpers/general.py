@@ -61,7 +61,7 @@ def make_new_dir(dir: StrPath) -> bool:
     return False
 
 
-def get_directory(path: StrPath, ) -> StrPath:
+def get_directory(path: StrPath) -> StrPath:
     """
     Extract directory path from file or directory path.
 
@@ -211,7 +211,7 @@ def stretch_to_list_of_dicts(dictionary: dict) -> list:
 
 
 # String operations
-def change_case_str(s: str, range, conversion: str, ) -> str:
+def change_case_str(s: str, range, conversion: str) -> str:
     """
     Change the case of part of a string.
 
@@ -382,7 +382,7 @@ def open_last_n_line(filepath: str, n: int = 1) -> str:
         return f.readline().decode()
 
 
-def open_last_line_with_content(filepath: str, ) -> str:
+def open_last_line_with_content(filepath: str) -> str:
     """
     Extract the last line which does not only contain whitespace from a file.
 

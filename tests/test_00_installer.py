@@ -115,7 +115,7 @@ def test_install_mzmine():
     )
 
     assert install_path == join(out_path, name)
-    
+
     ic(os.environ.get(["PATH"], ""))
     ic(tool_available([name.lower(), f"{name.lower()}_console"]))
     assert tool_available([name.lower(), f"{name.lower()}_console"])

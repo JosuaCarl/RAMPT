@@ -115,7 +115,7 @@ class MZmine_Runner(Pipe_Step):
                 message="You did not provide a user. You will be prompted to login by mzmine.\
                         For future use please find your user file under $USER/.mzmine/users/ after completing the login.",
                 minimum_verbosity=2,
-                verbosity=self.verbosity
+                verbosity=self.verbosity,
             )
             self.login = "--login"
 

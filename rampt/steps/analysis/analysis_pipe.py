@@ -76,9 +76,7 @@ class Analysis_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__(
-            save_log=save_log, additional_args=additional_args, verbosity=verbosity, 
-        )
+        super().__init__(save_log=save_log, additional_args=additional_args, verbosity=verbosity)
         if kwargs:
             self.update(kwargs)
         self.overwrite = overwrite

@@ -63,9 +63,7 @@ def download_directory(state, dir):
             download(state, content=os.path.join(root, file), name=os.path.basename(file))
 
 
-def download_data_node_files(
-    state, data_node_name, files_attribute: str = "scenario.data_nodes"
-):
+def download_data_node_files(state, data_node_name, files_attribute: str = "scenario.data_nodes"):
     entries = get_attribute_recursive(state, files_attribute)
     if data_node_name:
         logger.log("Ready for reading: " + str(entries[data_node_name].is_ready_for_reading))

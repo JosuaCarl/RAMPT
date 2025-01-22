@@ -13,7 +13,7 @@ mzmine_default_folder = os.path.join(Path.home(), ".mzmine", "users")
 
 def create_feature_finding():
     tgb.text("###### File selection", mode="markdown")
-    create_file_selection(process="feature_finding", out_node="processed_data_paths", )
+    create_file_selection(process="feature_finding", out_node="processed_data_paths")
 
     tgb.html("br")
 

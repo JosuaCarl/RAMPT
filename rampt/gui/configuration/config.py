@@ -166,7 +166,7 @@ def generic_step(
                 if path:
                     in_path_example = path
                     break
-            in_dir = get_directory(in_path_example, )
+            in_dir = get_directory(in_path_example)
             out_paths.append(os.path.normpath(os.path.join(in_dir, out_path_target)))
 
     # Run step
@@ -179,10 +179,7 @@ def generic_step(
 
 
 def convert_files(
-    raw_data_paths: StrPath,
-    conversion_out_paths: StrPath,
-    step_params: dict,
-    global_params: dict,
+    raw_data_paths: StrPath, conversion_out_paths: StrPath, step_params: dict, global_params: dict
 ):
     return generic_step(
         step_class=MSconvert_Runner,
@@ -273,10 +270,7 @@ def summarize_annotations(
 
 
 def analyze_difference(
-    summary_data_paths: StrPath,
-    analysis_out_paths: StrPath,
-    step_params: dict,
-    global_params: dict,
+    summary_data_paths: StrPath, analysis_out_paths: StrPath, step_params: dict, global_params: dict
 ):
     return generic_step(
         step_class=Analysis_Runner,

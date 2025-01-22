@@ -101,6 +101,7 @@ def capture_and_log(
 
     return results, out, err
 
+
 class Logger:
     def __init__(self, log_file_path: str = None):
         self.out = ""
@@ -115,10 +116,9 @@ class Logger:
         dict_representation = {
             "out": self.out,
             "err": self.err,
-            "log_file_path": self.log_file_path
+            "log_file_path": self.log_file_path,
         }
         return dict_representation
-
 
     def to_out(self, output: str):
         self.out += output
