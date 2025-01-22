@@ -18,7 +18,7 @@ from rampt.gui.configuration.config import *
 
 
 # COMMON
-def read_data_node(state, data_node: str, ) -> bool:
+def read_data_node(state, data_node: str) -> bool:
     data_node = state.scenario.data_nodes.get(data_node)
     if data_node.is_ready_for_reading:
         return data_node.read()
@@ -128,7 +128,7 @@ figure_possibilities = [
 figure_path_possibilities = []
 
 
-def prepare_figure_path(state, name, figure_id: str, ):
+def prepare_figure_path(state, name, figure_id: str):
     match figure_id:
         case "values heatmap":
             path_node = "summary_data_paths"
@@ -138,7 +138,7 @@ def prepare_figure_path(state, name, figure_id: str, ):
             path_node = "analysis_data_paths"
         case "zscore cutoff accumulation":
             path_node = "analysis_data_paths"
-    figure_path_possibilities = read_data_node(state, path_node, )
+    figure_path_possibilities = read_data_node(state, path_node)
     if figure_path_possibilities:
         set_attribute_recursive(state, "figure_path_possibilities", figure_path_possibilities)
         set_attribute_recursive(state, "figure_path", figure_path_possibilities[0])
@@ -186,10 +186,7 @@ def create_visualization():
             tgb.text("#### 🗃️ Path selection", mode="markdown")
             tgb.selector("{path_to_data}", lov="{paths_to_data}", dropdown=True)
 
-            tgb.button(
-                "📊 Show data",
-                on_action=populate_data_node,
-            )
+            tgb.button("📊 Show data", on_action=populate_data_node)
 
         # Middle part
         with tgb.part():
@@ -214,15 +211,8 @@ def create_visualization():
                 lov="{figure_possibilities}",
                 dropdown=True,
                 on_change=lambda state, name, value: prepare_figure_path(
-                    state=state, name=name, figure_id=value, 
+                    state=state, name=name, figure_id=value
                 ),
             )
-            tgb.selector(
-                "{figure_path}",
-                lov="{figure_path_possibilities}",
-                dropdown=True,
-            )
-            tgb.button(
-                "🖌️ Show visualization",
-                on_action=set_figure,
-            )
+            tgb.selector("{figure_path}", lov="{figure_path_possibilities}", dropdown=True)
+            tgb.button("🖌️ Show visualization", on_action=set_figure)
