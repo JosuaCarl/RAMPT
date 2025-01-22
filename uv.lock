@@ -2082,7 +2082,7 @@ wheels = [
 
 [[package]]
 name = "rampt"
-version = "2025.1.0b0"
+version = "2025.1.4b0"
 source = { editable = "." }
 dependencies = [
     { name = "argparse" },

@@ -719,7 +719,7 @@ class Logger:
 
     def warn(self, message: str, log_file_path: str = None):
         message = f"[{self.get_now()}][rampt_install][WARNING]\t{message}"
-        warnings.warn(UserWarning((message)))
+        warnings.warn(UserWarning(message))
         self.err += message
         self.write_log_file(message, log_file_path=log_file_path)
 
@@ -771,27 +771,13 @@ class Logger:
             log_file.write("\n" + output)
 
 
-log_file_path = os.path.normpath(os.path.join(Path.home(), "rampt_installer_log.txt"))
+rampt_user_path = os.path.abspath(os.path.join(Path.home(), ".rampt"))
+os.makedirs(rampt_user_path, exist_ok=True)
+log_file_path = os.path.normpath(os.path.join(rampt_user_path, "rampt_installer_log.txt"))
 logger = Logger(log_file_path)
 
 
-def create_symlink(target_file, symlink_path):
-    """
-    Create a symbolic link pointing to the target file.
-
-    :param target_file: The path to the file to be linked to (the target).
-    :param symlink_path: The path for the symbolic link to be created.
-    """
-    try:
-        # Create the symbolic link
-        os.symlink(target_file, symlink_path)
-        logger.log(f"Symbolic link created: {symlink_path} -> {target_file}")
-    except FileExistsError as e:
-        logger.error(e)
-    except OSError as e:
-        logger.error(e)
-
-
+# PATH CHECKING
 def tool_available(executable: str | list) -> bool:
     """
     Tool can be accessed in environment.
@@ -809,7 +795,77 @@ def tool_available(executable: str | list) -> bool:
     else:
         return None
 
+def is_in_path(directory_or_program: str) -> bool:
+    """
+    Check if a directory or program is in the PATH environment variable.
 
+    :param directory_or_program: Directory, that should be a direct entry in PATH, or program, that should be resolved by PATH.
+    :type directory_or_program: StrPath
+    :return: Whether it is on PATH
+    :rtype: bool
+    """
+    # Get the PATH environment variable
+    path_dirs = os.environ.get("PATH", "").split(os.pathsep)
+
+    # Normalize the input path
+    target = Path(directory_or_program).resolve()
+
+    on_path = False
+    # Check if it's a directory
+    if target.is_dir():
+        on_path = any(Path(p).resolve() == target for p in path_dirs)
+
+    # Check if it's a program (file in any PATH directory)
+    if target.is_file():
+        on_path = any((Path(p) / target.name).is_file() for p in path_dirs)
+
+    if on_path:
+        logger.log(f"{directory_or_program} is already on PATH")
+
+    return on_path
+
+# PATH APPENDING
+def add_to_local_path(new_path: str):
+    current_path = os.environ.get("PATH", "")
+    os.environ["PATH"] = f"{current_path}{os.pathsep}{new_path}"
+    logger.log(
+        f"Linked {new_path} to local python environment."
+    )
+
+
+def add_to_path(op_sys: str, path: str, local_only: bool = False):
+    if local_only or not is_in_path(path):
+        exported_to_path = False
+        if "windows" in op_sys:
+            current_path = os.environ.get("PATH", "")
+            if str(path) not in current_path:
+                logger.execute_command(["setx", "PATH", f"{path};{current_path}"], wait=True)
+            exported_to_path = True
+        else:
+            for shell_profile in [
+                ".profile",
+                ".bashrc",
+                ".zshrc",
+                os.path.join(".config", "fish", "config.fish"),
+                "~/.cshrc",
+                "~/.tcshrc",
+            ]:
+                shell_profile = Path.home() / shell_profile
+                if shell_profile.exists():
+                    export_line = f'export PATH="{path}:$PATH"'
+                    with shell_profile.open("a") as file:
+                        file.write(f"\n# Ensure {path} is on PATH\n{export_line}\n")
+                    exported_to_path = True
+                    logger.log(f"Added {path} to PATH in {shell_profile}")
+        if not exported_to_path:
+            logger.warn(
+                "No shell rc was found to export ~/.local/bin to PATH. You might have to do it yourself."
+            )
+    add_to_local_path(path)
+
+
+
+# PROGRAM INSTALLATION
 def calculate_file_hash(file: str | io.BufferedReader, hashing_algorithm: str = "sha256"):
     if isinstance(file, str):
         file = open(file, "rb")
@@ -848,113 +904,82 @@ def download_extract(
         logger.error(ValueError("Wrong hashing value of file."))
 
 
-def is_in_path(directory_or_program: str) -> bool:
+
+# LINK PROGRAM
+def create_symlink(target_file, symlink_path):
     """
-    Check if a directory or program is in the PATH environment variable.
+    Create a symbolic link pointing to the target file.
 
-    :param directory_or_program: Directory, that should be a direct entry in PATH, or program, that should be resolved by PATH.
-    :type directory_or_program: StrPath
-    :return: Whether it is on PATH
-    :rtype: bool
+    :param target_file: The path to the file to be linked to (the target).
+    :param symlink_path: The path for the symbolic link to be created.
     """
-    # Get the PATH environment variable
-    path_dirs = os.environ.get("PATH", "").split(os.pathsep)
-
-    # Normalize the input path
-    target = Path(directory_or_program).resolve()
-
-    on_path = False
-    # Check if it's a directory
-    if target.is_dir():
-        on_path = any(Path(p).resolve() == target for p in path_dirs)
-
-    # Check if it's a program (file in any PATH directory)
-    if target.is_file():
-        on_path = any((Path(p) / target.name).is_file() for p in path_dirs)
-
-    if on_path:
-        logger.log(f"{directory_or_program} is already on PATH")
-
-    return on_path
-
-
-def add_to_path(op_sys: str, path: str):
-    if not is_in_path(path):
-        exported_to_path = False
-        if "windows" in op_sys:
-            current_path = os.environ.get("PATH", "")
-            if str(path) not in current_path:
-                logger.execute_command(["setx", "PATH", f"{path};{current_path}"], wait=True)
-            exported_to_path = True
+    if os.path.exists(symlink_path):
+        if os.path.islink(symlink_path):
+            os.remove(symlink_path)
         else:
-            for shell_profile in [
-                ".profile",
-                ".bashrc",
-                ".zshrc",
-                os.path.join(".config", "fish", "config.fish"),
-                "~/.cshrc",
-                "~/.tcshrc",
-            ]:
-                shell_profile = Path.home() / shell_profile
-                if shell_profile.exists():
-                    export_line = f'export PATH="{path}:$PATH"'
-                    with shell_profile.open("a") as file:
-                        file.write(f"\n# Ensure {path} is on PATH\n{export_line}\n")
-                    exported_to_path = True
-                    logger.log(f"Added {path} to PATH in {shell_profile}")
-        if not exported_to_path:
-            logger.warn(
-                "No shell rc was found to export ~/.local/bin to PATH. You might have to do it yourself."
-            )
+            logger.error(Exception(f"{symlink_path} leads to a directory or file that is no symbolic link."))
+    os.symlink(target_file, symlink_path)
+    logger.log(f"Symbolic link created: {symlink_path} -> {target_file}")
 
 
-def link_program(op_sys: str, program_path: str, name: str):
-    local_bin = os.path.normpath(join(Path.home(), ".local", "bin"))
-    os.makedirs(local_bin, exist_ok=True)
-    if "windows" in op_sys:
-        # Create a shortcut
-        icon_path = os.path.normpath(join(program_path, "..", "statics", "share", "rampt.ico"))
-        shortcut_script_path = os.path.normpath(
-            join(program_path, "..", "statics", "make_shortcut.bat")
-        )
-        shortcut_path = join(local_bin, f"{name}.lnk")
+def create_shortcut_windows(shortcut_script_path: str, target_path: str, shortcut_path: str, icon_path: str):
+    if not os.path.isfile(shortcut_script_path):
         shortcut_script = (
-            r'set SCRIPT="%TEMP%\%RANDOM%-%RANDOM%-%RANDOM%-%RANDOM%.vbs"'
-            + "\n"
-            + 'echo Set oWS = WScript.CreateObject("WScript.Shell") >> %SCRIPT%'
-            + "\n"
-            + f'echo sLinkFile = "{shortcut_path}" >> %SCRIPT%'
-            + "\n"
-            + "echo Set oLink = oWS.CreateShortcut(sLinkFile) >> %SCRIPT%"
-            + "\n"
-            + f'echo oLink.TargetPath = "{program_path}" >> %SCRIPT%'
-            + "\n"
-            + f'echo oLink.IconLocation = "{icon_path}" >> %SCRIPT%'
-            + "\n"
-            + "echo oLink.Save >> %SCRIPT%"
-            + "\n"
-            + "cscript /nologo %SCRIPT%"
-            + "\n"
-            + "del %SCRIPT%"
-        )
-
+                r'set SCRIPT="%TEMP%\%RANDOM%-%RANDOM%-%RANDOM%-%RANDOM%.vbs"'
+                + "\n"
+                + 'echo Set oWS = WScript.CreateObject("WScript.Shell") >> %SCRIPT%'
+                + "\n"
+                + f'echo sLinkFile = "{shortcut_path}" >> %SCRIPT%'
+                + "\n"
+                + "echo Set oLink = oWS.CreateShortcut(sLinkFile) >> %SCRIPT%"
+                + "\n"
+                + f'echo oLink.TargetPath = "{target_path}" >> %SCRIPT%'
+                + "\n"
+                + f'echo oLink.IconLocation = "{icon_path}" >> %SCRIPT%'
+                + "\n"
+                + "echo oLink.Save >> %SCRIPT%"
+                + "\n"
+                + "cscript /nologo %SCRIPT%"
+                + "\n"
+                + "del %SCRIPT%"
+            )
         with open(shortcut_script_path, "w") as file:
             file.write(shortcut_script)
 
-        logger.execute_command([shortcut_script_path])
-        logger.log(f"Shortcut created: {shortcut_path} -> {program_path}")
+    logger.execute_command([shortcut_script_path])
+    logger.log(f"Shortcut created: {shortcut_path} -> {target_path}")
+
+
+def link_rampt(
+        op_sys: str,
+        program_path: str,
+        name: str,
+        out_folder: str = join(Path.home(), ".local", "bin"),
+        local_only: bool = False,
+    ):
+    os.makedirs(out_folder, exist_ok=True)
+    if "windows" in op_sys:
+        shortcut_script_path = os.path.normpath(
+            join(program_path, "..", "statics", "make_shortcut.bat")
+        )
+        icon_path = os.path.normpath(join(program_path, "..", "statics", "share", "rampt.ico"))
+        shortcut_path = join(out_folder, f"{name}.lnk")
+        create_shortcut_windows(
+            shortcut_script_path=shortcut_script_path,
+            target_path=program_path,
+            shortcut_path=shortcut_path,
+            icon_path=icon_path,
+        )
     else:
-        # Create the symlink
-        symlink_path = os.path.join(local_bin, name)
-        if symlink_path.exists() or symlink_path.is_symlink():
-            symlink_path.unlink()
-        symlink_path.symlink_to(program_path)
-        logger.log(f"Symlink created: {symlink_path} -> {program_path}")
-    add_to_path(op_sys=op_sys, path=local_bin)
+        symlink_path = os.path.join(out_folder, name)
+        create_symlink(target_file=program_path, symlink_path=symlink_path)
+    add_to_path(op_sys=op_sys, path=out_folder, local_only=local_only)
+
 
 
 class InstallerApp(tk.Tk):
-    def __init__(self, root):
+    def __init__(self, root, local_only: bool = False):
+        self.local_only = local_only
         self.op_sys = pf.system().lower()
 
         if "mac" in self.op_sys:
@@ -1054,11 +1079,13 @@ class InstallerApp(tk.Tk):
                     ["wget", "-qO-", "https://astral.sh/uv/install.sh"], text=False
                 )
                 process = logger.execute_command(["sh"], stdin=process.stdout)
+        add_to_local_path(join(Path.home(), ".local", "bin"))
         logger.log("Installed uv")
 
     def install_project(
         self, name: str, url: dict | str, install_path: str, hash_url_addendum: str = None
     ):
+        local_bin = os.path.normpath(os.path.join(Path().home(), ".local", "bin"))
         # Hash check
         if hash_url_addendum:
             response = requests.get(url + hash_url_addendum)
@@ -1072,27 +1099,33 @@ class InstallerApp(tk.Tk):
             url=url, target_path=install_path, expected_hash=expected_hash, extraction_method="zip"
         )
 
+        # UV action
         self.install_uv()
-
-        local_bin = os.path.normpath(os.path.join(Path().home(), ".local", "bin"))
         logger.execute_command([f"{local_bin}/uv", "sync", "--no-dev"], cwd=install_path)
 
         if "windows" in self.op_sys:
             python_path = os.path.join(install_path, ".venv", "Scripts", "python")
-            logger.log(f"Python path: {python_path}")
             path_executable = join(install_path, f"{self.name}.bat")
             execution_script = f'"{python_path}" -m rampt %*'
             with open(path_executable, "w") as file:
                 file.write(execution_script)
         else:
             python_path = os.path.join(install_path, ".venv", "bin", "python")
-            logger.log(f"Python path: {python_path}")
             path_executable = join(install_path, f"{self.name}.sh")
             execution_script = f'#!/usr/bin/sh\n"{python_path}" -m rampt'
             with open(path_executable, "w") as file:
                 file.write(execution_script)
+        
+        logger.log(f"Python path: {python_path}")
+        add_to_path(op_sys=self.op_sys, path=install_path, local_only=self.local_only)
 
-        link_program(op_sys=self.op_sys, program_path=path_executable, name=self.name)
+        link_rampt(
+            op_sys=self.op_sys,
+            program_path=path_executable,
+            name=self.name,
+            out_folder=local_bin,
+            local_only=self.local_only
+        )
 
         return os.path.abspath(install_path)
 
@@ -1149,7 +1182,12 @@ class InstallerApp(tk.Tk):
             )
 
             if bin_path:
-                add_to_path(op_sys=self.op_sys, path=join(install_path, bin_path))
+                if isinstance(bin_path, dict):
+                    bin_path = bin_path.get("*", None)
+                    bin_path_matches = [value for key, value in bin_path.items() if key in self.op_sys]
+                    if bin_path_matches:
+                        bin_path = bin_path_matches[0]
+                add_to_path(op_sys=self.op_sys, path=join(install_path, bin_path), local_only=self.local_only)
 
             return os.path.abspath(install_path)
 
@@ -1172,7 +1210,7 @@ class InstallerApp(tk.Tk):
                         urls=urls.get(component),
                         install_path=self.install_path,
                         extraction_method="tar.bz2",
-                        bin_path="",
+                        bin_paths="",
                         command="msconvert",
                         force=force,
                     )
@@ -1182,7 +1220,7 @@ class InstallerApp(tk.Tk):
                         name="MZmine",
                         urls=urls.get(component),
                         install_path=self.install_path,
-                        bin_path="bin",
+                        bin_paths={"windows" : "", "*": "bin"},
                         command=["mzmine", "mzmine_console"],
                         force=force,
                     )
@@ -1193,7 +1231,7 @@ class InstallerApp(tk.Tk):
                         urls=urls.get(component),
                         install_path=self.install_path,
                         hash_url_addendum=".sha256",
-                        bin_path=join("sirius", "bin"),
+                        bin_paths=join("sirius", "bin"),
                         command="sirius",
                         force=force,
                     )

@@ -35,25 +35,35 @@ urls = {
 
 
 def test_create_symlink():
-    create_symlink(join(mock_path, "empty_file"), join(out_path, "empty_file"))
-    assert os.path.isfile(join(out_path, "empty_file"))
+    if "windows" in platform:
+        create_shortcut_windows(
+            shortcut_script_path=join(out_path, "create_shorcut.bat"),
+            target_path=join(mock_path, "empty_file"),
+            shortcut_path=join(out_path, "empty_file.lnk"),
+            icon_path=join(mock_path, "icon.ico")
+        )
+        assert os.path.isfile(join(out_path, "empty_file.lnk"))
+    else:
+        create_symlink(join(mock_path, "empty_file"), join(out_path, "empty_file"))
+        assert os.path.isfile(join(out_path, "empty_file"))
 
 
 def test_tool_available():
-    assert tool_available("which")
+    assert tool_available("python") or tool_available("python3")
 
 
 def test_install_uv():
     clean_out(out_path)
     root = tk.Tk()
-    installer = InstallerApp(root)
+    installer = InstallerApp(root, local_only=True)
     installer.install_uv()
+    assert tool_available("uv")
 
 
 def test_install_project():
     clean_out(out_path)
     root = tk.Tk()
-    installer = InstallerApp(root)
+    installer = InstallerApp(root, local_only=True)
     name = "rampt"
     ic(out_path)
     install_path = installer.install_project(
@@ -70,7 +80,7 @@ def test_install_project():
 def test_install_msconvert(recwarn):
     clean_out(out_path)
     root = tk.Tk()
-    installer = InstallerApp(root)
+    installer = InstallerApp(root, local_only=True)
     name = "MSconvert"
 
     install_path = installer.install_component(
@@ -97,22 +107,25 @@ def test_install_msconvert(recwarn):
 def test_install_mzmine():
     clean_out(out_path)
     root = tk.Tk()
-    installer = InstallerApp(root)
+    installer = InstallerApp(root, local_only=True)
     name = "MZmine"
 
     install_path = installer.install_component(
-        name=name, urls=urls.get(name), install_path=out_path, bin_path="bin"
+        name=name, urls=urls.get(name), install_path=out_path, bin_path=""
     )
 
     assert install_path == join(out_path, name)
     assert tool_available(name.lower())
-    assert os.path.isdir(join(out_path, name))
+    if "windows" in platform:
+        assert os.path.isdir(join(out_path, f"{name}_console"))
+    else:
+        assert os.path.isdir(join(out_path, name))
 
 
 def test_install_sirius():
     clean_out(out_path)
     root = tk.Tk()
-    installer = InstallerApp(root)
+    installer = InstallerApp(root, local_only=True)
     name = "Sirius"
 
     install_path = installer.install_component(
@@ -127,7 +140,7 @@ def test_install_sirius():
 def test_install_components():
     clean_out(out_path)
     root = tk.Tk()
-    installer = InstallerApp(root)
+    installer = InstallerApp(root, local_only=True)
     installer.install_path = out_path
 
     installer.install_components(["MSconvert", "MZmine", "Sirius"])
