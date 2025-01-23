@@ -39,6 +39,7 @@ dev = [
     "pydata-sphinx-theme<1.0.0,>=0.15.4",
     "ruff<1.0.0,>=0.8.1",
     "auto-py-to-exe>=2.45.1",
+    "pip-licenses>=5.0.0",
 ]
 notebook = [
     "jupyter<2.0.0,>=1.1.1",
