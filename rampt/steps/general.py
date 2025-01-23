@@ -118,7 +118,6 @@ class Step_Configuration:
         mandatory_patterns: dict[str, str] = {},
         save_log: bool = True,
         verbosity: int = 1,
-        additional_args: list = [],
     ):
         """
         Initialize the pipeline step configuration. Used for pattern matching.
@@ -148,8 +147,6 @@ class Step_Configuration:
         :type save_log: bool, optional
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
-        :param additional_args: Additional arguments for mzmine, defaults to []
-        :type additional_args: list, optional
         """
         self.name = name
         self.platform = platform
@@ -164,7 +161,6 @@ class Step_Configuration:
         self.mandatory_patterns = mandatory_patterns
         self.save_log = save_log
         self.verbosity = verbosity
-        self.additional_args = additional_args
 
         self.update_regexes()
 
@@ -237,12 +233,6 @@ class Step_Configuration:
             if hasattr(value, "__dict__"):
                 attributes_dict[attribute] = self.dict_representation(value)
             else:
-                if attribute in ["scheduled_in", "scheduled_out"]:
-                    value = [
-                        entry.get("label", entry) if isinstance(entry, dict) else entry
-                        for entry in value
-                    ]
-                    setattr(self, attribute, value)
                 attributes_dict[attribute] = value
         return attributes_dict
 
@@ -331,20 +321,18 @@ class Pipe_Step(Step_Configuration):
             mandatory_patterns=mandatory_patterns,
             save_log=save_log,
             verbosity=verbosity,
-            additional_args=additional_args,
         )
 
         self.common_execs = []
         self.exec_path = exec_path
         self.futures = []
-        self.scheduled_in = []
-        self.scheduled_out = []
-        self.processed_in = []
-        self.processed_out = []
+        self.scheduled_ios = []
+        self.processed_ios = []
         self.outs = []
         self.errs = []
         self.log_paths = []
         self.results = []
+        self.additional_args=additional_args,
 
     # Executives
     def check_exec_path(self, exec_path: StrPath = None) -> bool:
@@ -407,8 +395,7 @@ class Pipe_Step(Step_Configuration):
 
     def store_progress(
         self,
-        in_path: StrPath,
-        out_path: StrPath,
+        in_out: StrPath,
         results=None,
         future=None,
         out: str = "",
@@ -431,17 +418,15 @@ class Pipe_Step(Step_Configuration):
         :param log_path: Path to log file, defaults to ""
         :type log_path: str, optional
         """
-        if in_path in self.processed_in:
-            i = self.processed_in.index(in_path)
-            self.processed_out[i] = out_path
+        if in_out in self.processed_ios:
+            i = self.processed_ios.index(in_out)
             self.log_paths[i] = log_path
             self.outs[i] = out
             self.errs[i] = err
             self.results[i] = results
             self.futures[i] = future
         else:
-            self.processed_in.append(in_path)
-            self.processed_out.append(out_path)
+            self.processed_ios.append(in_out)
             self.outs.append(out)
             self.errs.append(err)
             self.log_paths.append(log_path)
@@ -492,18 +477,18 @@ class Pipe_Step(Step_Configuration):
         Compute scheduled operations (futures).
         """
         futures = []
-        in_paths = []
-        for in_path, future in zip(self.processed_in, self.futures):
+        in_outs = []
+        for in_out, future in zip(self.processed_ios, self.futures):
             if future is not None:
-                in_paths.append(in_path)
+                in_outs.append(in_out)
                 futures.append(future)
 
         response = compute_scheduled(
             futures=futures, num_workers=self.workers, verbose=self.verbosity >= 1
         )
 
-        for in_path, (results, out, err) in zip(in_paths, response[0]):
-            i = self.processed_in.index(in_path)
+        for in_out, (results, out, err) in zip(in_outs, response[0]):
+            i = self.processed_ios.index(in_out)
             self.outs[i] = out
             self.errs[i] = err
             self.results[i] = results
@@ -544,18 +529,16 @@ class Pipe_Step(Step_Configuration):
             error_type=NotImplementedError,
         )
 
-    def run(self, in_paths: list | StrPath = [], out_paths: list | StrPath = [], **kwargs) -> list:
+    def run(self, in_outs: list[dict] = [], out_folder: StrPath = "pipe_step_out", **kwargs) -> list[dict]:
         """
         Run the instance step with the given in_paths and out_paths. Constructs a new out_target_folder for each directory, if given.
 
-        :param in_paths: Input paths
-        :type in_paths: list|StrPath
-        :param out_paths: Output paths
-        :type out_paths: list|StrPath
+        :param in_outs: Dicitionary with "in" and "out", containing dictionaries with i/o information
+        :type in_outs: list[dict] 
         :param kwargs: Dictionary of additional arguments for computation
         :type kwargs: ...
         :return: Output that was processed
-        :rtype: list
+        :rtype: list[dict]
         """
         logger.log(
             message=f"Started {self.__class__.__name__} step",
@@ -564,62 +547,49 @@ class Pipe_Step(Step_Configuration):
         )
 
         # Extend scheduled paths
-        self.scheduled_in = extend_list(self.scheduled_in, in_paths)
-        self.scheduled_out = extend_list(self.scheduled_out, out_paths)
+        self.scheduled_ios = extend_list(self.scheduled_ios, in_outs)
 
         # Handle empty output paths by choosing input directory as base
-        self.scheduled_out = (
-            self.scheduled_out
-            if self.scheduled_out
-            else [os.path.dirname(in_path) for in_path in self.scheduled_in]
-        )
-
-        # Handle smaller scheduled out list by extending with last element
-        size_diff = len(self.scheduled_in) - len(self.scheduled_out)
-        if size_diff > 0:
-            self.scheduled_out += [self.scheduled_out[-1]] * size_diff
+        for scheduled_io in self.scheduled_ios:
+            if "out" not in scheduled_io:
+                if "standard" in scheduled_io["in_path"]:
+                    standard_in_path = scheduled_io["in_path"]["standard"]
+                else:
+                    standard_in_path = filter(flatten_values(scheduled_io["in_path"]))[0]
+                scheduled_io["out_path"] = {
+                    "standard": os.path.abspath(
+                        os.path.join(get_directory(standard_in_path), "..", out_folder)
+                    )
+                }
 
         # Loop over all in/out combinations
-        for i, (in_path, out_path) in enumerate(zip(self.scheduled_in, self.scheduled_out)):
+        for i, scheduled_io in enumerate(self.scheduled_ios):
+
             # Skip already processed files/folders
-            if in_path in self.processed_in and not self.overwrite:
+            if scheduled_io in self.processed_ios and not self.overwrite:
                 continue
 
             # Construct out directories if not existent
-            if isinstance(out_path, dict):
-                target_paths = list(out_path.values())
-            elif isinstance(out_path, list) or isinstance(out_path, tuple):
-                target_paths = out_path
-            else:
-                target_paths = [out_path]
-            for target_path in target_paths:
-                os.makedirs(target_path, exist_ok=True)
+            for out_path in list(scheduled_io["out_path"].values()):
+                os.makedirs(out_path, exist_ok=True)
 
             logger.log(
-                message=f"Processing {in_path} -> {out_path}",
+                message=f'Processing {scheduled_io["in_path"]} -> {scheduled_io["out_path"]}',
                 minimum_verbosity=2,
                 verbosity=self.verbosity,
             )
 
-            # Ensure that further passed down lists are processed in parallel with in_path
-            additional_arguments = {}
-            for argument, value in kwargs.items():
-                if isinstance(value, list) and len(value) == len(self.scheduled_in):
-                    additional_arguments[argument] = value[i]
-                else:
-                    additional_arguments[argument] = value
-
             # Activate right computation function
-            in_path_example = flatten_values(in_path)[0]
+            in_path_example = filter(flatten_values(scheduled_io["in_path"]))[0]
             if self.nested:
-                self.run_nested(in_root_dir=in_path, out_root_dir=out_path)
+                self.run_nested(**scheduled_io)
             elif os.path.isdir(in_path_example):
-                self.run_directory(in_path=in_path, out_path=out_path, **additional_arguments)
+                self.run_directory(**scheduled_io)
             else:
-                self.run_single(in_path=in_path, out_path=out_path, **additional_arguments)
+                self.run_single(**scheduled_io)
 
             logger.log(
-                message=f"Processed {in_path} -> {out_path}",
+                message=f'Processed {scheduled_io["in_path"]} -> {scheduled_io["out_path"]}',
                 minimum_verbosity=2,
                 verbosity=self.verbosity,
             )
@@ -629,8 +599,7 @@ class Pipe_Step(Step_Configuration):
             self.compute_futures()
 
         # Clear schedules
-        self.scheduled_in = []
-        self.scheduled_out = []
+        self.scheduled_ios = []
 
         logger.log(
             message=f"Finished {self.__class__.__name__} step",
@@ -638,4 +607,4 @@ class Pipe_Step(Step_Configuration):
             verbosity=self.verbosity,
         )
 
-        return self.processed_out
+        return self.processed_ios

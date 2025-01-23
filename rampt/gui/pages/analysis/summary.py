@@ -8,7 +8,7 @@ from rampt.steps.analysis.summary_pipe import Summary_Runner
 summary_params = Summary_Runner()
 
 
-# TODO: Implement passing of two files to scheduled_in
+# TODO: Implement passing of two files to scheduled_ios
 def create_summary():
     with tgb.part(render="{'summ' in entrypoint.lower()}"):
         tgb.text("###### Select quantification table (.csv)", mode="markdown")

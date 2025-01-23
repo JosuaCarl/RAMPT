@@ -45,9 +45,11 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         verbosity=verbosity,
         nested=nested,
         workers=n_workers,
-        scheduled_in=in_dir,
-        scheduled_out=out_dir,
     )
+    analysis_runner.scheduled_ios={
+        "in_path": {"standard": in_dir},
+        "out_path": {"standard": out_dir}
+    }
     return analysis_runner.run()
 
 
@@ -190,14 +192,14 @@ class Analysis_Runner(Pipe_Step):
             verbosity=self.verbosity,
         )
 
-    def run_single(self, in_path: StrPath, out_path: StrPath):
+    def run_single(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath]):
         """
         Add the annotations into a quantification file.
 
         :param in_path: Path to scheduled file.
-        :type in_path: str
+        :type in_path: dict[str, StrPath]
         :param out_path: Path to output directory.
-        :type out_path: str
+        :type out_path: dict[str, StrPath]
         """
         self.compute(
             step_function=capture_and_log,
@@ -207,44 +209,44 @@ class Analysis_Runner(Pipe_Step):
             log_path=self.get_log_path(out_path=out_path),
         )
 
-    def run_directory(self, in_path: StrPath, out_path: StrPath):
+    def run_directory(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath]):
         """
         Convert all matching files in a folder.
 
         :param in_path: Path to scheduled file.
-        :type in_path: str
+        :type in_path: dict[str, StrPath]
         :param out_path: Path to output directory.
-        :type out_path: str
+        :type out_path: dict[str, StrPath]
         """
         self.run_single(in_path=join(in_path, "summary.tsv"), out_path=out_path)
 
-    def run_nested(self, in_root_dir: StrPath, out_root_dir: StrPath, recusion_level: int = 0):
+    def run_nested(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0):
         """
-        Converts multiple files in multiple folders, found in in_root_dir with msconvert and saves them
-        to a location out_root_dir again into their respective folders.
+        Converts multiple files in multiple folders, found in in_path with msconvert and saves them
+        to a location out_path again into their respective folders.
 
-        :param in_root_dir: Starting folder for descent.
-        :type in_root_dir: StrPath
-        :param out_root_dir: Folder where structure is mimiced and files are converted to
-        :type out_root_dir: StrPath
+        :param in_path: Starting folder for descent.
+        :type in_path: dict[str, StrPath]
+        :param out_path: Folder where structure is mimiced and files are converted to
+        :type out_path: dict[str, StrPath]
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
-        made_out_root_dir = False
+        made_out_path = False
 
-        for root, dirs, files in os.walk(in_root_dir):
+        for root, dirs, files in os.walk(in_path):
             if "summary.tsv" in files:
-                if not made_out_root_dir:
-                    os.makedirs(out_root_dir, exist_ok=True)
-                    made_out_root_dir = True
+                if not made_out_path:
+                    os.makedirs(out_path, exist_ok=True)
+                    made_out_path = True
 
-                self.run_single(in_path=join(root, "summary.tsv"), out_path=out_root_dir)
+                self.run_single(in_path=join(root, "summary.tsv"), out_path=out_path)
 
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
                 self.run_nested(
-                    in_root_dir=join(in_root_dir, dir),
-                    out_root_dir=join(out_root_dir, dir),
+                    in_path=join(in_path, dir),
+                    out_path=join(out_path, dir),
                     recusion_level=recusion_level + 1,
                 )
 

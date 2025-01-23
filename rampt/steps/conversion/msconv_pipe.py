@@ -54,9 +54,11 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         verbosity=verbosity,
         nested=nested,
         workers=n_workers,
-        scheduled_in=in_dir,
-        scheduled_out=out_dir,
     )
+    msconvert_runner.scheduled_ios={
+        "in_path": {"standard": in_dir},
+        "out_path": {"standard": out_dir}
+    }
     return msconvert_runner.run()
 
 
@@ -131,14 +133,14 @@ class MSconvert_Runner(Pipe_Step):
         )
         self.name = "msconvert"
 
-    def select_for_conversion(self, in_path: str, out_path: str) -> bool:
+    def select_for_conversion(self, in_path: StrPath, out_path: StrPath) -> bool:
         """
         Convert one file with msconvert.
 
         :param in_path: Path to scheduled file.
-        :type in_path: str
+        :type in_path: StrPath
         :param out_path: Path to output directory.
-        :type out_path: str
+        :type out_path: StrPath
         :return: Whether the file was converted
         :rtype: bool
         """
@@ -154,14 +156,15 @@ class MSconvert_Runner(Pipe_Step):
 
         return in_valid, out_valid
 
-    def run_single(self, in_path: str, out_path: str):
+
+    def run_single(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath]):
         """
         Convert one file with msconvert.
 
         :param in_path: Path to scheduled file.
-        :type in_path: str
+        :type in_path: dict[str, StrPath]
         :param out_path: Path to output directory.
-        :type out_path: str
+        :type out_path: dict[str, StrPath]
         """
         out_file_name = ".".join(os.path.basename(in_path).split(".")[:-1]) + self.target_format
 
@@ -182,14 +185,14 @@ class MSconvert_Runner(Pipe_Step):
             verbosity=self.verbosity,
         )
 
-    def run_directory(self, in_path: str, out_path: str):
+    def run_directory(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath]):
         """
         Convert all matching files in a folder.
 
         :param in_path: Path to scheduled file.
-        :type in_path: str
+        :type in_path: dict[str, StrPath]
         :param out_path: Path to output directory.
-        :type out_path: str
+        :type out_path: dict[str, StrPath]
         """
         verbose_tqdm = self.verbosity >= 2
         # Check folder with valid input:
@@ -208,41 +211,41 @@ class MSconvert_Runner(Pipe_Step):
                 if in_valid and out_valid:
                     self.run_single(in_path=entry_path, out_path=out_path)
 
-    def run_nested(self, in_root_dir: StrPath, out_root_dir: StrPath, recusion_level: int = 0):
+    def run_nested(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0):
         """
-        Converts multiple files in multiple folders, found in in_root_dir with msconvert and saves them
-        to a location out_root_dir again into their respective folders.
+        Converts multiple files in multiple folders, found in in_path with msconvert and saves them
+        to a location out_path again into their respective folders.
 
-        :param in_root_dir: Starting folder for descent.
-        :type in_root_dir: StrPath
-        :param out_root_dir: Folder where structure is mimiced and files are converted to
-        :type out_root_dir: StrPath
+        :param in_path: Starting folder for descent.
+        :type in_path: dict[str, StrPath]
+        :param out_path: Folder where structure is mimiced and files are converted to
+        :type out_path: dict[str, StrPath]
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
-        made_out_root_dir = False
+        made_out_path = False
 
         for entry in tqdm(
-            os.listdir(in_root_dir), disable=verbose_tqdm, desc="Schedule conversions"
+            os.listdir(in_path), disable=verbose_tqdm, desc="Schedule conversions"
         ):
-            entry_path = join(in_root_dir, entry)
+            entry_path = join(in_path, entry)
             hypothetical_out_path = join(
-                out_root_dir, replace_file_ending(entry, self.target_format)
+                out_path, replace_file_ending(entry, self.target_format)
             )
             in_valid, out_valid = self.select_for_conversion(
                 in_path=entry_path, out_path=hypothetical_out_path
             )
 
             if in_valid and out_valid:
-                if not made_out_root_dir:
-                    os.makedirs(out_root_dir, exist_ok=True)
-                    made_out_root_dir = True
-                self.run_single(in_path=entry_path, out_path=out_root_dir)
+                if not made_out_path:
+                    os.makedirs(out_path, exist_ok=True)
+                    made_out_path = True
+                self.run_single(in_path=entry_path, out_path=out_path)
             elif os.path.isdir(entry_path) and not in_valid:
                 self.run_nested(
-                    in_root_dir=entry_path,
-                    out_root_dir=join(out_root_dir, entry),
+                    in_path=entry_path,
+                    out_path=join(out_path, entry),
                     recusion_level=recusion_level + 1,
                 )
 

@@ -19,6 +19,9 @@ from typing import Any
 
 
 # Data nodes
+## Entrypoint
+entrypoint_config = Config.configure_in_memory_data_node(id="entrypoint", scope=Scope.SCENARIO)
+
 ## Data paths
 raw_data_paths_config = Config.configure_in_memory_data_node(
     id="raw_data_paths", scope=Scope.SCENARIO
@@ -64,28 +67,8 @@ analysis_data_config = Config.configure_csv_data_node(id="analysis_data", scope=
 
 
 ## Output paths
-conversion_out_paths_config = Config.configure_in_memory_data_node(
-    id="conversion_out_paths", scope=Scope.SCENARIO
-)
-
-feature_finding_out_paths_config = Config.configure_in_memory_data_node(
-    id="feature_finding_out_paths", scope=Scope.SCENARIO
-)
-
-gnps_out_paths_config = Config.configure_in_memory_data_node(
-    id="gnps_out_paths", scope=Scope.SCENARIO
-)
-
-sirius_out_paths_config = Config.configure_in_memory_data_node(
-    id="sirius_out_paths", scope=Scope.SCENARIO
-)
-
-summary_out_paths_config = Config.configure_in_memory_data_node(
-    id="summary_out_paths", scope=Scope.SCENARIO
-)
-
-analysis_out_paths_config = Config.configure_in_memory_data_node(
-    id="analysis_out_paths", scope=Scope.SCENARIO
+out_path_root_config = Config.configure_in_memory_data_node(
+    id="out_path_root", scope=Scope.SCENARIO,
 )
 
 
@@ -125,15 +108,17 @@ def generic_step(
     step_class,
     step_params: dict,
     global_params: dict,
-    in_paths: str | list = None,
-    out_paths: str | list = None,
-    out_path_target: StrPath = ".",
-    return_attributes: list = ["processed_out"],
+    entrypoint: bool,
+    in_outs: list[dict] = None,
+    out_path_root: str = "..",
+    out_folder: StrPath = ".",
+    return_attributes: list = ["processed_ios"],
     **kwargs,
 ) -> tuple[Any] | Any:
     # Fixate parameters
-    global_params.pop("patterns")
-    global_params.pop("additional_args")
+    if not entrypoint:
+        for entry in ["patterns", "pattern", "contains", "prefix", "suffix"]:
+            global_params.pop(entry)
     step_params.update(global_params)
     step_instance = step_class(**step_params)
 
@@ -144,33 +129,24 @@ def generic_step(
     )
 
     # Overwrite scheduled, when new in_path is given
-    if in_paths:
-        in_paths = to_list(in_paths)
-        step_instance.scheduled_in = []
-    elif not step_instance.scheduled_in:
+    if in_outs:
+        step_instance.scheduled_ios = to_list(in_outs)
+    elif not step_instance.scheduled_ios:
         raise logger.error(
-            message=f"No input in in_paths and {step_instance.__class__.__name__}.scheduled_in",
-            error_type=TypeError,
+            message=f"No input in `in_outs` and `{step_instance.__class__.__name__}.scheduled_ios`",
+            error_type=ValueError,
             raise_error=False,
         )
-
-    # Add out_paths as relatives to in_path if none is given
-    if out_paths:
-        out_paths = to_list(out_paths)
-        step_instance.scheduled_out = []
-    else:
-        out_paths = []
-        for in_path in in_paths:
-            # Get random in_path entry to determine a suitable out_path
-            for path in flatten_values(in_path):
-                if path:
-                    in_path_example = path
-                    break
-            in_dir = get_directory(in_path_example)
-            out_paths.append(os.path.normpath(os.path.join(in_dir, out_path_target)))
+    
+    for scheduled_io in step_instance.scheduled_ios:
+        if "out" not in scheduled_io:
+            if os.path.isabs(out_path_root):
+                scheduled_io["out_path"] = {
+                    "standard": os.path.join(out_path_root, out_folder)
+                }
 
     # Run step
-    step_instance.run(in_paths=in_paths, out_paths=out_paths, **kwargs)
+    step_instance.run(out_folder=out_folder, **kwargs)
 
     # Return results
     results = [getattr(step_instance, attr) for attr in return_attributes]
@@ -179,30 +155,37 @@ def generic_step(
 
 
 def convert_files(
-    raw_data_paths: StrPath, conversion_out_paths: StrPath, step_params: dict, global_params: dict
+    entrypoint: bool,
+    raw_data_paths: StrPath,
+    out_path_root: StrPath,
+    step_params: dict,
+    global_params: dict,
 ):
     return generic_step(
         step_class=MSconvert_Runner,
-        in_paths=raw_data_paths,
-        out_paths=conversion_out_paths,
-        out_path_target=os.path.join("..", "converted"),
+        match_patterns="conv" in entrypoint.lower(),
+        #in_paths=raw_data_paths,
+        out_path_root=out_path_root,
+        out_folder="converted",
         step_params=step_params,
         global_params=global_params,
     )
 
 
 def find_features(
+    entrypoint: bool,
     community_formatted_data_paths: StrPath,
-    feature_finding_out_paths: StrPath,
+    out_path_root: StrPath,
     mzmine_batch: StrPath,
     step_params: dict,
     global_params: dict,
 ):
     return generic_step(
         step_class=MZmine_Runner,
-        in_paths=community_formatted_data_paths,
-        out_paths=feature_finding_out_paths,
-        out_path_target=os.path.join("..", "processed"),
+        match_patterns="feat" in entrypoint.lower(),
+        #in_paths=community_formatted_data_paths,
+        out_path_root=out_path_root,
+        out_folder="processed",
         step_params=step_params,
         global_params=global_params,
         return_attributes=["processed_out", "log_paths"],
@@ -211,17 +194,19 @@ def find_features(
 
 
 def annotate_gnps(
+    entrypoint: bool,
     processed_data_paths: StrPath,
     mzmine_log: StrPath,
-    gnps_out_paths: StrPath,
+    out_path_root: StrPath,
     step_params: dict,
     global_params: dict,
 ):
     return generic_step(
         step_class=GNPS_Runner,
-        in_paths=processed_data_paths,
-        out_paths=gnps_out_paths,
-        out_path_target=os.path.join("..", "annotated"),
+        match_patterns="annot" in entrypoint.lower(),
+        #in_paths=processed_data_paths,
+        out_path_root=out_path_root,
+        out_folder="annotated",
         step_params=step_params,
         global_params=global_params,
         mzmine_log=mzmine_log,
@@ -229,17 +214,19 @@ def annotate_gnps(
 
 
 def annotate_sirius(
+    entrypoint: bool,
     processed_data_paths: StrPath,
-    sirius_out_paths: StrPath,
+    out_path_root: StrPath,
     config: StrPath,
     step_params: dict,
     global_params: dict,
 ):
     return generic_step(
         step_class=Sirius_Runner,
-        in_paths=processed_data_paths,
-        out_paths=sirius_out_paths,
-        out_path_target=os.path.join("..", "annotated"),
+        match_patterns="annot" in entrypoint.lower(),
+        #in_paths=processed_data_paths,
+        out_path_root=out_path_root,
+        out_folder="annotated",
         step_params=step_params,
         global_params=global_params,
         config=config,
@@ -247,36 +234,44 @@ def annotate_sirius(
 
 
 def summarize_annotations(
+    entrypoint: bool,
     processed_data_paths: StrPath,
     gnps_annotation_paths: StrPath,
     sirius_annotation_paths: StrPath,
-    summary_out_paths: StrPath,
+    out_path_root: StrPath,
     step_params: dict,
     global_params: dict,
 ):
     return generic_step(
         step_class=Summary_Runner,
-        in_paths=stretch_to_list_of_dicts(
-            {
-                "quantification": [processed_data_paths],
-                "annotation": [sirius_annotation_paths, gnps_annotation_paths],
-            }
-        ),
-        out_paths=summary_out_paths,
-        out_path_target=os.path.join("..", "analysis"),
+        match_patterns="summ" in entrypoint.lower(),
+        #in_paths=stretch_to_list_of_dicts(
+        #    {
+        #        "quantification": [processed_data_paths],
+        #        "annotation": [sirius_annotation_paths, gnps_annotation_paths],
+        #    }
+        #),
+        out_path_root=out_path_root,
+        out_folder="analysis",
         step_params=step_params,
         global_params=global_params,
     )
 
 
 def analyze_difference(
-    summary_data_paths: StrPath, analysis_out_paths: StrPath, step_params: dict, global_params: dict
+    entrypoint: bool,
+    summary_data_paths: StrPath,
+    out_path_root: StrPath,
+    step_params: dict,
+    global_params: dict,
 ):
     return generic_step(
         step_class=Analysis_Runner,
-        in_paths=summary_data_paths,
-        out_paths=analysis_out_paths,
-        out_path_target=os.path.join("..", "analysis"),
+        # Not kidding, because this covers analysis and analize
+        match_patterns="anal" in entrypoint.lower(),
+        #in_paths=summary_data_paths,
+        out_path_root=out_path_root,
+        out_folder="analysis",
         step_params=step_params,
         global_params=global_params,
     )
@@ -287,8 +282,9 @@ convert_files_config = Config.configure_task(
     "convert_files",
     function=convert_files,
     input=[
+        entrypoint_config,
         raw_data_paths_config,
-        conversion_out_paths_config,
+        out_path_root_config,
         conversion_params_config,
         global_params_config,
     ],
@@ -300,8 +296,9 @@ find_features_config = Config.configure_task(
     "find_features",
     function=find_features,
     input=[
+        entrypoint_config,
         community_formatted_data_paths_config,
-        feature_finding_out_paths_config,
+        out_path_root_config,
         mzmine_batch_config,
         feature_finding_params_config,
         global_params_config,
@@ -314,9 +311,10 @@ annotate_gnps_config = Config.configure_task(
     "annotate_gnps",
     function=annotate_gnps,
     input=[
+        entrypoint_config,
         processed_data_paths_config,
         mzmine_log_config,
-        gnps_out_paths_config,
+        out_path_root_config,
         gnps_params_config,
         global_params_config,
     ],
@@ -328,8 +326,9 @@ annotate_sirius_config = Config.configure_task(
     "annotate_sirius",
     function=annotate_sirius,
     input=[
+        entrypoint_config,
         processed_data_paths_config,
-        sirius_out_paths_config,
+        out_path_root_config,
         sirius_config_config,
         sirius_params_config,
         global_params_config,
@@ -342,10 +341,11 @@ summarize_annotations_config = Config.configure_task(
     "summarize_annotations",
     function=summarize_annotations,
     input=[
+        entrypoint_config,
         processed_data_paths_config,
         gnps_annotation_paths_config,
         sirius_annotation_paths_config,
-        summary_out_paths_config,
+        out_path_root_config,
         summary_params_config,
         global_params_config,
     ],
@@ -357,8 +357,9 @@ analyze_difference_config = Config.configure_task(
     "analyze_difference",
     function=analyze_difference,
     input=[
+        entrypoint_config,
         summary_data_paths_config,
-        analysis_out_paths_config,
+        out_path_root_config,
         analysis_params_config,
         global_params_config,
     ],
@@ -379,13 +380,6 @@ ms_analysis_config = Config.configure_scenario(
         analyze_difference_config,
     ],
     sequences={
-        "Skip GNPS": [
-            convert_files_config,
-            find_features_config,
-            annotate_sirius_config,
-            summarize_annotations_config,
-            analyze_difference_config,
-        ],
         "Convert": [convert_files_config],
         "Find features": [find_features_config],
         "Sirius annotation": [annotate_sirius_config],

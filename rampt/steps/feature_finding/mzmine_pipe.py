@@ -47,10 +47,12 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         additional_args=additional_args,
         verbosity=verbosity,
         nested=nested,
-        scheduled_in=in_dir,
-        scheduled_out=out_dir,
         valid_formats=valid_formats,
     )
+    mzmine_runner.scheduled_ios={
+        "in": {"standard": in_dir},
+        "out": {"standard": out_dir}
+    }
     mzmine_runner.run()
 
 
@@ -126,20 +128,19 @@ class MZmine_Runner(Pipe_Step):
                 error_type=ValueError,
             )
 
-    def run_single(self, in_path: StrPath, out_path: StrPath, batch: StrPath = None) -> bool:
+    def run_single(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], batch: dict[str, StrPath] = None):
         """
         Run a single mzmine batch.
 
         :param in_path: Path to in files (as a .txt with filepaths or glob string)
-        :type in_path: StrPath
+        :type in_path: dict[str, StrPath]
         :param out_path: Output directory
-        :type out_path: StrPath
-        :param out_path: Batch file
-        :type out_path: StrPath
-        :return: Success of the command
-        :rtype: bool
+        :type out_path: dict[str, StrPath]
+        :param batch: Batch file
+        :type batch: dict[str, StrPath]
         """
         batch = batch if batch else self.batch
+        in_path
 
         cmd = rf'"{self.exec_path}" {self.login} --batch "{batch}" --input "{in_path}" --output "{out_path}" {" ".join(self.additional_args)}'
 
@@ -152,14 +153,14 @@ class MZmine_Runner(Pipe_Step):
             verbosity=self.verbosity,
         )
 
-    def run_directory(self, in_path: StrPath, out_path: StrPath, batch: StrPath = None):
+    def run_directory(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], batch:  dict[str, StrPath] = None):
         """
         Compute a single mzmine batch on a folder.
 
         :param in_path: Path to in folder
-        :type in_path: StrPath
+        :type in_path: dict[str, StrPath]
         :param out_path: Output directory
-        :type out_path: StrPath
+        :type out_path: dict[str, StrPath]
         :param batch: Batch file, defaults to None
         :type batch: StrPath, optional
         """
@@ -172,26 +173,26 @@ class MZmine_Runner(Pipe_Step):
             if self.match_file_name(pattern=self.patterns["in"], file_name=entry):
                 self.run_single(in_path=join(in_path, entry), out_path=out_path, batch=batch)
 
-    def run_nested(self, in_root_dir: StrPath, out_root_dir: StrPath, recusion_level: int = 0):
+    def run_nested(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0):
         """
         Run a mzmine batch on a nested structure.
 
-        :param in_root_dir: Root directory for descending the structure
-        :type in_root_dir: StrPath
-        :param out_root_dir: Root directory for output
-        :type out_root_dir: StrPath
+        :param in_path: Root directory for descending the structure
+        :type in_path: dict[str, StrPath]
+        :param out_path: Root directory for output
+        :type out_path: dict[str, StrPath]
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
-        made_out_root_dir = False
+        made_out_dir = False
         found_files = []
         batch = None
 
         for entry in tqdm(
-            os.listdir(in_root_dir), disable=verbose_tqdm, desc="Schedule feature_finding"
+            os.listdir(in_path), disable=verbose_tqdm, desc="Schedule feature_finding"
         ):
-            entry_path = join(in_root_dir, entry)
+            entry_path = join(in_path, entry)
 
             if self.match_file_name(pattern=self.patterns["in"], file_name=entry):
                 found_files.append(entry_path)
@@ -199,19 +200,19 @@ class MZmine_Runner(Pipe_Step):
                 batch = entry_path if not self.batch else None
             elif os.path.isdir(entry_path):
                 self.run_nested(
-                    in_root_dir=entry_path,
-                    out_root_dir=join(out_root_dir, entry),
+                    in_path=entry_path,
+                    out_path=join(out_path, entry),
                     recusion_level=recusion_level + 1,
                 )
 
-        source_paths_file = join(out_root_dir, "source_files.txt")
+        source_paths_file = join(out_path, "source_files.txt")
         if found_files:
-            if not made_out_root_dir:
-                os.makedirs(out_root_dir, exist_ok=True)
-                made_out_root_dir = True
+            if not made_out_dir:
+                os.makedirs(out_path, exist_ok=True)
+                made_out_dir = True
             with open(source_paths_file, "w", encoding="utf8") as f:
                 f.write("\n".join(found_files))
-            self.run_single(in_path=source_paths_file, out_path=out_root_dir, batch=batch)
+            self.run_single(in_path=source_paths_file, out_path=out_path, batch=batch)
 
     def run(self, in_paths: list = [], out_paths: list = [], batch: StrPath = None, **kwargs):
         return super().run(in_paths=in_paths, out_paths=out_paths, batch=batch, **kwargs)

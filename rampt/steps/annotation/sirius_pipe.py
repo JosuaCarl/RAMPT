@@ -44,9 +44,11 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         verbosity=verbosity,
         nested=nested,
         workers=n_workers,
-        scheduled_in=in_dir,
-        scheduled_out=out_dir,
     )
+    sirius_runner.scheduled_ios={
+        "in_path": {"standard": in_dir},
+        "out_path": {"standard": out_dir}
+    }
     return sirius_runner.run(projectspace=projectspace)
 
 
@@ -111,8 +113,8 @@ class Sirius_Runner(Pipe_Step):
 
     def run_single(
         self,
-        in_path: StrPath,
-        out_path: StrPath,
+        in_path: dict[str, StrPath],
+        out_path: dict[str, StrPath],
         projectspace: StrPath = None,
         config: StrPath = None,
     ) -> bool:
@@ -120,9 +122,9 @@ class Sirius_Runner(Pipe_Step):
         Run a single SIRIUS configuration.
 
         :param in_path: Path to in file
-        :type in_path: StrPath
+        :type in_path: dict[str, StrPath]
         :param out_path: Output directory
-        :type out_path: StrPath
+        :type out_path: dict[str, StrPath]
         :param projectspace: Path to projectspace file / directory, defaults to out_path
         :type projectspace: StrPath
         :param config: Path to configuration file / directory or configuration as string, defaults to None
@@ -149,7 +151,7 @@ class Sirius_Runner(Pipe_Step):
         )
 
     def run_directory(
-        self, in_path: StrPath, out_path: StrPath, projectspace: StrPath = None, config: str = None
+        self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], projectspace: StrPath = None, config: str = None
     ):
         """
         Compute a sirius run on a folder. When no config is defined, it will search in the folder for config.txt.
@@ -177,34 +179,34 @@ class Sirius_Runner(Pipe_Step):
                     config=config,
                 )
 
-    def run_nested(self, in_root_dir: StrPath, out_root_dir: StrPath, recusion_level: int = 0):
+    def run_nested(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0):
         """
         Run SIRIUS Pipeline in nested directories.
 
-        :param in_root_dir: Root input directory
-        :type in_root_dir: StrPath
-        :param out_root_dir: Root output directory
-        :type out_root_dir: StrPath
+        :param in_path: Root input directory
+        :type in_path: dict[str, StrPath]
+        :param out_path: Root output directory
+        :type out_path: dict[str, StrPath]
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
-        made_out_root_dir = False
+        made_out_path = False
 
         for entry in tqdm(
-            os.listdir(in_root_dir), disable=verbose_tqdm, desc="Schedule Sirius annotation"
+            os.listdir(in_path), disable=verbose_tqdm, desc="Schedule Sirius annotation"
         ):
-            entry_path = join(in_root_dir, entry)
+            entry_path = join(in_path, entry)
 
             if self.match_file_name(pattern=self.patterns["in"], file_name=entry):
-                if not made_out_root_dir:
-                    os.makedirs(out_root_dir, exist_ok=True)
-                    made_out_root_dir = True
-                self.run_single(in_path=entry_path, out_path=out_root_dir)
+                if not made_out_path:
+                    os.makedirs(out_path, exist_ok=True)
+                    made_out_path = True
+                self.run_single(in_path=entry_path, out_path=out_path)
             elif os.path.isdir(entry_path):
                 self.run_nested(
-                    in_root_dir=entry_path,
-                    out_root_dir=join(out_root_dir, entry),
+                    in_path=entry_path,
+                    out_path=join(out_path, entry),
                     recusion_level=recusion_level + 1,
                 )
 

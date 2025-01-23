@@ -41,17 +41,19 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
     additional_args = get_value(args, "summary_arguments")
     additional_args = additional_args if additional_args else unknown_args
 
-    # Conversion
+    # Summary
     summary_runner = Summary_Runner(
         overwrite=overwrite,
         save_log=save_log,
         additional_args=additional_args,
         verbosity=verbosity,
         nested=nested,
-        workers=n_workers,
-        scheduled_in=[{"quantification": in_dir_quantification, "annotation": in_dir_annotations}],
-        scheduled_out=out_dir,
+        workers=n_workers
     )
+    summary_runner.scheduled_ios={
+        "in_path": {"quantification": in_dir_quantification, "annotation": in_dir_annotations},
+        "out_path": {"standard": out_dir}
+    }
     return summary_runner.run()
 
 
@@ -421,8 +423,8 @@ class Summary_Runner(Pipe_Step):
 
     def run_single(
         self,
-        in_path: StrPath,
-        out_path: StrPath,
+        in_path: dict[str, StrPath],
+        out_path: dict[str, StrPath],
         annotation_file_type: str,
         summary: pd.DataFrame = None,
     ):
@@ -430,9 +432,9 @@ class Summary_Runner(Pipe_Step):
         Add the annotations into a quantification file.
 
         :param in_path: Path to scheduled file.
-        :type in_path: str
+        :type in_path: dict[str, StrPath]
         :param out_path: Path to output directory.
-        :type out_path: str
+        :type out_path: dict[str, StrPath]
         :param annotation_file_type: File type of annotation
         :type annotation_file_type: str
         :param summary: Summary to write to, defaults to None
@@ -455,8 +457,8 @@ class Summary_Runner(Pipe_Step):
 
     def run_directory(
         self,
-        in_path: StrPath,
-        out_path: StrPath,
+        in_path: dict[str, StrPath],
+        out_path: dict[str, StrPath],
         summary: pd.DataFrame = None,
         quantification_file: StrPath = None,
         annotation_files: dict[str, StrPath] = None,
@@ -465,9 +467,9 @@ class Summary_Runner(Pipe_Step):
         Convert all matching files in a folder.
 
         :param in_path: Path to scheduled file.
-        :type in_path: str
+        :type in_path: dict[str, StrPath]
         :param out_path: Path to output directory.
-        :type out_path: str
+        :type out_path: dict[str, StrPath]
         :param summary: Summary to write to, defaults to None
         :type summary: pd.DataFrame, optional
         """
@@ -487,38 +489,38 @@ class Summary_Runner(Pipe_Step):
             log_path=self.get_log_path(out_path=out_path),
         )
 
-    def run_nested(self, in_root_dir: StrPath, out_root_dir: StrPath, recusion_level: int = 0):
+    def run_nested(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0):
         """
-        Converts multiple files in multiple folders, found in in_root_dir with msconvert and saves them
-        to a location out_root_dir again into their respective folders.
+        Converts multiple files in multiple folders, found in in_path with msconvert and saves them
+        to a location out_path again into their respective folders.
 
-        :param in_root_dir: Starting folder for descent.
-        :type in_root_dir: StrPath
-        :param out_root_dir: Folder where structure is mimiced and files are converted to
-        :type out_root_dir: StrPath
+        :param in_path: Starting folder for descent.
+        :type in_path: dict[str, StrPath]
+        :param out_path: Folder where structure is mimiced and files are converted to
+        :type out_path: dict[str, StrPath]
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
-        made_out_root_dir = False
+        made_out_path = False
 
-        for root, dirs, files in os.walk(in_root_dir):
+        for root, dirs, files in os.walk(in_path):
             quantification_file = self.search_quantification_file(dir=root)
             annotation_files = self.search_annotation_files(dir=root)
 
             if quantification_file and [
                 val for val in annotation_files.values() if val is not None
             ]:
-                if not made_out_root_dir:
-                    os.makedirs(out_root_dir, exist_ok=True)
-                    made_out_root_dir = True
+                if not made_out_path:
+                    os.makedirs(out_path, exist_ok=True)
+                    made_out_path = True
 
-                self.run_directory(in_path=root, out_path=out_root_dir)
+                self.run_directory(in_path=root, out_path=out_path)
 
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
                 self.run_nested(
-                    in_root_dir=join(in_root_dir, dir),
-                    out_root_dir=join(out_root_dir, dir),
+                    in_path=join(in_path, dir),
+                    out_path=join(out_path, dir),
                     recusion_level=recusion_level + 1,
                 )
 

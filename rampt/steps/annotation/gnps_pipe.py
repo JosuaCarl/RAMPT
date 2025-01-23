@@ -43,10 +43,12 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         additional_args=additional_args,
         verbosity=verbosity,
         nested=nested,
-        workers=n_workers,
-        scheduled_in=in_dir,
-        scheduled_out=out_dir,
+        workers=n_workers
     )
+    gnps_runner.scheduled_ios={
+        "in_path": {"standard": in_dir},
+        "out_path": {"standard": out_dir}
+    }
     return gnps_runner.run()
 
 
@@ -314,8 +316,8 @@ class GNPS_Runner(Pipe_Step):
 
     def run_single(
         self,
-        in_path: StrPath,
-        out_path: StrPath = None,
+        in_path: dict[str, StrPath],
+        out_path: dict[str, StrPath] = None,
         feature_ms2_file: StrPath = None,
         feature_quantification_file: str = None,
         mzmine_log: str = None,
@@ -325,9 +327,9 @@ class GNPS_Runner(Pipe_Step):
         Get the GNPS results from a single path, mzmine_log or GNPS response.
 
         :param in_path: Input directory
-        :type in_path: StrPath
+        :type in_path: dict[str, StrPath]
         :param out_path: Output directory of result, defaults to None
-        :type out_path: StrPath, optional
+        :type out_path: dict[str, StrPath], optional
         :param feature_ms2_file: File with ms2 spectra (in .mgf format), defaults to None
         :type feature_ms2_file: StrPath, optional
         :param feature_quantification_file: File with quantification table (in .csv format), defaults to None
@@ -361,39 +363,39 @@ class GNPS_Runner(Pipe_Step):
         """
         self.run_single(**kwargs)
 
-    def run_nested(self, in_root_dir: StrPath, out_root_dir: StrPath, recusion_level: int = 0):
+    def run_nested(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0):
         """
         Construct a list of necessary computations for getting the GNPS results from a nested scheme of mzmine results.
 
-        :param in_root_dir: Root input directory
-        :type in_root_dir: StrPath
-        :param out_root_dir: Root output directory
-        :type out_root_dir: StrPath
+        :param in_path: Root input directory
+        :type in_path: dict[str, StrPath]
+        :param out_path: Root output directory
+        :type out_path: dict[str, StrPath]
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
         :return: Future computations
         :rtype: list
         """
         verbose_tqdm = self.verbosity >= recusion_level + 2
-        made_out_root_dir = False
+        made_out_path = False
 
-        for root, dirs, files in os.walk(in_root_dir):
+        for root, dirs, files in os.walk(in_path):
             feature_ms2_file, feature_quantification_file = self.check_dir_files(dir=root)
             if feature_ms2_file and feature_quantification_file:
-                if not made_out_root_dir:
-                    os.makedirs(out_root_dir, exist_ok=True)
-                    made_out_root_dir = True
+                if not made_out_path:
+                    os.makedirs(out_path, exist_ok=True)
+                    made_out_path = True
                 self.run_single(
-                    in_path=in_root_dir,
-                    out_path=out_root_dir,
+                    in_path=in_path,
+                    out_path=out_path,
                     feature_ms2_file=feature_ms2_file,
                     feature_quantification_file=feature_quantification_file,
                 )
 
             for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
                 self.run_nested(
-                    in_root_dir=join(in_root_dir, dir),
-                    out_root_dir=join(out_root_dir, dir),
+                    in_path=join(in_path, dir),
+                    out_path=join(out_path, dir),
                     recusion_level=recusion_level + 1,
                 )
 

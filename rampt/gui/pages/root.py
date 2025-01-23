@@ -137,12 +137,7 @@ match_data_node = {
 }
 
 optional_data_nodes = [
-    "conversion_out_paths",
-    "feature_finding_out_paths",
-    "gnps_out_paths",
-    "sirius_out_paths",
-    "summary_out_paths",
-    "analysis_out_paths",
+    "out_path_root",
     "sirius_annotation_paths",
     "gnps_annotation_paths",
 ]
