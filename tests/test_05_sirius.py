@@ -7,12 +7,25 @@ from tests.common import *
 from rampt.steps.annotation.sirius_pipe import *
 from rampt.steps.annotation.sirius_pipe import main as sirius_pipe_main
 
+from rampt.installer import *
+
 import pandas as pd
 
 platform = get_platform()
 filepath = get_internal_filepath(__file__)
 out_path, mock_path, example_path, batch_path, installs_path = contruct_common_paths(filepath)
 make_out(out_path)
+make_out(installs_path)
+
+
+def test_installation():
+    clean_out(installs_path)
+    root = tk.Tk()
+    installer = InstallerApp(root, local_only=True)
+    installer.install_path = installs_path
+
+    installer.install_components(["Sirius"], standalone=True)
+    assert tool_available("sirius")
 
 
 def test_sirius_pipe_run_single():

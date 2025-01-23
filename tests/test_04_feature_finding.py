@@ -7,14 +7,27 @@ from tests.common import *
 from rampt.steps.feature_finding.mzmine_pipe import *
 from rampt.steps.feature_finding.mzmine_pipe import main as mzmine_pipe_main
 
+from rampt.installer import *
+
 import pandas as pd
 
 platform = get_platform()
 filepath = get_internal_filepath(__file__)
 out_path, mock_path, example_path, batch_path, installs_path = contruct_common_paths(filepath)
 make_out(out_path)
+make_out(installs_path)
 
 user = "joca"  # NEEDS TO BE EDITED FOR TESTING TO WORK
+
+
+def test_installation():
+    clean_out(installs_path)
+    root = tk.Tk()
+    installer = InstallerApp(root, local_only=True)
+    installer.install_path = installs_path
+
+    installer.install_components(["MZmine"], standalone=True)
+    assert tool_available(["mzmine", "mzmine_console"])
 
 
 def test_mzmine_pipe_run_single():
@@ -83,7 +96,6 @@ def test_mzmine_pipe_main():
         in_dir=example_path,
         out_dir=out_path,
         batch=join(batch_path, "minimal.mzbatch"),
-        valid_formats=["mzML"],
         user=user,
         nested=True,
         platform=platform,

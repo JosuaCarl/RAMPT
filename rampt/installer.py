@@ -624,14 +624,27 @@ class InstallerApp(tk.Tk):
             text="Select optional components for installation",
             font=("Arial", 14, "bold"),
         ).pack(pady=10)
-        
-        Label(self.main_frame, text="Licenses of components can be inferred from the README at:").pack(pady=10, padx=10)
-        lisence_label = Label(self.main_frame, text="https://github.com/JosuaCarl/RAMPT/blob/main/README.md", underline=True)
+
+        Label(
+            self.main_frame, text="Licenses of components can be inferred from the README at:"
+        ).pack(pady=10, padx=10)
+        lisence_label = Label(
+            self.main_frame,
+            text="https://github.com/JosuaCarl/RAMPT/blob/main/README.md",
+            underline=True,
+        )
         lisence_label.pack(pady=5, padx=10)
-        lisence_label.bind("<Button-1>", lambda e: webbrowser.open_new_tab("https://github.com/JosuaCarl/RAMPT/blob/main/README.md"))
+        lisence_label.bind(
+            "<Button-1>",
+            lambda e: webbrowser.open_new_tab(
+                "https://github.com/JosuaCarl/RAMPT/blob/main/README.md"
+            ),
+        )
 
         for component, var in self.component_vars.items():
-            Checkbutton(self.main_frame, text=component, variable=var).pack(anchor="w", padx=20, pady=0)
+            Checkbutton(self.main_frame, text=component, variable=var).pack(
+                anchor="w", padx=20, pady=0
+            )
 
         Label(
             self.main_frame,
@@ -642,7 +655,7 @@ class InstallerApp(tk.Tk):
             self.main_frame,
             text="Reinstall components, if already present ? (Not recommended)",
             variable=self.force,
-        ).pack(anchor="w", pady=20, padx=10,)
+        ).pack(anchor="w", pady=20, padx=10)
 
     # LISCENCE
     def change_accept(self):

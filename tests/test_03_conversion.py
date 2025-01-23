@@ -8,7 +8,7 @@ from tests.common import *
 from rampt.steps.conversion.msconv_pipe import *
 from rampt.steps.conversion.msconv_pipe import main as msconv_pipe_main
 
-# from rampt.installer import *
+from rampt.installer import *
 
 from bs4 import BeautifulSoup
 
@@ -16,27 +16,17 @@ platform = get_platform()
 filepath = get_internal_filepath(__file__)
 out_path, mock_path, example_path, batch_path, installs_path = contruct_common_paths(filepath)
 make_out(out_path)
+make_out(installs_path)
 
-"""
-root = tk.Tk()
-installer = InstallerApp(root)
-name = "MSconvert"
 
-urls = {
-    "win64": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt83/3339046/pwiz-bin-windows-x86_64-vc143-release-3_0_25011_8ace8f0.tar.bz2",
-    "win32": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt36/2440017/pwiz-bin-windows-x86-vc143-release-3_0_23129_dfd6c0a.tar.bz2",
-    "mac": None,
-    "linux": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt17/3339048/pwiz-bin-linux-x86_64-gcc7-release-3_0_25011_8ace8f0.tar.bz2",
-}
+def test_installation():
+    clean_out(installs_path)
+    root = tk.Tk()
+    installer = InstallerApp(root, local_only=True)
+    installer.install_path = installs_path
 
-install_path = installer.install_component(
-    name=name,
-    urls=urls,
-    install_path=out_path,
-    extraction_method="tar.bz2",
-    bin_path="",
-)
-"""
+    installer.install_components(["MSconvert"], standalone=True)
+    assert tool_available("msconvert")
 
 
 def test_msconv_pipe_run_single():
