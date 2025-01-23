@@ -9,6 +9,10 @@ global_params = Step_Configuration()
 
 
 def create_general():
+    pass
+
+
+def create_general_advanced():
     tgb.text("###### Computation:", mode="markdown")
     with tgb.layout(columns="1 1 1", columns__mobile="1", gap="5%"):
         tgb.toggle(
@@ -56,3 +60,26 @@ def create_general():
                 max=4,
                 hover_text="Level of verbosity during operations.",
             )
+
+    tgb.text("###### Pattern matching:", mode="markdown")
+    with tgb.layout(columns="1 1 1 1", columns__mobile="1", gap="5%"):
+        tgb.input(
+            "{global_params.pattern}",
+            label="Regular Expression:",
+            hover_text="Regular expression to filter file (e.g. my_experiment_.*[.]mzML)",
+        )
+        tgb.input(
+            "{global_params.contains}",
+            label="Contains:",
+            hover_text="String that must be contained in file (e.g. experiment)",
+        )
+        tgb.input(
+            "{global_params.prefix}",
+            label="Prefix:",
+            hover_text="Prefix to filter file (e.g. my_experiment)",
+        )
+        tgb.input(
+            "{global_params.suffix}",
+            label="Suffix:",
+            hover_text="Suffix  to filter file (e.g. .mzML)",
+        )

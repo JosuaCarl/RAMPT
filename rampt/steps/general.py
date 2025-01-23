@@ -168,7 +168,6 @@ class Step_Configuration:
 
         self.update_regexes()
 
-
     # Update variables
     def update(self, attributions: dict):
         """
@@ -181,7 +180,12 @@ class Step_Configuration:
         self.update_regexes()
 
     def update_regex(
-        self, pattern: str = None, contains: str = None, suffix: str = None, prefix: str = None, key: str = "in"
+        self,
+        pattern: str = None,
+        contains: str = None,
+        suffix: str = None,
+        prefix: str = None,
+        key: str = "in",
     ):
         # Check for existing patterns
         pattern = pattern if pattern else self.pattern
@@ -199,10 +203,14 @@ class Step_Configuration:
             regex_all = rf"{regex_all}.*{suffix}$" if regex_all else rf".*{suffix}$"
         if prefix:
             regex_all = rf"^{prefix}.*{regex_all}" if regex_all else rf"^{prefix}.*"
-        
+
         # Add mandatory
         if self.mandatory_patterns.get(key, None):
-            regex_all = rf"(?={regex_all})(?={self.mandatory_patterns[key]})" if regex_all else self.mandatory_patterns[key]
+            regex_all = (
+                rf"(?={regex_all})(?={self.mandatory_patterns[key]})"
+                if regex_all
+                else self.mandatory_patterns[key]
+            )
 
         # Save inputs
         self.prefix = prefix
@@ -214,9 +222,12 @@ class Step_Configuration:
     def update_regexes(self):
         for key in list(self.mandatory_patterns.keys()) + list(self.patterns.keys()):
             self.update_regex(
-                pattern=self.pattern, contains=self.contains, suffix=self.suffix, prefix=self.prefix, key=key
+                pattern=self.pattern,
+                contains=self.contains,
+                suffix=self.suffix,
+                prefix=self.prefix,
+                key=key,
             )
-
 
     # Dictionary represenation
     def dict_representation(self, attribute=None):
@@ -334,7 +345,6 @@ class Pipe_Step(Step_Configuration):
         self.errs = []
         self.log_paths = []
         self.results = []
-
 
     # Executives
     def check_exec_path(self, exec_path: StrPath = None) -> bool:
