@@ -68,7 +68,7 @@ analysis_data_config = Config.configure_csv_data_node(id="analysis_data", scope=
 
 ## Output paths
 out_path_root_config = Config.configure_in_memory_data_node(
-    id="out_path_root", scope=Scope.SCENARIO,
+    id="out_path_root", scope=Scope.SCENARIO
 )
 
 
@@ -137,13 +137,11 @@ def generic_step(
             error_type=ValueError,
             raise_error=False,
         )
-    
+
     for scheduled_io in step_instance.scheduled_ios:
         if "out" not in scheduled_io:
             if os.path.isabs(out_path_root):
-                scheduled_io["out_path"] = {
-                    "standard": os.path.join(out_path_root, out_folder)
-                }
+                scheduled_io["out_path"] = {"standard": os.path.join(out_path_root, out_folder)}
 
     # Run step
     step_instance.run(out_folder=out_folder, **kwargs)
@@ -164,7 +162,7 @@ def convert_files(
     return generic_step(
         step_class=MSconvert_Runner,
         match_patterns="conv" in entrypoint.lower(),
-        #in_paths=raw_data_paths,
+        # in_paths=raw_data_paths,
         out_path_root=out_path_root,
         out_folder="converted",
         step_params=step_params,
@@ -183,7 +181,7 @@ def find_features(
     return generic_step(
         step_class=MZmine_Runner,
         match_patterns="feat" in entrypoint.lower(),
-        #in_paths=community_formatted_data_paths,
+        # in_paths=community_formatted_data_paths,
         out_path_root=out_path_root,
         out_folder="processed",
         step_params=step_params,
@@ -204,7 +202,7 @@ def annotate_gnps(
     return generic_step(
         step_class=GNPS_Runner,
         match_patterns="annot" in entrypoint.lower(),
-        #in_paths=processed_data_paths,
+        # in_paths=processed_data_paths,
         out_path_root=out_path_root,
         out_folder="annotated",
         step_params=step_params,
@@ -224,7 +222,7 @@ def annotate_sirius(
     return generic_step(
         step_class=Sirius_Runner,
         match_patterns="annot" in entrypoint.lower(),
-        #in_paths=processed_data_paths,
+        # in_paths=processed_data_paths,
         out_path_root=out_path_root,
         out_folder="annotated",
         step_params=step_params,
@@ -245,12 +243,12 @@ def summarize_annotations(
     return generic_step(
         step_class=Summary_Runner,
         match_patterns="summ" in entrypoint.lower(),
-        #in_paths=stretch_to_list_of_dicts(
+        # in_paths=stretch_to_list_of_dicts(
         #    {
         #        "quantification": [processed_data_paths],
         #        "annotation": [sirius_annotation_paths, gnps_annotation_paths],
         #    }
-        #),
+        # ),
         out_path_root=out_path_root,
         out_folder="analysis",
         step_params=step_params,
@@ -269,7 +267,7 @@ def analyze_difference(
         step_class=Analysis_Runner,
         # Not kidding, because this covers analysis and analize
         match_patterns="anal" in entrypoint.lower(),
-        #in_paths=summary_data_paths,
+        # in_paths=summary_data_paths,
         out_path_root=out_path_root,
         out_folder="analysis",
         step_params=step_params,

@@ -48,11 +48,11 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         additional_args=additional_args,
         verbosity=verbosity,
         nested=nested,
-        workers=n_workers
+        workers=n_workers,
     )
-    summary_runner.scheduled_ios={
+    summary_runner.scheduled_ios = {
         "in_path": {"quantification": in_dir_quantification, "annotation": in_dir_annotations},
-        "out_path": {"standard": out_dir}
+        "out_path": {"standard": out_dir},
     }
     return summary_runner.run()
 
@@ -489,7 +489,9 @@ class Summary_Runner(Pipe_Step):
             log_path=self.get_log_path(out_path=out_path),
         )
 
-    def run_nested(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0):
+    def run_nested(
+        self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0
+    ):
         """
         Converts multiple files in multiple folders, found in in_path with msconvert and saves them
         to a location out_path again into their respective folders.

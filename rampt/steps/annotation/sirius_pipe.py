@@ -45,9 +45,9 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         nested=nested,
         workers=n_workers,
     )
-    sirius_runner.scheduled_ios={
+    sirius_runner.scheduled_ios = {
         "in_path": {"standard": in_dir},
-        "out_path": {"standard": out_dir}
+        "out_path": {"standard": out_dir},
     }
     return sirius_runner.run(projectspace=projectspace)
 
@@ -151,7 +151,11 @@ class Sirius_Runner(Pipe_Step):
         )
 
     def run_directory(
-        self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], projectspace: StrPath = None, config: str = None
+        self,
+        in_path: dict[str, StrPath],
+        out_path: dict[str, StrPath],
+        projectspace: StrPath = None,
+        config: str = None,
     ):
         """
         Compute a sirius run on a folder. When no config is defined, it will search in the folder for config.txt.
@@ -179,7 +183,9 @@ class Sirius_Runner(Pipe_Step):
                     config=config,
                 )
 
-    def run_nested(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0):
+    def run_nested(
+        self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0
+    ):
         """
         Run SIRIUS Pipeline in nested directories.
 

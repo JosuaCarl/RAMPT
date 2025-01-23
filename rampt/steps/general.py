@@ -332,7 +332,7 @@ class Pipe_Step(Step_Configuration):
         self.errs = []
         self.log_paths = []
         self.results = []
-        self.additional_args=additional_args,
+        self.additional_args = (additional_args,)
 
     # Executives
     def check_exec_path(self, exec_path: StrPath = None) -> bool:
@@ -529,12 +529,14 @@ class Pipe_Step(Step_Configuration):
             error_type=NotImplementedError,
         )
 
-    def run(self, in_outs: list[dict] = [], out_folder: StrPath = "pipe_step_out", **kwargs) -> list[dict]:
+    def run(
+        self, in_outs: list[dict] = [], out_folder: StrPath = "pipe_step_out", **kwargs
+    ) -> list[dict]:
         """
         Run the instance step with the given in_paths and out_paths. Constructs a new out_target_folder for each directory, if given.
 
         :param in_outs: Dicitionary with "in" and "out", containing dictionaries with i/o information
-        :type in_outs: list[dict] 
+        :type in_outs: list[dict]
         :param kwargs: Dictionary of additional arguments for computation
         :type kwargs: ...
         :return: Output that was processed
@@ -564,7 +566,6 @@ class Pipe_Step(Step_Configuration):
 
         # Loop over all in/out combinations
         for i, scheduled_io in enumerate(self.scheduled_ios):
-
             # Skip already processed files/folders
             if scheduled_io in self.processed_ios and not self.overwrite:
                 continue

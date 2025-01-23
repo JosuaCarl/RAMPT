@@ -46,9 +46,9 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         nested=nested,
         workers=n_workers,
     )
-    analysis_runner.scheduled_ios={
+    analysis_runner.scheduled_ios = {
         "in_path": {"standard": in_dir},
-        "out_path": {"standard": out_dir}
+        "out_path": {"standard": out_dir},
     }
     return analysis_runner.run()
 
@@ -220,7 +220,9 @@ class Analysis_Runner(Pipe_Step):
         """
         self.run_single(in_path=join(in_path, "summary.tsv"), out_path=out_path)
 
-    def run_nested(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0):
+    def run_nested(
+        self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0
+    ):
         """
         Converts multiple files in multiple folders, found in in_path with msconvert and saves them
         to a location out_path again into their respective folders.

@@ -49,10 +49,7 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         nested=nested,
         valid_formats=valid_formats,
     )
-    mzmine_runner.scheduled_ios={
-        "in": {"standard": in_dir},
-        "out": {"standard": out_dir}
-    }
+    mzmine_runner.scheduled_ios = {"in": {"standard": in_dir}, "out": {"standard": out_dir}}
     mzmine_runner.run()
 
 
@@ -128,7 +125,12 @@ class MZmine_Runner(Pipe_Step):
                 error_type=ValueError,
             )
 
-    def run_single(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], batch: dict[str, StrPath] = None):
+    def run_single(
+        self,
+        in_path: dict[str, StrPath],
+        out_path: dict[str, StrPath],
+        batch: dict[str, StrPath] = None,
+    ):
         """
         Run a single mzmine batch.
 
@@ -153,7 +155,12 @@ class MZmine_Runner(Pipe_Step):
             verbosity=self.verbosity,
         )
 
-    def run_directory(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], batch:  dict[str, StrPath] = None):
+    def run_directory(
+        self,
+        in_path: dict[str, StrPath],
+        out_path: dict[str, StrPath],
+        batch: dict[str, StrPath] = None,
+    ):
         """
         Compute a single mzmine batch on a folder.
 
@@ -173,7 +180,9 @@ class MZmine_Runner(Pipe_Step):
             if self.match_file_name(pattern=self.patterns["in"], file_name=entry):
                 self.run_single(in_path=join(in_path, entry), out_path=out_path, batch=batch)
 
-    def run_nested(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0):
+    def run_nested(
+        self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0
+    ):
         """
         Run a mzmine batch on a nested structure.
 

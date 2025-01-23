@@ -55,9 +55,9 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         nested=nested,
         workers=n_workers,
     )
-    msconvert_runner.scheduled_ios={
+    msconvert_runner.scheduled_ios = {
         "in_path": {"standard": in_dir},
-        "out_path": {"standard": out_dir}
+        "out_path": {"standard": out_dir},
     }
     return msconvert_runner.run()
 
@@ -156,7 +156,6 @@ class MSconvert_Runner(Pipe_Step):
 
         return in_valid, out_valid
 
-
     def run_single(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath]):
         """
         Convert one file with msconvert.
@@ -211,7 +210,9 @@ class MSconvert_Runner(Pipe_Step):
                 if in_valid and out_valid:
                     self.run_single(in_path=entry_path, out_path=out_path)
 
-    def run_nested(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0):
+    def run_nested(
+        self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0
+    ):
         """
         Converts multiple files in multiple folders, found in in_path with msconvert and saves them
         to a location out_path again into their respective folders.
@@ -226,13 +227,9 @@ class MSconvert_Runner(Pipe_Step):
         verbose_tqdm = self.verbosity >= recusion_level + 2
         made_out_path = False
 
-        for entry in tqdm(
-            os.listdir(in_path), disable=verbose_tqdm, desc="Schedule conversions"
-        ):
+        for entry in tqdm(os.listdir(in_path), disable=verbose_tqdm, desc="Schedule conversions"):
             entry_path = join(in_path, entry)
-            hypothetical_out_path = join(
-                out_path, replace_file_ending(entry, self.target_format)
-            )
+            hypothetical_out_path = join(out_path, replace_file_ending(entry, self.target_format))
             in_valid, out_valid = self.select_for_conversion(
                 in_path=entry_path, out_path=hypothetical_out_path
             )

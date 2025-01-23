@@ -43,12 +43,9 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         additional_args=additional_args,
         verbosity=verbosity,
         nested=nested,
-        workers=n_workers
+        workers=n_workers,
     )
-    gnps_runner.scheduled_ios={
-        "in_path": {"standard": in_dir},
-        "out_path": {"standard": out_dir}
-    }
+    gnps_runner.scheduled_ios = {"in_path": {"standard": in_dir}, "out_path": {"standard": out_dir}}
     return gnps_runner.run()
 
 
@@ -363,7 +360,9 @@ class GNPS_Runner(Pipe_Step):
         """
         self.run_single(**kwargs)
 
-    def run_nested(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0):
+    def run_nested(
+        self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0
+    ):
         """
         Construct a list of necessary computations for getting the GNPS results from a nested scheme of mzmine results.
 

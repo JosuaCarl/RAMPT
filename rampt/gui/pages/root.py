@@ -136,11 +136,7 @@ match_data_node = {
     "sirius_projectspace": ["sirius_params.projectspace"],
 }
 
-optional_data_nodes = [
-    "out_path_root",
-    "sirius_annotation_paths",
-    "gnps_annotation_paths",
-]
+optional_data_nodes = ["out_path_root", "sirius_annotation_paths", "gnps_annotation_paths"]
 
 entrypoints = ["↔️ Conversion", "🔍 Feature finding", "✒️ Annotation", "🧺 Summary", "📈 Analysis"]
 entrypoint = "↔️ Conversion"
