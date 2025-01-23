@@ -51,7 +51,13 @@ def test_step_configuration():
 
 def test_pipe_step():
     clean_out(out_path)
-    pipe_step = Pipe_Step("test", exec_path="echo", pattern="", contains="rababa", mandatory_patterns={"in": ".* nice$"})
+    pipe_step = Pipe_Step(
+        "test",
+        exec_path="echo",
+        pattern="",
+        contains="rababa",
+        mandatory_patterns={"in": ".* nice$"},
+    )
     assert pipe_step.name == "test"
 
     # Test matching

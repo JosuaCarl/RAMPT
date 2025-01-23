@@ -94,12 +94,27 @@ class MSconvert_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        self.valid_formats = ["raw", "d", "lcd", "t2d", "baf", "fid", "tdf", "tsf", "wiff", "wiff2", "yep", "mzML", "mzXML", "imzML"]
+        self.valid_formats = [
+            "raw",
+            "d",
+            "lcd",
+            "t2d",
+            "baf",
+            "fid",
+            "tdf",
+            "tsf",
+            "wiff",
+            "wiff2",
+            "yep",
+            "mzML",
+            "mzXML",
+            "imzML",
+        ]
         self.valid_folder_formats = ["raw", "d"]
         super().__init__(
             mandatory_patterns={
                 "in": rf".*\.({r'|'.join(self.valid_formats)})$",
-                "in_folder": rf".*\.({r'|'.join(self.valid_folder_formats)})$"
+                "in_folder": rf".*\.({r'|'.join(self.valid_folder_formats)})$",
             },
             exec_path=exec_path,
             save_log=save_log,
@@ -183,7 +198,9 @@ class MSconvert_Runner(Pipe_Step):
         else:
             for entry in tqdm(os.listdir(in_path), disable=verbose_tqdm, desc="Converting folder"):
                 entry_path = join(in_path, entry)
-                hypothetical_out_path = join(out_path, replace_file_ending(entry, self.target_format))
+                hypothetical_out_path = join(
+                    out_path, replace_file_ending(entry, self.target_format)
+                )
                 in_valid, out_valid = self.select_for_conversion(
                     in_path=entry_path, out_path=hypothetical_out_path
                 )
