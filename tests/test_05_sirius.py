@@ -31,8 +31,13 @@ def test_installation():
     ic(os.environ.get("SIRIUS_USER", ""))
     ic(os.environ.get("SIRIUS_PASSWORD", ""))
     process = subprocess.Popen(
-        ["sirius", "login", f'--user=\"{os.environ.get("SIRIUS_USER", "")}\"', f'--password=\"{os.environ.get("SIRIUS_PASSWORD", "")}\"'],
-        text=True
+        [
+            "sirius",
+            "login",
+            f'--user="{os.environ.get("SIRIUS_USER", "")}"',
+            f'--password="{os.environ.get("SIRIUS_PASSWORD", "")}"',
+        ],
+        text=True,
     )
     process.wait()
 
