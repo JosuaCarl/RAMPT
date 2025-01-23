@@ -11,8 +11,13 @@ sirius_params.config = os.path.join(ROOT_DIR, "statics", "batch_files", "sirius_
 
 
 def create_sirius():
-    tgb.text("###### File selection", mode="markdown")
-    create_file_selection(process="sirius", out_node="sirius_annotation_paths")
+    with tgb.part(render="{'annot' in entrypoint.lower()}"):
+        tgb.text("###### File selection", mode="markdown")
+        create_file_selection(process="sirius", out_node="sirius_annotation_paths")
+
+
+def create_sirius_advanced():
+    create_exec_selection(process="sirius", exec_name="sirius")
 
     tgb.html("br")
 
@@ -20,10 +25,6 @@ def create_sirius():
     create_list_selection(
         process="sirius", attribute="config", extensions="*", name="configuration"
     )
-
-    create_advanced_settings()
-
-    create_exec_selection(process="sirius", exec_name="sirius")
 
     tgb.html("br")
 

@@ -163,12 +163,14 @@ cython_debug/
 
 
 # OWN
+# Tests
+tests/statics/out/*
+tests/statics/installs/*
 
 ## Folders
 data/
 .conda/
 substep_batches/
-tests/statics/out/*
 backup/
 .taipy/
 .vscode/

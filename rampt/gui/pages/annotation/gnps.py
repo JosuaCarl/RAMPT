@@ -9,12 +9,15 @@ gnps_params = GNPS_Runner()
 
 
 def create_gnps():
-    tgb.text("###### File selection", mode="markdown")
-    create_file_selection(process="gnps", out_node="gnps_annotation_paths")
+    with tgb.part(render="{'annot' in entrypoint.lower()}"):
+        tgb.text("###### Select MS2 spectra (.mgf)", mode="markdown")
+        create_file_selection(process="gnps", out_node="gnps_annotation_paths")
 
-    tgb.html("br")
+    # TODO: Select quant file, metadata  (+ additional pairs)
 
-    tgb.text("###### MZmine log selection", mode="markdown")
+
+def create_gnps_advanced():
+    tgb.text("###### Select mzmine log", mode="markdown")
     create_list_selection(
         process="gnps",
         attribute="mzmine_log",

@@ -89,6 +89,7 @@ scenario = tp.create_scenario(ms_analysis_config, name="Default")
 
 
 ## Synchronisation of Scenario
+# TODO: Change structure so that previous steps are preferred as inputs
 match_data_node = {
     # Used to decide which values (the last in the list) are used in case of conflicts
     # Processed chained Inputs are preffered to scheduled targets
@@ -145,6 +146,9 @@ optional_data_nodes = [
     "sirius_annotation_paths",
     "gnps_annotation_paths",
 ]
+
+entrypoints = ["↔️ Conversion", "🔍 Feature finding", "✒️ Annotation", "🧺 Summary", "📈 Analysis"]
+entrypoint = "↔️ Conversion"
 
 
 def lock_scenario(state):
@@ -248,37 +252,64 @@ with tgb.Page(style=style) as configuration:
         # Middle part
         with tgb.part():
             tgb.text("## ⚙️ Configuration", mode="markdown")
+
+            tgb.text("Where would you like to enter the workflow ?", mode="markdown")
+            tgb.selector("{entrypoint}", lov="{entrypoints}", dropdown=True, filter=True, multiple=False)
+
+            # Create possible settings
+            # TODO: Unify outpath selection, where the folders are then created
+            # TODO: Parse Batch file
+            # TODO: Pass entrypoint to backend
+            # TODO: Reflect selection of entrypoint in value filling (Discard all I/O entries, not associated to entrypoint)
+            with tgb.expandable(
+                title="⭐ Recommended settings:",
+                hover_text="Settings that are recommended for entering the workflow at the selected point.",
+                expanded=True
+            ):
+                create_conversion()
+                create_feature_finding()
+                create_gnps()
+                create_sirius()
+                create_summary()
+                create_analysis()
+
+            # Create advanced settings
+            tgb.text("### Advanced settings", mode="markdown")
             create_expandable_setting(
-                create_methods={"": create_general},
+                create_methods={"": create_general_advanced},
                 title="🌐 General",
                 hover_text="General settings, that are applied globally.",
             )
 
             create_expandable_setting(
-                create_methods={"": create_conversion},
+                create_methods={"": create_conversion_advanced},
                 title="↔️ Conversion",
                 hover_text="Convert manufacturer files into community formats.",
             )
 
             create_expandable_setting(
-                create_methods={"": create_feature_finding},
+                create_methods={"": create_feature_finding_advanced},
                 title="🔍 Feature finding",
                 hover_text="Find features with MZmine through applying steps via a batch file.",
             )
 
             create_expandable_setting(
-                create_methods={"GNPS": create_gnps, "Sirius": create_sirius},
+                create_methods={"GNPS": create_gnps_advanced, "Sirius": create_sirius_advanced},
                 title="✒️ Annotation",
                 hover_text="Annotation of data with GNPS and Sirius.",
             )
 
             create_expandable_setting(
-                create_methods={"Summary": create_summary, "Analysis": create_analysis},
+                create_methods={
+                    "🧺 Summary": create_summary_advanced,
+                    "📈 Analysis": create_analysis_advanced,
+                },
                 title="📈 Analysis",
                 hover_text="Statistical analysis of annotated features.",
             )
 
-            # Pipeline showcasing
+            # Scenario / workflow management
+            # TODO: Callback after scenario creation
             tgb.text("## 🎬 Scenario management", mode="markdown")
             tgb.scenario(
                 "{scenario}",
@@ -289,10 +320,14 @@ with tgb.Page(style=style) as configuration:
                     state, "I", f"{submission.get_label()} submitted."
                 ),
             )
-            tgb.scenario_dag("{scenario}")
 
+            # Job management
             tgb.text("## 🐝 Jobs", mode="markdown")
             tgb.job_selector("{job}")
+
+            # Display Graph of scenario
+            tgb.scenario_dag("{scenario}")
+
 
         # Right part
         with tgb.part():

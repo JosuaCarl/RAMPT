@@ -191,7 +191,7 @@ def create_visualization():
         # Middle part
         with tgb.part():
             tgb.text("## 📊 Data", mode="markdown")
-            tgb.data_node("{data_node}", chart_configs={"type": "scatter"})
+            tgb.data_node("{data_node}")
 
             tgb.html("br")
 

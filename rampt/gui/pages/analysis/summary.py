@@ -10,12 +10,18 @@ summary_params = Summary_Runner()
 
 # TODO: Implement passing of two files to scheduled_in
 def create_summary():
-    tgb.text("###### File selection (quantification)", mode="markdown")
-    create_file_selection(
-        process="summary", execution_key_in="quantification", out_node="summary_data_paths"
-    )
+    with tgb.part(render="{'summ' in entrypoint.lower()}"):
+        tgb.text("###### Select quantification table (.csv)", mode="markdown")
+        create_file_selection(
+            process="summary", execution_key_in="quantification", out_node="summary_data_paths"
+        )
 
-    tgb.text("###### File selection (annotation)", mode="markdown")
-    create_file_selection(
-        process="summary", execution_key_in="annotation", out_node="summary_data_paths"
-    )
+    with tgb.part(render="{'summ' in entrypoint.lower()}"):
+        tgb.text("###### Select annotation data", mode="markdown")
+        create_file_selection(
+            process="summary", execution_key_in="annotation", out_node="summary_data_paths"
+        )
+
+
+def create_summary_advanced():
+    pass

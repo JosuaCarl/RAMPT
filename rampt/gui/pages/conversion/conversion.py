@@ -10,11 +10,12 @@ conversion_params = MSconvert_Runner()
 
 
 def create_conversion():
-    tgb.text("###### File selection", mode="markdown")
-    create_file_selection(process="conversion", out_node="community_formatted_data_paths")
+    with tgb.part(render="{'conv' in entrypoint.lower()}"):
+        tgb.text("###### Select raw data", mode="markdown")
+        create_file_selection(process="conversion", out_node="community_formatted_data_paths")
 
-    create_advanced_settings()
 
+def create_conversion_advanced():
     create_exec_selection(process="conversion", exec_name="msconvert")
 
     tgb.html("br")
@@ -26,31 +27,6 @@ def create_conversion():
         hover_text="The target format for the conversion. mzML is recommended.",
         width="100px",
     )
-
-    # Pattern matching
-    tgb.html("br")
-    tgb.text("###### Pattern matching:", mode="markdown")
-    with tgb.layout(columns="1 1 1 1", columns__mobile="1", gap="5%"):
-        tgb.input(
-            "{conversion_params.pattern}",
-            label="Regular Expression:",
-            hover_text="Regular expression to filter file (e.g. my_experiment_.*[.]mzML)",
-        )
-        tgb.input(
-            "{conversion_params.contains}",
-            label="Contains:",
-            hover_text="String that must be contained in file (e.g. experiment)",
-        )
-        tgb.input(
-            "{conversion_params.prefix}",
-            label="Prefix:",
-            hover_text="Prefix to filter file (e.g. my_experiment)",
-        )
-        tgb.input(
-            "{conversion_params.suffix}",
-            label="Suffix:",
-            hover_text="Suffix  to filter file (e.g. .mzML)",
-        )
 
     # Other
     tgb.html("br")

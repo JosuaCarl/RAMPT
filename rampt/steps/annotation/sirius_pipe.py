@@ -66,7 +66,7 @@ class Sirius_Runner(Pipe_Step):
         **kwargs,
     ):
         """
-        Initialize the GNPS_Runner.
+        Initialize the Sirius_Runner. To use this, you must have logged in in the Sirius GUI.
 
         :param exec_path: Path to SIRIUS executable, defaults to "sirius"
         :type exec_path: StrPath
@@ -82,7 +82,7 @@ class Sirius_Runner(Pipe_Step):
         :type verbosity: int, optional
         """
         super().__init__(
-            patterns={"in": r".*_sirius.mgf$"},
+            patterns={"in": r".*_sirius.mgf$", "config": r"sirius_config.txt"},
             save_log=save_log,
             additional_args=additional_args,
             verbosity=verbosity,
@@ -165,7 +165,7 @@ class Sirius_Runner(Pipe_Step):
         """
         if config is None and self.config is None:
             for entry in os.listdir(in_path):
-                if self.match_file_name(pattern=r"config\.txt$", file_name=entry):
+                if self.match_file_name(pattern=self.patterns["config"], file_name=entry):
                     config = join(in_path, entry)
 
         for entry in os.listdir(in_path):

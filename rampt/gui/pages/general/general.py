@@ -9,7 +9,8 @@ global_params = Step_Configuration()
 
 
 def create_general():
-    pass
+    with tgb.part(render="{'general' in entrypoint}"):
+        pass
 
 
 def create_general_advanced():

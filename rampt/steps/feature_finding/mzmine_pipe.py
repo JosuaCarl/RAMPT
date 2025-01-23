@@ -30,6 +30,7 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
     batch = get_value(args, "batch")
     user = get_value(args, "user", None)
     nested = get_value(args, "nested", False)
+    valid_formats = get_value(args, "valid_formats", ["mzML", "mzXML", "imzML"])
     save_log = get_value(args, "save_log", False)
     verbosity = get_value(args, "verbosity", 1)
     additional_args = get_value(args, "mzmine_arguments", unknown_args)
@@ -48,6 +49,7 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         nested=nested,
         scheduled_in=in_dir,
         scheduled_out=out_dir,
+        valid_formats=valid_formats,
     )
     mzmine_runner.run()
 
@@ -63,6 +65,7 @@ class MZmine_Runner(Pipe_Step):
         batch: StrPath = "",
         login: str = "-login",
         user: str = None,
+        valid_formats: list = ["mzML", "mzXML", "imzML"],
         save_log: bool = False,
         additional_args: list = [],
         verbosity: int = 1,
@@ -79,6 +82,8 @@ class MZmine_Runner(Pipe_Step):
         :type login: str, optional
         :param user: User command, defaults to None
         :type user: str, optional
+        :param valid_formats: Formats to search for as valid endings, defaults to ["mzML", "mzXML", "imzML"]
+        :type valid_formats: list, optional
         :param save_log: Whether to save the output(s).
         :type save_log: bool, optional
         :param additional_args: Additional arguments for mzmine, defaults to []
@@ -86,7 +91,6 @@ class MZmine_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        valid_formats = ["mzML", "mzXML", "imzML"]
         super().__init__(
             mandatory_patterns={"in": rf".*\.({r'|'.join(valid_formats)})$"},
             save_log=save_log,

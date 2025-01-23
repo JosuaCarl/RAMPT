@@ -31,17 +31,12 @@ def create_expandable_setting(
             tgb.part()
 
 
-def create_advanced_settings():
-    tgb.html("br")
-    tgb.html("hr")
-    tgb.text("###### Advanced settings", mode="markdown")
-
-
 def create_file_selection(
     process: str,
     param_attribute_in: str = "scheduled_in",
     execution_key_in: str = None,
     out_node: str = "",
+    render: str = True,
 ):
     naming_list = (
         [process, param_attribute_in, execution_key_in]
@@ -93,62 +88,65 @@ def create_file_selection(
             state, f"{process}_params.{param_attribute_in}", selected_labels, refresh=True
         )
 
-    with tgb.layout(columns="1 2 2", columns__mobile="1", gap="5%"):
-        # In
-        with tgb.part():
-            with tgb.part(render="{local}"):
-                tgb.button(
-                    "Select in",
-                    on_action=lambda state: construct_selection_tree(
-                        state,
-                        open_file_folder(
-                            select_folder=get_attribute_recursive(
-                                state, f"select_folders.{selector_id}"
-                            )
+    with tgb.part(render=render):
+        with tgb.layout(columns="1 3 1", columns__mobile="1", gap="5%"):
+            # In
+            with tgb.part():
+                with tgb.part(render="{local}"):
+                    tgb.button(
+                        "Select in",
+                        on_action=lambda state: construct_selection_tree(
+                            state,
+                            open_file_folder(
+                                select_folder=get_attribute_recursive(
+                                    state, f"select_folders.{selector_id}"
+                                )
+                            ),
                         ),
-                    ),
-                )
-            with tgb.part(render="{not local}"):
-                tgb.file_selector(
-                    f"{{uploaded_paths.{selector_id}}}",
-                    label="Select in",
-                    extensions="*",
-                    drop_message=f"Drop files/folders for {process} here:",
-                    multiple=True,
-                    on_action=lambda state: construct_selection_tree(state),
-                )
-            tgb.toggle(f"{{select_folders.{selector_id}}}", label="Select folder")
+                    )
+                with tgb.part(render="{not local}"):
+                    tgb.file_selector(
+                        f"{{uploaded_paths.{selector_id}}}",
+                        label="Select in",
+                        extensions="*",
+                        drop_message=f"Drop files/folders for {process} here:",
+                        multiple=True,
+                        on_action=lambda state: construct_selection_tree(state),
+                    )
+                tgb.toggle(f"{{select_folders.{selector_id}}}", label="Select folder")
 
-        # Selection tree
-        tgb.tree(
-            f"{{selected.{selector_id}}}",
-            lov=f"{{selection_trees_pruned.{selector_id}}}",
-            label=f"Select in for {process}",
-            filter=True,
-            multiple=execution_key_in is None,
-            expanded=True,
-            on_change=lambda state, name, value: update_selection(state, name, value),
-        )
+            # Selection tree
+            tgb.tree(
+                f"{{selected.{selector_id}}}",
+                lov=f"{{selection_trees_pruned.{selector_id}}}",
+                label=f"Select in for {process}",
+                filter=True,
+                multiple=execution_key_in is None,
+                expanded=True,
+                on_change=lambda state, name, value: update_selection(state, name, value),
+            )
 
-        # Out
-        with tgb.part():
-            with tgb.part(render="{local}"):
-                tgb.button(
-                    "Select out",
-                    on_action=lambda state: set_attribute_recursive(
-                        state,
-                        f"{process}_params.scheduled_out",
-                        open_file_folder(select_folder=True),
-                        refresh=True,
-                    ),
-                )
-            with tgb.part(render="{not local}"):
-                tgb.file_download(
-                    "{None}",
-                    active=f"{{scenario.data_nodes['{out_node}'].is_ready_for_reading}}",
-                    label="Download results",
-                    on_action=lambda state, id, payload: download_data_node_files(state, out_node),
-                )
+            # Out
+            with tgb.part():
+                with tgb.part(render="{local}"):
+                    tgb.button(
+                        "Select out",
+                        on_action=lambda state: set_attribute_recursive(
+                            state,
+                            f"{process}_params.scheduled_out",
+                            open_file_folder(select_folder=True),
+                            refresh=True,
+                        ),
+                    )
+                with tgb.part(render="{not local}"):
+                    tgb.file_download(
+                        "{None}",
+                        active=f"{{scenario.data_nodes['{out_node}'].is_ready_for_reading}}",
+                        label="Download results",
+                        on_action=lambda state, id, payload: download_data_node_files(
+                            state, out_node
+                        ),
+                    )
 
 
 # List selectors
@@ -163,6 +161,7 @@ def create_list_selection(
     extensions: str = "*",
     name: str = "batch file",
     default_value=Path.home(),
+    render: str = True,
 ):
     selector_id = f"{process}_{attribute}"
     list_options.update({selector_id: []})
@@ -182,40 +181,41 @@ def create_list_selection(
     def update_selection(state, name, value):
         set_attribute_recursive(state, f"{process}_params.{attribute}", value, refresh=True)
 
-    with tgb.layout(columns="1 1", columns__mobile="1", gap="5%"):
-        with tgb.part(render="{local}"):
-            tgb.button(
-                f"Select {name}",
-                on_action=lambda state: construct_selection_list(
-                    state,
-                    open_file_folder(
-                        multiple=False,
-                        filetypes=[
-                            (f"{ext[1:]} files", f"*{ext}") for ext in extensions.split(",")
-                        ],
-                        initaldir=get_directory(default_value),
+    with tgb.part(render=render):
+        with tgb.layout(columns="1 1", columns__mobile="1", gap="5%"):
+            with tgb.part(render="{local}"):
+                tgb.button(
+                    f"Select {name}",
+                    on_action=lambda state: construct_selection_list(
+                        state,
+                        open_file_folder(
+                            multiple=False,
+                            filetypes=[
+                                (f"{ext[1:]} files", f"*{ext}") for ext in extensions.split(",")
+                            ],
+                            initialdir=get_directory(default_value),
+                        ),
                     ),
-                ),
-            )
-        with tgb.part(render="{not local}"):
-            tgb.file_selector(
-                f"{{list_uploaded.{selector_id}}}",
-                label=f"Select {name}",
-                extensions=extensions,
-                drop_message=f"Drop {name} for {process} here:",
-                multiple=False,
-                on_action=lambda state: construct_selection_list(state),
-            )
+                )
+            with tgb.part(render="{not local}"):
+                tgb.file_selector(
+                    f"{{list_uploaded.{selector_id}}}",
+                    label=f"Select {name}",
+                    extensions=extensions,
+                    drop_message=f"Drop {name} for {process} here:",
+                    multiple=False,
+                    on_action=lambda state: construct_selection_list(state),
+                )
 
-        tgb.selector(
-            f"{{list_selected.{selector_id}}}",
-            lov=f"{{list_options.{selector_id}}}",
-            label=f"Select a {name} for {process}",
-            filter=True,
-            multiple=False,
-            mode="radio",
-            on_change=lambda state, name, value: update_selection(state, name, value),
-        )
+            tgb.selector(
+                f"{{list_selected.{selector_id}}}",
+                lov=f"{{list_options.{selector_id}}}",
+                label=f"Select a {name} for {process}",
+                filter=True,
+                multiple=False,
+                mode="radio",
+                on_change=lambda state, name, value: update_selection(state, name, value),
+            )
 
 
 def set_if_chosen(state, attribute: str):
@@ -224,18 +224,21 @@ def set_if_chosen(state, attribute: str):
         set_attribute_recursive(state, attribute, refresh=True)
 
 
-def create_exec_selection(process: str, exec_name: str, exec_attribute="exec_path"):
-    with tgb.layout(columns="1 1 1 1", columns__mobile="1", gap="5%"):
-        tgb.button(
-            "Select executable",
-            active="{local}",
-            on_action=lambda state: set_if_chosen(state, f"{process}_params.exec_path"),
-        )
-        tgb.input(
-            f"{{{process}_params.{exec_attribute}}}",
-            active="{local}",
-            label=f"`{exec_name}` executable",
-            hover_text=f"You may enter the path to {exec_name}.",
-        )
-        tgb.part()
-        tgb.part()
+def create_exec_selection(
+    process: str, exec_name: str, exec_attribute="exec_path", render: str = True
+):
+    with tgb.part(render=render):
+        with tgb.layout(columns="1 1 1 1", columns__mobile="1", gap="5%"):
+            tgb.button(
+                "Select executable",
+                active="{local}",
+                on_action=lambda state: set_if_chosen(state, f"{process}_params.exec_path"),
+            )
+            tgb.input(
+                f"{{{process}_params.{exec_attribute}}}",
+                active="{local}",
+                label=f"`{exec_name}` executable",
+                hover_text=f"You may enter the path to {exec_name}.",
+            )
+            tgb.part()
+            tgb.part()
