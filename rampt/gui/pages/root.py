@@ -254,7 +254,9 @@ with tgb.Page(style=style) as configuration:
             tgb.text("## ⚙️ Configuration", mode="markdown")
 
             tgb.text("Where would you like to enter the workflow ?", mode="markdown")
-            tgb.selector("{entrypoint}", lov="{entrypoints}", dropdown=True, filter=True, multiple=False)
+            tgb.selector(
+                "{entrypoint}", lov="{entrypoints}", dropdown=True, filter=True, multiple=False
+            )
 
             # Create possible settings
             # TODO: Unify outpath selection, where the folders are then created
@@ -264,7 +266,7 @@ with tgb.Page(style=style) as configuration:
             with tgb.expandable(
                 title="⭐ Recommended settings:",
                 hover_text="Settings that are recommended for entering the workflow at the selected point.",
-                expanded=True
+                expanded=True,
             ):
                 create_conversion()
                 create_feature_finding()
@@ -327,7 +329,6 @@ with tgb.Page(style=style) as configuration:
 
             # Display Graph of scenario
             tgb.scenario_dag("{scenario}")
-
 
         # Right part
         with tgb.part():
