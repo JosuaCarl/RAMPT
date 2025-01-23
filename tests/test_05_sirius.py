@@ -27,6 +27,15 @@ def test_installation():
     installer.install_components(["Sirius"], standalone=True)
     assert tool_available("sirius")
 
+    # TODO: DEBUG SIRIUS TESTING
+    ic(os.environ.get("SIRIUS_USER", ""))
+    ic(os.environ.get("SIRIUS_PASSWORD", ""))
+    process = subprocess.Popen(
+        ["sirius", "login", f'--user=\"{os.environ.get("SIRIUS_USER", "")}\"', f'--password=\"{os.environ.get("SIRIUS_PASSWORD", "")}\"'],
+        text=True
+    )
+    process.wait()
+
 
 def test_sirius_pipe_run_single():
     clean_out(out_path)
