@@ -28,7 +28,6 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
     in_dir = get_value(args, "in_dir")
     out_dir = get_value(args, "out_dir")
     batch = get_value(args, "batch")
-    valid_formats = get_value(args, "valid_formats", ["mzML", "mzXML", "imzML"])
     user = get_value(args, "user", None)
     nested = get_value(args, "nested", False)
     save_log = get_value(args, "save_log", False)
@@ -43,7 +42,6 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         exec_path=exec_path,
         batch=batch,
         user=user,
-        valid_formats=valid_formats,
         save_log=save_log,
         additional_args=additional_args,
         verbosity=verbosity,
@@ -65,7 +63,6 @@ class MZmine_Runner(Pipe_Step):
         batch: StrPath = "",
         login: str = "-login",
         user: str = None,
-        valid_formats: list = ["mzML", "mzXML", "imzML"],
         save_log: bool = False,
         additional_args: list = [],
         verbosity: int = 1,
@@ -82,8 +79,6 @@ class MZmine_Runner(Pipe_Step):
         :type login: str, optional
         :param user: User command, defaults to None
         :type user: str, optional
-        :param valid_formats: Formats to search for as valid endings, defaults to ["mzML", "mzXML", "imzML"]
-        :type valid_formats: list, optional
         :param save_log: Whether to save the output(s).
         :type save_log: bool, optional
         :param additional_args: Additional arguments for mzmine, defaults to []
@@ -91,8 +86,9 @@ class MZmine_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
+        valid_formats = ["mzML", "mzXML", "imzML"]
         super().__init__(
-            patterns={"in": rf".*({r'|'.join(valid_formats)})$"},
+            mandatory_patterns={"in": rf".*\.({r'|'.join(valid_formats)})$"},
             save_log=save_log,
             additional_args=additional_args,
             verbosity=verbosity,
@@ -227,7 +223,6 @@ if __name__ == "__main__":
     parser.add_argument("-in", "--in_dir", required=True)
     parser.add_argument("-out", "--out_dir", required=True)
     parser.add_argument("-batch", "--batch", required=True)
-    parser.add_argument("-formats", "--valid_formats", required=False, nargs="+")
     parser.add_argument("-u", "--user", required=False)
     parser.add_argument("-n", "--nested", required=False, action="store_true")
     parser.add_argument("-s", "--save_log", required=False, action="store_true")

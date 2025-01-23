@@ -110,7 +110,12 @@ class Step_Configuration:
         overwrite: bool = True,
         nested: bool = False,
         workers: int = 1,
+        pattern: str = None,
+        suffix: str = None,
+        prefix: str = None,
+        contains: str = None,
         patterns: dict[str, str] = {"in": ".*"},
+        mandatory_patterns: dict[str, str] = {},
         save_log: bool = True,
         verbosity: int = 1,
         additional_args: list = [],
@@ -127,8 +132,18 @@ class Step_Configuration:
         :type overwrite: bool, optional
         :param workers: Number of workers to use for parallel execution, defaults to 1
         :type workers: int, optional
+        :param pattern: Pattern for folder matching, defaults to ""
+        :type pattern: str, optional
+        :param suffix: Suffix for folder matching, defaults to None
+        :type suffix: str, optional
+        :param prefix: Prefix for folder matching, defaults to None
+        :type prefix: str, optional
+        :param contains: Contained strings for folder matching, defaults to None
+        :type contains: str, optional
         :param patterns: Matching patterns for finding appropriate folders, defaults to None
         :type patterns: dict[str,str], optional
+        :param mandatory_patterns: Mandatory pattern, that must be in the step, defaults to 1
+        :type mandatory_patterns: dict[str,str], optional
         :param save_log: Whether to save the output(s), defaults to True.
         :type save_log: bool, optional
         :param verbosity: Level of verbosity, defaults to 1
@@ -141,11 +156,20 @@ class Step_Configuration:
         self.overwrite = overwrite
         self.nested = nested
         self.workers = workers
+        self.pattern = pattern
+        self.suffix = suffix
+        self.prefix = prefix
+        self.contains = contains
         self.patterns = patterns
+        self.mandatory_patterns = mandatory_patterns
         self.save_log = save_log
         self.verbosity = verbosity
         self.additional_args = additional_args
 
+        self.update_regexes()
+
+
+    # Update variables
     def update(self, attributions: dict):
         """
         Update an attribute of this object.
@@ -154,7 +178,47 @@ class Step_Configuration:
         :type attributions: str
         """
         self.__dict__.update(attributions)
+        self.update_regexes()
 
+    def update_regex(
+        self, pattern: str = None, contains: str = None, suffix: str = None, prefix: str = None, key: str = "in"
+    ):
+        # Check for existing patterns
+        pattern = pattern if pattern else self.pattern
+        contains = contains if contains else self.contains
+        suffix = suffix if suffix else self.suffix
+        prefix = prefix if prefix else self.prefix
+
+        # Fill regex
+        regex_all = None
+        if pattern:
+            regex_all = pattern
+        if contains:
+            regex_all = rf"{regex_all}|.*{contains}.*" if regex_all else rf".*{contains}.*"
+        if suffix:
+            regex_all = rf"{regex_all}.*{suffix}$" if regex_all else rf".*{suffix}$"
+        if prefix:
+            regex_all = rf"^{prefix}.*{regex_all}" if regex_all else rf"^{prefix}.*"
+        
+        # Add mandatory
+        if self.mandatory_patterns.get(key, None):
+            regex_all = rf"(?={regex_all})(?={self.mandatory_patterns[key]})" if regex_all else self.mandatory_patterns[key]
+
+        # Save inputs
+        self.prefix = prefix
+        self.suffix = suffix
+        self.contains = contains
+        if regex_all:
+            self.patterns[key] = regex_all
+
+    def update_regexes(self):
+        for key in list(self.mandatory_patterns.keys()) + list(self.patterns.keys()):
+            self.update_regex(
+                pattern=self.pattern, contains=self.contains, suffix=self.suffix, prefix=self.prefix, key=key
+            )
+
+
+    # Dictionary represenation
     def dict_representation(self, attribute=None):
         attribute = attribute if attribute is not None else self
         attributes_dict = {}
@@ -171,6 +235,7 @@ class Step_Configuration:
                 attributes_dict[attribute] = value
         return attributes_dict
 
+    # IO
     def save(self, location):
         with open(location, "w") as f:
             json.dump(self.dict_representation(self), f, indent=4)
@@ -194,7 +259,12 @@ class Pipe_Step(Step_Configuration):
         overwrite: bool = True,
         nested: bool = False,
         workers: int = 1,
+        pattern: str = r".*",
+        suffix: str = None,
+        prefix: str = None,
+        contains: str = None,
         patterns: dict[str, str] = {"in": ".*"},
+        mandatory_patterns: dict[str, str] = {"in": ".*"},
         save_log: bool = False,
         verbosity: int = 1,
         additional_args: list = [],
@@ -215,8 +285,18 @@ class Pipe_Step(Step_Configuration):
         :type nested: bool, optional
         :param workers: Number of workers to use for parallel execution, defaults to 1
         :type workers: int, optional
+        :param pattern: Pattern for folder matching, defaults to ""
+        :type pattern: str, optional
+        :param suffix: Suffix for folder matching, defaults to None
+        :type suffix: str, optional
+        :param prefix: Prefix for folder matching, defaults to None
+        :type prefix: str, optional
+        :param contains: Contained strings for folder matching, defaults to None
+        :type contains: str, optional
         :param patterns: Matching patterns for finding appropriate folders, defaults to None
         :type patterns: dict[str,str], optional
+        :param mandatory_patterns: Mandatory pattern, that must be in the step, defaults to 1
+        :type mandatory_patterns: dict[str,str], optional
         :param save_log: Whether to save the output(s).
         :type save_log: bool, optional
         :param verbosity: Level of verbosity, defaults to 1
@@ -232,7 +312,12 @@ class Pipe_Step(Step_Configuration):
             overwrite=overwrite,
             nested=nested,
             workers=workers,
+            pattern=pattern,
+            contains=contains,
+            prefix=prefix,
+            suffix=suffix,
             patterns=patterns,
+            mandatory_patterns=mandatory_patterns,
             save_log=save_log,
             verbosity=verbosity,
             additional_args=additional_args,
@@ -250,6 +335,8 @@ class Pipe_Step(Step_Configuration):
         self.log_paths = []
         self.results = []
 
+
+    # Executives
     def check_exec_path(self, exec_path: StrPath = None) -> bool:
         """
         Check whether a path to an executable is valid.
@@ -286,6 +373,7 @@ class Pipe_Step(Step_Configuration):
 
         return valid_exec
 
+    # Matching
     def match_file_name(self, pattern: str, file_name: StrPath) -> bool:
         """
         Match a file_name against a regex expression
@@ -299,6 +387,7 @@ class Pipe_Step(Step_Configuration):
         """
         return bool(regex.search(pattern=pattern, string=str(file_name)))
 
+    # Saving
     def get_log_path(self, out_path: StrPath) -> StrPath:
         log_path = (
             os.path.join(get_directory(out_path), f"{self.name}_log.txt") if self.save_log else None
@@ -349,6 +438,7 @@ class Pipe_Step(Step_Configuration):
             self.results.append(results)
             self.futures.append(future)
 
+    # Executing
     def compute(self, step_function: Callable | str | list, *args, **kwargs):
         """
         Execute a computation of a command with or without parallelization.

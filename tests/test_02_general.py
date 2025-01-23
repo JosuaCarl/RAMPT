@@ -14,26 +14,36 @@ make_out(out_path)
 
 def test_step_configuration():
     clean_out(out_path)
+
+    # Initialization test
     step_configuration = Step_Configuration("test")
     assert step_configuration.name == "test"
     assert step_configuration.patterns == {"in": ".*"}
 
+    # Update test
     step_configuration = Step_Configuration("test")
     step_configuration.update({"overwrite": False, "verbosity": 3})
+    step_configuration.update({"pattern": ".*", "prefix": "Chuck", "suffix": "Norris"})
     assert not step_configuration.overwrite
     assert step_configuration.verbosity == 3
+    assert step_configuration.prefix == "Chuck"
+    assert step_configuration.patterns["in"] == r"^Chuck.*.*.*Norris$"
 
+    # Saving test
     step_configuration.save(os.path.join(out_path, "step_config.json"))
     assert os.path.isfile(os.path.join(out_path, "step_config.json"))
     with open(os.path.join(out_path, "step_config.json"), "r") as file:
         step_config_dict = json.load(file)
         assert step_config_dict == step_configuration.dict_representation()
 
+    # Loading test
+    ## Check for pre load configuration
     step_configuration = Step_Configuration("test")
     assert step_configuration.name == "test"
     assert step_configuration.verbosity == 1
     assert step_configuration.overwrite
 
+    ## Check post load configuration
     step_configuration.load(os.path.join(out_path, "step_config.json"))
     assert step_configuration.verbosity == 3
     assert not step_configuration.overwrite
@@ -41,12 +51,14 @@ def test_step_configuration():
 
 def test_pipe_step():
     clean_out(out_path)
-    pipe_step = Pipe_Step("test", exec_path="echo")
+    pipe_step = Pipe_Step("test", exec_path="echo", pattern="", contains="rababa", mandatory_patterns={"in": ".* nice$"})
     assert pipe_step.name == "test"
 
     # Test matching
-    assert not pipe_step.match_file_name(r"\.XML", "a.mzXML")
+    assert pipe_step.match_file_name(pipe_step.patterns["in"], "rababa is nice")
+    assert not pipe_step.match_file_name(pipe_step.patterns["in"], "ababa is nice")
     assert pipe_step.match_file_name(r"\.mzXML$", "a.mzXML")
+    assert not pipe_step.match_file_name(r"\.XML", "a.mzXML")
 
     # Test storing
     pipe_step.store_progress("/mnt/x/bar", "/mnt/y/bar", results={"hello": "all"})

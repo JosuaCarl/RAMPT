@@ -69,10 +69,6 @@ class MSconvert_Runner(Pipe_Step):
         self,
         exec_path: StrPath = "msconvert",
         target_format: str = "mzML",
-        pattern: str = r".*",
-        suffix: str = None,
-        prefix: str = None,
-        contains: str = None,
         redo_threshold: float = 1e8,
         overwrite: bool = False,
         save_log=False,
@@ -87,14 +83,6 @@ class MSconvert_Runner(Pipe_Step):
         :type exec_path: StrPath
         :param target_format: _description_, defaults to "mzML"
         :type target_format: str, optional
-        :param pattern: Pattern for folder matching, defaults to ""
-        :type pattern: str, optional
-        :param suffix: Suffix for folder matching, defaults to None
-        :type suffix: str, optional
-        :param prefix: Prefix for folder matching, defaults to None
-        :type prefix: str, optional
-        :param contains: Contained strings for folder matching, defaults to None
-        :type contains: str, optional
         :param redo_threshold: Threshold in bytess for a target file to be considered as incomplete and scheduled for re running the conversion, defaults to 1e8
         :type redo_threshold: float, optional
         :param overwrite: Overwrite all, do not check whether file already exists, defaults to False
@@ -106,43 +94,27 @@ class MSconvert_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
+        self.valid_formats = ["raw", "d", "lcd", "t2d", "baf", "fid", "tdf", "tsf", "wiff", "wiff2", "yep", "mzML", "mzXML", "imzML"]
+        self.valid_folder_formats = ["raw", "d"]
         super().__init__(
+            mandatory_patterns={
+                "in": rf".*\.({r'|'.join(self.valid_formats)})$",
+                "in_folder": rf".*\.({r'|'.join(self.valid_folder_formats)})$"
+            },
             exec_path=exec_path,
-            patterns={"in": pattern},
             save_log=save_log,
+            overwrite=overwrite,
             additional_args=additional_args,
             verbosity=verbosity,
         )
         if kwargs:
             self.update(kwargs)
         self.redo_threshold = redo_threshold
-        self.overwrite = overwrite
         self.target_format = target_format if target_format.startswith(".") else f".{target_format}"
         self.target_format = change_case_str(
             s=self.target_format, range=slice(3, len(self.target_format)), conversion="upper"
         )
-        self.pattern = pattern
-        self.suffix = suffix
-        self.prefix = prefix
-        self.contains = contains
         self.name = "msconvert"
-
-        self.update_regex(pattern=pattern, contains=contains, suffix=suffix, prefix=prefix)
-
-    def update_regex(
-        self, pattern: str = ".*", contains: str = None, suffix: str = None, prefix: str = None
-    ):
-        pattern = pattern if pattern else self.pattern
-        contains = contains if contains else self.contains
-        suffix = suffix if suffix else self.suffix
-        prefix = prefix if prefix else self.prefix
-        if contains:
-            pattern = rf"({pattern})|(.*{contains}.*)"
-        if suffix:
-            pattern = rf"{pattern}.*{suffix}$"
-        if prefix:
-            pattern = rf"^{prefix}.*{pattern}"
-        self.patterns["in"] = pattern
 
     def select_for_conversion(self, in_path: str, out_path: str) -> bool:
         """
@@ -205,18 +177,19 @@ class MSconvert_Runner(Pipe_Step):
         :type out_path: str
         """
         verbose_tqdm = self.verbosity >= 2
-        # Case Agilent folder:
-        if in_path.endswith(".d"):
+        # Check folder with valid input:
+        if self.match_file_name(in_path, self.patterns["in_folder"]):
             self.run_single(in_path=in_path, out_path=out_path)
-        for entry in tqdm(os.listdir(in_path), disable=verbose_tqdm, desc="Converting folder"):
-            entry_path = join(in_path, entry)
-            hypothetical_out_path = join(out_path, replace_file_ending(entry, self.target_format))
-            in_valid, out_valid = self.select_for_conversion(
-                in_path=entry_path, out_path=hypothetical_out_path
-            )
+        else:
+            for entry in tqdm(os.listdir(in_path), disable=verbose_tqdm, desc="Converting folder"):
+                entry_path = join(in_path, entry)
+                hypothetical_out_path = join(out_path, replace_file_ending(entry, self.target_format))
+                in_valid, out_valid = self.select_for_conversion(
+                    in_path=entry_path, out_path=hypothetical_out_path
+                )
 
-            if in_valid and out_valid:
-                self.run_single(in_path=entry_path, out_path=out_path)
+                if in_valid and out_valid:
+                    self.run_single(in_path=entry_path, out_path=out_path)
 
     def run_nested(self, in_root_dir: StrPath, out_root_dir: StrPath, recusion_level: int = 0):
         """

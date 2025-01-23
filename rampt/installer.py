@@ -1135,7 +1135,7 @@ class InstallerApp(tk.Tk):
         name: str,
         urls: dict | str,
         install_path: str,
-        bin_path: str = None,
+        bin_paths: str = None,
         extraction_method: str = "zip",
         hash_url_addendum: str = None,
         command: str | list = None,
@@ -1182,14 +1182,16 @@ class InstallerApp(tk.Tk):
                 extraction_method=extraction_method,
             )
 
-            if bin_path:
-                if isinstance(bin_path, dict):
-                    bin_path = bin_path.get("*", None)
-                    bin_path_matches = [
-                        value for key, value in bin_path.items() if key in self.op_sys
+            if bin_paths:
+                if isinstance(bin_paths, dict):
+                    bin_path = bin_paths.get("*", None)
+                    bin_paths_matches = [
+                        value for key, value in bin_paths.items() if key in self.op_sys
                     ]
-                    if bin_path_matches:
-                        bin_path = bin_path_matches[0]
+                    if bin_paths_matches:
+                        bin_path = bin_paths_matches[0]
+                else:
+                    bin_path = bin_paths
                 add_to_path(
                     op_sys=self.op_sys,
                     path=join(install_path, bin_path),

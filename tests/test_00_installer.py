@@ -65,7 +65,6 @@ def test_install_project():
     root = tk.Tk()
     installer = InstallerApp(root, local_only=True)
     name = "rampt"
-    ic(out_path)
     install_path = installer.install_project(
         name=name,
         url="https://github.com/JosuaCarl/RAMPT/releases/latest/download/rampt.zip",
@@ -88,7 +87,7 @@ def test_install_msconvert(recwarn):
         urls=urls.get(name),
         install_path=out_path,
         extraction_method="tar.bz2",
-        bin_path="",
+        bin_paths="",
     )
 
     if "mac" in installer.op_sys:
@@ -111,13 +110,10 @@ def test_install_mzmine():
     name = "MZmine"
 
     install_path = installer.install_component(
-        name=name, urls=urls.get(name), install_path=out_path, bin_path=""
+        name=name, urls=urls.get(name), install_path=out_path, bin_paths={"windows": "", "*": "bin"}
     )
 
     assert install_path == join(out_path, name)
-
-    ic(os.environ.get(["PATH"], ""))
-    ic(tool_available([name.lower(), f"{name.lower()}_console"]))
     assert tool_available([name.lower(), f"{name.lower()}_console"])
     assert os.path.isdir(join(out_path, name))
 
@@ -129,11 +125,10 @@ def test_install_sirius():
     name = "Sirius"
 
     install_path = installer.install_component(
-        name=name, urls=urls.get(name), install_path=out_path, bin_path=join("sirius", "bin")
+        name=name, urls=urls.get(name), install_path=out_path, bin_paths=join("sirius", "bin")
     )
 
     assert install_path == join(out_path, name)
-    ic(tool_available(name.lower()))
     assert tool_available(name.lower())
     assert os.path.isdir(join(out_path, name))
 
@@ -147,7 +142,7 @@ def test_install_components():
     installer.install_components(["MSconvert", "MZmine", "Sirius"])
 
     assert tool_available("msconvert")
-    assert tool_available("mzmine")
+    assert tool_available(["mzmine", "mzmine_console"])
     assert tool_available("sirius")
 
 
