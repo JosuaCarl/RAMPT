@@ -12,15 +12,11 @@ summary_params = Summary_Runner()
 def create_summary():
     with tgb.part(render="{'summ' in entrypoint.lower()}"):
         tgb.text("###### Select quantification table (.csv)", mode="markdown")
-        create_file_selection(
-            process="summary", execution_key_in="quantification", out_node="summary_data_paths"
-        )
+        create_file_selection(process="summary", io_key="quantification")
 
     with tgb.part(render="{'summ' in entrypoint.lower()}"):
         tgb.text("###### Select annotation data", mode="markdown")
-        create_file_selection(
-            process="summary", execution_key_in="annotation", out_node="summary_data_paths"
-        )
+        create_file_selection(process="summary", io_key="annotation")
 
 
 def create_summary_advanced():

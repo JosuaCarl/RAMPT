@@ -162,8 +162,6 @@ class Step_Configuration:
         self.save_log = save_log
         self.verbosity = verbosity
 
-        self.update_regexes()
-
     # Update variables
     def update(self, attributions: dict):
         """
@@ -173,7 +171,6 @@ class Step_Configuration:
         :type attributions: str
         """
         self.__dict__.update(attributions)
-        self.update_regexes()
 
     def update_regex(
         self,
@@ -221,7 +218,7 @@ class Step_Configuration:
             self.patterns[key] = regex_all
 
     def update_regexes(self, fill_patterns: list = []):
-        for key in list(self.mandatory_patterns.keys()) + list(self.patterns.keys()):
+        for key in set(list(self.mandatory_patterns.keys()) + list(self.patterns.keys())):
             self.update_regex(
                 pattern=self.pattern,
                 contains=self.contains,
@@ -626,7 +623,11 @@ class Pipe_Step(Step_Configuration):
             return list(optionals.values())
 
     def distribute_scheduled(
-        self, standard_value: str = "standard", correct_runner: str = None, **scheduled_io
+        self,
+        standard_value: str = "standard",
+        correct_runner: str = None,
+        kwargs: dict = {},
+        **scheduled_io,
     ):
         """
         Distribute the scheduled
@@ -653,7 +654,7 @@ class Pipe_Step(Step_Configuration):
                     minimum_verbosity=3,
                     verbosity=self.verbosity,
                 )
-                return self.run_nested(**scheduled_io)
+                return self.run_nested(**scheduled_io, **kwargs)
 
             case "directory":
                 logger.log(
@@ -661,14 +662,14 @@ class Pipe_Step(Step_Configuration):
                     minimum_verbosity=3,
                     verbosity=self.verbosity,
                 )
-                return self.run_directory(**scheduled_io)
+                return self.run_directory(**scheduled_io, **kwargs)
             case "single":
                 logger.log(
                     f"Distributing to {self.__class__.__name__} single run.",
                     minimum_verbosity=3,
                     verbosity=self.verbosity,
                 )
-                return self.run_single(**scheduled_io)
+                return self.run_single(**scheduled_io, **kwargs)
             case _:
                 logger.error(
                     f"correct_runner: {correct_runner} did not match any run implementation."
@@ -747,7 +748,7 @@ class Pipe_Step(Step_Configuration):
                 verbosity=self.verbosity,
             )
 
-            self.distribute_scheduled(**scheduled_io)
+            self.distribute_scheduled(kwargs=kwargs, **scheduled_io)
 
             logger.log(
                 message=f'Processed {scheduled_io["in_path"]} -> {scheduled_io["out_path"]}',

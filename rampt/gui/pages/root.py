@@ -94,7 +94,8 @@ match_data_node = {
     # Used to decide which values (the last in the list) are used in case of conflicts
     # Processed chained Inputs are preffered to scheduled targets
     # In Data Paths
-    "raw_data_paths": ["conversion_params.scheduled_in"],
+    # TODO: ADJUST DATA NODE SEARCH
+    "raw_data_paths": [""],
     "community_formatted_data_paths": [
         "feature_finding_params.scheduled_in",
         "conversion_params.processed_out",
@@ -116,19 +117,7 @@ match_data_node = {
     "summary_data_paths": ["analysis_params.scheduled_in", "summary_params.processed_out"],
     "analysis_data_paths": ["analysis_params.processed_out"],
     # Out Data
-    "conversion_out_paths": [
-        "conversion_params.scheduled_out",
-        "feature_finding_params.scheduled_in",
-    ],
-    "feature_finding_out_paths": [
-        "feature_finding_params.scheduled_out",
-        "gnps_params.scheduled_in",
-        "sirius_params.scheduled_in",
-    ],
-    "gnps_out_paths": ["gnps_params.scheduled_out"],
-    "sirius_out_paths": ["sirius_params.scheduled_out"],
-    "summary_out_paths": ["summary_params.scheduled_out", "analysis_params.scheduled_in"],
-    "analysis_out_paths": ["analysis_params.scheduled_out"],
+    "out_path_root": ["out_path_root"],
     # Batches and more
     "mzmine_batch": ["feature_finding_params.batch"],
     "mzmine_log": ["feature_finding_params.log_paths", "gnps_params.mzmine_log"],
@@ -140,6 +129,26 @@ optional_data_nodes = ["out_path_root", "sirius_annotation_paths", "gnps_annotat
 
 entrypoints = ["↔️ Conversion", "🔍 Feature finding", "✒️ Annotation", "🧺 Summary", "📈 Analysis"]
 entrypoint = "↔️ Conversion"
+
+
+match_entrypoint = {
+    "*": {"out_path_root": ["out_path_root"]},
+    "↔️ Conversion": {
+        "raw_data_paths": ["conversion_params.scheduled_ios['standard']"],
+        "mzmine_batch": ["feature_finding_params.scheduled_ios['batch']"],
+        "mzmine_user": ["feature_finding_params.scheduled_ios['user']"],
+    },
+    "🔍 Feature finding": {
+        "community_formatted_data_paths": ["feature_finding_params.scheduled_ios['standard']"],
+        "mzmine_batch": ["feature_finding_params.scheduled_ios['batch']"],
+        "mzmine_user": ["feature_finding_params.scheduled_ios['user']"],
+    },
+    "✒️ Annotation": {"processed_data_paths": []},
+    "🧺 Summary": {"raw_data_paths": []},
+    "📈 Analysis": {"raw_data_paths": []},
+}
+
+out_path_root = None
 
 
 def lock_scenario(state):
@@ -265,6 +274,21 @@ with tgb.Page(style=style) as configuration:
                 create_sirius()
                 create_summary()
                 create_analysis()
+
+                tgb.html("br")
+
+                # Out Path
+                with tgb.part(render="{local}"):
+                    tgb.text("###### Select root folder for output", mode="markdown")
+                    tgb.button(
+                        "Select out",
+                        on_action=lambda state: set_attribute_recursive(
+                            state,
+                            "out_path_root",
+                            open_file_folder(select_folder=True),
+                            refresh=True,
+                        ),
+                    )
 
             # Create advanced settings
             tgb.text("### Advanced settings", mode="markdown")

@@ -32,17 +32,9 @@ def create_expandable_setting(
 
 
 def create_file_selection(
-    process: str,
-    param_attribute_in: str = "scheduled_in",
-    execution_key_in: str = None,
-    out_node: str = "",
-    render: str = True,
+    process: str, param_attribute_in: str = "scheduled_ios", io_key: str = "standard"
 ):
-    naming_list = (
-        [process, param_attribute_in, execution_key_in]
-        if execution_key_in
-        else [process, param_attribute_in]
-    )
+    naming_list = [process, param_attribute_in, io_key] if io_key else [process, param_attribute_in]
 
     # Construct intermediary dicts
     selector_id = "_".join(naming_list)
@@ -79,74 +71,51 @@ def create_file_selection(
         selected_labels = [
             element.get("label") if isinstance(element, dict) else element for element in value
         ]
-        if execution_key_in:
+        if io_key:
             in_list = get_attribute_recursive(state, f"{process}_params.{param_attribute_in}")
             dictionary = in_list[0] if in_list else {}
-            dictionary.update({execution_key_in: selected_labels[0]})
+            dictionary.update({io_key: selected_labels[0]})
             selected_labels = [dictionary]
         set_attribute_recursive(
             state, f"{process}_params.{param_attribute_in}", selected_labels, refresh=True
         )
 
-    with tgb.part(render=render):
-        with tgb.layout(columns="1 3 1", columns__mobile="1", gap="5%"):
-            # In
-            with tgb.part():
-                with tgb.part(render="{local}"):
-                    tgb.button(
-                        "Select in",
-                        on_action=lambda state: construct_selection_tree(
-                            state,
-                            open_file_folder(
-                                select_folder=get_attribute_recursive(
-                                    state, f"select_folders.{selector_id}"
-                                )
-                            ),
+    with tgb.layout(columns="1 4", columns__mobile="1", gap="5%"):
+        # In
+        with tgb.part():
+            with tgb.part(render="{local}"):
+                tgb.button(
+                    "Select in",
+                    on_action=lambda state: construct_selection_tree(
+                        state,
+                        open_file_folder(
+                            select_folder=get_attribute_recursive(
+                                state, f"select_folders.{selector_id}"
+                            )
                         ),
-                    )
-                with tgb.part(render="{not local}"):
-                    tgb.file_selector(
-                        f"{{uploaded_paths.{selector_id}}}",
-                        label="Select in",
-                        extensions="*",
-                        drop_message=f"Drop files/folders for {process} here:",
-                        multiple=True,
-                        on_action=lambda state: construct_selection_tree(state),
-                    )
-                tgb.toggle(f"{{select_folders.{selector_id}}}", label="Select folder")
+                    ),
+                )
+            with tgb.part(render="{not local}"):
+                tgb.file_selector(
+                    f"{{uploaded_paths.{selector_id}}}",
+                    label="Select in",
+                    extensions="*",
+                    drop_message=f"Drop files/folders for {process} here:",
+                    multiple=True,
+                    on_action=lambda state: construct_selection_tree(state),
+                )
+            tgb.toggle(f"{{select_folders.{selector_id}}}", label="Select folder")
 
-            # Selection tree
-            tgb.tree(
-                f"{{selected.{selector_id}}}",
-                lov=f"{{selection_trees_pruned.{selector_id}}}",
-                label=f"Select in for {process}",
-                filter=True,
-                multiple=execution_key_in is None,
-                expanded=True,
-                on_change=lambda state, name, value: update_selection(state, name, value),
-            )
-
-            # Out
-            with tgb.part():
-                with tgb.part(render="{local}"):
-                    tgb.button(
-                        "Select out",
-                        on_action=lambda state: set_attribute_recursive(
-                            state,
-                            f"{process}_params.scheduled_out",
-                            open_file_folder(select_folder=True),
-                            refresh=True,
-                        ),
-                    )
-                with tgb.part(render="{not local}"):
-                    tgb.file_download(
-                        "{None}",
-                        active=f"{{scenario.data_nodes['{out_node}'].is_ready_for_reading}}",
-                        label="Download results",
-                        on_action=lambda state, id, payload: download_data_node_files(
-                            state, out_node
-                        ),
-                    )
+        # Selection tree
+        tgb.tree(
+            f"{{selected.{selector_id}}}",
+            lov=f"{{selection_trees_pruned.{selector_id}}}",
+            label=f"Select in for {process}",
+            filter=True,
+            multiple=io_key is None,
+            expanded=True,
+            on_change=lambda state, name, value: update_selection(state, name, value),
+        )
 
 
 # List selectors
@@ -182,7 +151,7 @@ def create_list_selection(
         set_attribute_recursive(state, f"{process}_params.{attribute}", value, refresh=True)
 
     with tgb.part(render=render):
-        with tgb.layout(columns="1 1", columns__mobile="1", gap="5%"):
+        with tgb.layout(columns="1 4", columns__mobile="1", gap="5%"):
             with tgb.part(render="{local}"):
                 tgb.button(
                     f"Select {name}",

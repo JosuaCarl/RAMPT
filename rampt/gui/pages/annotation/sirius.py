@@ -12,8 +12,9 @@ sirius_params.config = os.path.join(ROOT_DIR, "statics", "batch_files", "sirius_
 
 def create_sirius():
     with tgb.part(render="{'annot' in entrypoint.lower()}"):
-        tgb.text("###### File selection", mode="markdown")
-        create_file_selection(process="sirius", out_node="sirius_annotation_paths")
+        tgb.text("#### Sirius", mode="markdown")
+        tgb.text("###### Select spectra (.mgf)", mode="markdown")
+        create_file_selection(process="sirius")
 
 
 def create_sirius_advanced():

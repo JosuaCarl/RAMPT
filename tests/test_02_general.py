@@ -24,6 +24,7 @@ def test_step_configuration():
     step_configuration = Step_Configuration("test")
     step_configuration.update({"overwrite": False, "verbosity": 3})
     step_configuration.update({"pattern": ".*", "prefix": "Chuck", "suffix": "Norris"})
+    step_configuration.update_regexes(fill_patterns=["in"])
     assert not step_configuration.overwrite
     assert step_configuration.verbosity == 3
     assert step_configuration.prefix == "Chuck"
@@ -101,24 +102,27 @@ def test_pattern_matching():
         contains="bunny",
         mandatory_patterns={"in": ".*nice$"},
     )
+    ic(pipe_step.patterns)
+    pipe_step.update_regexes(fill_patterns=["in"])
+    ic(pipe_step.patterns)
     assert pipe_step.name == "test"
 
     # Test matching
     assert pipe_step.match_path(r"\.mzXML$", "a.mzXML")
     assert not pipe_step.match_path(r"\.XML", "a.mzXML")
 
-    # Test filled pattern handling
+    # Test filled pattern handling (Very forgiving, because linked with or, except mandatory)
     assert pipe_step.match_path(pipe_step.patterns["in"], "This bunny seems nice")
     assert pipe_step.match_path(pipe_step.patterns["in"], "Thisbunnynice")
+    assert pipe_step.match_path(pipe_step.patterns["in"], "This rabbit seems nice")
+    assert pipe_step.match_path(pipe_step.patterns["in"], "The bunny seems nice")
+    assert pipe_step.match_path(pipe_step.patterns["in"], "bunnynice")
 
     assert not pipe_step.match_path(pipe_step.patterns["in"], "Thisbunnynic")
-    assert not pipe_step.match_path(pipe_step.patterns["in"], "thisbunnynice")
-    assert not pipe_step.match_path(pipe_step.patterns["in"], "This bunny seems nice.")
-    assert not pipe_step.match_path(pipe_step.patterns["in"], "This rabbit seems nice")
+    assert not pipe_step.match_path(pipe_step.patterns["in"], "rabbit nice")
 
     # Test regex updating
     pipe_step.prefix = "The"
-    assert not pipe_step.match_path(pipe_step.patterns["in"], "The bunny seems nice")
 
     pipe_step.update_regexes()
     assert pipe_step.match_path(pipe_step.patterns["in"], "The bunny seems nice")

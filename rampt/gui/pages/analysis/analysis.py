@@ -11,7 +11,7 @@ analysis_params = Analysis_Runner()
 def create_analysis():
     with tgb.part(render="{'anal' in entrypoint.lower()}"):
         tgb.text("###### Select summary (.tsv)", mode="markdown")
-        create_file_selection(process="analysis", out_node="analysis_data_paths")
+        create_file_selection(process="analysis")
 
 
 def create_analysis_advanced():

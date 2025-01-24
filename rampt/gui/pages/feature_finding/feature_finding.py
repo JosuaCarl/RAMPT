@@ -14,12 +14,12 @@ mzmine_default_folder = os.path.join(Path.home(), ".mzmine", "users")
 def create_feature_finding():
     with tgb.part(render="{'feat' in entrypoint.lower()}"):
         tgb.text("###### Select converted (.mzML)", mode="markdown")
-        create_file_selection(process="feature_finding", out_node="processed_data_paths")
+        create_file_selection(process="feature_finding")
 
     with tgb.part(render="{'feat' in entrypoint.lower() or 'conv' in entrypoint.lower()}"):
         tgb.html("br")
 
-        tgb.text("###### Batch selection", mode="markdown")
+        tgb.text("###### Select a batch file (.mzbatch)", mode="markdown")
         create_list_selection(
             process="feature_finding", extensions=".mzbatch,.xml", name="Batch file"
         )

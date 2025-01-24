@@ -12,7 +12,7 @@ conversion_params = MSconvert_Runner()
 def create_conversion():
     with tgb.part(render="{'conv' in entrypoint.lower()}"):
         tgb.text("###### Select raw data", mode="markdown")
-        create_file_selection(process="conversion", out_node="community_formatted_data_paths")
+        create_file_selection(process="conversion")
 
 
 def create_conversion_advanced():

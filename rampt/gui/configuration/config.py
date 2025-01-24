@@ -112,7 +112,7 @@ def generic_step(
     in_outs: list[dict] = None,
     out_path_root: str = "..",
     out_folder: StrPath = ".",
-    return_attributes: list = ["processed_ios"],
+    return_attributes: dict = {},
     **kwargs,
 ) -> tuple[Any] | Any:
     # Fixate parameters
@@ -147,14 +147,22 @@ def generic_step(
     step_instance.run(out_folder=out_folder, **kwargs)
 
     # Return results
-    results = [getattr(step_instance, attr) for attr in return_attributes]
+    standard_out_path = step_instance.extract_standard(
+        out_path=step_instance.processed_ios["out_path"]
+    )
+    other_returns = {
+        key: get_attribute_recursive(step_instance, attr) for key, attr in return_attributes.items()
+    }
 
-    return tuple(results) if len(results) > 1 else results[0]
+    # Repackage output for workflow
+    results = [{"in_path": {"standard": standard_out_path}}] + other_returns
+
+    return results
 
 
 def convert_files(
     entrypoint: bool,
-    raw_data_paths: StrPath,
+    raw_data_paths: dict[str, StrPath],
     out_path_root: StrPath,
     step_params: dict,
     global_params: dict,
@@ -162,7 +170,7 @@ def convert_files(
     return generic_step(
         step_class=MSconvert_Runner,
         entrypoint="conv" in entrypoint.lower(),
-        # in_paths=raw_data_paths,
+        in_outs=raw_data_paths,
         out_path_root=out_path_root,
         out_folder="converted",
         step_params=step_params,
@@ -172,7 +180,7 @@ def convert_files(
 
 def find_features(
     entrypoint: bool,
-    community_formatted_data_paths: StrPath,
+    community_formatted_data_paths: dict[str, StrPath],
     out_path_root: StrPath,
     mzmine_batch: StrPath,
     step_params: dict,
@@ -181,19 +189,19 @@ def find_features(
     return generic_step(
         step_class=MZmine_Runner,
         entrypoint="feat" in entrypoint.lower(),
-        # in_paths=community_formatted_data_paths,
+        in_outs=community_formatted_data_paths,
         out_path_root=out_path_root,
         out_folder="processed",
         step_params=step_params,
         global_params=global_params,
-        return_attributes=["processed_out", "log_paths"],
+        return_attributes={"mzmine_log", "log_paths"},
         batch=mzmine_batch,
     )
 
 
 def annotate_gnps(
     entrypoint: bool,
-    processed_data_paths: StrPath,
+    processed_data_paths: dict[str, StrPath],
     mzmine_log: StrPath,
     out_path_root: StrPath,
     step_params: dict,
@@ -202,7 +210,7 @@ def annotate_gnps(
     return generic_step(
         step_class=GNPS_Runner,
         entrypoint="annot" in entrypoint.lower(),
-        # in_paths=processed_data_paths,
+        in_outs=processed_data_paths,
         out_path_root=out_path_root,
         out_folder="annotated",
         step_params=step_params,
@@ -213,7 +221,7 @@ def annotate_gnps(
 
 def annotate_sirius(
     entrypoint: bool,
-    processed_data_paths: StrPath,
+    processed_data_paths: dict[str, StrPath],
     out_path_root: StrPath,
     config: StrPath,
     step_params: dict,
@@ -222,7 +230,7 @@ def annotate_sirius(
     return generic_step(
         step_class=Sirius_Runner,
         entrypoint="annot" in entrypoint.lower(),
-        # in_paths=processed_data_paths,
+        in_outs=processed_data_paths,
         out_path_root=out_path_root,
         out_folder="annotated",
         step_params=step_params,
@@ -233,9 +241,9 @@ def annotate_sirius(
 
 def summarize_annotations(
     entrypoint: bool,
-    processed_data_paths: StrPath,
-    gnps_annotation_paths: StrPath,
-    sirius_annotation_paths: StrPath,
+    processed_data_paths: dict[str, StrPath],
+    gnps_annotation_paths: dict[str, StrPath],
+    sirius_annotation_paths: dict[str, StrPath],
     out_path_root: StrPath,
     step_params: dict,
     global_params: dict,
@@ -243,12 +251,7 @@ def summarize_annotations(
     return generic_step(
         step_class=Summary_Runner,
         entrypoint="summ" in entrypoint.lower(),
-        # in_paths=stretch_to_list_of_dicts(
-        #    {
-        #        "quantification": [processed_data_paths],
-        #        "annotation": [sirius_annotation_paths, gnps_annotation_paths],
-        #    }
-        # ),
+        in_outs=processed_data_paths | gnps_annotation_paths | sirius_annotation_paths,
         out_path_root=out_path_root,
         out_folder="analysis",
         step_params=step_params,
@@ -258,16 +261,16 @@ def summarize_annotations(
 
 def analyze_difference(
     entrypoint: bool,
-    summary_data_paths: StrPath,
+    summary_data_paths: dict[str, StrPath],
     out_path_root: StrPath,
     step_params: dict,
     global_params: dict,
 ):
     return generic_step(
         step_class=Analysis_Runner,
-        # Not kidding, because this covers analysis and analize
+        # Not kidding, this covers analysis and analize
         entrypoint="anal" in entrypoint.lower(),
-        # in_paths=summary_data_paths,
+        in_outs=summary_data_paths,
         out_path_root=out_path_root,
         out_folder="analysis",
         step_params=step_params,
