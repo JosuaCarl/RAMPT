@@ -30,13 +30,16 @@ def test_gnps_submit():
         )
     assert isinstance(task_id, str) and task_id != ""
 
+
 def test_gnps_pipe_run_single():
     clean_out(out_path)
 
     # Superficial testing of run_single
     gnps_runner = GNPS_Runner(verbosity=3)
 
-    gnps_runner.run_single(in_path={"mzmine_log": join(example_path, "mzmine_log.txt")}, out_path=out_path)
+    gnps_runner.run_single(
+        in_path={"mzmine_log": join(example_path, "mzmine_log.txt")}, out_path=out_path
+    )
 
     assert os.path.isfile(join(out_path, "fbmn_all_db_annotations.json"))
 
@@ -59,9 +62,7 @@ def test_gnps_pipe_run_nested():
     gnps_runner.run_nested(example_path, out_path)
 
     assert os.path.isfile(join(out_path, "fbmn_all_db_annotations.json"))
-    assert os.path.isfile(
-        join(out_path, "example_nested", "fbmn_all_db_annotations.json")
-    )
+    assert os.path.isfile(join(out_path, "example_nested", "fbmn_all_db_annotations.json"))
 
 
 def test_gnps_pipe_run():
@@ -76,7 +77,7 @@ def test_gnps_pipe_run():
     assert gnps_runner.processed_ios == [
         {
             "in_path": {"mzmine_log": join(example_path, "mzmine_log.txt")},
-            "out_path": join(out_path, "fbmn_all_db_annotations.json")
+            "out_path": join(out_path, "fbmn_all_db_annotations.json"),
         }
     ]
 
@@ -95,9 +96,7 @@ def test_gnps_pipe_main():
     gnps_pipe_main(args, unknown_args=[])
 
     assert os.path.isfile(join(out_path, "fbmn_all_db_annotations.json"))
-    assert os.path.isfile(
-        join(out_path, "example_nested", "fbmn_all_db_annotations.json")
-    )
+    assert os.path.isfile(join(out_path, "example_nested", "fbmn_all_db_annotations.json"))
 
 
 def test_clean():

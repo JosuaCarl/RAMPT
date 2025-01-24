@@ -182,7 +182,7 @@ class Step_Configuration:
         suffix: str = None,
         prefix: str = None,
         key: str = "in",
-        refill_pattern: bool = False
+        refill_pattern: bool = False,
     ):
         # Check for existing patterns
         pattern = pattern if pattern else self.pattern
@@ -228,7 +228,7 @@ class Step_Configuration:
                 suffix=self.suffix,
                 prefix=self.prefix,
                 key=key,
-                refill_pattern=key in fill_patterns
+                refill_pattern=key in fill_patterns,
             )
 
     # Dictionary represenation
@@ -621,11 +621,13 @@ class Pipe_Step(Step_Configuration):
         if return_dict:
             return optionals
         elif len(keys) == 1:
-                return next(iter(optionals.values()))
+            return next(iter(optionals.values()))
         else:
             return list(optionals.values())
 
-    def distribute_scheduled(self, standard_value: str = "standard", correct_runner: str = None, **scheduled_io):
+    def distribute_scheduled(
+        self, standard_value: str = "standard", correct_runner: str = None, **scheduled_io
+    ):
         """
         Distribute the scheduled
 
@@ -652,7 +654,7 @@ class Pipe_Step(Step_Configuration):
                     verbosity=self.verbosity,
                 )
                 return self.run_nested(**scheduled_io)
-            
+
             case "directory":
                 logger.log(
                     f"Distributing to {self.__class__.__name__} directory run.",
@@ -683,12 +685,17 @@ class Pipe_Step(Step_Configuration):
             kwargs.pop("additional_args") if "additional_args" in kwargs else self.additional_args
         )
 
-        additional_args = " ".join(filter(None,
-            [
-                " ".join(additional_args),
-                " ".join([" ".join([f"--{key}", f'"{value}"']) for key, value in kwargs.items()])
-            ]
-        ))
+        additional_args = " ".join(
+            filter(
+                None,
+                [
+                    " ".join(additional_args),
+                    " ".join(
+                        [" ".join([f"--{key}", f'"{value}"']) for key, value in kwargs.items()]
+                    ),
+                ],
+            )
+        )
 
         return additional_args
 

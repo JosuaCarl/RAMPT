@@ -155,9 +155,7 @@ class Sirius_Runner(Pipe_Step):
 
         self.compute(
             step_function=execute_verbose_command,
-            in_out=dict(
-                in_path=in_path, out_path=out_path
-            ),
+            in_out=dict(in_path=in_path, out_path=out_path),
             log_path=self.get_log_path(out_path=out_path),
             cmd=cmd,
             verbosity=self.verbosity,

@@ -49,17 +49,15 @@ def test_step_configuration():
     assert not step_configuration.overwrite
 
 
-
 def test_pipe_step():
     clean_out(out_path)
-    pipe_step = Pipe_Step(
-        "test",
-        exec_path="echo",
-    )
+    pipe_step = Pipe_Step("test", exec_path="echo")
     assert pipe_step.name == "test"
 
     # Test storing
-    pipe_step.store_progress({"in_path": "/mnt/x/bar", "out_path": "/mnt/y/bar"}, results={"hello": "all"})
+    pipe_step.store_progress(
+        {"in_path": "/mnt/x/bar", "out_path": "/mnt/y/bar"}, results={"hello": "all"}
+    )
     assert pipe_step.processed_ios == [{"in_path": "/mnt/x/bar", "out_path": "/mnt/y/bar"}]
     assert pipe_step.results == [{"hello": "all"}]
 
@@ -85,6 +83,7 @@ def test_pipe_step():
 
     # Run is tested for each individual step
 
+
 def test_pattern_matching():
     clean_out(out_path)
     # Update regex
@@ -92,7 +91,7 @@ def test_pattern_matching():
     step_configuration.update({"pattern": ".*", "prefix": "Chuck", "suffix": "Norris"})
     assert step_configuration.prefix == "Chuck"
     assert step_configuration.patterns["in"] == r"^Chuck.*.*.*Norris$"
-    
+
     # Matching
     pipe_step = Pipe_Step(
         "test",
@@ -107,7 +106,7 @@ def test_pattern_matching():
     # Test matching
     assert pipe_step.match_path(r"\.mzXML$", "a.mzXML")
     assert not pipe_step.match_path(r"\.XML", "a.mzXML")
-    
+
     # Test filled pattern handling
     assert pipe_step.match_path(pipe_step.patterns["in"], "This bunny seems nice")
     assert pipe_step.match_path(pipe_step.patterns["in"], "Thisbunnynice")
@@ -120,7 +119,7 @@ def test_pattern_matching():
     # Test regex updating
     pipe_step.prefix = "The"
     assert not pipe_step.match_path(pipe_step.patterns["in"], "The bunny seems nice")
-    
+
     pipe_step.update_regexes()
     assert pipe_step.match_path(pipe_step.patterns["in"], "The bunny seems nice")
 
@@ -140,7 +139,7 @@ def test_extract():
     # Extract standard
     assert pipe_step.extract_standard(**dictionary) == 1
     assert pipe_step.extract_standard(standard_value="arbritrary", some_arbitrary_key=1) == 1
-    
+
     dictionary = {"in": {"wildcard": 1}}
     assert pipe_step.extract_standard(standard_value="wildcard", **dictionary) == 1
 
@@ -155,10 +154,10 @@ def test_link_additional_args():
     assert pipe_step.link_additional_args() == ""
 
     dictionary = {"in": 1}
-    assert pipe_step.link_additional_args(**dictionary) == "--in \"1\""
+    assert pipe_step.link_additional_args(**dictionary) == '--in "1"'
 
     pipe_step.additional_args = ["--out", "2"]
-    assert pipe_step.link_additional_args(**dictionary) == "--out 2 --in \"1\""
+    assert pipe_step.link_additional_args(**dictionary) == '--out 2 --in "1"'
 
 
 def test_clean():

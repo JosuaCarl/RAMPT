@@ -107,10 +107,7 @@ def test_analysis_pipe_run():
     analysis_runner.compute_futures()
 
     assert analysis_runner.processed_ios == [
-        {
-            "in_path": join(example_path, "summary.tsv"),
-            "out_path": out_path
-        }
+        {"in_path": join(example_path, "summary.tsv"), "out_path": out_path}
     ]
 
 

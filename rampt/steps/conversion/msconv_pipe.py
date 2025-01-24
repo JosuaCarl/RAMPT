@@ -184,9 +184,7 @@ class MSconvert_Runner(Pipe_Step):
         self.compute(
             step_function=execute_verbose_command,
             cmd=cmd,
-            in_out=dict(
-                in_path=in_path, out_path=out_path
-            ),
+            in_out=dict(in_path=in_path, out_path=out_path),
             log_path=self.get_log_path(out_path=out_path),
             verbosity=self.verbosity,
         )
@@ -201,7 +199,7 @@ class MSconvert_Runner(Pipe_Step):
         :type out_path: dict[str, StrPath]
         """
         in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
-        
+
         # Check folder with valid input:
         if self.match_path(in_path, self.patterns["in_folder"]):
             self.run_single(in_path=in_path, out_path=out_path, **kwargs)
@@ -241,7 +239,7 @@ class MSconvert_Runner(Pipe_Step):
         has_in_file = False
 
         root, dirs, files = next(os.walk(in_path))
-        
+
         for i, file in enumerate(files):
             if self.match_path(pattern=self.patterns["in"], path=file):
                 self.run_directory(in_path=in_path, out_path=out_path, **kwargs)

@@ -79,18 +79,11 @@ def test_mzmine_pipe_run():
     # Superficial testing of run
     mzmine_runner = MZmine_Runner(batch=join(batch_path, "minimal.mzbatch"), user=user, workers=2)
 
-    mzmine_runner.run(
-        [
-            dict(in_path=example_path, out_path=out_path)
-        ]
-    )
+    mzmine_runner.run([dict(in_path=example_path, out_path=out_path)])
     mzmine_runner.compute_futures()
 
     assert mzmine_runner.processed_ios == [
-        {
-            "in_path": join(out_path, "source_files.txt"),
-            "out_path": out_path
-        }
+        {"in_path": join(out_path, "source_files.txt"), "out_path": out_path}
     ]
     with open(join(out_path, "source_files.txt"), "r") as f:
         lines = f.readlines()

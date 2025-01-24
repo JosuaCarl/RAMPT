@@ -291,19 +291,19 @@ class GNPS_Runner(Pipe_Step):
 
         else:
             raise BrokenPipeError(f"Status of {task_id} was not marked DONE.")
-        
-     # Distribution
+
+    # Distribution
     def distribute_scheduled(self, **scheduled_io):
         if self.nested:
             correct_runner = "nested"
         else:
             correct_runner = "single"
-            for path in filter(None, self.extract_optional(
-                scheduled_io["in_path"], keys=list(self.patterns.keys())
-            )):
+            for path in filter(
+                None,
+                self.extract_optional(scheduled_io["in_path"], keys=list(self.patterns.keys())),
+            ):
                 if os.path.isdir(path):
                     correct_runner = "directory"
-            
 
         return super().distribute_scheduled(correct_runner=correct_runner, **scheduled_io)
 
@@ -318,16 +318,14 @@ class GNPS_Runner(Pipe_Step):
         :type out_path: dict[str, StrPath], optional
         """
         in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
-        
+
         if os.path.isdir(out_path):
             out_path = join(out_path, "fbmn_all_db_annotations.json")
 
         self.compute(
             step_function=capture_and_log,
             func=self.gnps_check_resubmit,
-            in_out=dict(
-                in_path=in_path, out_path=out_path
-            ),
+            in_out=dict(in_path=in_path, out_path=out_path),
             log_path=self.get_log_path(out_path=out_path),
         )
 
@@ -336,7 +334,7 @@ class GNPS_Runner(Pipe_Step):
         Pass on the directory to single case.
         """
         in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
-        
+
         # Special case "standard" as summary of file_types
         if "standard" in in_path:
             for annotation_type in iter(self.patterns.keys()):

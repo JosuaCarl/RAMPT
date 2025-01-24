@@ -14,7 +14,6 @@ out_path, mock_path, example_path, batch_path, installs_path = contruct_common_p
 make_out(out_path)
 
 
-
 def test_summary_add_quantification():
     clean_out(out_path)
 
@@ -75,8 +74,10 @@ def test_summary_add_annotations():
             if summary_runner.match_path(pattern=summary_runner.patterns[file_type], path=entry):
                 matched_in_paths[file_type] = join(path, entry)
                 break
-    
-    summary = summary_runner.add_quantification(matched_in_paths.pop("quantification"), summary=None)
+
+    summary = summary_runner.add_quantification(
+        matched_in_paths.pop("quantification"), summary=None
+    )
     summary = summary_runner.add_annotations(matched_in_paths, summary=summary)
 
     assert summary[summary["ID"] == "2"]["m/z"][0] == 267.12273020717777
@@ -122,8 +123,7 @@ def test_summary_pipe_run_directory():
     summary_runner = Summary_Runner()
 
     summary_runner.run_directory(
-        in_path={"quantification": example_path, "annotation": example_path},
-        out_path=out_path
+        in_path={"quantification": example_path, "annotation": example_path}, out_path=out_path
     )
 
     assert os.path.isfile(join(out_path, "summary.tsv"))
@@ -146,21 +146,32 @@ def test_summary_pipe_run():
     # Superficial testing of run
     summary_runner = Summary_Runner(workers=2)
 
-    summary_runner.run([dict(in_path={"quantification": example_path, "annotation": example_path}, out_path=out_path)])
+    summary_runner.run(
+        [
+            dict(
+                in_path={"quantification": example_path, "annotation": example_path},
+                out_path=out_path,
+            )
+        ]
+    )
     summary_runner.compute_futures()
 
     assert summary_runner.processed_ios == [
         {
             "in_path": {
-                    'canopus_formula_summary': join(example_path, 'canopus_formula_summary.tsv'),
-                    'canopus_structure_summary': join(example_path, 'canopus_structure_summary.tsv'),
-                    'denovo_structure_identifications': join(example_path, 'denovo_structure_identifications.tsv'),
-                    'formula_identifications': join(example_path, 'formula_identifications.tsv'),
-                    'gnps_annotations': join(example_path, 'example_files_fbmn_all_db_annotations.json'),
-                    'quantification': join(example_path, 'example_files_iimn_fbmn_quant.csv'),
-                    'structure_identifications': join(example_path, 'structure_identifications.tsv'),
-                },
-            "out_path": join(out_path, "summary.tsv")
+                "canopus_formula_summary": join(example_path, "canopus_formula_summary.tsv"),
+                "canopus_structure_summary": join(example_path, "canopus_structure_summary.tsv"),
+                "denovo_structure_identifications": join(
+                    example_path, "denovo_structure_identifications.tsv"
+                ),
+                "formula_identifications": join(example_path, "formula_identifications.tsv"),
+                "gnps_annotations": join(
+                    example_path, "example_files_fbmn_all_db_annotations.json"
+                ),
+                "quantification": join(example_path, "example_files_iimn_fbmn_quant.csv"),
+                "structure_identifications": join(example_path, "structure_identifications.tsv"),
+            },
+            "out_path": join(out_path, "summary.tsv"),
         }
     ]
 

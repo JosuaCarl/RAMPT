@@ -48,7 +48,10 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         nested=nested,
         valid_formats=valid_formats,
     )
-    mzmine_runner.scheduled_ios = {"in_path": {"standard": in_dir}, "out_path": {"standard": out_dir}}
+    mzmine_runner.scheduled_ios = {
+        "in_path": {"standard": in_dir},
+        "out_path": {"standard": out_dir},
+    }
     mzmine_runner.run()
 
 
@@ -156,9 +159,7 @@ class MZmine_Runner(Pipe_Step):
 
         self.compute(
             step_function=execute_verbose_command,
-            in_out=dict(
-                in_path=in_path, out_path=out_path
-            ),
+            in_out=dict(in_path=in_path, out_path=out_path),
             log_path=self.get_log_path(out_path=out_path),
             cmd=cmd,
             verbosity=self.verbosity,
@@ -225,7 +226,7 @@ class MZmine_Runner(Pipe_Step):
         """
         in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
         root, dirs, files = next(os.walk(in_path))
-        
+
         for file in files:
             if self.match_path(pattern=self.patterns["in"], path=file):
                 self.run_directory(in_path=in_path, out_path=out_path, **kwargs)

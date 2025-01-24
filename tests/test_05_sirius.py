@@ -90,10 +90,7 @@ def test_sirius_pipe_run():
     sirius_runner.compute_futures()
 
     assert sirius_runner.processed_ios == [
-        {
-            "in_path": join(example_path, "example_files_sirius.mgf"),
-            "out_path": out_path
-        }
+        {"in_path": join(example_path, "example_files_sirius.mgf"), "out_path": out_path}
     ]
 
 

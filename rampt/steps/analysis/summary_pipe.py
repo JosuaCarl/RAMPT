@@ -109,7 +109,6 @@ class Summary_Runner(Pipe_Step):
         self.name = "summary"
         self.summary = None
 
-
     # Read df
     def read_sirius_df(self, file_path: StrPath, filter_columns: list | str) -> pd.DataFrame:
         df = pd.read_csv(file_path, sep="\t")
@@ -119,7 +118,7 @@ class Summary_Runner(Pipe_Step):
         # find matching filter columns
         if isinstance(filter_columns, str):
             filter_columns = [column for column in df.columns if filter_columns in column]
-        
+
         # Replace filter colummns with floats
         for filter_column in filter_columns:
             df[filter_column] = df[filter_column].replace(r",", r".", regex=True).astype(float)
@@ -336,9 +335,7 @@ class Summary_Runner(Pipe_Step):
         self.compute(
             step_function=capture_and_log,
             func=self.summarize_info,
-            in_out=dict(
-                in_path=in_path, out_path=out_path
-            ),
+            in_out=dict(in_path=in_path, out_path=out_path),
             log_path=self.get_log_path(out_path=out_path),
         )
 
@@ -371,7 +368,7 @@ class Summary_Runner(Pipe_Step):
                     in_path[annotation_type] = in_path["annotation"]
             in_path.pop("annotation")
 
-        # Search matches and sort folder to right place 
+        # Search matches and sort folder to right place
         matched_in_paths = {}
         for file_type, path in in_path.items():
             # Catch files
