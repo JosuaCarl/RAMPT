@@ -9,7 +9,6 @@ import argparse
 import regex
 
 from os.path import join
-from tqdm.auto import tqdm
 
 from ..general import *
 
@@ -185,8 +184,9 @@ class MSconvert_Runner(Pipe_Step):
         self.compute(
             step_function=execute_verbose_command,
             cmd=cmd,
-            in_path=in_path,
-            out_path=out_path,
+            in_out=dict(
+                in_path=in_path, out_path=out_path
+            ),
             log_path=self.get_log_path(out_path=out_path),
             verbosity=self.verbosity,
         )
@@ -201,14 +201,12 @@ class MSconvert_Runner(Pipe_Step):
         :type out_path: dict[str, StrPath]
         """
         in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
-
+        
         # Check folder with valid input:
         if self.match_path(in_path, self.patterns["in_folder"]):
             self.run_single(in_path=in_path, out_path=out_path, **kwargs)
         else:
-            for entry in tqdm(
-                os.listdir(in_path), disable=self.verbosity >= 2, desc="Converting folder"
-            ):
+            for entry in os.listdir(in_path):
                 entry_path = join(in_path, entry)
                 hypothetical_out_path = join(
                     out_path, replace_file_ending(entry, self.target_format)
@@ -241,25 +239,27 @@ class MSconvert_Runner(Pipe_Step):
         """
         in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
         has_in_file = False
-        for root, dirs, files in os.walk(in_path):
-            for file in files:
-                if self.match_path(pattern=self.patterns["in"], path=file):
+
+        root, dirs, files = next(os.walk(in_path))
+        
+        for i, file in enumerate(files):
+            if self.match_path(pattern=self.patterns["in"], path=file):
+                self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
+                has_in_file = True
+                break
+
+        for dir in dirs:
+            if self.match_path(pattern=self.patterns["in_folder"], path=file):
+                if not has_in_file:
                     self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
                     has_in_file = True
-                    break
-
-            for dir in dirs:
-                if self.match_path(pattern=self.patterns["in_folder"], path=file):
-                    if not has_in_file:
-                        self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
-                        has_in_file = True
-                else:
-                    self.run_nested(
-                        in_path=join(in_path, dir),
-                        out_path=join(out_path, dir),
-                        recusion_level=recusion_level + 1,
-                        **kwargs,
-                    )
+            else:
+                self.run_nested(
+                    in_path=join(in_path, dir),
+                    out_path=join(out_path, dir),
+                    recusion_level=recusion_level + 1,
+                    **kwargs,
+                )
 
 
 if __name__ == "__main__":

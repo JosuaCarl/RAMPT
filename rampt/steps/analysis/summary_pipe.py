@@ -86,7 +86,7 @@ class Summary_Runner(Pipe_Step):
                 "quantification": r".*_quant\.csv$",
                 "formula_identifications": r".*formula_identifications\.tsv$",
                 "canopus_formula_summary": r".*canopus_formula_summary\.tsv$",
-                "structure_identifications": r".*structure_identifications\.tsv$",
+                "structure_identifications": r".*(?<!denovo_)structure_identifications\.tsv$",
                 "canopus_structure_summary": r".*canopus_structure_summary\.tsv$",
                 "denovo_structure_identifications": r".*denovo_structure_identifications\.tsv$",
                 "gnps_annotations": r".*fbmn_all_db_annotations\.json$",
@@ -97,17 +97,30 @@ class Summary_Runner(Pipe_Step):
         )
         if kwargs:
             self.update(kwargs)
+        self.ordered_annotations = [
+            "formula_identifications",
+            "canopus_formula_summary",
+            "structure_identifications",
+            "canopus_structure_summary",
+            "denovo_structure_identifications",
+            "gnps_annotations",
+        ]
         self.overwrite = overwrite
         self.name = "summary"
         self.summary = None
 
+
+    # Read df
     def read_sirius_df(self, file_path: StrPath, filter_columns: list | str) -> pd.DataFrame:
         df = pd.read_csv(file_path, sep="\t")
         df.replace("-Infinity", -np.inf, inplace=True)
         df.rename(columns={"mappingFeatureId": "ID"})
 
+        # find matching filter columns
         if isinstance(filter_columns, str):
             filter_columns = [column for column in df.columns if filter_columns in column]
+        
+        # Replace filter colummns with floats
         for filter_column in filter_columns:
             df[filter_column] = df[filter_column].replace(r",", r".", regex=True).astype(float)
 
@@ -135,7 +148,7 @@ class Summary_Runner(Pipe_Step):
         self, annotation_file: StrPath, annotation_file_type: str, summary: pd.DataFrame
     ) -> pd.DataFrame:
         match annotation_file_type:
-            case "formula_identifications_file":
+            case "formula_identifications":
                 df = self.read_sirius_df(file_path=annotation_file, filter_columns=["ZodiacScore"])
                 df = df[["mappingFeatureId", "molecularFormula", "ZodiacScore"]]
                 df = df.rename(
@@ -146,7 +159,7 @@ class Summary_Runner(Pipe_Step):
                     }
                 )
 
-            case "canopus_formula_summary_file":
+            case "canopus_formula_summary":
                 df = self.read_sirius_df(file_path=annotation_file, filter_columns="Probability")
                 df = df[
                     [
@@ -167,7 +180,7 @@ class Summary_Runner(Pipe_Step):
                 rename_dict.update({"mappingFeatureId": "ID"})
                 df = df.rename(columns=rename_dict)
 
-            case "structure_identifications_file":
+            case "structure_identifications":
                 df = self.read_sirius_df(
                     file_path=annotation_file,
                     filter_columns=["ConfidenceScoreExact", "ConfidenceScoreApproximate"],
@@ -193,7 +206,7 @@ class Summary_Runner(Pipe_Step):
                     }
                 )
 
-            case "canopus_structure_summary_file":
+            case "canopus_structure_summary":
                 df = self.read_sirius_df(file_path=annotation_file, filter_columns="Probability")
                 df = df[
                     [
@@ -214,7 +227,7 @@ class Summary_Runner(Pipe_Step):
                 rename_dict.update({"mappingFeatureId": "ID"})
                 df = df.rename(columns=rename_dict)
 
-            case "denovo_structure_identifications_file":
+            case "denovo_structure_identifications":
                 df = self.read_sirius_df(
                     file_path=annotation_file, filter_columns=["CSI:FingerIDScore"]
                 )
@@ -227,7 +240,7 @@ class Summary_Runner(Pipe_Step):
                     }
                 )
 
-            case "gnps_annotations_path":
+            case "gnps_annotations":
                 with open(annotation_file, "r") as file:
                     hit_dicts = json.load(file)["blockData"]
                 df = pd.DataFrame(hit_dicts)[
@@ -242,6 +255,10 @@ class Summary_Runner(Pipe_Step):
                         "SharedPeaks": "FBMN_shared_peaks",
                     }
                 )
+            case _:
+                logger.warn(
+                    f"Annotation file type: {annotation_file_type} is not implemented. Skipping."
+                )
 
         df = df.astype({"ID": str})
         summary = summary.merge(df, how="left", on="ID")
@@ -251,16 +268,8 @@ class Summary_Runner(Pipe_Step):
         self, annotation_files: dict[str, StrPath], summary: pd.DataFrame
     ) -> pd.DataFrame:
         # Order the annotations
-        order_list = [
-            "formula_identifications",
-            "canopus_formula_summary",
-            "structure_identifications",
-            "canopus_structure_summary",
-            "denovo_structure_identifications",
-            "gnps_annotations",
-        ]
         annotation_files_ordered = {}
-        for key in order_list:
+        for key in self.ordered_annotations:
             if key in annotation_files:
                 annotation_files_ordered[key] = annotation_files[key]
 
@@ -275,7 +284,8 @@ class Summary_Runner(Pipe_Step):
 
         return summary
 
-    def summarize_info(self, in_path: dict, out_path: StrPath, summary: pd.DataFrame = None):
+    def summarize_info(self, in_out: dict[str, StrPath], summary: pd.DataFrame = None):
+        in_path, out_path = self.extract_standard(**in_out)
         # Make quantification table as base
         summary = self.add_quantification(
             quantification_path=in_path.pop("quantification"), summary=summary
@@ -326,8 +336,9 @@ class Summary_Runner(Pipe_Step):
         self.compute(
             step_function=capture_and_log,
             func=self.summarize_info,
-            in_path=in_path,
-            out_path=out_path,
+            in_out=dict(
+                in_path=in_path, out_path=out_path
+            ),
             log_path=self.get_log_path(out_path=out_path),
         )
 
@@ -353,8 +364,20 @@ class Summary_Runner(Pipe_Step):
             in_path=in_path, out_path=out_path, summary=summary
         )
 
+        # Special case "annotation" as summary of file_types
+        if "annotation" in in_path:
+            for annotation_type in self.ordered_annotations:
+                if annotation_type not in in_path:
+                    in_path[annotation_type] = in_path["annotation"]
+            in_path.pop("annotation")
+
+        # Search matches and sort folder to right place 
         matched_in_paths = {}
-        for file_type, path in in_path:
+        for file_type, path in in_path.items():
+            # Catch files
+            if os.path.isfile(path):
+                matched_in_paths[file_type] = path
+            # Search directories
             for entry in os.listdir(path):
                 if self.match_path(pattern=self.patterns[file_type], path=entry):
                     matched_in_paths[file_type] = join(path, entry)
@@ -388,25 +411,26 @@ class Summary_Runner(Pipe_Step):
         """
         in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
 
-        for root, dirs, files in os.walk(in_path):
-            dirs_with_matches = {}
-            for dir in dirs:
-                for file_type, pattern in self.patterns:
-                    for entry in os.listdir(in_path, dir):
-                        if self.match_path(pattern=pattern, path=entry):
-                            dirs_with_matches[file_type] = join(in_path, dir)
-                            break
+        root, dirs, files = next(os.walk(in_path))
 
-            if dirs_with_matches:
-                self.run_directory(in_path=dirs_with_matches, out_path=out_path, **kwargs)
-            else:
-                for dir in dirs:
-                    self.run_nested(
-                        in_path=join(in_path, dir),
-                        out_path=join(out_path, dir),
-                        recusion_level=recusion_level + 1,
-                        **kwargs,
-                    )
+        dirs_with_matches = {}
+        for dir in dirs:
+            for file_type, pattern in self.patterns.items():
+                for entry in os.listdir(join(in_path, dir)):
+                    if self.match_path(pattern=pattern, path=entry):
+                        dirs_with_matches[file_type] = join(in_path, dir)
+                        break
+
+        if dirs_with_matches:
+            self.run_directory(in_path=dirs_with_matches, out_path=out_path, **kwargs)
+        else:
+            for dir in dirs:
+                self.run_nested(
+                    in_path=join(in_path, dir),
+                    out_path=join(out_path, dir),
+                    recusion_level=recusion_level + 1,
+                    **kwargs,
+                )
 
 
 if __name__ == "__main__":

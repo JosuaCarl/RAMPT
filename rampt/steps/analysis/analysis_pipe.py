@@ -78,7 +78,7 @@ class Analysis_Runner(Pipe_Step):
         :type verbosity: int, optional
         """
         super().__init__(
-            patterns={"in": r"summary\.tsv"},
+            patterns={"in": r"^(.*[\\/])?summary\.tsv$"},
             save_log=save_log,
             additional_args=additional_args,
             verbosity=verbosity,
@@ -177,7 +177,8 @@ class Analysis_Runner(Pipe_Step):
             for mode, mode_columns in peak_columns.items():
                 analysis[mode_columns].to_csv(join(out_path, f"analysis_{mode}_mode.tsv"), sep="\t")
 
-    def complete_analysis(self, in_path: StrPath, out_path: StrPath) -> pd.DataFrame:
+    def complete_analysis(self, in_out: dict[str, StrPath]) -> pd.DataFrame:
+        in_path, out_path = self.extract_standard(**in_out)
         summary = self.read_summary(file_path=in_path)
 
         peak_columns = self.search_check_peak_info(summary=summary)
@@ -217,8 +218,9 @@ class Analysis_Runner(Pipe_Step):
         self.compute(
             step_function=capture_and_log,
             func=self.complete_analysis,
-            in_path=in_path,
-            out_path=out_path,
+            in_out=dict(
+                in_path=in_path, out_path=out_path
+            ),
             log_path=self.get_log_path(out_path=out_path),
         )
 
@@ -258,18 +260,19 @@ class Analysis_Runner(Pipe_Step):
         """
         in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
 
-        for root, dirs, files in os.walk(in_path):
-            for file in files:
-                if self.match_path(pattern=self.patterns["in"], path=file):
-                    self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
+        root, dirs, files = next(os.walk(in_path))
 
-            for dir in dirs:
-                self.run_nested(
-                    in_path=join(in_path, dir),
-                    out_path=join(out_path, dir),
-                    recusion_level=recusion_level + 1,
-                    **kwargs,
-                )
+        for file in files:
+            if self.match_path(pattern=self.patterns["in"], path=file):
+                self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
+
+        for dir in dirs:
+            self.run_nested(
+                in_path=join(in_path, dir),
+                out_path=join(out_path, dir),
+                recusion_level=recusion_level + 1,
+                **kwargs,
+            )
 
 
 if __name__ == "__main__":

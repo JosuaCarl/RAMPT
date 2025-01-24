@@ -52,10 +52,9 @@ def test_complete_analysis():
 
     analysis_runner = Analysis_Runner()
 
-    with pytest.warns(UserWarning):
-        analysis_runner.complete_analysis(
-            in_path=join(example_path, "summary.tsv"), out_path=out_path
-        )
+    analysis_runner.complete_analysis(
+        in_out=dict(in_path=join(example_path, "summary.tsv"), out_path=out_path)
+    )
 
     assert os.path.isfile(join(out_path, "analysis.tsv"))
     assert os.path.isfile(join(out_path, "analysis_positive_mode.tsv"))
@@ -68,8 +67,7 @@ def test_analysis_pipe_run_single():
     # Superficial testing of run_single
     analysis_runner = Analysis_Runner()
 
-    with pytest.warns(UserWarning):
-        analysis_runner.run_single(in_path=join(example_path, "summary.tsv"), out_path=out_path)
+    analysis_runner.run_single(in_path=join(example_path, "summary.tsv"), out_path=out_path)
 
     assert os.path.isfile(join(out_path, "analysis.tsv"))
     assert os.path.isfile(join(out_path, "analysis_positive_mode.tsv"))
@@ -81,8 +79,7 @@ def test_analysis_pipe_run_directory():
     # Supoerficial testing of run_directory
     analysis_runner = Analysis_Runner(mzmine_log=example_path)
 
-    with pytest.warns(UserWarning):
-        analysis_runner.run_directory(in_path=example_path, out_path=out_path)
+    analysis_runner.run_directory(in_path=example_path, out_path=out_path)
 
     assert os.path.isfile(join(out_path, "analysis.tsv"))
     assert os.path.isfile(join(out_path, "analysis_positive_mode.tsv"))
@@ -94,8 +91,7 @@ def test_analysis_pipe_run_nested():
     # Superficial testing of run_nested
     analysis_runner = Analysis_Runner()
 
-    with pytest.warns(UserWarning):
-        analysis_runner.run_nested(example_path, out_path)
+    analysis_runner.run_nested(example_path, out_path)
 
     assert os.path.isfile(join(out_path, "analysis.tsv"))
     assert os.path.isfile(join(out_path, "example_nested", "analysis.tsv"))
@@ -107,12 +103,15 @@ def test_analysis_pipe_run():
     # Superficial testing of run
     analysis_runner = Analysis_Runner(workers=2)
 
-    with pytest.warns(UserWarning):
-        analysis_runner.run(in_paths=[example_path], out_paths=[out_path])
-        analysis_runner.compute_futures()
+    analysis_runner.run([dict(in_path=example_path, out_path=out_path)])
+    analysis_runner.compute_futures()
 
-    assert analysis_runner.processed_in == [join(example_path, "summary.tsv")]
-    assert analysis_runner.processed_out == [out_path]
+    assert analysis_runner.processed_ios == [
+        {
+            "in_path": join(example_path, "summary.tsv"),
+            "out_path": out_path
+        }
+    ]
 
 
 def test_analysis_pipe_main():
@@ -126,8 +125,7 @@ def test_analysis_pipe_main():
         analysis_arguments=None,
     )
 
-    with pytest.warns(UserWarning):
-        analysis_pipe_main(args, unknown_args=[])
+    analysis_pipe_main(args, unknown_args=[])
 
     assert os.path.isfile(join(out_path, "analysis.tsv"))
     assert os.path.isfile(join(out_path, "example_nested", "analysis.tsv"))

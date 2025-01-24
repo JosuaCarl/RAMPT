@@ -83,7 +83,7 @@ class Sirius_Runner(Pipe_Step):
         :type verbosity: int, optional
         """
         super().__init__(
-            patterns={"in": r".*_sirius.mgf$", "config": r"sirius_config.txt"},
+            patterns={"in": r".*_sirius\.mgf$", "config": r"sirius_config\.txt"},
             save_log=save_log,
             additional_args=additional_args,
             verbosity=verbosity,
@@ -149,14 +149,15 @@ class Sirius_Runner(Pipe_Step):
         config = self.extract_config(config=config)
 
         cmd = (
-            rf'"{self.exec_path}" --project "{join(projectspace, "projectspace.sirius")}" --input "{in_path} '
+            rf'"{self.exec_path}" --project "{join(projectspace, "projectspace.sirius")}" --input "{in_path}" '
             + rf'config {config} write-summaries --output "{out_path}" {additional_args}'
         )
 
         self.compute(
             step_function=execute_verbose_command,
-            in_path=in_path,
-            out_path=out_path,
+            in_out=dict(
+                in_path=in_path, out_path=out_path
+            ),
             log_path=self.get_log_path(out_path=out_path),
             cmd=cmd,
             verbosity=self.verbosity,
@@ -224,18 +225,19 @@ class Sirius_Runner(Pipe_Step):
         """
         in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
 
-        for root, dirs, files in os.walk(in_path):
-            for file in files:
-                if self.match_path(pattern=self.patterns["in"], path=file):
-                    self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
+        root, dirs, files = next(os.walk(in_path))
 
-            for dir in dirs:
-                self.run_nested(
-                    in_path=join(in_path, dir),
-                    out_path=join(out_path, dir),
-                    recusion_level=recusion_level + 1,
-                    **kwargs,
-                )
+        for file in files:
+            if self.match_path(pattern=self.patterns["in"], path=file):
+                self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
+
+        for dir in dirs:
+            self.run_nested(
+                in_path=join(in_path, dir),
+                out_path=join(out_path, dir),
+                recusion_level=recusion_level + 1,
+                **kwargs,
+            )
 
 
 if __name__ == "__main__":

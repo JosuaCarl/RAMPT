@@ -58,9 +58,9 @@ def open_file_folder(
 
 # Download
 def download_directory(state, dir):
-    for root, dirs, files in os.walk(dir):
-        for file in files:
-            download(state, content=os.path.join(root, file), name=os.path.basename(file))
+    root, dirs, files = next(os.walk(dir))
+    for file in files:
+        download(state, content=os.path.join(root, file), name=os.path.basename(file))
 
 
 def download_data_node_files(state, data_node_name, files_attribute: str = "scenario.data_nodes"):

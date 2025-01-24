@@ -76,26 +76,26 @@ def test_msconv_pipe_run_nested():
         target_format=".mzML",
         suffix=".mzML",
         save_log=False,
-        verbosity=1,
+        verbosity=3,
         nested=True,
         workers=1,
     )
 
-    futures = msconvert_runner.run_nested(in_root_dir=mock_path, out_root_dir=out_path)
-    compute_scheduled(
-        futures=futures,
-        num_workers=msconvert_runner.workers,
-        verbose=msconvert_runner.verbosity >= 1,
-    )
+    msconvert_runner.run_nested(in_path=mock_path, out_path=out_path)
 
-    assert msconvert_runner.processed_out == [
-        join(out_path, "minimal_file.mzML"),
-        join(out_path, "nested_test_folder", "minimal_file.mzML"),
+    assert msconvert_runner.processed_ios == [
+        {
+            "in_path": join(mock_path, "minimal_file.mzML"),
+            "out_path": join(out_path, "minimal_file.mzML"),
+        },
+        {
+            "in_path": join(mock_path, "nested_test_folder", "minimal_file.mzML"),
+            "out_path": join(out_path, "nested_test_folder", "minimal_file.mzML"),
+        },
     ]
     assert os.path.isfile(join(out_path, "minimal_file.mzML"))
     assert os.path.exists(join(out_path, "nested_test_folder"))
     assert os.path.isfile(join(out_path, "nested_test_folder", "minimal_file.mzML"))
-
 
 def test_msconv_pipe_run():
     clean_out(out_path)
@@ -112,19 +112,31 @@ def test_msconv_pipe_run():
         workers=1,
     )
 
-    msconvert_runner.run(in_paths=[mock_path], out_paths=[out_path])
+    msconvert_runner.run(
+        in_outs=[
+            dict(in_path=mock_path, out_path=out_path)
+        ]
+    )
 
-    assert msconvert_runner.processed_in == [join(mock_path, "minimal_file.mzML")]
-    assert msconvert_runner.processed_out == [join(out_path, "minimal_file.mzML")]
+    assert msconvert_runner.processed_ios == [
+        {
+            "in_path": join(mock_path, "minimal_file.mzML"),
+            "out_path": join(out_path, "minimal_file.mzML"),
+        },
+    ]
     assert os.path.isfile(join(out_path, "minimal_file.mzML"))
 
     clean_out(out_path)
 
     # Specific run
-    msconvert_runner.run(in_paths=[join(mock_path, "minimal_file.mzML")], out_paths=[out_path])
+    msconvert_runner.run([dict(in_path=join(mock_path, "minimal_file.mzML"), out_path=out_path)])
 
-    assert msconvert_runner.processed_in == [join(mock_path, "minimal_file.mzML")]
-    assert msconvert_runner.processed_out == [join(out_path, "minimal_file.mzML")]
+    assert msconvert_runner.processed_ios == [
+        {
+            "in_path": join(mock_path, "minimal_file.mzML"),
+            "out_path": join(out_path, "minimal_file.mzML"),
+        },
+    ]
     assert os.path.isfile(join(out_path, "minimal_file.mzML"))
 
 
@@ -141,15 +153,17 @@ def test_msconv_pipe_run_cross():
         workers=1,
     )
 
-    msconvert_runner.run(in_paths=[mock_path], out_paths=[out_path])
+    msconvert_runner.run([dict(in_path=mock_path, out_path=out_path)])
 
-    assert msconvert_runner.processed_in == [
-        join(mock_path, "minimal_file.mzML"),
-        join(mock_path, "nested_test_folder", "minimal_file.mzML"),
-    ]
-    assert msconvert_runner.processed_out == [
-        join(out_path, "minimal_file.mzXML"),
-        join(out_path, "nested_test_folder", "minimal_file.mzXML"),
+    assert msconvert_runner.processed_ios == [
+        {
+            "in_path": join(mock_path, "minimal_file.mzML"),
+            "out_path": join(out_path, "minimal_file.mzXML"),
+        },
+        {
+            "in_path": join(mock_path, "nested_test_folder", "minimal_file.mzML"),
+            "out_path": join(out_path, "nested_test_folder", "minimal_file.mzXML"),
+        },
     ]
     assert os.path.isfile(join(out_path, "minimal_file.mzXML"))
     assert os.path.isfile(join(out_path, "nested_test_folder", "minimal_file.mzXML"))

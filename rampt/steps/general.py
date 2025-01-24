@@ -182,6 +182,7 @@ class Step_Configuration:
         suffix: str = None,
         prefix: str = None,
         key: str = "in",
+        refill_pattern: bool = False
     ):
         # Check for existing patterns
         pattern = pattern if pattern else self.pattern
@@ -190,15 +191,19 @@ class Step_Configuration:
         prefix = prefix if prefix else self.prefix
 
         # Fill regex
-        regex_all = None
-        if pattern:
-            regex_all = pattern
-        if contains:
-            regex_all = rf"{regex_all}|.*{contains}.*" if regex_all else rf".*{contains}.*"
-        if suffix:
-            regex_all = rf"{regex_all}.*{suffix}$" if regex_all else rf".*{suffix}$"
-        if prefix:
-            regex_all = rf"^{prefix}.*{regex_all}" if regex_all else rf"^{prefix}.*"
+        if key in self.patterns:
+            regex_all = self.patterns[key]
+        else:
+            regex_all = None
+        if refill_pattern:
+            if pattern:
+                regex_all = pattern
+            if contains:
+                regex_all = rf"{regex_all}|.*{contains}.*" if regex_all else rf".*{contains}.*"
+            if suffix:
+                regex_all = rf"{regex_all}.*{suffix}$" if regex_all else rf".*{suffix}$"
+            if prefix:
+                regex_all = rf"^{prefix}.*{regex_all}" if regex_all else rf"^{prefix}.*"
 
         # Add mandatory
         if self.mandatory_patterns.get(key, None):
@@ -215,7 +220,7 @@ class Step_Configuration:
         if regex_all:
             self.patterns[key] = regex_all
 
-    def update_regexes(self):
+    def update_regexes(self, fill_patterns: list = []):
         for key in list(self.mandatory_patterns.keys()) + list(self.patterns.keys()):
             self.update_regex(
                 pattern=self.pattern,
@@ -223,6 +228,7 @@ class Step_Configuration:
                 suffix=self.suffix,
                 prefix=self.prefix,
                 key=key,
+                refill_pattern=key in fill_patterns
             )
 
     # Dictionary represenation
@@ -332,7 +338,7 @@ class Pipe_Step(Step_Configuration):
         self.errs = []
         self.log_paths = []
         self.results = []
-        self.additional_args = (additional_args,)
+        self.additional_args = additional_args
 
     # Executives
     def check_exec_path(self, exec_path: StrPath = None) -> bool:
@@ -407,17 +413,19 @@ class Pipe_Step(Step_Configuration):
         :rtype: dict[str, StrPath]
         """
         patterns = patterns if patterns else self.patterns
-        for root, dirs, files in os.walk(dir):
-            for file in files:
-                for name, pattern in patterns.items():
-                    if valid_paths.get(name, None) and self.match_path(pattern, file):
-                        valid_paths[name] = os.path.join(root, file)
 
-            if check_dirs:
-                for dir in dirs:
-                    for name, pattern in patterns.items():
-                        if valid_paths.get(name, None) and self.match_path(pattern, dir):
-                            valid_paths[name] = os.path.join(root, dir)
+        root, dirs, files = next(os.walk(dir))
+
+        for file in files:
+            for name, pattern in patterns.items():
+                if valid_paths.get(name, None) and self.match_path(pattern, file):
+                    valid_paths[name] = os.path.join(root, file)
+
+        if check_dirs:
+            for dir in dirs:
+                for name, pattern in patterns.items():
+                    if valid_paths.get(name, None) and self.match_path(pattern, dir):
+                        valid_paths[name] = os.path.join(root, dir)
 
         return valid_paths
 
@@ -426,7 +434,6 @@ class Pipe_Step(Step_Configuration):
         log_path = (
             os.path.join(get_directory(out_path), f"{self.name}_log.txt") if self.save_log else None
         )
-
         return log_path
 
     def store_progress(
@@ -469,6 +476,14 @@ class Pipe_Step(Step_Configuration):
             self.results.append(results)
             self.futures.append(future)
 
+    def reset_progress(self):
+        self.processed_ios = []
+        self.log_paths = []
+        self.outs = []
+        self.errs = []
+        self.results = []
+        self.futures = []
+
     # Executing
     def compute(self, step_function: Callable | str | list, *args, **kwargs):
         """
@@ -482,7 +497,7 @@ class Pipe_Step(Step_Configuration):
         :type **kwargs: **kwargs
         """
         # Catch passed bash commands
-        if isinstance(step_function, str) or isinstance(step_function, str):
+        if isinstance(step_function, str):
             kwargs["cmd"] = step_function
             step_function = execute_verbose_command
 
@@ -499,8 +514,7 @@ class Pipe_Step(Step_Configuration):
         out, err = [response[i] if i < len(response) else None for i in range(1, 3)]
 
         self.store_progress(
-            in_path=kwargs.get("in_path"),
-            out_path=kwargs.get("out_path"),
+            in_out=kwargs.get("in_out"),
             results=results,
             future=future,
             out=out,
@@ -522,7 +536,6 @@ class Pipe_Step(Step_Configuration):
         response = compute_scheduled(
             futures=futures, num_workers=self.workers, verbose=self.verbosity >= 1
         )
-
         for in_out, (results, out, err) in zip(in_outs, response[0]):
             i = self.processed_ios.index(in_out)
             self.outs[i] = out
@@ -582,7 +595,7 @@ class Pipe_Step(Step_Configuration):
         ]
         if len(kwargs) == 0:
             logger.error(
-                "Gave no arguments to extract_standards. You must at least provide one.",
+                "Gave no arguments to extract_standard. You must at least provide one.",
                 error_type=ValueError,
             )
         elif len(kwargs) == 1:
@@ -590,7 +603,7 @@ class Pipe_Step(Step_Configuration):
         else:
             return standards
 
-    def extract_optional(self, dictionary: dict, keys: list) -> dict:
+    def extract_optional(self, dictionary: dict, keys: list, return_dict: bool = False) -> dict:
         """
         Extracts standard values from kwargs. If the value is not a dictionary, it is returned instead.
 
@@ -599,9 +612,20 @@ class Pipe_Step(Step_Configuration):
         :return: Dictioary with only standard values
         :rtype: dict
         """
-        return [dictionary[key] if key in dictionary else None for key in keys]
+        optionals = {key: dictionary[key] if key in dictionary else None for key in keys}
+        if len(keys) == 0:
+            logger.error(
+                "Gave no keys to extract_optional. You must at least provide one.",
+                error_type=ValueError,
+            )
+        if return_dict:
+            return optionals
+        elif len(keys) == 1:
+                return next(iter(optionals.values()))
+        else:
+            return list(optionals.values())
 
-    def distribute_scheduled(self, standard_value: str = "standard", **scheduled_io):
+    def distribute_scheduled(self, standard_value: str = "standard", correct_runner: str = None, **scheduled_io):
         """
         Distribute the scheduled
 
@@ -610,28 +634,43 @@ class Pipe_Step(Step_Configuration):
         :return: _description_
         :rtype: _type_
         """
-        standard_in = self.extract_standard(standard_value, scheduled_io["in_path"])[standard_value]
-        if self.nested:
-            logger.log(
-                f"Distributing to {self.__class__.__name__} nested run.",
-                minimum_verbosity=3,
-                verbosity=self.verbosity,
-            )
-            return self.run_nested(**scheduled_io)
-        elif os.path.isdir(standard_in):
-            logger.log(
-                f"Distributing to {self.__class__.__name__} directory run.",
-                minimum_verbosity=3,
-                verbosity=self.verbosity,
-            )
-            return self.run_directory(**scheduled_io)
-        else:
-            logger.log(
-                f"Distributing to {self.__class__.__name__} single run.",
-                minimum_verbosity=3,
-                verbosity=self.verbosity,
-            )
-            return self.run_single(**scheduled_io)
+        standard_in = self.extract_standard(standard_value, in_path=scheduled_io["in_path"])
+
+        if not correct_runner:
+            if self.nested:
+                correct_runner = "nested"
+            elif os.path.isdir(standard_in):
+                correct_runner = "directory"
+            else:
+                correct_runner = "single"
+
+        match correct_runner:
+            case "nested":
+                logger.log(
+                    f"Distributing to {self.__class__.__name__} nested run.",
+                    minimum_verbosity=3,
+                    verbosity=self.verbosity,
+                )
+                return self.run_nested(**scheduled_io)
+            
+            case "directory":
+                logger.log(
+                    f"Distributing to {self.__class__.__name__} directory run.",
+                    minimum_verbosity=3,
+                    verbosity=self.verbosity,
+                )
+                return self.run_directory(**scheduled_io)
+            case "single":
+                logger.log(
+                    f"Distributing to {self.__class__.__name__} single run.",
+                    minimum_verbosity=3,
+                    verbosity=self.verbosity,
+                )
+                return self.run_single(**scheduled_io)
+            case _:
+                logger.error(
+                    f"correct_runner: {correct_runner} did not match any run implementation."
+                )
 
     def link_additional_args(self, **kwargs) -> str:
         """
@@ -643,9 +682,14 @@ class Pipe_Step(Step_Configuration):
         additional_args = (
             kwargs.pop("additional_args") if "additional_args" in kwargs else self.additional_args
         )
-        additional_args = " ".join(additional_args) + " ".join(
-            [" ".join([f"--{key}", f'"{value}"']) for key, value in kwargs.items()]
-        )
+
+        additional_args = " ".join(filter(None,
+            [
+                " ".join(additional_args),
+                " ".join([" ".join([f"--{key}", f'"{value}"']) for key, value in kwargs.items()])
+            ]
+        ))
+
         return additional_args
 
     # RUN
@@ -673,11 +717,11 @@ class Pipe_Step(Step_Configuration):
 
         # Handle empty output paths by choosing input directory as base
         for scheduled_io in self.scheduled_ios:
-            if "out" not in scheduled_io:
+            if "out_path" not in scheduled_io:
                 if "standard" in scheduled_io["in_path"]:
                     standard_in_path = scheduled_io["in_path"]["standard"]
                 else:
-                    standard_in_path = filter(flatten_values(scheduled_io["in_path"]))[0]
+                    standard_in_path = next(filter(None, flatten_values(scheduled_io["in_path"])))
                 scheduled_io["out_path"] = {
                     "standard": os.path.abspath(
                         os.path.join(get_directory(standard_in_path), "..", out_folder)
@@ -685,15 +729,10 @@ class Pipe_Step(Step_Configuration):
                 }
 
         # Loop over all in/out combinations
-        for i, scheduled_io in enumerate(self.scheduled_ios):
+        for scheduled_io in self.scheduled_ios:
             # Skip already processed files/folders
             if scheduled_io in self.processed_ios and not self.overwrite:
                 continue
-
-            # Construct out directories if not existent
-            for out_path in list(scheduled_io["out_path"].values()):
-                if not os.path.isfile(out_path):
-                    os.makedirs(out_path, exist_ok=True)
 
             logger.log(
                 message=f'Processing {scheduled_io["in_path"]} -> {scheduled_io["out_path"]}',

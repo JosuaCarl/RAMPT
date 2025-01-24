@@ -48,7 +48,7 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         nested=nested,
         valid_formats=valid_formats,
     )
-    mzmine_runner.scheduled_ios = {"in": {"standard": in_dir}, "out": {"standard": out_dir}}
+    mzmine_runner.scheduled_ios = {"in_path": {"standard": in_dir}, "out_path": {"standard": out_dir}}
     mzmine_runner.run()
 
 
@@ -156,8 +156,9 @@ class MZmine_Runner(Pipe_Step):
 
         self.compute(
             step_function=execute_verbose_command,
-            in_path=in_path,
-            out_path=out_path,
+            in_out=dict(
+                in_path=in_path, out_path=out_path
+            ),
             log_path=self.get_log_path(out_path=out_path),
             cmd=cmd,
             verbosity=self.verbosity,
@@ -186,15 +187,15 @@ class MZmine_Runner(Pipe_Step):
         batch = batch if batch else self.batch
 
         in_files = []
-        for root, dirs, files in os.walk(in_path):
-            if not batch:
-                for file in os.listdir(files):
-                    if self.match_path(pattern=r".*\.mzbatch$", path=file):
-                        batch = join(in_path, file) if not self.batch else None
+        root, dirs, files = next(os.walk(in_path))
+        if not batch:
+            for file in os.listdir(files):
+                if self.match_path(pattern=r".*\.mzbatch$", path=file):
+                    batch = join(in_path, file) if not self.batch else None
 
-            for file in file:
-                if self.match_path(pattern=self.patterns["in"], path=file):
-                    in_files.append(join(in_path, file))
+        for file in files:
+            if self.match_path(pattern=self.patterns["in"], path=file):
+                in_files.append(join(in_path, file))
 
         if in_files:
             os.makedirs(out_path, exist_ok=True)
@@ -223,19 +224,20 @@ class MZmine_Runner(Pipe_Step):
         :type recusion_level: int, optional
         """
         in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
-        for root, dirs, files in os.walk(in_path):
-            for file in files:
-                if self.match_path(pattern=self.patterns["in"], path=file):
-                    self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
-                    break
+        root, dirs, files = next(os.walk(in_path))
+        
+        for file in files:
+            if self.match_path(pattern=self.patterns["in"], path=file):
+                self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
+                break
 
-            for dir in dirs:
-                self.run_nested(
-                    in_path=join(in_path, dir),
-                    out_path=join(out_path, dir),
-                    recusion_level=recusion_level + 1,
-                    **kwargs,
-                )
+        for dir in dirs:
+            self.run_nested(
+                in_path=join(in_path, dir),
+                out_path=join(out_path, dir),
+                recusion_level=recusion_level + 1,
+                **kwargs,
+            )
 
 
 if __name__ == "__main__":

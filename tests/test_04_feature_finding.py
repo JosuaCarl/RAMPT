@@ -79,14 +79,23 @@ def test_mzmine_pipe_run():
     # Superficial testing of run
     mzmine_runner = MZmine_Runner(batch=join(batch_path, "minimal.mzbatch"), user=user, workers=2)
 
-    mzmine_runner.run(in_paths=[example_path], out_paths=[out_path])
+    mzmine_runner.run(
+        [
+            dict(in_path=example_path, out_path=out_path)
+        ]
+    )
     mzmine_runner.compute_futures()
 
-    assert mzmine_runner.processed_in == [
-        join(example_path, "example_neg.mzXML"),
-        join(example_path, "minimal.mzML"),
+    assert mzmine_runner.processed_ios == [
+        {
+            "in_path": join(out_path, "source_files.txt"),
+            "out_path": out_path
+        }
     ]
-    assert mzmine_runner.processed_out == [out_path, out_path]
+    with open(join(out_path, "source_files.txt"), "r") as f:
+        lines = f.readlines()
+        assert lines[0].strip() == str(join(example_path, "example_neg.mzXML"))
+        assert lines[1].strip() == str(join(example_path, "minimal.mzML"))
 
 
 def test_mzmine_pipe_main():
@@ -109,15 +118,13 @@ def test_mzmine_pipe_main():
     assert os.path.isfile(join(out_path, "example_nested", "source_files.txt"))
 
     with open(join(out_path, "source_files.txt"), "r") as f:
-        text = f.read()
-        assert text == str(join(example_path, "minimal.mzML"))
+        lines = f.readlines()
+        assert lines[0].strip() == str(join(example_path, "example_neg.mzXML"))
+        assert lines[1].strip() == str(join(example_path, "minimal.mzML"))
 
     assert os.path.isfile(join(out_path, "example_nested", "example_nested_iimn_fbmn_quant.csv"))
     df = pd.read_csv(join(out_path, "example_nested", "example_nested_iimn_fbmn_quant.csv"))
     assert "row retention time" in df.columns
-
-    del df
-    del text
 
 
 def test_clean():

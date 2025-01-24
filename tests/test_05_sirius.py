@@ -86,11 +86,15 @@ def test_sirius_pipe_run():
     # Superficial testing of run
     sirius_runner = Sirius_Runner(workers=2)
 
-    sirius_runner.run(in_paths=[example_path], out_paths=[out_path])
+    sirius_runner.run([dict(in_path=example_path, out_path=out_path)])
     sirius_runner.compute_futures()
 
-    assert sirius_runner.processed_in == [join(example_path, "example_files_sirius.mgf")]
-    assert sirius_runner.processed_out == [out_path]
+    assert sirius_runner.processed_ios == [
+        {
+            "in_path": join(example_path, "example_files_sirius.mgf"),
+            "out_path": out_path
+        }
+    ]
 
 
 def test_sirius_pipe_main():
