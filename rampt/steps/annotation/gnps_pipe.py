@@ -11,8 +11,7 @@ import re
 import json
 import requests
 
-from os.path import join, basename
-from tqdm.auto import tqdm
+from os.path import join
 
 from ..general import *
 
@@ -77,7 +76,17 @@ class GNPS_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__(save_log=save_log, additional_args=additional_args, verbosity=verbosity)
+        super().__init__(
+            patterns={
+                "feature_quantification": r".*fbmn_quant\.csv$",
+                "feature_ms2": r".*fbmn\.mgf$",
+                "additional_pairs": r".*metadata\.(tsv|csv)",  # TODO: Find out naming of additional pairs file
+                "sample_metadata": r".*metadata\.(tsv|csv)",  # TODO: Find out naming of metadata file
+            },
+            save_log=save_log,
+            additional_args=additional_args,
+            verbosity=verbosity,
+        )
         if kwargs:
             self.update(kwargs)
         self.mzmine_log_query = "io.github.mzmine.modules.io.export_features_gnps.GNPSUtils submitFbmnJob GNPS FBMN/IIMN response: "
@@ -123,47 +132,6 @@ class GNPS_Runner(Pipe_Step):
         else:
             return self.query_response_iterator(query=query, iterator=mzmine_log.split("\n"))
 
-    def submit_to_gnps(
-        self, feature_ms2_file: StrPath, feature_quantification_file: StrPath
-    ) -> str:
-        # Read files
-        files = {
-            "featurems2": open(feature_ms2_file, "r"),
-            "featurequantification": open(feature_quantification_file, "r"),
-        }
-
-        # enter parameters
-        parameters = {
-            "title": "Cool title",
-            "featuretool": "MZMINE2",
-            "description": "Job from mine2sirius",
-        }
-        # Submit job
-        url = "https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking"
-
-        logger.log(
-            message=f"POSTing request to {url}", minimum_verbosity=2, verbosity=self.verbosity
-        )
-
-        response = requests.api.post(url, data=parameters, files=files, timeout=120.0)
-
-        if response.status_code == 200:
-            logger.log(
-                message=f"POST request {response.request.url} returned status code {response.status_code}",
-                minimum_verbosity=2,
-                verbosity=self.verbosity,
-            )
-        else:
-            logger.error(
-                message=f"POST request {response.request.url} returned status code {response.status_code}",
-                error_type=ConnectionError,
-            )
-
-        # Check for finish
-        task_id, status = self.check_task_finished(gnps_response=response.json())
-
-        return task_id, status
-
     def check_task_finished(
         self, mzmine_log: str = None, gnps_response: dict = None
     ) -> tuple[str, bool]:
@@ -203,14 +171,12 @@ class GNPS_Runner(Pipe_Step):
             verbosity=self.verbosity,
         )
 
-    def fetch_results(self, task_id: str, out_path: StrPath = None) -> dict:
+    def fetch_results(self, task_id: str) -> dict:
         """
         Fetch all resulting annotations from a GNSP Task and optionally save it.
 
         :param task_id: Task ID from GNPS
         :type task_id: str
-        :param out_path: Path for saving the output json, defaults to None
-        :type out_path: StrPath, optional
         :return: Result as a dictionary
         :rtype: dict
         """
@@ -218,47 +184,57 @@ class GNPS_Runner(Pipe_Step):
             f"https://gnps.ucsd.edu/ProteoSAFe/result_json.jsp?task={task_id}&view=view_all_annotations_DB"
         )
 
-        if out_path:
-            with open(out_path, "w") as file:
-                file.write(response.text)
+        return response.json()
 
-        return json.loads(response.text)
+    def submit_to_gnps(self, **paths) -> str:
+        # Open files and adjust naming
+        files = {name.replace("_", ""): open(path, "r") for name, path in paths.items() if path}
 
-    def check_dir_files(
-        self,
-        dir: StrPath,
-        feature_ms2_file: StrPath = None,
-        feature_quantification_file: str = None,
-    ) -> tuple[StrPath, StrPath]:
-        """
-        Check whether the needed files for GNPS POST request are present, according to mzmine naming scheme.
+        if "featurems2" not in files or "featurequantification" not in files:
+            logger.error(
+                message=f"{files} did not contain featurems2 and featurequantification.",
+                error_type=ValueError,
+            )
 
-        :param dir: Directory to search in
-        :type dir: StrPath
-        :param feature_ms2_file: File with ms2 spectra (in .mgf format), defaults to None
-        :type feature_ms2_file: StrPath, optional
-        :param feature_quantification_file: File with quantification table (in .csv format), defaults to None
-        :type feature_quantification_file: StrPath, optional
-        :return: MS2 feature and feature quantification file
-        :rtype: tuple[StrPath, StrPath]
-        """
-        for root, dirs, files in os.walk(dir):
-            for file in files:
-                if not feature_ms2_file and file.endswith("_iimn_fbmn.mgf"):
-                    feature_ms2_file = join(root, file)
-                elif not feature_quantification_file and file.endswith("_iimn_fbmn_quant.csv"):
-                    feature_quantification_file = join(root, file)
-        return feature_ms2_file, feature_quantification_file
+        # Enter parameters
+        parameters = {
+            "title": "Cool title",
+            "featuretool": "MZMINE2",
+            "description": "Job from RAMPT",
+        }
 
-    def gnps_check_resubmit(
-        self,
-        in_path: StrPath,
-        out_path: StrPath = None,
-        feature_ms2_file: StrPath = None,
-        feature_quantification_file: str = None,
-        mzmine_log: str = None,
-        gnps_response: dict = None,
-    ):
+        # Submit job
+        url = "https://gnps-quickstart.ucsd.edu/uploadanalyzefeaturenetworking"
+
+        logger.log(
+            message=f"POSTing request to {url}", minimum_verbosity=2, verbosity=self.verbosity
+        )
+
+        response = requests.api.post(url, data=parameters, files=files, timeout=120.0)
+
+        # Close opened files after upload
+        for file in files.values():
+            file.close()
+
+        # Logging
+        if response.status_code == 200:
+            logger.log(
+                message=f"POST request {response.request.url} returned status code {response.status_code}",
+                minimum_verbosity=2,
+                verbosity=self.verbosity,
+            )
+        else:
+            logger.error(
+                message=f"POST request {response.request.url} returned status code {response.status_code}",
+                error_type=ConnectionError,
+            )
+
+        # Check for finish
+        task_id, status = self.check_task_finished(gnps_response=response.json())
+
+        return task_id, status
+
+    def gnps_check_resubmit(self, in_path: StrPath, out_path: StrPath):
         """
         Get the GNPS results from a single path, mzmine_log or GNPS response.
 
@@ -266,44 +242,49 @@ class GNPS_Runner(Pipe_Step):
         :type in_path: StrPath
         :param out_path: Output directory of result, defaults to None
         :type out_path: StrPath, optional
-        :param feature_ms2_file: File with ms2 spectra (in .mgf format), defaults to None
-        :type feature_ms2_file: StrPath, optional
-        :param feature_quantification_file: File with quantification table (in .csv format), defaults to None
-        :type feature_quantification_file: StrPath, optional
-        :param mzmine_log: mzmine_log String containing GNPS response, defaults to None
-        :type mzmine_log: str, optional
-        :param gnps_response: GNPS response to POST request, defaults to None
-        :type gnps_response: dict, optional
         :raises BrokenPipeError: When the task does not complete in the expected time
         """
         try:
+            # Use MZmine GNPS submit, if existent
+            mzmine_log, gnps_response = self.extract_optional(
+                in_path, keys=["mzmine_log", "gnps_response"]
+            )
             task_id, status = self.check_task_finished(
                 mzmine_log=mzmine_log, gnps_response=gnps_response
             )
         except ValueError as ve:
+            # Own GNPS FBMN submission
             if self.resubmit:
-                feature_ms2_file, feature_quantification_file = self.check_dir_files(
-                    dir=in_path,
-                    feature_ms2_file=feature_ms2_file,
-                    feature_quantification_file=feature_quantification_file,
-                )
-                task_id, status = self.submit_to_gnps(feature_ms2_file, feature_quantification_file)
+                if "standard" in in_files:
+                    in_path = self.extract_standard(in_path=in_path)
+                    in_files = self.match_dir_paths(dir=in_path["in_path"])
+                else:
+                    in_files = self.extract_optional(
+                        in_path,
+                        [
+                            "feature_ms2",
+                            "feature_quantification",
+                            "additional_pairs",
+                            "sample_metadata",
+                        ],
+                    )
+                task_id, status = self.submit_to_gnps(**in_files)
             else:
                 logger.error(message=str(ve), error_type=ValueError)
 
         if status:
+            # Obtain results
             results_dict = self.fetch_results(task_id=task_id, out_path=out_path)
 
-            logger.log(
-                message=f"GNPS results {basename(in_path)}:\ntask_id:{task_id}\n{results_dict}",
-                minimum_verbosity=4,
-                verbosity=self.verbosity,
-            )
+            # Save file
+            out_path = self.extract_standard(out_path=out_path)
+            if os.path.isdir(out_path):
+                out_path = join(out_path, "fbmn_all_db_annotations.json")
+            with open(out_path, "w") as file:
+                json.dump(results_dict, file)
 
-            in_path = gnps_response if gnps_response else mzmine_log if mzmine_log else in_path
-
             logger.log(
-                f"Successful GNPS run with data from {in_path}",
+                f"Successful FBMN run with data from {gnps_response if gnps_response else mzmine_log if mzmine_log else in_path}",
                 minimum_verbosity=2,
                 verbosity=self.verbosity,
             )
@@ -311,15 +292,7 @@ class GNPS_Runner(Pipe_Step):
         else:
             raise BrokenPipeError(f"Status of {task_id} was not marked DONE.")
 
-    def run_single(
-        self,
-        in_path: dict[str, StrPath],
-        out_path: dict[str, StrPath] = None,
-        feature_ms2_file: StrPath = None,
-        feature_quantification_file: str = None,
-        mzmine_log: str = None,
-        gnps_response: dict = None,
-    ):
+    def run_single(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
         """
         Get the GNPS results from a single path, mzmine_log or GNPS response.
 
@@ -327,30 +300,12 @@ class GNPS_Runner(Pipe_Step):
         :type in_path: dict[str, StrPath]
         :param out_path: Output directory of result, defaults to None
         :type out_path: dict[str, StrPath], optional
-        :param feature_ms2_file: File with ms2 spectra (in .mgf format), defaults to None
-        :type feature_ms2_file: StrPath, optional
-        :param feature_quantification_file: File with quantification table (in .csv format), defaults to None
-        :type feature_quantification_file: StrPath, optional
-        :param mzmine_log: mzmine_log String containing GNPS response, defaults to None
-        :type mzmine_log: str, optional
-        :param gnps_response: GNPS response to POST request, defaults to None
-        :type gnps_response: dict, optional
         """
-        if not mzmine_log:
-            mzmine_log = self.mzmine_log if self.mzmine_log else in_path
-        if out_path:
-            dir_name = basename(get_directory(in_path))
-            out_path = join(out_path, f"{dir_name}_gnps_all_db_annotations.json")
-
         self.compute(
             step_function=capture_and_log,
             func=self.gnps_check_resubmit,
             in_path=in_path,
             out_path=out_path,
-            feature_ms2_file=feature_ms2_file,
-            feature_quantification_file=feature_quantification_file,
-            mzmine_log=mzmine_log,
-            gnps_response=gnps_response,
             log_path=self.get_log_path(out_path=out_path),
         )
 
@@ -361,7 +316,11 @@ class GNPS_Runner(Pipe_Step):
         self.run_single(**kwargs)
 
     def run_nested(
-        self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0
+        self,
+        in_path: dict[str, StrPath],
+        out_path: dict[str, StrPath],
+        recusion_level: int = 0,
+        **kwargs,
     ):
         """
         Construct a list of necessary computations for getting the GNPS results from a nested scheme of mzmine results.
@@ -375,31 +334,23 @@ class GNPS_Runner(Pipe_Step):
         :return: Future computations
         :rtype: list
         """
-        verbose_tqdm = self.verbosity >= recusion_level + 2
-        made_out_path = False
+        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
 
         for root, dirs, files in os.walk(in_path):
-            feature_ms2_file, feature_quantification_file = self.check_dir_files(dir=root)
-            if feature_ms2_file and feature_quantification_file:
-                if not made_out_path:
-                    os.makedirs(out_path, exist_ok=True)
-                    made_out_path = True
-                self.run_single(
-                    in_path=in_path,
-                    out_path=out_path,
-                    feature_ms2_file=feature_ms2_file,
-                    feature_quantification_file=feature_quantification_file,
-                )
+            for file in files:
+                if self.match_path(
+                    pattern=self.patterns["feature_ms2"], path=file
+                ) or self.match_path(pattern=self.patterns["feature_quantification"], path=file):
+                    self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
+                    break
 
-            for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
+            for dir in dirs:
                 self.run_nested(
                     in_path=join(in_path, dir),
                     out_path=join(out_path, dir),
                     recusion_level=recusion_level + 1,
+                    **kwargs,
                 )
-
-    def run(self, in_paths: list = [], out_paths: list = [], mzmine_log: list = [], **kwargs):
-        return super().run(in_paths=in_paths, out_paths=out_paths, mzmine_log=mzmine_log, **kwargs)
 
 
 if __name__ == "__main__":

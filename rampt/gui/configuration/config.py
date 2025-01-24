@@ -161,7 +161,7 @@ def convert_files(
 ):
     return generic_step(
         step_class=MSconvert_Runner,
-        match_patterns="conv" in entrypoint.lower(),
+        entrypoint="conv" in entrypoint.lower(),
         # in_paths=raw_data_paths,
         out_path_root=out_path_root,
         out_folder="converted",
@@ -180,7 +180,7 @@ def find_features(
 ):
     return generic_step(
         step_class=MZmine_Runner,
-        match_patterns="feat" in entrypoint.lower(),
+        entrypoint="feat" in entrypoint.lower(),
         # in_paths=community_formatted_data_paths,
         out_path_root=out_path_root,
         out_folder="processed",
@@ -201,7 +201,7 @@ def annotate_gnps(
 ):
     return generic_step(
         step_class=GNPS_Runner,
-        match_patterns="annot" in entrypoint.lower(),
+        entrypoint="annot" in entrypoint.lower(),
         # in_paths=processed_data_paths,
         out_path_root=out_path_root,
         out_folder="annotated",
@@ -221,7 +221,7 @@ def annotate_sirius(
 ):
     return generic_step(
         step_class=Sirius_Runner,
-        match_patterns="annot" in entrypoint.lower(),
+        entrypoint="annot" in entrypoint.lower(),
         # in_paths=processed_data_paths,
         out_path_root=out_path_root,
         out_folder="annotated",
@@ -242,7 +242,7 @@ def summarize_annotations(
 ):
     return generic_step(
         step_class=Summary_Runner,
-        match_patterns="summ" in entrypoint.lower(),
+        entrypoint="summ" in entrypoint.lower(),
         # in_paths=stretch_to_list_of_dicts(
         #    {
         #        "quantification": [processed_data_paths],
@@ -266,7 +266,7 @@ def analyze_difference(
     return generic_step(
         step_class=Analysis_Runner,
         # Not kidding, because this covers analysis and analize
-        match_patterns="anal" in entrypoint.lower(),
+        entrypoint="anal" in entrypoint.lower(),
         # in_paths=summary_data_paths,
         out_path_root=out_path_root,
         out_folder="analysis",

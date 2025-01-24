@@ -372,18 +372,54 @@ class Pipe_Step(Step_Configuration):
         return valid_exec
 
     # Matching
-    def match_file_name(self, pattern: str, file_name: StrPath) -> bool:
+    def match_path(self, pattern: str, path: StrPath) -> bool:
         """
         Match a file_name against a regex expression
 
         :param pattern: Pattern
         :type pattern: str
-        :param file_name: Name of the file
-        :type file_name: StrPath
+        :param path: Name of the file
+        :type path: StrPath
         :return: Whether the patter is in the file name
         :rtype: bool
         """
-        return bool(regex.search(pattern=pattern, string=str(file_name)))
+        return bool(regex.search(pattern=pattern, string=str(path)))
+
+    def match_dir_paths(
+        self,
+        dir: StrPath,
+        valid_paths: dict[str, StrPath] = {},
+        patterns: dict[str, str] = {},
+        check_dirs: bool = False,
+    ) -> dict[str, StrPath]:
+        """
+        Match whether the needed files for GNPS POST request are present, according to mzmine naming scheme.
+
+        :param dir: Directory to search in
+        :type dir: StrPath
+        :param valid_paths: Valid files in directory, defaults to {}
+        :type valid_paths: dict[str, StrPath]
+        :param patterns: Custom patterns to match against, defaults to {}
+        :type patterns: dict[str, str]
+        :param check_dirs: Custom patterns to match against, defaults to {}
+        :type check_dirs: dict[str, str]
+        :return: Valid paths
+        :rtype: dict[str, StrPath]
+        """
+        patterns = patterns if patterns else self.patterns
+        for root, dirs, files in os.walk(dir):
+            for file in files:
+                for name, pattern in patterns.items():
+                    if valid_paths.get(name, None) and self.match_path(pattern, file):
+                        valid_paths[name] = os.path.join(root, file)
+
+            if check_dirs:
+                for dir in dirs:
+                    for name, pattern in patterns.items():
+                        if valid_paths.get(name, None) and self.match_path(pattern, dir):
+                            valid_paths[name] = os.path.join(root, dir)
+
+        return valid_paths
 
     # Saving
     def get_log_path(self, out_path: StrPath) -> StrPath:
@@ -493,6 +529,7 @@ class Pipe_Step(Step_Configuration):
             self.errs[i] = err
             self.results[i] = results
 
+    # RUN Methods
     def run_single(self, **kwargs):
         """
         Compute a single instance of the runner
@@ -529,6 +566,89 @@ class Pipe_Step(Step_Configuration):
             error_type=NotImplementedError,
         )
 
+    # Distribution methods
+    def extract_standard(self, standard_value: str = "standard", **kwargs) -> dict:
+        """
+        Extracts standard values from kwargs. If the value is not a dictionary, it is returned instead.
+
+        :param standard_value: Standard value key, defaults to "standard"
+        :type standard_value: str, optional
+        :return: Dictioary with only standard values
+        :rtype: dict
+        """
+        standards = [
+            value.get(standard_value, value) if isinstance(value, dict) else value
+            for key, value in kwargs.items()
+        ]
+        if len(kwargs) == 0:
+            logger.error(
+                "Gave no arguments to extract_standards. You must at least provide one.",
+                error_type=ValueError,
+            )
+        elif len(kwargs) == 1:
+            return standards[0]
+        else:
+            return standards
+
+    def extract_optional(self, dictionary: dict, keys: list) -> dict:
+        """
+        Extracts standard values from kwargs. If the value is not a dictionary, it is returned instead.
+
+        :param dictionary: Dictionary to extract
+        :type dictionary: dict
+        :return: Dictioary with only standard values
+        :rtype: dict
+        """
+        return [dictionary[key] if key in dictionary else None for key in keys]
+
+    def distribute_scheduled(self, standard_value: str = "standard", **scheduled_io):
+        """
+        Distribute the scheduled
+
+        :param standard_value: _description_, defaults to "standard"
+        :type standard_value: str, optional
+        :return: _description_
+        :rtype: _type_
+        """
+        standard_in = self.extract_standard(standard_value, scheduled_io["in_path"])[standard_value]
+        if self.nested:
+            logger.log(
+                f"Distributing to {self.__class__.__name__} nested run.",
+                minimum_verbosity=3,
+                verbosity=self.verbosity,
+            )
+            return self.run_nested(**scheduled_io)
+        elif os.path.isdir(standard_in):
+            logger.log(
+                f"Distributing to {self.__class__.__name__} directory run.",
+                minimum_verbosity=3,
+                verbosity=self.verbosity,
+            )
+            return self.run_directory(**scheduled_io)
+        else:
+            logger.log(
+                f"Distributing to {self.__class__.__name__} single run.",
+                minimum_verbosity=3,
+                verbosity=self.verbosity,
+            )
+            return self.run_single(**scheduled_io)
+
+    def link_additional_args(self, **kwargs) -> str:
+        """
+        Link the additional arguments given to kwargs. Packs kwargs automatically in strings.
+
+        :return: Additional arguments
+        :rtype: str
+        """
+        additional_args = (
+            kwargs.pop("additional_args") if "additional_args" in kwargs else self.additional_args
+        )
+        additional_args = " ".join(additional_args) + " ".join(
+            [" ".join([f"--{key}", f'"{value}"']) for key, value in kwargs.items()]
+        )
+        return additional_args
+
+    # RUN
     def run(
         self, in_outs: list[dict] = [], out_folder: StrPath = "pipe_step_out", **kwargs
     ) -> list[dict]:
@@ -572,7 +692,8 @@ class Pipe_Step(Step_Configuration):
 
             # Construct out directories if not existent
             for out_path in list(scheduled_io["out_path"].values()):
-                os.makedirs(out_path, exist_ok=True)
+                if not os.path.isfile(out_path):
+                    os.makedirs(out_path, exist_ok=True)
 
             logger.log(
                 message=f'Processing {scheduled_io["in_path"]} -> {scheduled_io["out_path"]}',
@@ -580,14 +701,7 @@ class Pipe_Step(Step_Configuration):
                 verbosity=self.verbosity,
             )
 
-            # Activate right computation function
-            in_path_example = filter(flatten_values(scheduled_io["in_path"]))[0]
-            if self.nested:
-                self.run_nested(**scheduled_io)
-            elif os.path.isdir(in_path_example):
-                self.run_directory(**scheduled_io)
-            else:
-                self.run_single(**scheduled_io)
+            self.distribute_scheduled(**scheduled_io)
 
             logger.log(
                 message=f'Processed {scheduled_io["in_path"]} -> {scheduled_io["out_path"]}',

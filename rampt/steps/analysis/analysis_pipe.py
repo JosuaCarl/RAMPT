@@ -10,7 +10,6 @@ import argparse
 import pandas as pd
 
 from os.path import join
-from tqdm.auto import tqdm
 
 from rampt.helpers.types import StrPath
 from rampt.steps.general import Pipe_Step, get_value
@@ -78,13 +77,19 @@ class Analysis_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__(save_log=save_log, additional_args=additional_args, verbosity=verbosity)
+        super().__init__(
+            patterns={"in": r"summary\.tsv"},
+            save_log=save_log,
+            additional_args=additional_args,
+            verbosity=verbosity,
+        )
         if kwargs:
             self.update(kwargs)
         self.overwrite = overwrite
         self.name = "analysis"
         self.analysis = None
 
+    # Information extraction
     def read_summary(self, file_path: StrPath):
         """
         Read in summary file.
@@ -152,6 +157,7 @@ class Analysis_Runner(Pipe_Step):
 
         return {mode: mode_columns for mode, mode_columns in peak_columns.items() if mode_columns}
 
+    # Analysis methods
     def z_score(self, summary: pd.DataFrame, peak_mode_columns: list) -> pd.DataFrame:
         if len(peak_mode_columns) < 2:
             logger.warn(
@@ -162,6 +168,7 @@ class Analysis_Runner(Pipe_Step):
             analysis = stats.zscore(summary[peak_mode_columns], axis=1, nan_policy="omit")
             return analysis
 
+    # Export
     def export_results(self, analysis: pd.DataFrame, peak_columns: list, out_path: StrPath):
         if os.path.isfile(out_path):
             analysis.to_csv(out_path, sep="\t")
@@ -192,7 +199,12 @@ class Analysis_Runner(Pipe_Step):
             verbosity=self.verbosity,
         )
 
-    def run_single(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath]):
+    # Distribution
+    def distribute_scheduled(self, **scheduled_io):
+        return super().distribute_scheduled(**scheduled_io)
+
+    # RUN
+    def run_single(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
         """
         Add the annotations into a quantification file.
 
@@ -201,6 +213,7 @@ class Analysis_Runner(Pipe_Step):
         :param out_path: Path to output directory.
         :type out_path: dict[str, StrPath]
         """
+        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
         self.compute(
             step_function=capture_and_log,
             func=self.complete_analysis,
@@ -209,7 +222,7 @@ class Analysis_Runner(Pipe_Step):
             log_path=self.get_log_path(out_path=out_path),
         )
 
-    def run_directory(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath]):
+    def run_directory(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
         """
         Convert all matching files in a folder.
 
@@ -218,10 +231,19 @@ class Analysis_Runner(Pipe_Step):
         :param out_path: Path to output directory.
         :type out_path: dict[str, StrPath]
         """
-        self.run_single(in_path=join(in_path, "summary.tsv"), out_path=out_path)
+        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
+        for entry in os.listdir(in_path):
+            if self.match_path(pattern=self.patterns["in"], path=entry):
+                os.makedirs(out_path, exist_ok=True)
+                self.run_single(in_path=join(in_path, entry), out_path=out_path, **kwargs)
+                break
 
     def run_nested(
-        self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0
+        self,
+        in_path: dict[str, StrPath],
+        out_path: dict[str, StrPath],
+        recusion_level: int = 0,
+        **kwargs,
     ):
         """
         Converts multiple files in multiple folders, found in in_path with msconvert and saves them
@@ -234,22 +256,19 @@ class Analysis_Runner(Pipe_Step):
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
         """
-        verbose_tqdm = self.verbosity >= recusion_level + 2
-        made_out_path = False
+        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
 
         for root, dirs, files in os.walk(in_path):
-            if "summary.tsv" in files:
-                if not made_out_path:
-                    os.makedirs(out_path, exist_ok=True)
-                    made_out_path = True
+            for file in files:
+                if self.match_path(pattern=self.patterns["in"], path=file):
+                    self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
 
-                self.run_single(in_path=join(root, "summary.tsv"), out_path=out_path)
-
-            for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
+            for dir in dirs:
                 self.run_nested(
                     in_path=join(in_path, dir),
                     out_path=join(out_path, dir),
                     recusion_level=recusion_level + 1,
+                    **kwargs,
                 )
 
 

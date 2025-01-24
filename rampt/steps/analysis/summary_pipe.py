@@ -8,7 +8,6 @@ import os
 import argparse
 
 from os.path import join
-from tqdm.auto import tqdm
 
 import pandas as pd
 import numpy as np
@@ -82,102 +81,25 @@ class Summary_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
-        super().__init__(save_log=save_log, additional_args=additional_args, verbosity=verbosity)
+        super().__init__(
+            patterns={
+                "quantification": r".*_quant\.csv$",
+                "formula_identifications": r".*formula_identifications\.tsv$",
+                "canopus_formula_summary": r".*canopus_formula_summary\.tsv$",
+                "structure_identifications": r".*structure_identifications\.tsv$",
+                "canopus_structure_summary": r".*canopus_structure_summary\.tsv$",
+                "denovo_structure_identifications": r".*denovo_structure_identifications\.tsv$",
+                "gnps_annotations": r".*fbmn_all_db_annotations\.json$",
+            },
+            save_log=save_log,
+            additional_args=additional_args,
+            verbosity=verbosity,
+        )
         if kwargs:
             self.update(kwargs)
         self.overwrite = overwrite
         self.name = "summary"
         self.summary = None
-
-    def search_quantification_file(
-        self, dir: StrPath, quantification_file: StrPath = None
-    ) -> StrPath:
-        """
-        Check for quantification file.
-
-        :param dir: Directory to search in
-        :type dir: StrPath
-        :param quantification_file: Quantification table path, defaults to None
-        :type quantification_file: StrPath, optional
-        :return: Paths to file
-        :rtype:  StrPath
-        """
-        if os.path.isfile(dir):
-            return dir
-        for root, dirs, files in os.walk(dir):
-            for file in files:
-                if not quantification_file and file.endswith("_quant.csv"):
-                    quantification_file = join(root, file)
-
-        return quantification_file
-
-    def search_annotation_files(
-        self,
-        dir: StrPath,
-        canopus_formula_summary_file: StrPath = None,
-        canopus_structure_summary_file: StrPath = None,
-        denovo_structure_identifications_file: StrPath = None,
-        formula_identifications_file: StrPath = None,
-        structure_identifications_file: StrPath = None,
-        gnps_annotations_path: StrPath = None,
-    ) -> dict[str, StrPath]:
-        """
-        Check for annotation files.
-
-        :param dir: Directory to search in
-        :type dir: StrPath
-        :param canopus_formula_summary_file: Canopus formula table path, defaults to None
-        :type canopus_formula_summary_file: StrPath, optional
-        :param canopus_structure_summary_file: Canopus structure table path, defaults to None
-        :type canopus_structure_summary_file: StrPath, optional
-        :param denovo_structure_identifications_file: DeNovo structure table path, defaults to None
-        :type denovo_structure_identifications_file: StrPath, optional
-        :param formula_identifications_file: Formula identifications table path, defaults to None
-        :type formula_identifications_file: StrPath, optional
-        :param structure_identifications_file: Structure identifications table path, defaults to None
-        :type structure_identifications_file: StrPath, optional
-        :param gnps_annotations_path: Annotations of GNPS molecular feature finding, defaults to None
-        :type gnps_annotations_path: StrPath, optional
-        :return: Paths to files
-        :rtype:  dict[str, StrPath]
-        """
-        dirs = dir if isinstance(dir, list) or isinstance(dir, tuple) else [dir]
-        for dir in dirs:
-            if not dir:
-                continue
-            for root, dirs, files in os.walk(dir):
-                for file in files:
-                    if not canopus_formula_summary_file and file == "canopus_formula_summary.tsv":
-                        canopus_formula_summary_file = join(root, file)
-                    elif (
-                        not canopus_structure_summary_file
-                        and file == "canopus_structure_summary.tsv"
-                    ):
-                        canopus_structure_summary_file = join(root, file)
-                    elif (
-                        not denovo_structure_identifications_file
-                        and file == "denovo_structure_identifications.tsv"
-                    ):
-                        denovo_structure_identifications_file = join(root, file)
-                    elif not formula_identifications_file and file == "formula_identifications.tsv":
-                        formula_identifications_file = join(root, file)
-                    elif (
-                        not structure_identifications_file
-                        and file == "structure_identifications.tsv"
-                    ):
-                        structure_identifications_file = join(root, file)
-                    elif not gnps_annotations_path and file.endswith(
-                        "_gnps_all_db_annotations.json"
-                    ):
-                        gnps_annotations_path = join(root, file)
-        return {
-            "formula_identifications_file": formula_identifications_file,
-            "canopus_formula_summary_file": canopus_formula_summary_file,
-            "structure_identifications_file": structure_identifications_file,
-            "canopus_structure_summary_file": canopus_structure_summary_file,
-            "denovo_structure_identifications_file": denovo_structure_identifications_file,
-            "gnps_annotations_path": gnps_annotations_path,
-        }
 
     def read_sirius_df(self, file_path: StrPath, filter_columns: list | str) -> pd.DataFrame:
         df = pd.read_csv(file_path, sep="\t")
@@ -193,9 +115,9 @@ class Summary_Runner(Pipe_Step):
 
     # TODO: Add documentation & Testing
     def add_quantification(
-        self, quantification_file: StrPath, summary: pd.DataFrame = None
+        self, quantification_path: StrPath, summary: pd.DataFrame = None
     ) -> pd.DataFrame:
-        df = pd.read_csv(quantification_file)
+        df = pd.read_csv(quantification_path)
         df.columns = [column.replace("row ", "") for column in df.columns]
 
         if summary is not None:
@@ -325,19 +247,22 @@ class Summary_Runner(Pipe_Step):
         summary = summary.merge(df, how="left", on="ID")
         return summary
 
-    def add_annotations(self, annotation_files: StrPath, summary: pd.DataFrame):
+    def add_annotations(
+        self, annotation_files: dict[str, StrPath], summary: pd.DataFrame
+    ) -> pd.DataFrame:
         # Order the annotations
         order_list = [
-            "formula_identifications_file",
-            "canopus_formula_summary_file",
-            "structure_identifications_file",
-            "canopus_structure_summary_file",
-            "denovo_structure_identifications_file",
-            "gnps_annotations_path",
+            "formula_identifications",
+            "canopus_formula_summary",
+            "structure_identifications",
+            "canopus_structure_summary",
+            "denovo_structure_identifications",
+            "gnps_annotations",
         ]
-        annotation_files_ordered = dict()
+        annotation_files_ordered = {}
         for key in order_list:
-            annotation_files_ordered[key] = annotation_files[key]
+            if key in annotation_files:
+                annotation_files_ordered[key] = annotation_files[key]
 
         # Append all annotations
         for annotation_file_type, annotation_path in annotation_files_ordered.items():
@@ -350,83 +275,35 @@ class Summary_Runner(Pipe_Step):
 
         return summary
 
-    def sort_in_paths(
-        self, in_paths: tuple[StrPath] | list[StrPath] | dict[str, StrPath] | StrPath
-    ) -> tuple[StrPath]:
-        if isinstance(in_paths, dict):
-            return (in_paths["quantification"], in_paths["annotation"])
-        elif isinstance(in_paths, StrPath):
-            return in_paths, in_paths
-        else:
-            return in_paths[0], in_paths[1]
-
-    def add_quantification_annotation_s(
-        self,
-        in_path: dict,
-        out_path: StrPath,
-        annotation_file_type: str = None,
-        quantification_file: StrPath = None,
-        annotation_files: dict[str, StrPath] = None,
-        summary: pd.DataFrame = None,
-    ):
-        # Separate arguments of in_path
-        in_paths_annotation = None
-        if isinstance(in_path, dict):
-            in_path_quantification = in_path.get("quantification")
-            in_paths_annotation = in_path.get("annotation")
-        elif isinstance(in_path, str):
-            in_path_quantification = in_path
-        else:
-            in_path_quantification = in_path[0]
-            in_paths_annotation = in_path[1]
-
+    def summarize_info(self, in_path: dict, out_path: StrPath, summary: pd.DataFrame = None):
         # Make quantification table as base
-        if not quantification_file:
-            quantification_file = self.search_quantification_file(dir=in_path_quantification)
-        summary = self.add_quantification(quantification_file=quantification_file, summary=summary)
+        summary = self.add_quantification(
+            quantification_path=in_path.pop("quantification"), summary=summary
+        )
 
         # Add annotations
-        if annotation_files:
-            summary = self.add_annotations(annotation_files=annotation_files, summary=summary)
-        else:
-            # Filter out duplicates and None
-            for in_path_annotation in [ipa for ipa in set(to_list(in_paths_annotation)) if ipa]:
-                annotation_files = self.search_annotation_files(dir=in_path_annotation)
-
-                # Case run_single
-                if annotation_file_type:
-                    summary = self.add_annotation(
-                        annotation_file=in_path_annotation,
-                        annotation_file_type=annotation_file_type,
-                        summary=summary,
-                    )
-                else:
-                    summary = self.add_annotations(
-                        annotation_files=annotation_files, summary=summary
-                    )
+        summary = self.add_annotations(annotation_files=in_path, summary=summary)
 
         # Export summary
         summary.to_csv(out_path, sep="\t")
 
-        if in_paths_annotation:
-            logger.log(
-                f"Added annotation from {in_paths_annotation} to {in_path_quantification}.Exported to {out_path}.",
-                minimum_verbosity=1,
-                verbosity=self.verbosity,
-            )
-        else:
-            logger.log(
-                f"No annotation received. {in_path_quantification} exported to {out_path}.",
-                minimum_verbosity=1,
-                verbosity=self.verbosity,
-            )
+        logger.log(
+            f"Added given annotations {list(in_path.keys())} to quantifications. Exported to {out_path}.",
+            minimum_verbosity=1,
+            verbosity=self.verbosity,
+        )
 
+    # Distribution
+    def distribute_scheduled(self, **scheduled_io):
+        return super().distribute_scheduled(standard_value="quantification", **scheduled_io)
+
+    # RUN
     def run_single(
         self,
         in_path: dict[str, StrPath],
         out_path: dict[str, StrPath],
-        annotation_file_type: str,
         summary: pd.DataFrame = None,
+        **kwargs,
     ):
         """
         Add the annotations into a quantification file.
@@ -435,23 +312,22 @@ class Summary_Runner(Pipe_Step):
         :type in_path: dict[str, StrPath]
         :param out_path: Path to output directory.
         :type out_path: dict[str, StrPath]
-        :param annotation_file_type: File type of annotation
-        :type annotation_file_type: str
         :param summary: Summary to write to, defaults to None
         :type summary: pd.DataFrame, optional
         """
-        summary = summary if summary else self.summary
-
-        # Determine paths
-        in_path_quantification, in_path_annotation = self.sort_in_paths(in_paths=in_path)
+        in_path, out_path, summary = self.extract_standard(
+            in_path=in_path, out_path=out_path, summary=summary
+        )
         out_path = join(out_path, "summary.tsv") if os.path.isdir(out_path) else out_path
+
+        # Propagate summary of instance (can be used to annotate with multiple annotation files in a row)
+        summary = summary if summary else self.summary
 
         self.compute(
             step_function=capture_and_log,
-            func=self.add_quantification_annotation_s,
-            in_path={"quantification": in_path_quantification, "annotation": in_path_annotation},
+            func=self.summarize_info,
+            in_path=in_path,
             out_path=out_path,
-            annotation_file_type=annotation_file_type,
             log_path=self.get_log_path(out_path=out_path),
         )
 
@@ -460,11 +336,10 @@ class Summary_Runner(Pipe_Step):
         in_path: dict[str, StrPath],
         out_path: dict[str, StrPath],
         summary: pd.DataFrame = None,
-        quantification_file: StrPath = None,
-        annotation_files: dict[str, StrPath] = None,
+        **kwargs,
     ):
         """
-        Convert all matching files in a folder.
+        Summarize all annpotation and files in the given folders.
 
         :param in_path: Path to scheduled file.
         :type in_path: dict[str, StrPath]
@@ -474,27 +349,35 @@ class Summary_Runner(Pipe_Step):
         :type summary: pd.DataFrame, optional
         """
         summary = summary if summary else self.summary
-
-        # Determine paths
-        in_path_quantification, in_paths_annotation = self.sort_in_paths(in_paths=in_path)
-        out_path = join(out_path, "summary.tsv") if os.path.isdir(out_path) else out_path
-
-        self.compute(
-            step_function=capture_and_log,
-            func=self.add_quantification_annotation_s,
-            in_path={"quantification": in_path_quantification, "annotation": in_paths_annotation},
-            out_path=out_path,
-            quantification_file=quantification_file,
-            annotation_files=annotation_files,
-            log_path=self.get_log_path(out_path=out_path),
+        in_path, out_path, summary = self.extract_standard(
+            in_path=in_path, out_path=out_path, summary=summary
         )
 
+        matched_in_paths = {}
+        for file_type, path in in_path:
+            for entry in os.listdir(path):
+                if self.match_path(pattern=self.patterns[file_type], path=entry):
+                    matched_in_paths[file_type] = join(path, entry)
+                    break
+
+        if "quantification" in matched_in_paths:
+            os.makedirs(out_path, exist_ok=True)
+            self.run_single(in_path=matched_in_paths, out_path=out_path, summary=summary, **kwargs)
+        else:
+            logger.error(
+                message=f"Found no quantification information in matched_in_paths={matched_in_paths}, inferred from in_paths={in_path}",
+                error_type=ValueError,
+            )
+
     def run_nested(
-        self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0
+        self,
+        in_path: dict[str, StrPath],
+        out_path: dict[str, StrPath],
+        recusion_level: int = 0,
+        **kwargs,
     ):
         """
-        Converts multiple files in multiple folders, found in in_path with msconvert and saves them
-        to a location out_path again into their respective folders.
+        Summarize all annotation files with quantification files in the matching folders.
 
         :param in_path: Starting folder for descent.
         :type in_path: dict[str, StrPath]
@@ -503,28 +386,27 @@ class Summary_Runner(Pipe_Step):
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
         """
-        verbose_tqdm = self.verbosity >= recusion_level + 2
-        made_out_path = False
+        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
 
         for root, dirs, files in os.walk(in_path):
-            quantification_file = self.search_quantification_file(dir=root)
-            annotation_files = self.search_annotation_files(dir=root)
+            dirs_with_matches = {}
+            for dir in dirs:
+                for file_type, pattern in self.patterns:
+                    for entry in os.listdir(in_path, dir):
+                        if self.match_path(pattern=pattern, path=entry):
+                            dirs_with_matches[file_type] = join(in_path, dir)
+                            break
 
-            if quantification_file and [
-                val for val in annotation_files.values() if val is not None
-            ]:
-                if not made_out_path:
-                    os.makedirs(out_path, exist_ok=True)
-                    made_out_path = True
-
-                self.run_directory(in_path=root, out_path=out_path)
-
-            for dir in tqdm(dirs, disable=verbose_tqdm, desc="Directories"):
-                self.run_nested(
-                    in_path=join(in_path, dir),
-                    out_path=join(out_path, dir),
-                    recusion_level=recusion_level + 1,
-                )
+            if dirs_with_matches:
+                self.run_directory(in_path=dirs_with_matches, out_path=out_path, **kwargs)
+            else:
+                for dir in dirs:
+                    self.run_nested(
+                        in_path=join(in_path, dir),
+                        out_path=join(out_path, dir),
+                        recusion_level=recusion_level + 1,
+                        **kwargs,
+                    )
 
 
 if __name__ == "__main__":

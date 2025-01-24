@@ -9,7 +9,6 @@ import os
 import argparse
 
 from os.path import join
-from tqdm.auto import tqdm
 
 from ..general import *
 
@@ -111,12 +110,18 @@ class Sirius_Runner(Pipe_Step):
             config = config[6:] if config.startswith("config") else config
         return config.strip()
 
+    # Distribution
+    def distribute_scheduled(self, **scheduled_io):
+        return super().distribute_scheduled(**scheduled_io)
+
+    # RUN
     def run_single(
         self,
         in_path: dict[str, StrPath],
         out_path: dict[str, StrPath],
-        projectspace: StrPath = None,
-        config: StrPath = None,
+        projectspace: dict[str, StrPath] = None,
+        config: dict[str, StrPath] = None,
+        **kwargs,
     ) -> bool:
         """
         Run a single SIRIUS configuration.
@@ -126,19 +131,27 @@ class Sirius_Runner(Pipe_Step):
         :param out_path: Output directory
         :type out_path: dict[str, StrPath]
         :param projectspace: Path to projectspace file / directory, defaults to out_path
-        :type projectspace: StrPath
+        :type projectspace: dict[str, StrPath]
         :param config: Path to configuration file / directory or configuration as string, defaults to None
-        :type config: StrPath, optional
+        :type config: dict[str, StrPath], optional
         :return: Success of the command
         :rtype: bool
         """
+        in_path, out_path, projectspace, config = self.extract_standard(
+            in_path=in_path, out_path=out_path, projectspace=projectspace, config=config
+        )
+        additional_args = self.link_additional_args(**kwargs)
+
         if projectspace is None:
             projectspace = self.projectspace if self.projectspace else out_path
         if config is None:
             config = self.config
         config = self.extract_config(config=config)
 
-        cmd = rf'"{self.exec_path}" --project "{join(projectspace, "projectspace.sirius")}" --input "{in_path}" config {config} write-summaries --output "{out_path}"{" ".join(self.additional_args)}'
+        cmd = (
+            rf'"{self.exec_path}" --project "{join(projectspace, "projectspace.sirius")}" --input "{in_path} '
+            + rf'config {config} write-summaries --output "{out_path}" {additional_args}'
+        )
 
         self.compute(
             step_function=execute_verbose_command,
@@ -156,6 +169,7 @@ class Sirius_Runner(Pipe_Step):
         out_path: dict[str, StrPath],
         projectspace: StrPath = None,
         config: str = None,
+        **kwargs,
     ):
         """
         Compute a sirius run on a folder. When no config is defined, it will search in the folder for config.txt.
@@ -169,22 +183,34 @@ class Sirius_Runner(Pipe_Step):
         :param config: Configuration (file), defaults to None
         :type config: StrPath, optional
         """
+        in_path, out_path, projectspace, config = self.extract_standard(
+            in_path=in_path, out_path=out_path, projectspace=projectspace, config=config
+        )
+
+        # Search for config present in folder
         if config is None and self.config is None:
             for entry in os.listdir(in_path):
-                if self.match_file_name(pattern=self.patterns["config"], file_name=entry):
+                if self.match_path(pattern=self.patterns["config"], path=entry):
                     config = join(in_path, entry)
 
+        # Search for relevant files
         for entry in os.listdir(in_path):
-            if self.match_file_name(pattern=self.patterns["in"], file_name=entry):
+            if self.match_path(pattern=self.patterns["in"], path=entry):
+                os.makedirs(out_path, exist_ok=True)
                 self.run_single(
                     in_path=join(in_path, entry),
                     out_path=out_path,
                     projectspace=projectspace,
                     config=config,
+                    **kwargs,
                 )
 
     def run_nested(
-        self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], recusion_level: int = 0
+        self,
+        in_path: dict[str, StrPath],
+        out_path: dict[str, StrPath],
+        recusion_level: int = 0,
+        **kwargs,
     ):
         """
         Run SIRIUS Pipeline in nested directories.
@@ -196,32 +222,20 @@ class Sirius_Runner(Pipe_Step):
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
         """
-        verbose_tqdm = self.verbosity >= recusion_level + 2
-        made_out_path = False
+        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
 
-        for entry in tqdm(
-            os.listdir(in_path), disable=verbose_tqdm, desc="Schedule Sirius annotation"
-        ):
-            entry_path = join(in_path, entry)
+        for root, dirs, files in os.walk(in_path):
+            for file in files:
+                if self.match_path(pattern=self.patterns["in"], path=file):
+                    self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
 
-            if self.match_file_name(pattern=self.patterns["in"], file_name=entry):
-                if not made_out_path:
-                    os.makedirs(out_path, exist_ok=True)
-                    made_out_path = True
-                self.run_single(in_path=entry_path, out_path=out_path)
-            elif os.path.isdir(entry_path):
+            for dir in dirs:
                 self.run_nested(
-                    in_path=entry_path,
-                    out_path=join(out_path, entry),
+                    in_path=join(in_path, dir),
+                    out_path=join(out_path, dir),
                     recusion_level=recusion_level + 1,
+                    **kwargs,
                 )
-
-    def run(
-        self, in_paths: list = [], out_paths: list = [], projectspace: StrPath = None, **kwargs
-    ):
-        return super().run(
-            in_paths=in_paths, out_paths=out_paths, projectspace=projectspace, **kwargs
-        )
 
 
 if __name__ == "__main__":
