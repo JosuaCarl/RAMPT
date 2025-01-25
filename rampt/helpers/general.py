@@ -135,6 +135,31 @@ def insert_unlinked_list(arr: list, index: int, object) -> list:
 
 
 # Dict operations
+def get_if_dict(container: Any, keys: list[str] | str, default_value: Any = None) -> Any:
+    """
+    Extracts a key from a container via .get if container is a dict.
+
+    :param container: Container of data
+    :type container: Any
+    :param keys: Keys for dictionary to try with. If not matching, None is returned.
+    :type keys: list[str]|str
+    :param default_value: Default value to return when key is not present, defaults to None.
+    :type default_value: Any, optional
+    :return: Extracted value
+    :rtype: Any
+    """
+    if isinstance(container, dict):
+        if isinstance(keys, list):
+            if len(keys) == 1:
+                return container.get(keys[0], default_value)
+            else:
+                return [container.get(key, default_value) for key in keys]
+        else:
+            return container.get(keys, default_value)
+    else:
+        return container
+
+
 def flatten_values(obj: Any) -> list:
     """
     Flatten values in dictionaries and lists in lists to one list of values.
@@ -347,9 +372,9 @@ class Path_Nester:
         if isinstance(new_paths, str):
             new_paths = [new_paths]
         for new_path in new_paths:
-            in_path = os.path.normpath(new_path)
-            split_path = in_path.split(os.sep)
-            nested_paths = self.add_nested_lists(split_path[1:], nested_paths, in_path)
+            in_paths = os.path.normpath(new_path)
+            split_path = in_paths.split(os.sep)
+            nested_paths = self.add_nested_lists(split_path[1:], nested_paths, in_paths)
         return nested_paths
 
     def prune_lca(self, nested_paths):

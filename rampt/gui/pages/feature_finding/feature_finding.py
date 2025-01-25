@@ -14,7 +14,11 @@ mzmine_default_folder = os.path.join(Path.home(), ".mzmine", "users")
 def create_feature_finding():
     with tgb.part(render="{'feat' in entrypoint.lower()}"):
         tgb.text("###### Select converted (.mzML)", mode="markdown")
-        create_file_selection(process="feature_finding")
+        create_file_selection(
+            process="feature_finding",
+            io_key="community_formatted_data_paths",
+            file_dialog_kwargs={"multiple": True},
+        )
 
     with tgb.part(render="{'feat' in entrypoint.lower() or 'conv' in entrypoint.lower()}"):
         tgb.html("br")

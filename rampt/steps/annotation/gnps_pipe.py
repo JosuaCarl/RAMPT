@@ -44,7 +44,10 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         nested=nested,
         workers=n_workers,
     )
-    gnps_runner.scheduled_ios = {"in_path": {"standard": in_dir}, "out_path": {"standard": out_dir}}
+    gnps_runner.scheduled_ios = {
+        "in_paths": {"processed_data_paths": in_dir},
+        "out_path": {"gnps_annotated_data_paths": out_dir}
+    }
     return gnps_runner.run()
 
 
@@ -76,13 +79,25 @@ class GNPS_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
+        self.data_ids = {
+            "in_paths": ["mzmine_log", "feature_quantification", "feature_ms2", "additional_pairs", "sample_metadata"],
+            "out_path": ["gnps_annotated_data_paths"],
+            "standard": ["processed_data_paths"],
+        }
         super().__init__(
             patterns={
-                "mzmine_log": r".*mzmine_log\.txt$",
-                "feature_quantification": r".*fbmn_quant\.csv$",
-                "feature_ms2": r".*fbmn\.mgf$",
-                "additional_pairs": r".*metadata\.(tsv|csv)",  # TODO: Find out naming of additional pairs file
-                "sample_metadata": r".*metadata\.(tsv|csv)",  # TODO: Find out naming of metadata file
+                self.data_ids["in_paths"][0]: r".*mzmine_log\.txt$",
+                self.data_ids["in_paths"][1]: r".*fbmn_quant",
+                self.data_ids["in_paths"][2]: r".*fbmn",
+                self.data_ids["in_paths"][3]: r".*metadata",  # TODO: Find out naming of additional pairs file
+                self.data_ids["in_paths"][4]: r".*metadata",  # TODO: Find out naming of metadata file
+            },
+            mandatory_patterns={
+                self.data_ids["in_paths"][0]: r".*",
+                self.data_ids["in_paths"][1]: r".*\.csv$",
+                self.data_ids["in_paths"][2]: r".*\.mgf$",
+                self.data_ids["in_paths"][3]: r".*\.(tsv|csv)",  # TODO: Find out naming of additional pairs file
+                self.data_ids["in_paths"][4]: r".*\.(tsv|csv)",  # TODO: Find out naming of metadata file
             },
             save_log=save_log,
             additional_args=additional_args,
@@ -243,11 +258,12 @@ class GNPS_Runner(Pipe_Step):
         :type in_out: dict[str, StrPath]
         :raises BrokenPipeError: When the task does not complete in the expected time
         """
-        in_path, out_path = self.extract_standard(**in_out)
+        in_paths = in_out["in_paths"]
+        out_path = get_if_dict(out_path, self.data_ids["out_path"])
 
         # Use MZmine GNPS submit, if existent
         mzmine_log, gnps_response = self.extract_optional(
-            in_path, keys=["mzmine_log", "gnps_response"]
+            in_paths, keys=["mzmine_log", "gnps_response"]
         )
         if mzmine_log or gnps_response:
             task_id, status = self.check_task_finished(
@@ -256,12 +272,15 @@ class GNPS_Runner(Pipe_Step):
         # Own GNPS FBMN submission
         else:
             if self.resubmit:
-                if "standard" in in_path:
-                    in_path = self.extract_standard(in_path=in_path)
-                    in_files = self.match_dir_paths(dir=in_path["in_path"])
+                if self.data_ids["standard"] in in_paths:
+                    standard_dir = self.extract_standard(
+                        in_paths=in_paths,
+                        standard_value=self.standard_key
+                    )
+                    in_files = self.match_dir_paths(dir=standard_dir)
                 else:
                     in_files = self.extract_optional(
-                        in_path,
+                        in_paths,
                         [
                             "feature_ms2",
                             "feature_quantification",
@@ -284,7 +303,7 @@ class GNPS_Runner(Pipe_Step):
                 json.dump(results_dict, file)
 
             logger.log(
-                f"Successful FBMN run with data from {gnps_response if gnps_response else mzmine_log if mzmine_log else in_path}",
+                f"Successful FBMN run with data from {gnps_response if gnps_response else mzmine_log if mzmine_log else in_paths}",
                 minimum_verbosity=2,
                 verbosity=self.verbosity,
             )
@@ -300,7 +319,7 @@ class GNPS_Runner(Pipe_Step):
             correct_runner = "single"
             for path in filter(
                 None,
-                self.extract_optional(scheduled_io["in_path"], keys=list(self.patterns.keys())),
+                self.extract_optional(scheduled_io["in_paths"], keys=self.data_ids["in_paths"]),
             ):
                 if os.path.isdir(path):
                     correct_runner = "directory"
@@ -308,64 +327,65 @@ class GNPS_Runner(Pipe_Step):
         return super().distribute_scheduled(correct_runner=correct_runner, **scheduled_io)
 
     # RUN
-    def run_single(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
+    def run_single(self, in_paths: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
         """
         Get the GNPS results from a single path, mzmine_log or GNPS response.
 
-        :param in_path: Input directory
-        :type in_path: dict[str, StrPath]
+        :param in_paths: Input directory
+        :type in_paths: dict[str, StrPath]
         :param out_path: Output directory of result, defaults to None
         :type out_path: dict[str, StrPath], optional
         """
-        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
-
+        out_path = get_if_dict(out_path, self.data_ids["out_path"])
         if os.path.isdir(out_path):
             out_path = join(out_path, "fbmn_all_db_annotations.json")
 
         self.compute(
             step_function=capture_and_log,
             func=self.gnps_check_resubmit,
-            in_out=dict(in_path=in_path, out_path=out_path),
+            in_out=dict(
+                in_paths=in_paths,
+                out_path={self.data_ids["out_path"][0]: out_path}
+            ),
             log_path=self.get_log_path(out_path=out_path),
         )
 
-    def run_directory(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
+    def run_directory(self, in_paths: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
         """
         Pass on the directory to single case.
         """
-        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
-
+        out_path = get_if_dict(out_path, self.data_ids["out_path"])
+        
         # Special case "standard" as summary of file_types
-        if "standard" in in_path:
-            for annotation_type in iter(self.patterns.keys()):
-                if annotation_type not in in_path:
-                    in_path[annotation_type] = in_path["standard"]
-            in_path.pop("standard")
+        in_paths = self.fill_dict_standards(
+            dictionary=in_paths,
+            replacement_keys=self.data_ids["in_paths"],
+            standards_key=self.data_ids["standard"][0],
+        )
 
         # Search for valid files
-        matched_in_paths = {}
-        for file_type, path in in_path.items():
+        matched_in_paths = in_paths.copy()
+        for file_type, path in in_paths.items():
             # Catch files
             if os.path.isfile(path):
                 matched_in_paths[file_type] = path
             # Search directories
             for entry in os.listdir(path):
-                if self.match_path(pattern=self.patterns[file_type], path=entry):
+                if self.match_path(pattern=file_type, path=entry):
                     matched_in_paths[file_type] = join(path, entry)
                     break
 
         if matched_in_paths:
             os.makedirs(out_path, exist_ok=True)
-            self.run_single(in_path=matched_in_paths, out_path=out_path, **kwargs)
+            self.run_single(in_paths=matched_in_paths, out_path=out_path, **kwargs)
         else:
-            logger.error(
-                message=f"Found no matched_in_paths={matched_in_paths}, inferred from in_paths={in_path}",
-                error_type=ValueError,
+            logger.warn(
+                message=f"Found no matched_in_paths={matched_in_paths}, inferred from in_paths={in_paths}",
             )
 
     def run_nested(
         self,
-        in_path: dict[str, StrPath],
+        in_paths: dict[str, StrPath],
         out_path: dict[str, StrPath],
         recusion_level: int = 0,
         **kwargs,
@@ -373,8 +393,8 @@ class GNPS_Runner(Pipe_Step):
         """
         Construct a list of necessary computations for getting the GNPS results from a nested scheme of mzmine results.
 
-        :param in_path: Root input directory
-        :type in_path: dict[str, StrPath]
+        :param in_paths: Root input directory
+        :type in_paths: dict[str, StrPath]
         :param out_path: Root output directory
         :type out_path: dict[str, StrPath]
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
@@ -382,26 +402,28 @@ class GNPS_Runner(Pipe_Step):
         :return: Future computations
         :rtype: list
         """
-        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
+        in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
+        out_path = get_if_dict(out_path, self.data_ids["out_path"])
 
-        root, dirs, files = next(os.walk(in_path))
+        for in_path in in_paths:
+            root, dirs, files = next(os.walk(in_path))
 
-        dirs_with_matches = {}
-        for file_type, pattern in self.patterns.items():
-            for file in files:
-                if self.match_path(pattern=pattern, path=file):
-                    dirs_with_matches[file_type] = in_path
+            dirs_with_matches = {}
+            for file_type, pattern in self.patterns.items():
+                for file in files:
+                    if self.match_path(pattern=file_type, path=file):
+                        dirs_with_matches[file_type] = in_path
 
-        if dirs_with_matches:
-            self.run_directory(in_path=dirs_with_matches, out_path=out_path, **kwargs)
+            if dirs_with_matches:
+                self.run_directory(in_paths=dirs_with_matches, out_path=out_path, **kwargs)
 
-        for dir in dirs:
-            self.run_nested(
-                in_path=join(in_path, dir),
-                out_path=join(out_path, dir),
-                recusion_level=recusion_level + 1,
-                **kwargs,
-            )
+            for dir in dirs:
+                self.run_nested(
+                    in_paths=join(in_path, dir),
+                    out_path=join(out_path, dir),
+                    recusion_level=recusion_level + 1,
+                    **kwargs,
+                )
 
 
 if __name__ == "__main__":

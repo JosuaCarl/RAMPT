@@ -114,7 +114,7 @@ class Step_Configuration:
         suffix: str = None,
         prefix: str = None,
         contains: str = None,
-        patterns: dict[str, str] = {"in": ".*"},
+        patterns: dict[str, str] = {},
         mandatory_patterns: dict[str, str] = {},
         save_log: bool = True,
         verbosity: int = 1,
@@ -161,6 +161,7 @@ class Step_Configuration:
         self.mandatory_patterns = mandatory_patterns
         self.save_log = save_log
         self.verbosity = verbosity
+        self.update_patterns(list(self.patterns.keys()))
 
     # Update variables
     def update(self, attributions: dict):
@@ -171,15 +172,15 @@ class Step_Configuration:
         :type attributions: str
         """
         self.__dict__.update(attributions)
+        self.update_patterns(list(self.patterns.keys()))
 
-    def update_regex(
+    def update_pattern(
         self,
+        key: str,
         pattern: str = None,
         contains: str = None,
         suffix: str = None,
         prefix: str = None,
-        key: str = "in",
-        refill_pattern: bool = False,
     ):
         # Check for existing patterns
         pattern = pattern if pattern else self.pattern
@@ -187,46 +188,42 @@ class Step_Configuration:
         suffix = suffix if suffix else self.suffix
         prefix = prefix if prefix else self.prefix
 
-        # Fill regex
-        if key in self.patterns:
-            regex_all = self.patterns[key]
-        else:
-            regex_all = None
-        if refill_pattern:
-            if pattern:
-                regex_all = pattern
-            if contains:
-                regex_all = rf"{regex_all}|.*{contains}.*" if regex_all else rf".*{contains}.*"
-            if suffix:
-                regex_all = rf"{regex_all}.*{suffix}$" if regex_all else rf".*{suffix}$"
-            if prefix:
-                regex_all = rf"^{prefix}.*{regex_all}" if regex_all else rf"^{prefix}.*"
-
-        # Add mandatory
-        if self.mandatory_patterns.get(key, None):
-            regex_all = (
-                rf"(?={regex_all})(?={self.mandatory_patterns[key]})"
-                if regex_all
-                else self.mandatory_patterns[key]
-            )
+        regex_all = None
+        if pattern:
+            regex_all = pattern
+        if contains:
+            regex_all = rf"{regex_all}|.*{contains}.*" if regex_all else rf".*{contains}.*"
+        if suffix:
+            regex_all = rf"{regex_all}.*{suffix}$" if regex_all else rf".*{suffix}$"
+        if prefix:
+            regex_all = rf"^{prefix}.*{regex_all}" if regex_all else rf"^{prefix}.*"
 
         # Save inputs
-        self.prefix = prefix
-        self.suffix = suffix
-        self.contains = contains
         if regex_all:
             self.patterns[key] = regex_all
 
-    def update_regexes(self, fill_patterns: list = []):
-        for key in set(list(self.mandatory_patterns.keys()) + list(self.patterns.keys())):
-            self.update_regex(
+    def update_patterns(self, fill_patterns: list = []):
+        for key in fill_patterns:
+            self.update_pattern(
+                key=key,
                 pattern=self.pattern,
                 contains=self.contains,
                 suffix=self.suffix,
                 prefix=self.prefix,
-                key=key,
-                refill_pattern=key in fill_patterns,
             )
+
+    def contruct_full_regex(self, regex_id: str) -> str:
+        pattern_regex = self.patterns.get(regex_id, None)
+        mandatory_regex = self.mandatory_patterns.get(regex_id, None)
+        if pattern_regex and mandatory_regex:
+            return rf"(?={pattern_regex})(?={mandatory_regex})"
+        elif pattern_regex:
+            return pattern_regex
+        elif mandatory_regex:
+            return mandatory_regex
+        else:
+            return None
+
 
     # Dictionary represenation
     def dict_representation(self, attribute=None):
@@ -263,7 +260,7 @@ class Pipe_Step(Step_Configuration):
         overwrite: bool = True,
         nested: bool = False,
         workers: int = 1,
-        pattern: str = r".*",
+        pattern: str = None,
         suffix: str = None,
         prefix: str = None,
         contains: str = None,
@@ -375,7 +372,7 @@ class Pipe_Step(Step_Configuration):
         return valid_exec
 
     # Matching
-    def match_path(self, pattern: str, path: StrPath) -> bool:
+    def match_path(self, pattern: str, path: StrPath, by_name=True) -> bool:
         """
         Match a file_name against a regex expression
 
@@ -386,6 +383,10 @@ class Pipe_Step(Step_Configuration):
         :return: Whether the patter is in the file name
         :rtype: bool
         """
+        if by_name:
+            pattern = self.contruct_full_regex(regex_id=pattern)
+        if not pattern:
+            return False
         return bool(regex.search(pattern=pattern, string=str(path)))
 
     def match_dir_paths(
@@ -435,7 +436,7 @@ class Pipe_Step(Step_Configuration):
 
     def store_progress(
         self,
-        in_out: StrPath,
+        in_out: dict[str, StrPath],
         results=None,
         future=None,
         out: str = "",
@@ -445,10 +446,8 @@ class Pipe_Step(Step_Configuration):
         """
         Store progress in PipeStep variables. Ensures a match between reprocessed in_paths and out_paths.
 
-        :param in_path: Path to scheduled file.
-        :type in_path: StrPath
-        :param out_path: Path to output directory.
-        :type out_path: StrPath
+        :param in_out: I/O combination with paths
+        :type in_out: dict[str, StrPath]
         :param results: Results of computation in pythonic form.
         :type results: any
         :param out: Output of run, defaults to ""
@@ -490,7 +489,7 @@ class Pipe_Step(Step_Configuration):
         :type step_function: Callable|str|list
         :param *args: Arguments without keywords for the function
         :type *args: *args
-        :param **kwargs: Keyword arguments, must contain in_path, and out_path
+        :param **kwargs: Keyword arguments, must contain in_paths, and out_path
         :type **kwargs: **kwargs
         """
         # Catch passed bash commands
@@ -577,6 +576,15 @@ class Pipe_Step(Step_Configuration):
         )
 
     # Distribution methods
+    def fill_dict_standards(self, dictionary: dict, replacement_keys: list[str], standards_key: str = "standard"):
+        if standards_key in dictionary:
+            for replacement_key in replacement_keys:
+                if replacement_key not in dictionary:
+                    dictionary[replacement_key] = dictionary[standards_key]
+
+        return dictionary
+    
+
     def extract_standard(self, standard_value: str = "standard", **kwargs) -> dict:
         """
         Extracts standard values from kwargs. If the value is not a dictionary, it is returned instead.
@@ -637,7 +645,9 @@ class Pipe_Step(Step_Configuration):
         :return: _description_
         :rtype: _type_
         """
-        standard_in = self.extract_standard(standard_value, in_path=scheduled_io["in_path"])
+        if hasattr(self, "data_ids") and standard_value == "standard":
+            standard_value = self.data_ids["standard"][0]
+        standard_in = self.extract_standard(standard_value, in_paths=scheduled_io["in_paths"])
 
         if not correct_runner:
             if self.nested:
@@ -702,7 +712,11 @@ class Pipe_Step(Step_Configuration):
 
     # RUN
     def run(
-        self, in_outs: list[dict] = [], out_folder: StrPath = "pipe_step_out", **kwargs
+        self,
+        in_outs: list[dict] = [],
+        out_folder: StrPath = "pipe_step_out",
+        standard_in: str = "standard",
+        **kwargs,
     ) -> list[dict]:
         """
         Run the instance step with the given in_paths and out_paths. Constructs a new out_target_folder for each directory, if given.
@@ -726,13 +740,15 @@ class Pipe_Step(Step_Configuration):
         # Handle empty output paths by choosing input directory as base
         for scheduled_io in self.scheduled_ios:
             if "out_path" not in scheduled_io:
-                if "standard" in scheduled_io["in_path"]:
-                    standard_in_path = scheduled_io["in_path"]["standard"]
+                if standard_in in scheduled_io["in_paths"]:
+                    standard_in_paths = self.extract_standard(
+                        standard_in, in_paths=scheduled_io["in_paths"]
+                    )[0]
                 else:
-                    standard_in_path = next(filter(None, flatten_values(scheduled_io["in_path"])))
+                    standard_in_paths = next(filter(None, flatten_values(scheduled_io["in_paths"])))
                 scheduled_io["out_path"] = {
                     "standard": os.path.abspath(
-                        os.path.join(get_directory(standard_in_path), "..", out_folder)
+                        os.path.join(get_directory(standard_in_paths), "..", out_folder)
                     )
                 }
 
@@ -743,7 +759,7 @@ class Pipe_Step(Step_Configuration):
                 continue
 
             logger.log(
-                message=f'Processing {scheduled_io["in_path"]} -> {scheduled_io["out_path"]}',
+                message=f'Processing {scheduled_io["in_paths"]} -> {scheduled_io["out_path"]}',
                 minimum_verbosity=2,
                 verbosity=self.verbosity,
             )
@@ -751,7 +767,7 @@ class Pipe_Step(Step_Configuration):
             self.distribute_scheduled(kwargs=kwargs, **scheduled_io)
 
             logger.log(
-                message=f'Processed {scheduled_io["in_path"]} -> {scheduled_io["out_path"]}',
+                message=f'Processed {scheduled_io["in_paths"]} -> {scheduled_io["out_path"]}',
                 minimum_verbosity=2,
                 verbosity=self.verbosity,
             )

@@ -11,6 +11,7 @@ import pandas as pd
 
 from os.path import join
 
+from rampt.helpers.general import *
 from rampt.helpers.types import StrPath
 from rampt.steps.general import Pipe_Step, get_value
 from rampt.steps.analysis.statistics import *
@@ -46,8 +47,8 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         workers=n_workers,
     )
     analysis_runner.scheduled_ios = {
-        "in_path": {"standard": in_dir},
-        "out_path": {"standard": out_dir},
+        "in_paths": {"summary_paths": in_dir},
+        "out_path": {"analysis_paths": out_dir},
     }
     return analysis_runner.run()
 
@@ -77,8 +78,14 @@ class Analysis_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
+        self.data_ids = {
+            "in_paths": ["summary_paths"],
+            "out_path": ["analysis_paths"],
+            "standard": ["summary_paths"],
+        }
         super().__init__(
-            patterns={"in": r"^(.*[\\/])?summary\.tsv$"},
+            patterns={self.data_ids["in_paths"][0]: r"^(.*[\\/])?summary"},
+            mandatory_patterns={self.data_ids["in_paths"][0]: r".*\.tsv$"},
             save_log=save_log,
             additional_args=additional_args,
             verbosity=verbosity,
@@ -178,8 +185,10 @@ class Analysis_Runner(Pipe_Step):
                 analysis[mode_columns].to_csv(join(out_path, f"analysis_{mode}_mode.tsv"), sep="\t")
 
     def complete_analysis(self, in_out: dict[str, StrPath]) -> pd.DataFrame:
-        in_path, out_path = self.extract_standard(**in_out)
-        summary = self.read_summary(file_path=in_path)
+        in_paths = get_if_dict(in_out["in_paths"], self.data_ids["in_paths"])
+        out_path = get_if_dict(in_out["out_path"], self.data_ids["out_path"])
+
+        summary = self.read_summary(file_path=in_paths)
 
         peak_columns = self.search_check_peak_info(summary=summary)
 
@@ -195,7 +204,7 @@ class Analysis_Runner(Pipe_Step):
         self.export_results(analysis=self.analysis, peak_columns=peak_columns, out_path=out_path)
 
         logger.log(
-            f"Analyzed {in_path}, saved to {out_path}",
+            f"Analyzed {in_paths}, saved to {out_path}",
             minimum_verbosity=1,
             verbosity=self.verbosity,
         )
@@ -205,72 +214,97 @@ class Analysis_Runner(Pipe_Step):
         return super().distribute_scheduled(**scheduled_io)
 
     # RUN
-    def run_single(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
+    def run_single(self, in_paths: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
         """
         Add the annotations into a quantification file.
 
-        :param in_path: Path to scheduled file.
-        :type in_path: dict[str, StrPath]
+        :param in_paths: Path to scheduled file.
+        :type in_paths: dict[str, StrPath]
         :param out_path: Path to output directory.
         :type out_path: dict[str, StrPath]
         """
-        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
+        in_paths = get_if_dict(in_paths, self.data_ids["in_paths"])
+        out_path = get_if_dict(out_path, self.data_ids["out_path"])
+
         self.compute(
             step_function=capture_and_log,
             func=self.complete_analysis,
-            in_out=dict(in_path=in_path, out_path=out_path),
+            in_out=dict(
+                in_paths=in_paths,
+                out_path={self.data_ids["out_path"][0]: out_path}
+            ),
             log_path=self.get_log_path(out_path=out_path),
         )
 
-    def run_directory(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
+    def run_directory(self, in_paths: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
         """
         Convert all matching files in a folder.
 
-        :param in_path: Path to scheduled file.
-        :type in_path: dict[str, StrPath]
+        :param in_paths: Path to scheduled file.
+        :type in_paths: dict[str, StrPath]
         :param out_path: Path to output directory.
         :type out_path: dict[str, StrPath]
         """
-        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
-        for entry in os.listdir(in_path):
-            if self.match_path(pattern=self.patterns["in"], path=entry):
-                os.makedirs(out_path, exist_ok=True)
-                self.run_single(in_path=join(in_path, entry), out_path=out_path, **kwargs)
-                break
+        in_paths = get_if_dict(in_paths, self.data_ids["in_paths"])
+        out_path = get_if_dict(out_path, self.data_ids["out_path"])
+        if not isinstance(in_paths, dict):
+            in_paths = {"summary_paths": in_paths}
+        # Search for relevant files
+        matched_in_paths = in_paths.copy()
+        for file_type, path in in_paths.items():
+            # Catch files
+            if os.path.isfile(path):
+                matched_in_paths[file_type] = path
+            # Search directories
+            for entry in os.listdir(path):
+                if self.match_path(pattern=file_type, path=entry):
+                    matched_in_paths[file_type] = join(path, entry)
+                    break
+
+        if matched_in_paths:
+            os.makedirs(out_path, exist_ok=True)
+            self.run_single(in_paths=matched_in_paths, out_path=out_path, **kwargs)
+        else:
+            logger.warn(
+                message=f"Found no information in matched_in_paths={matched_in_paths}, inferred from in_paths={in_paths}",
+            )
 
     def run_nested(
         self,
-        in_path: dict[str, StrPath],
+        in_paths: dict[str, StrPath],
         out_path: dict[str, StrPath],
         recusion_level: int = 0,
         **kwargs,
     ):
         """
-        Converts multiple files in multiple folders, found in in_path with msconvert and saves them
+        Converts multiple files in multiple folders, found in in_paths with msconvert and saves them
         to a location out_path again into their respective folders.
 
-        :param in_path: Starting folder for descent.
-        :type in_path: dict[str, StrPath]
+        :param in_paths: Starting folder for descent.
+        :type in_paths: dict[str, StrPath]
         :param out_path: Folder where structure is mimiced and files are converted to
         :type out_path: dict[str, StrPath]
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
         """
-        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
+        in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
+        out_path = get_if_dict(out_path, self.data_ids["out_path"])
 
-        root, dirs, files = next(os.walk(in_path))
+        for in_path in in_paths:
+            root, dirs, files = next(os.walk(in_path))
 
-        for file in files:
-            if self.match_path(pattern=self.patterns["in"], path=file):
-                self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
+            for file in files:
+                if self.match_path(pattern=self.data_ids["in_paths"][0], path=file):
+                    self.run_directory(in_paths=in_path, out_path=out_path, **kwargs)
+                    break
 
-        for dir in dirs:
-            self.run_nested(
-                in_path=join(in_path, dir),
-                out_path=join(out_path, dir),
-                recusion_level=recusion_level + 1,
-                **kwargs,
-            )
+            for dir in dirs:
+                self.run_nested(
+                    in_paths=join(in_path, dir),
+                    out_path=join(out_path, dir),
+                    recusion_level=recusion_level + 1,
+                    **kwargs,
+                )
 
 
 if __name__ == "__main__":

@@ -49,7 +49,7 @@ def test_sirius_pipe_run_single():
     sirius_runner = Sirius_Runner(config=join(batch_path, "sirius_config.txt"))
 
     sirius_runner.run_single(
-        in_path=join(example_path, "example_files_sirius.mgf"), out_path=out_path
+        in_paths=join(example_path, "example_files_sirius.mgf"), out_path=out_path
     )
 
     assert os.path.isfile(join(out_path, "projectspace.sirius"))
@@ -61,7 +61,7 @@ def test_sirius_pipe_run_directory():
     # Supoerficial testing of run_directory
     sirius_runner = Sirius_Runner(config=example_path)
 
-    sirius_runner.run_directory(in_path=example_path, out_path=out_path)
+    sirius_runner.run_directory(in_paths=example_path, out_path=out_path)
 
     assert os.path.isfile(join(out_path, "projectspace.sirius"))
     assert os.path.isfile(join(out_path, "structure_identifications.tsv"))
@@ -86,11 +86,11 @@ def test_sirius_pipe_run():
     # Superficial testing of run
     sirius_runner = Sirius_Runner(workers=2)
 
-    sirius_runner.run([dict(in_path=example_path, out_path=out_path)])
+    sirius_runner.run([dict(in_paths=example_path, out_path=out_path)])
     sirius_runner.compute_futures()
 
     assert sirius_runner.processed_ios == [
-        {"in_path": join(example_path, "example_files_sirius.mgf"), "out_path": out_path}
+        {"in_paths": join(example_path, "example_files_sirius.mgf"), "out_path":{"sirius_annotated_data_paths": out_path}}
     ]
 
 

@@ -128,7 +128,7 @@ def generic_step(
         verbosity=global_params.get("verbosity", 0),
     )
 
-    # Overwrite scheduled, when new in_path is given
+    # Overwrite scheduled, when new in_paths is given
     if in_outs:
         step_instance.scheduled_ios = to_list(in_outs)
     elif not step_instance.scheduled_ios:
@@ -155,9 +155,9 @@ def generic_step(
     }
 
     # Repackage output for workflow
-    results = [{"in_path": {"standard": standard_out_path}}] + other_returns
+    results = [standard_out_path] + other_returns
 
-    return results
+    return results[0] if len(results) == 1 else results
 
 
 def convert_files(
@@ -170,7 +170,7 @@ def convert_files(
     return generic_step(
         step_class=MSconvert_Runner,
         entrypoint="conv" in entrypoint.lower(),
-        in_outs=raw_data_paths,
+        in_outs={"in_path": raw_data_paths},
         out_path_root=out_path_root,
         out_folder="converted",
         step_params=step_params,
@@ -189,7 +189,7 @@ def find_features(
     return generic_step(
         step_class=MZmine_Runner,
         entrypoint="feat" in entrypoint.lower(),
-        in_outs=community_formatted_data_paths,
+        in_outs={"in_path": community_formatted_data_paths},
         out_path_root=out_path_root,
         out_folder="processed",
         step_params=step_params,
@@ -210,12 +210,11 @@ def annotate_gnps(
     return generic_step(
         step_class=GNPS_Runner,
         entrypoint="annot" in entrypoint.lower(),
-        in_outs=processed_data_paths,
+        in_outs={"in_path": processed_data_paths | mzmine_log},
         out_path_root=out_path_root,
         out_folder="annotated",
         step_params=step_params,
         global_params=global_params,
-        mzmine_log=mzmine_log,
     )
 
 
@@ -230,7 +229,7 @@ def annotate_sirius(
     return generic_step(
         step_class=Sirius_Runner,
         entrypoint="annot" in entrypoint.lower(),
-        in_outs=processed_data_paths,
+        in_outs={"in_path": processed_data_paths},
         out_path_root=out_path_root,
         out_folder="annotated",
         step_params=step_params,
@@ -251,7 +250,7 @@ def summarize_annotations(
     return generic_step(
         step_class=Summary_Runner,
         entrypoint="summ" in entrypoint.lower(),
-        in_outs=processed_data_paths | gnps_annotation_paths | sirius_annotation_paths,
+        in_outs={"in_path": processed_data_paths | gnps_annotation_paths | sirius_annotation_paths},
         out_path_root=out_path_root,
         out_folder="analysis",
         step_params=step_params,
@@ -270,7 +269,7 @@ def analyze_difference(
         step_class=Analysis_Runner,
         # Not kidding, this covers analysis and analize
         entrypoint="anal" in entrypoint.lower(),
-        in_outs=summary_data_paths,
+        in_outs={"in_path": summary_data_paths},
         out_path_root=out_path_root,
         out_folder="analysis",
         step_params=step_params,

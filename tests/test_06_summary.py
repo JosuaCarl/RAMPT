@@ -61,17 +61,17 @@ def test_summary_add_annotations():
     summary_runner = Summary_Runner()
 
     # Prepare annotation data
-    in_path = {"annotation": example_path, "quantification": example_path}
-    if "annotation" in in_path:
-        for annotation_type in summary_runner.ordered_annotations:
-            if annotation_type not in in_path:
-                in_path[annotation_type] = in_path["annotation"]
-        in_path.pop("annotation")
+    in_paths = {"annotations": example_path, "quantification": example_path}
+    summary_runner.fill_dict_standards(
+        dictionary=in_paths,
+        replacement_keys=summary_runner.ordered_annotations,
+        standards_key="annotations"
+    )
 
-    matched_in_paths = {}
-    for file_type, path in in_path.items():
+    matched_in_paths = in_paths.copy()
+    for file_type, path in in_paths.items():
         for entry in os.listdir(path):
-            if summary_runner.match_path(pattern=summary_runner.patterns[file_type], path=entry):
+            if summary_runner.match_path(pattern=file_type, path=entry):
                 matched_in_paths[file_type] = join(path, entry)
                 break
 
@@ -105,7 +105,7 @@ def test_summary_pipe_run_single():
     summary_runner = Summary_Runner()
 
     summary_runner.run_single(
-        in_path={
+        in_paths={
             "quantification": join(example_path, "example_files_iimn_fbmn_quant.csv"),
             "gnps_annotations": join(example_path, "example_files_fbmn_all_db_annotations.json"),
         },
@@ -123,7 +123,7 @@ def test_summary_pipe_run_directory():
     summary_runner = Summary_Runner()
 
     summary_runner.run_directory(
-        in_path={"quantification": example_path, "annotation": example_path}, out_path=out_path
+        in_paths={"quantification": example_path, "annotation": example_path}, out_path=out_path
     )
 
     assert os.path.isfile(join(out_path, "summary.tsv"))
@@ -149,7 +149,7 @@ def test_summary_pipe_run():
     summary_runner.run(
         [
             dict(
-                in_path={"quantification": example_path, "annotation": example_path},
+                in_paths={"quantification": example_path, "annotations": example_path},
                 out_path=out_path,
             )
         ]
@@ -158,7 +158,8 @@ def test_summary_pipe_run():
 
     assert summary_runner.processed_ios == [
         {
-            "in_path": {
+            "in_paths": {
+                "annotations": example_path,
                 "canopus_formula_summary": join(example_path, "canopus_formula_summary.tsv"),
                 "canopus_structure_summary": join(example_path, "canopus_structure_summary.tsv"),
                 "denovo_structure_identifications": join(
@@ -171,7 +172,7 @@ def test_summary_pipe_run():
                 "quantification": join(example_path, "example_files_iimn_fbmn_quant.csv"),
                 "structure_identifications": join(example_path, "structure_identifications.tsv"),
             },
-            "out_path": join(out_path, "summary.tsv"),
+            "out_path":{"summary_paths": join(out_path, "summary.tsv")},
         }
     ]
 

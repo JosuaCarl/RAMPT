@@ -49,8 +49,8 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         valid_formats=valid_formats,
     )
     mzmine_runner.scheduled_ios = {
-        "in_path": {"standard": in_dir},
-        "out_path": {"standard": out_dir},
+        "in_paths": {"community_formatted_data_paths": in_dir},
+        "out_path": {"processed_data_paths": out_dir},
     }
     mzmine_runner.run()
 
@@ -92,8 +92,21 @@ class MZmine_Runner(Pipe_Step):
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
         """
+        self.data_ids = {
+            "in_paths": ["community_formatted_data_paths"],
+            "out_path": ["processed_data_paths"],
+            "batch": ["standard"],
+            "standard": ["community_formatted_data_paths"],
+        }
         super().__init__(
-            mandatory_patterns={"in": rf".*\.({r'|'.join(valid_formats)})$"},
+            mandatory_patterns={
+                self.data_ids["in_paths"][0]: rf".*\.({r'|'.join(valid_formats)})$",
+                "batch": r".*\.mzbatch$",
+            },
+            patterns={
+                self.data_ids["in_paths"][0]: r".*",
+                "batch": r".*",
+            },
             save_log=save_log,
             additional_args=additional_args,
             verbosity=verbosity,
@@ -127,6 +140,38 @@ class MZmine_Runner(Pipe_Step):
                 error_type=ValueError,
             )
 
+    def collect_source_files(
+        self, files: list, root_path_out: StrPath, root_path_in: StrPath = None
+    ) -> list:
+        """
+        Collect all files in a source_files.txt that match the in_paths regex.
+
+        :param files: List of file names
+        :type files: list
+        :param root_path_out: Root out path
+        :type root_path_out: StrPath
+        :param root_path_in: Root in path
+        :type root_path_in: StrPath
+        :return: List of source paths
+        :rtype: list
+        """
+        source_files = []
+        for file in files:
+            if self.match_path(pattern=self.data_ids["in_paths"][0], path=file):
+                if root_path_in:
+                    source_files.append(join(root_path_in, file))
+                else:
+                    source_files.append(file)
+
+        if source_files:
+            os.makedirs(root_path_out, exist_ok=True)
+            source_files_path = join(root_path_out, "source_files.txt")
+            with open(source_files_path, "w", encoding="utf8") as f:
+                f.write("\n".join(source_files))
+            return source_files_path
+        else:
+            return None
+
     # Distribution
     def distribute_scheduled(self, **scheduled_io):
         return super().distribute_scheduled(**scheduled_io)
@@ -134,7 +179,7 @@ class MZmine_Runner(Pipe_Step):
     # RUN
     def run_single(
         self,
-        in_path: dict[str, StrPath],
+        in_paths: dict[str, StrPath],
         out_path: dict[str, StrPath],
         batch: dict[str, StrPath] = None,
         **kwargs,
@@ -142,24 +187,30 @@ class MZmine_Runner(Pipe_Step):
         """
         Run a single mzmine batch.
 
-        :param in_path: Path to in files (as a .txt with filepaths or glob string)
-        :type in_path: dict[str, StrPath]
+        :param in_paths: Path to in files (as a .txt with filepaths or glob string)
+        :type in_paths: dict[str, StrPath]
         :param out_path: Output directory
         :type out_path: dict[str, StrPath]
         :param batch: Batch file
         :type batch: dict[str, StrPath]
         """
-        in_path, out_path, batch = self.extract_standard(
-            in_path=in_path, out_path=out_path, batch=batch
-        )
+        in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
+        out_path = get_if_dict(out_path, self.data_ids["out_path"])
+        batch = get_if_dict(batch, self.data_ids["batch"])
         batch = batch if batch else self.batch
         additional_args = self.link_additional_args(**kwargs)
+
+        if len(in_paths) > 1:
+            source_file_path = self.collect_source_files(files=in_paths, root_path_out=out_path)
+            in_path = source_file_path
+        else:
+            in_path = in_paths[0]
 
         cmd = rf'"{self.exec_path}" {self.login} --batch "{batch}" --input "{in_path}" --output "{out_path}" {additional_args}'
 
         self.compute(
             step_function=execute_verbose_command,
-            in_out=dict(in_path=in_path, out_path=out_path),
+            in_out=dict(in_paths=in_path, out_path={self.data_ids["out_path"][0]: out_path}),
             log_path=self.get_log_path(out_path=out_path),
             cmd=cmd,
             verbosity=self.verbosity,
@@ -167,7 +218,7 @@ class MZmine_Runner(Pipe_Step):
 
     def run_directory(
         self,
-        in_path: dict[str, StrPath],
+        in_paths: dict[str, StrPath],
         out_path: dict[str, StrPath],
         batch: dict[str, StrPath] = None,
         **kwargs,
@@ -175,41 +226,35 @@ class MZmine_Runner(Pipe_Step):
         """
         Compute a single mzmine batch on a folder.
 
-        :param in_path: Path to in folder
-        :type in_path: dict[str, StrPath]
+        :param in_paths: Path to in folder
+        :type in_paths: dict[str, StrPath]
         :param out_path: Output directory
         :type out_path: dict[str, StrPath]
         :param batch: Batch file, defaults to None
         :type batch: StrPath, optional
         """
-        in_path, out_path, batch = self.extract_standard(
-            in_path=in_path, out_path=out_path, batch=batch
-        )
+        in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
+        out_path = get_if_dict(out_path, self.data_ids["out_path"])
+        batch = get_if_dict(batch, self.data_ids["batch"])
         batch = batch if batch else self.batch
 
-        in_files = []
-        root, dirs, files = next(os.walk(in_path))
-        if not batch:
-            for file in os.listdir(files):
-                if self.match_path(pattern=r".*\.mzbatch$", path=file):
-                    batch = join(in_path, file) if not self.batch else None
-
-        for file in files:
-            if self.match_path(pattern=self.patterns["in"], path=file):
-                in_files.append(join(in_path, file))
-
-        if in_files:
-            os.makedirs(out_path, exist_ok=True)
-            source_paths_file = join(out_path, "source_files.txt")
-            with open(source_paths_file, "w", encoding="utf8") as f:
-                f.write("\n".join(in_files))
-            self.run_single(in_path=source_paths_file, out_path=out_path, batch=batch)
-        else:
-            logger.warn(f"No valid files found at {in_path}.")
+        for in_path in in_paths:
+            root, dirs, files = next(os.walk(in_path))
+            if not batch:
+                for file in os.listdir(files):
+                    if self.match_path(pattern="batch", path=file):
+                        batch = join(in_path, file) if not self.batch else None
+            source_file_path = self.collect_source_files(
+                files=files, root_path_in=in_path, root_path_out=out_path
+            )
+            if source_file_path:
+                self.run_single(in_paths=source_file_path, out_path=out_path, batch=batch)
+            else:
+                logger.warn(f"No valid files found at {in_path}.")
 
     def run_nested(
         self,
-        in_path: dict[str, StrPath],
+        in_paths: dict[str, StrPath],
         out_path: dict[str, StrPath],
         recusion_level: int = 0,
         **kwargs,
@@ -217,28 +262,31 @@ class MZmine_Runner(Pipe_Step):
         """
         Run a mzmine batch on a nested structure.
 
-        :param in_path: Root directory for descending the structure
-        :type in_path: dict[str, StrPath]
+        :param in_paths: Root directory for descending the structure
+        :type in_paths: dict[str, StrPath]
         :param out_path: Root directory for output
         :type out_path: dict[str, StrPath]
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
         """
-        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
-        root, dirs, files = next(os.walk(in_path))
+        in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
+        out_path = get_if_dict(out_path, self.data_ids["out_path"])
 
-        for file in files:
-            if self.match_path(pattern=self.patterns["in"], path=file):
-                self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
-                break
+        for in_path in in_paths:
+            root, dirs, files = next(os.walk(in_path))
 
-        for dir in dirs:
-            self.run_nested(
-                in_path=join(in_path, dir),
-                out_path=join(out_path, dir),
-                recusion_level=recusion_level + 1,
-                **kwargs,
-            )
+            for file in files:
+                if self.match_path(pattern=self.data_ids["in_paths"][0], path=file):
+                    self.run_directory(in_paths=in_path, out_path=out_path, **kwargs)
+                    break
+
+            for dir in dirs:
+                self.run_nested(
+                    in_paths=join(in_path, dir),
+                    out_path=join(out_path, dir),
+                    recusion_level=recusion_level + 1,
+                    **kwargs,
+                )
 
 
 if __name__ == "__main__":

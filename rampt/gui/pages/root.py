@@ -87,6 +87,7 @@ def load_params(state, path: StrPath = None, scenario_name: str = "Default"):
 # SCENARIO
 scenario = tp.create_scenario(ms_analysis_config, name="Default")
 
+out_path_root = None
 
 ## Synchronisation of Scenario
 # TODO: Change structure so that previous steps are preferred as inputs
@@ -131,26 +132,75 @@ entrypoints = ["↔️ Conversion", "🔍 Feature finding", "✒️ Annotation",
 entrypoint = "↔️ Conversion"
 
 
+# TODO merge dicts with | to get node
 match_entrypoint = {
     "*": {"out_path_root": ["out_path_root"]},
     "↔️ Conversion": {
-        "raw_data_paths": ["conversion_params.scheduled_ios['standard']"],
-        "mzmine_batch": ["feature_finding_params.scheduled_ios['batch']"],
-        "mzmine_user": ["feature_finding_params.scheduled_ios['user']"],
+        "raw_data_paths": ["conversion_params.scheduled_ios"],
+        "mzmine_batch": ["feature_finding_params.batch"],
+        "mzmine_user": ["feature_finding_params.user"],
     },
     "🔍 Feature finding": {
-        "community_formatted_data_paths": ["feature_finding_params.scheduled_ios['standard']"],
-        "mzmine_batch": ["feature_finding_params.scheduled_ios['batch']"],
-        "mzmine_user": ["feature_finding_params.scheduled_ios['user']"],
+        "community_formatted_data_paths": ["feature_finding_params.scheduled_ios"],
+        "mzmine_batch": ["feature_finding_params.batch"],
+        "mzmine_user": ["feature_finding_params.user"],
     },
-    "✒️ Annotation": {"processed_data_paths": []},
-    "🧺 Summary": {"raw_data_paths": []},
-    "📈 Analysis": {"raw_data_paths": []},
+    "✒️ Annotation": {
+        "processed_data_paths": [
+            "summary_params.scheduled_ios",
+            "gnps_params.scheduled_ios",
+            "sirius_params.scheduled_ios",
+        ]
+    },
+    "🧺 Summary": {
+        "gnps_annotation_paths": ["summary_params.scheduled_ios"],
+        "sirius_annotation_paths": ["summary_params.scheduled_ios"],
+    },
+    "📈 Analysis": {"summary_data_paths": ["analysis_params.scheduled_ios"]},
 }
 
-out_path_root = None
+
+def lock_scenario(state):
+    # Fetch scenario
+    scenario = state.scenario
+
+    # Obtain parameters
+    parameters = construct_params_dict(state)
+
+    # Write Nones to optional nodes
+    for optional_data_node in optional_data_nodes:
+        scenario.data_nodes.get(optional_data_node).write(None)
+
+    # Get required nodes
+    entrypoint_required_nodes = match_entrypoint.get(get_attribute_recursive(state, "entrypoint"))
+    entrypoint_required_nodes = entrypoint_required_nodes | match_entrypoint.get("*")
+
+    # Iterate over required nodes
+    for data_node_id, access_points in entrypoint_required_nodes.items():
+        content = {}
+        # Iterate over access points of data_node
+        for access_point in access_points:
+            # Extract information from access_point
+            access_point = regex.split(r"\.|(?:\[[\"\'](.*?)[\"\']\])", access_point)
+            value = parameters
+            for access_part in access_point:
+                value = value.get(access_part)
+
+            # Merge content dictionary (Last entry overwrites) just accept last of rest
+            content = content | value if isinstance(value, dict) else value
+
+        # Write to data node
+        scenario.data_nodes.get(data_node_id).write(content)
+
+    # Write param nodes
+    for param_data_node_id, param in parameters.items():
+        scenario.data_nodes.get(param_data_node_id).write(param)
+
+    state.scenario = scenario
+    state.refresh("scenario")
 
 
+"""
 def lock_scenario(state):
     global scenario
     scenario = state.scenario
@@ -162,7 +212,7 @@ def lock_scenario(state):
     # Iterate over all possible matches
     for data_node_key, attribute_keys in match_data_node.items():
         # Iterate over all possible places, where data nodes info could come from
-        for i, state_attribute in enumerate(attribute_keys):
+        for istate_attribute in attribute_keys:
             # Split to get attributes
             attribute_split = regex.split(r"\.|(?:\[[\"\'](.*?)[\"\']\])", state_attribute)
 
@@ -196,6 +246,7 @@ def lock_scenario(state):
 
     state.scenario = scenario
     state.refresh("scenario")
+"""
 
 
 ## Interaction
@@ -285,7 +336,7 @@ with tgb.Page(style=style) as configuration:
                         on_action=lambda state: set_attribute_recursive(
                             state,
                             "out_path_root",
-                            open_file_folder(select_folder=True),
+                            open_file_folder(select_folder=True, multiple=False),
                             refresh=True,
                         ),
                     )

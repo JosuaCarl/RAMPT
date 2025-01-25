@@ -68,6 +68,12 @@ def test_to_list():
 
 
 # Dict operations
+def test_get_if_dict():
+    assert get_if_dict({"key": "value"}, "key") == "value"
+    assert get_if_dict({"key": "value"}, ["key"]) == "value"
+    assert get_if_dict({"key": "value"}, ["key", "key2"]) == ["value", None]
+    assert get_if_dict("value", "key") == "value"
+
 def test_flatten_values():
     assert flatten_values({"A": [1, 2, 3]}) == [1, 2, 3]
     assert flatten_values({"A": [1, 2, 3]}) == [1, 2, 3]

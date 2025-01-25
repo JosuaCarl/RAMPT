@@ -32,7 +32,10 @@ def create_expandable_setting(
 
 
 def create_file_selection(
-    process: str, param_attribute_in: str = "scheduled_ios", io_key: str = "standard"
+    process: str,
+    param_attribute_in: str = "scheduled_ios",
+    io_key: str = "standard",
+    file_dialog_kwargs: dict = {},
 ):
     naming_list = [process, param_attribute_in, io_key] if io_key else [process, param_attribute_in]
 
@@ -68,21 +71,33 @@ def create_file_selection(
             set_attribute_recursive(state, f"selection_trees_pruned.{selector_id}", pruned_tree)
 
     def update_selection(state, name, value):
+        """
+        Merge values of selection with I/O dictionary
+
+        :param state: State of taipy application
+        :type state: State
+        :param name: Name of variable
+        :type name: str
+        :param value: Selected value (usually dict)
+        :type value: Any
+        """
+        # Extract selected path from value-dict
         selected_labels = [
             element.get("label") if isinstance(element, dict) else element for element in value
         ]
+        # Merge path into i/o dictionary
         if io_key:
-            in_list = get_attribute_recursive(state, f"{process}_params.{param_attribute_in}")
-            dictionary = in_list[0] if in_list else {}
-            dictionary.update({io_key: selected_labels[0]})
-            selected_labels = [dictionary]
+            io_dictionary = get_attribute_recursive(state, f"{process}_params.{param_attribute_in}")
+            io_dictionary = io_dictionary if io_dictionary else {}
+            io_dictionary.update({io_key: selected_labels})
         set_attribute_recursive(
-            state, f"{process}_params.{param_attribute_in}", selected_labels, refresh=True
+            state, f"{process}_params.{param_attribute_in}", io_dictionary, refresh=True
         )
 
     with tgb.layout(columns="1 4", columns__mobile="1", gap="5%"):
-        # In
+        # Selector
         with tgb.part():
+            tgb.toggle(f"{{select_folders.{selector_id}}}", label="Select folder")
             with tgb.part(render="{local}"):
                 tgb.button(
                     "Select in",
@@ -91,7 +106,8 @@ def create_file_selection(
                         open_file_folder(
                             select_folder=get_attribute_recursive(
                                 state, f"select_folders.{selector_id}"
-                            )
+                            ),
+                            **file_dialog_kwargs,
                         ),
                     ),
                 )
@@ -104,7 +120,6 @@ def create_file_selection(
                     multiple=True,
                     on_action=lambda state: construct_selection_tree(state),
                 )
-            tgb.toggle(f"{{select_folders.{selector_id}}}", label="Select folder")
 
         # Selection tree
         tgb.tree(
@@ -129,8 +144,8 @@ def create_list_selection(
     attribute: str = "batch",
     extensions: str = "*",
     name: str = "batch file",
-    default_value=Path.home(),
-    render: str = True,
+    default_value=str(Path.home()),
+    file_dialog_kwargs: dict = {},
 ):
     selector_id = f"{process}_{attribute}"
     list_options.update({selector_id: []})
@@ -150,41 +165,41 @@ def create_list_selection(
     def update_selection(state, name, value):
         set_attribute_recursive(state, f"{process}_params.{attribute}", value, refresh=True)
 
-    with tgb.part(render=render):
-        with tgb.layout(columns="1 4", columns__mobile="1", gap="5%"):
-            with tgb.part(render="{local}"):
-                tgb.button(
-                    f"Select {name}",
-                    on_action=lambda state: construct_selection_list(
-                        state,
-                        open_file_folder(
-                            multiple=False,
-                            filetypes=[
-                                (f"{ext[1:]} files", f"*{ext}") for ext in extensions.split(",")
-                            ],
-                            initialdir=get_directory(default_value),
-                        ),
+    with tgb.layout(columns="1 4", columns__mobile="1", gap="5%"):
+        with tgb.part(render="{local}"):
+            tgb.button(
+                f"Select {name}",
+                on_action=lambda state: construct_selection_list(
+                    state,
+                    open_file_folder(
+                        multiple=False,
+                        filetypes=[
+                            (f"{ext[1:]} files", f"*{ext}") for ext in extensions.split(",")
+                        ],
+                        initialdir=get_directory(default_value),
+                        **file_dialog_kwargs,
                     ),
-                )
-            with tgb.part(render="{not local}"):
-                tgb.file_selector(
-                    f"{{list_uploaded.{selector_id}}}",
-                    label=f"Select {name}",
-                    extensions=extensions,
-                    drop_message=f"Drop {name} for {process} here:",
-                    multiple=False,
-                    on_action=lambda state: construct_selection_list(state),
-                )
-
-            tgb.selector(
-                f"{{list_selected.{selector_id}}}",
-                lov=f"{{list_options.{selector_id}}}",
-                label=f"Select a {name} for {process}",
-                filter=True,
-                multiple=False,
-                mode="radio",
-                on_change=lambda state, name, value: update_selection(state, name, value),
+                ),
             )
+        with tgb.part(render="{not local}"):
+            tgb.file_selector(
+                f"{{list_uploaded.{selector_id}}}",
+                label=f"Select {name}",
+                extensions=extensions,
+                drop_message=f"Drop {name} for {process} here:",
+                multiple=False,
+                on_action=lambda state: construct_selection_list(state),
+            )
+
+        tgb.selector(
+            f"{{list_selected.{selector_id}}}",
+            lov=f"{{list_options.{selector_id}}}",
+            label=f"Select a {name} for {process}",
+            filter=True,
+            multiple=False,
+            mode="radio",
+            on_change=lambda state, name, value: update_selection(state, name, value),
+        )
 
 
 def set_if_chosen(state, attribute: str):

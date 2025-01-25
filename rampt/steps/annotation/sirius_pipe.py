@@ -45,8 +45,8 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         workers=n_workers,
     )
     sirius_runner.scheduled_ios = {
-        "in_path": {"standard": in_dir},
-        "out_path": {"standard": out_dir},
+        "in_paths": {"processed_data_paths": in_dir},
+        "out_path": {"sirius_annotated_data_paths": out_dir},
     }
     return sirius_runner.run(projectspace=projectspace)
 
@@ -81,9 +81,23 @@ class Sirius_Runner(Pipe_Step):
         :type additional_args: list, optional
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
-        """
+        """ 
+        self.data_ids = {
+            "in_paths": ["ms_spectra",],
+            "out_path": ["sirius_annotated_data_paths"],
+            "standard": ["processed_data_paths"],
+            "projectspace": ["standard"],
+            "config": ["standard"],
+        }
         super().__init__(
-            patterns={"in": r".*_sirius\.mgf$", "config": r"sirius_config\.txt"},
+            mandatory_patterns={
+                self.data_ids["in_paths"][0]: r".*\.mgf$",
+                "config": r".*\.txt$"
+            },
+            patterns={
+                self.data_ids["in_paths"][0]: r".*_sirius",
+                "config": r".*sirius_config"
+            },
             save_log=save_log,
             additional_args=additional_args,
             verbosity=verbosity,
@@ -117,7 +131,7 @@ class Sirius_Runner(Pipe_Step):
     # RUN
     def run_single(
         self,
-        in_path: dict[str, StrPath],
+        in_paths: dict[str, StrPath],
         out_path: dict[str, StrPath],
         projectspace: dict[str, StrPath] = None,
         config: dict[str, StrPath] = None,
@@ -126,8 +140,8 @@ class Sirius_Runner(Pipe_Step):
         """
         Run a single SIRIUS configuration.
 
-        :param in_path: Path to in file
-        :type in_path: dict[str, StrPath]
+        :param in_paths: Path to in file
+        :type in_paths: dict[str, StrPath]
         :param out_path: Output directory
         :type out_path: dict[str, StrPath]
         :param projectspace: Path to projectspace file / directory, defaults to out_path
@@ -137,25 +151,30 @@ class Sirius_Runner(Pipe_Step):
         :return: Success of the command
         :rtype: bool
         """
-        in_path, out_path, projectspace, config = self.extract_standard(
-            in_path=in_path, out_path=out_path, projectspace=projectspace, config=config
-        )
-        additional_args = self.link_additional_args(**kwargs)
-
+        in_paths = get_if_dict(in_paths, self.data_ids["in_paths"])
+        out_path = get_if_dict(out_path, self.data_ids["out_path"])
+        projectspace = get_if_dict(projectspace, self.data_ids["projectspace"])
         if projectspace is None:
             projectspace = self.projectspace if self.projectspace else out_path
+        config = get_if_dict(config, self.data_ids["config"])
         if config is None:
             config = self.config
+
+        additional_args = self.link_additional_args(**kwargs)
+        
         config = self.extract_config(config=config)
 
         cmd = (
-            rf'"{self.exec_path}" --project "{join(projectspace, "projectspace.sirius")}" --input "{in_path}" '
+            rf'"{self.exec_path}" --project "{join(projectspace, "projectspace.sirius")}" --input "{in_paths}" '
             + rf'config {config} write-summaries --output "{out_path}" {additional_args}'
         )
 
         self.compute(
             step_function=execute_verbose_command,
-            in_out=dict(in_path=in_path, out_path=out_path),
+            in_out=dict(
+                in_paths=in_paths,
+                out_path={self.data_ids["out_path"][0]: out_path},
+            ),
             log_path=self.get_log_path(out_path=out_path),
             cmd=cmd,
             verbosity=self.verbosity,
@@ -164,7 +183,7 @@ class Sirius_Runner(Pipe_Step):
 
     def run_directory(
         self,
-        in_path: dict[str, StrPath],
+        in_paths: dict[str, StrPath],
         out_path: dict[str, StrPath],
         projectspace: StrPath = None,
         config: str = None,
@@ -173,40 +192,61 @@ class Sirius_Runner(Pipe_Step):
         """
         Compute a sirius run on a folder. When no config is defined, it will search in the folder for config.txt.
 
-        :param in_dir: Path to in folder
-        :type in_dir: StrPath
-        :param out_dir: Output directory
-        :type out_dir: StrPath
+        :param in_paths: Path to in folder
+        :type in_paths: StrPath
+        :param out_path: Output directory
+        :type out_path: StrPath
         :param projectspace: Path to projectspace file / directory, defaults to out_path
         :type projectspace: StrPath
         :param config: Configuration (file), defaults to None
         :type config: StrPath, optional
         """
-        in_path, out_path, projectspace, config = self.extract_standard(
-            in_path=in_path, out_path=out_path, projectspace=projectspace, config=config
+        out_path = get_if_dict(out_path, self.data_ids["out_path"])
+        projectspace = get_if_dict(projectspace, self.data_ids["projectspace"])
+        config = get_if_dict(config, self.data_ids["config"])
+
+        # Special case: standard as summary of file_types
+        in_paths = self.fill_dict_standards(
+            dictionary=in_paths,
+            replacement_keys=self.data_ids["in_paths"],
+            standards_key=self.data_ids["standard"][0],
         )
 
         # Search for config present in folder
         if config is None and self.config is None:
-            for entry in os.listdir(in_path):
-                if self.match_path(pattern=self.patterns["config"], path=entry):
-                    config = join(in_path, entry)
+            for entry in os.listdir(in_paths):
+                if self.match_path(pattern="config", path=entry):
+                    config = join(in_paths, entry)
 
         # Search for relevant files
-        for entry in os.listdir(in_path):
-            if self.match_path(pattern=self.patterns["in"], path=entry):
-                os.makedirs(out_path, exist_ok=True)
-                self.run_single(
-                    in_path=join(in_path, entry),
-                    out_path=out_path,
-                    projectspace=projectspace,
-                    config=config,
-                    **kwargs,
-                )
+        matched_in_paths = in_paths.copy()
+        for file_type, path in in_paths.items():
+            # Catch files
+            if os.path.isfile(path):
+                matched_in_paths[file_type] = path
+            # Search directories
+            for entry in os.listdir(path):
+                if self.match_path(pattern=file_type, path=entry):
+                    matched_in_paths[file_type] = join(path, entry)
+                    break
+        
+        if matched_in_paths:
+            os.makedirs(out_path, exist_ok=True)
+            self.run_single(
+                in_paths=join(in_paths, entry),
+                out_path=out_path,
+                projectspace=projectspace,
+                config=config,
+                **kwargs,
+            )
+        else:
+            logger.warn(
+                message=f"Found no matched_in_paths={matched_in_paths}, inferred from in_paths={in_paths}",
+            )
 
     def run_nested(
         self,
-        in_path: dict[str, StrPath],
+        in_paths: dict[str, StrPath],
         out_path: dict[str, StrPath],
         recusion_level: int = 0,
         **kwargs,
@@ -214,28 +254,30 @@ class Sirius_Runner(Pipe_Step):
         """
         Run SIRIUS Pipeline in nested directories.
 
-        :param in_path: Root input directory
-        :type in_path: dict[str, StrPath]
+        :param in_paths: Root input directory
+        :type in_paths: dict[str, StrPath]
         :param out_path: Root output directory
         :type out_path: dict[str, StrPath]
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
         """
-        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
+        in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
+        out_path = get_if_dict(out_path, self.data_ids["out_path"])
 
-        root, dirs, files = next(os.walk(in_path))
+        for in_path in in_paths:
+            root, dirs, files = next(os.walk(in_path))
 
-        for file in files:
-            if self.match_path(pattern=self.patterns["in"], path=file):
-                self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
+            for file in files:
+                if self.match_path(pattern=self.data_ids["in_path"][0], path=file):
+                    self.run_directory(in_paths=in_path, out_path=out_path, **kwargs)
 
-        for dir in dirs:
-            self.run_nested(
-                in_path=join(in_path, dir),
-                out_path=join(out_path, dir),
-                recusion_level=recusion_level + 1,
-                **kwargs,
-            )
+            for dir in dirs:
+                self.run_nested(
+                    in_paths=join(in_path, dir),
+                    out_path=join(out_path, dir),
+                    recusion_level=recusion_level + 1,
+                    **kwargs,
+                )
 
 
 if __name__ == "__main__":

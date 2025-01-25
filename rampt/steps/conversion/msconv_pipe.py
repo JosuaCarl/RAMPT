@@ -55,8 +55,8 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         workers=n_workers,
     )
     msconvert_runner.scheduled_ios = {
-        "in_path": {"standard": in_dir},
-        "out_path": {"standard": out_dir},
+        "in_paths": {"raw_data_paths": in_dir},
+        "out_path": {"community_formatted_data_paths": out_dir},
     }
     return msconvert_runner.run()
 
@@ -111,11 +111,17 @@ class MSconvert_Runner(Pipe_Step):
             "mzXML",
             "imzML",
         ]
-        self.valid_folder_formats = ["raw", "d"]
+        self.data_ids = {
+            "in_paths": ["raw_data_paths"],
+            "out_path": ["community_formatted_data_paths"],
+            "standard": ["raw_data_paths"],
+        }
         super().__init__(
             mandatory_patterns={
-                "in": rf".*\.({r'|'.join(self.valid_formats)})$",
-                "in_folder": rf".*\.({r'|'.join(self.valid_folder_formats)})$",
+                self.data_ids["in_paths"][0]: rf".*\.({r'|'.join(self.valid_formats)})$"
+            },
+            patterns={
+                self.data_ids["in_paths"][0]: r".*"
             },
             exec_path=exec_path,
             save_log=save_log,
@@ -132,6 +138,7 @@ class MSconvert_Runner(Pipe_Step):
         )
         self.name = "msconvert"
 
+
     def select_for_conversion(self, in_path: StrPath, out_path: StrPath) -> bool:
         """
         Convert one file with msconvert.
@@ -144,7 +151,7 @@ class MSconvert_Runner(Pipe_Step):
         :rtype: bool
         """
         # Check origin
-        in_valid = super().match_path(pattern=self.patterns["in"], path=in_path)
+        in_valid = super().match_path(pattern=self.data_ids["in_paths"][0], path=in_path)
         # Check target
         out_valid = (
             self.overwrite
@@ -159,105 +166,121 @@ class MSconvert_Runner(Pipe_Step):
     def distribute_scheduled(self, **scheduled_io):
         return super().distribute_scheduled(**scheduled_io)
 
-    def run_single(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
+    def run_single(self, in_paths: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
         """
         Convert one file with msconvert.
 
-        :param in_path: Path to scheduled file.
-        :type in_path: dict[str, StrPath]
+        :param in_paths: Path to scheduled file.
+        :type in_paths: dict[str, StrPath]
         :param out_path: Path to output directory.
         :type out_path: dict[str, StrPath]
         """
-        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
-        additional_args = self.link_additional_args(**kwargs)
+        in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
+        out_path = get_if_dict(out_path, self.data_ids["out_path"])
 
-        out_file_name = ".".join(os.path.basename(in_path).split(".")[:-1]) + self.target_format
+        for in_path in in_paths:
+            # Check for valid I/O
+            hypothetical_out_path = join(out_path, replace_file_ending(in_path, self.target_format))
+            in_valid, out_valid = self.select_for_conversion(
+                in_path=in_path, out_path=hypothetical_out_path
+            )
+            if in_valid and out_valid:
+                additional_args = self.link_additional_args(**kwargs)
 
-        cmd = (
-            rf'"{self.exec_path}" --{self.target_format[1:]} -e {self.target_format} --64 '
-            + rf'-o "{out_path}" --outfile "{out_file_name}" "{in_path}" {additional_args}'
-        )
+                out_file_name = (
+                    ".".join(os.path.basename(in_path).split(".")[:-1]) + self.target_format
+                )
 
-        if not os.path.isfile(out_path):
-            out_path = os.path.join(out_path, out_file_name)
+                cmd = (
+                    rf'"{self.exec_path}" --{self.target_format[1:]} -e {self.target_format} --64 '
+                    + rf'-o "{out_path}" --outfile "{out_file_name}" "{in_path}" {additional_args}'
+                )
 
-        self.compute(
-            step_function=execute_verbose_command,
-            cmd=cmd,
-            in_out=dict(in_path=in_path, out_path=out_path),
-            log_path=self.get_log_path(out_path=out_path),
-            verbosity=self.verbosity,
-        )
+                if not os.path.isfile(out_path):
+                    out_path = os.path.join(out_path, out_file_name)
 
-    def run_directory(self, in_path: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
+                self.compute(
+                    step_function=execute_verbose_command,
+                    cmd=cmd,
+                    in_out=dict(
+                        in_paths=in_path, out_path={self.data_ids["out_path"][0]: out_path}
+                    ),
+                    log_path=self.get_log_path(out_path=out_path),
+                    verbosity=self.verbosity,
+                )
+            else:
+                logger.log(
+                    f"The path {in_path} or {hypothetical_out_path} is invalid or was written before."
+                    + "You can either set overwrite=True or adjust the file size threshold to change out_path checking behaviour.",
+                    minimum_verbosity=3,
+                    verbosity=self.verbosity,
+                )
+
+    def run_directory(self, in_paths: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
         """
         Convert all matching files in a folder.
 
-        :param in_path: Path to scheduled file.
-        :type in_path: dict[str, StrPath]
+        :param in_paths: Path to scheduled file.
+        :type in_paths: dict[str, StrPath]
         :param out_path: Path to output directory.
         :type out_path: dict[str, StrPath]
         """
-        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
+        in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
+        out_path = get_if_dict(out_path, self.data_ids["out_path"])
 
-        # Check folder with valid input:
-        if self.match_path(in_path, self.patterns["in_folder"]):
-            self.run_single(in_path=in_path, out_path=out_path, **kwargs)
-        else:
+        for in_path in in_paths:
+            # Check folder with valid input:
+            if self.match_path(pattern=self.data_ids["in_paths"][0], path=in_path):
+                self.run_single(in_paths=in_path, out_path=out_path, **kwargs)
+
+            # Check for files with valid patterns
             for entry in os.listdir(in_path):
-                entry_path = join(in_path, entry)
-                hypothetical_out_path = join(
-                    out_path, replace_file_ending(entry, self.target_format)
-                )
-                in_valid, out_valid = self.select_for_conversion(
-                    in_path=entry_path, out_path=hypothetical_out_path
-                )
-
-                if in_valid and out_valid:
+                if self.match_path(pattern=self.data_ids["in_paths"][0], path=entry):
                     os.makedirs(out_path, exist_ok=True)
-                    self.run_single(in_path=entry_path, out_path=out_path, **kwargs)
+                    self.run_single(in_paths=join(in_path, entry), out_path=out_path, **kwargs)
 
     def run_nested(
         self,
-        in_path: dict[str, StrPath],
+        in_paths: dict[str, StrPath],
         out_path: dict[str, StrPath],
         recusion_level: int = 0,
         **kwargs,
     ):
         """
-        Converts multiple files in multiple folders, found in in_path with msconvert and saves them
+        Converts multiple files in multiple folders, found in in_paths with msconvert and saves them
         to a location out_path again into their respective folders.
 
-        :param in_path: Starting folder for descent.
-        :type in_path: dict[str, StrPath]
+        :param in_paths: Starting folder for descent.
+        :type in_paths: dict[str, StrPath]
         :param out_path: Folder where structure is mimiced and files are converted to
         :type out_path: dict[str, StrPath]
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
         """
-        in_path, out_path = self.extract_standard(in_path=in_path, out_path=out_path)
-        has_in_file = False
+        in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
+        out_path = get_if_dict(out_path, self.data_ids["out_path"])
+        
+        ic(self.patterns)
 
-        root, dirs, files = next(os.walk(in_path))
+        for in_path in in_paths:
+            root, dirs, files = next(os.walk(in_path))
 
-        for i, file in enumerate(files):
-            if self.match_path(pattern=self.patterns["in"], path=file):
-                self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
-                has_in_file = True
-                break
-
-        for dir in dirs:
-            if self.match_path(pattern=self.patterns["in_folder"], path=file):
-                if not has_in_file:
-                    self.run_directory(in_path=in_path, out_path=out_path, **kwargs)
-                    has_in_file = True
-            else:
-                self.run_nested(
-                    in_path=join(in_path, dir),
-                    out_path=join(out_path, dir),
-                    recusion_level=recusion_level + 1,
-                    **kwargs,
-                )
+            for i, file in enumerate(files):
+                if self.match_path(pattern=self.data_ids["in_paths"][0], path=file):
+                    ic(file)
+                    self.run_directory(in_paths=in_path, out_path=out_path, **kwargs)
+                    break
+            
+            for dir in dirs:
+                if self.match_path(pattern=self.data_ids["in_paths"][0], path=dir):
+                    self.run_single(in_paths=in_path, out_path=out_path, **kwargs)
+                else:
+                    self.run_nested(
+                        in_paths=join(in_path, dir),
+                        out_path=join(out_path, dir),
+                        recusion_level=recusion_level + 1,
+                        **kwargs,
+                    )
 
 
 if __name__ == "__main__":

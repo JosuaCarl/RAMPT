@@ -6,6 +6,7 @@ import tempfile
 from pathlib import Path as Path
 
 import tkinter.filedialog as fd
+import tkfilebrowser as tkfb
 
 from taipy.gui import download
 
@@ -44,12 +45,15 @@ def change_work_dir_root(gui, new_root: StrPath = None):
 
 # File selection
 def open_file_folder(
-    save: bool = False, select_folder: bool = False, multiple: bool = True, **kwargs
+    save: bool = False, select_folder: bool = False, multiple: bool = False, **kwargs
 ):
     if save:
         return fd.asksaveasfilename(**kwargs)
     if select_folder:
-        return fd.askdirectory(**kwargs)
+        if multiple:
+            return tkfb.askopendirnames(**kwargs)
+        else:
+            return fd.askdirectory(**kwargs)
     elif multiple:
         return fd.askopenfilenames(**kwargs)
     else:

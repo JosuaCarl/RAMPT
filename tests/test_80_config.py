@@ -30,7 +30,8 @@ def test_generic_step():
             step_class=Pipe_Step,
             step_params={},
             global_params=minimal_global_patterns.copy(),
-            in_paths=[mock_path],
+            entrypoint=True,
+            in_outs=[{"in_path": mock_path}],
         )
     except NotImplementedError:
         assert True

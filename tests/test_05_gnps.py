@@ -38,7 +38,7 @@ def test_gnps_pipe_run_single():
     gnps_runner = GNPS_Runner(verbosity=3)
 
     gnps_runner.run_single(
-        in_path={"mzmine_log": join(example_path, "mzmine_log.txt")}, out_path=out_path
+        in_paths={"mzmine_log": join(example_path, "mzmine_log.txt")}, out_path=out_path
     )
 
     assert os.path.isfile(join(out_path, "fbmn_all_db_annotations.json"))
@@ -49,7 +49,7 @@ def test_gnps_pipe_run_directory():
     # Supoerficial testing of run_directory
     gnps_runner = GNPS_Runner(verbosity=3)
 
-    gnps_runner.run_directory(in_path={"mzmine_log": example_path}, out_path=out_path)
+    gnps_runner.run_directory(in_paths={"mzmine_log": example_path}, out_path=out_path)
 
     assert os.path.isfile(join(out_path, "fbmn_all_db_annotations.json"))
 
@@ -71,12 +71,12 @@ def test_gnps_pipe_run():
     # Superficial testing of run
     gnps_runner = GNPS_Runner(verbosity=3, workers=2)
 
-    gnps_runner.run([dict(in_path={"mzmine_log": example_path}, out_path=out_path)])
+    gnps_runner.run([dict(in_paths={"mzmine_log": example_path}, out_path=out_path)])
     gnps_runner.compute_futures()
 
     assert gnps_runner.processed_ios == [
         {
-            "in_path": {"mzmine_log": join(example_path, "mzmine_log.txt")},
+            "in_paths": {"mzmine_log": join(example_path, "mzmine_log.txt")},
             "out_path": join(out_path, "fbmn_all_db_annotations.json"),
         }
     ]
