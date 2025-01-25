@@ -46,7 +46,7 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
     )
     gnps_runner.scheduled_ios = {
         "in_paths": {"processed_data_paths": in_dir},
-        "out_path": {"gnps_annotated_data_paths": out_dir}
+        "out_path": {"gnps_annotated_data_paths": out_dir},
     }
     return gnps_runner.run()
 
@@ -80,7 +80,13 @@ class GNPS_Runner(Pipe_Step):
         :type verbosity: int, optional
         """
         self.data_ids = {
-            "in_paths": ["mzmine_log", "feature_quantification", "feature_ms2", "additional_pairs", "sample_metadata"],
+            "in_paths": [
+                "mzmine_log",
+                "feature_quantification",
+                "feature_ms2",
+                "additional_pairs",
+                "sample_metadata",
+            ],
             "out_path": ["gnps_annotated_data_paths"],
             "standard": ["processed_data_paths"],
         }
@@ -89,15 +95,23 @@ class GNPS_Runner(Pipe_Step):
                 self.data_ids["in_paths"][0]: r".*mzmine_log\.txt$",
                 self.data_ids["in_paths"][1]: r".*fbmn_quant",
                 self.data_ids["in_paths"][2]: r".*fbmn",
-                self.data_ids["in_paths"][3]: r".*metadata",  # TODO: Find out naming of additional pairs file
-                self.data_ids["in_paths"][4]: r".*metadata",  # TODO: Find out naming of metadata file
+                self.data_ids["in_paths"][
+                    3
+                ]: r".*metadata",  # TODO: Find out naming of additional pairs file
+                self.data_ids["in_paths"][
+                    4
+                ]: r".*metadata",  # TODO: Find out naming of metadata file
             },
             mandatory_patterns={
                 self.data_ids["in_paths"][0]: r".*",
                 self.data_ids["in_paths"][1]: r".*\.csv$",
                 self.data_ids["in_paths"][2]: r".*\.mgf$",
-                self.data_ids["in_paths"][3]: r".*\.(tsv|csv)",  # TODO: Find out naming of additional pairs file
-                self.data_ids["in_paths"][4]: r".*\.(tsv|csv)",  # TODO: Find out naming of metadata file
+                self.data_ids["in_paths"][
+                    3
+                ]: r".*\.(tsv|csv)",  # TODO: Find out naming of additional pairs file
+                self.data_ids["in_paths"][
+                    4
+                ]: r".*\.(tsv|csv)",  # TODO: Find out naming of metadata file
             },
             save_log=save_log,
             additional_args=additional_args,
@@ -274,8 +288,7 @@ class GNPS_Runner(Pipe_Step):
             if self.resubmit:
                 if self.data_ids["standard"] in in_paths:
                     standard_dir = self.extract_standard(
-                        in_paths=in_paths,
-                        standard_value=self.standard_key
+                        in_paths=in_paths, standard_value=self.standard_key
                     )
                     in_files = self.match_dir_paths(dir=standard_dir)
                 else:
@@ -343,10 +356,7 @@ class GNPS_Runner(Pipe_Step):
         self.compute(
             step_function=capture_and_log,
             func=self.gnps_check_resubmit,
-            in_out=dict(
-                in_paths=in_paths,
-                out_path={self.data_ids["out_path"][0]: out_path}
-            ),
+            in_out=dict(in_paths=in_paths, out_path={self.data_ids["out_path"][0]: out_path}),
             log_path=self.get_log_path(out_path=out_path),
         )
 
@@ -355,7 +365,7 @@ class GNPS_Runner(Pipe_Step):
         Pass on the directory to single case.
         """
         out_path = get_if_dict(out_path, self.data_ids["out_path"])
-        
+
         # Special case "standard" as summary of file_types
         in_paths = self.fill_dict_standards(
             dictionary=in_paths,
@@ -380,7 +390,7 @@ class GNPS_Runner(Pipe_Step):
             self.run_single(in_paths=matched_in_paths, out_path=out_path, **kwargs)
         else:
             logger.warn(
-                message=f"Found no matched_in_paths={matched_in_paths}, inferred from in_paths={in_paths}",
+                message=f"Found no matched_in_paths={matched_in_paths}, inferred from in_paths={in_paths}"
             )
 
     def run_nested(

@@ -65,7 +65,7 @@ def test_summary_add_annotations():
     summary_runner.fill_dict_standards(
         dictionary=in_paths,
         replacement_keys=summary_runner.ordered_annotations,
-        standards_key="annotations"
+        standards_key="annotations",
     )
 
     matched_in_paths = in_paths.copy()
@@ -172,7 +172,7 @@ def test_summary_pipe_run():
                 "quantification": join(example_path, "example_files_iimn_fbmn_quant.csv"),
                 "structure_identifications": join(example_path, "structure_identifications.tsv"),
             },
-            "out_path":{"summary_paths": join(out_path, "summary.tsv")},
+            "out_path": {"summary_paths": join(out_path, "summary.tsv")},
         }
     ]
 

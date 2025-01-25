@@ -120,9 +120,7 @@ class MSconvert_Runner(Pipe_Step):
             mandatory_patterns={
                 self.data_ids["in_paths"][0]: rf".*\.({r'|'.join(self.valid_formats)})$"
             },
-            patterns={
-                self.data_ids["in_paths"][0]: r".*"
-            },
+            patterns={self.data_ids["in_paths"][0]: r".*"},
             exec_path=exec_path,
             save_log=save_log,
             overwrite=overwrite,
@@ -137,7 +135,6 @@ class MSconvert_Runner(Pipe_Step):
             s=self.target_format, range=slice(3, len(self.target_format)), conversion="upper"
         )
         self.name = "msconvert"
-
 
     def select_for_conversion(self, in_path: StrPath, out_path: StrPath) -> bool:
         """
@@ -259,7 +256,7 @@ class MSconvert_Runner(Pipe_Step):
         """
         in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
         out_path = get_if_dict(out_path, self.data_ids["out_path"])
-        
+
         ic(self.patterns)
 
         for in_path in in_paths:
@@ -270,7 +267,7 @@ class MSconvert_Runner(Pipe_Step):
                     ic(file)
                     self.run_directory(in_paths=in_path, out_path=out_path, **kwargs)
                     break
-            
+
             for dir in dirs:
                 if self.match_path(pattern=self.data_ids["in_paths"][0], path=dir):
                     self.run_single(in_paths=in_path, out_path=out_path, **kwargs)

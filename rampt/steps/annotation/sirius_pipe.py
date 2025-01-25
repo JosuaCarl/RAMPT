@@ -81,23 +81,17 @@ class Sirius_Runner(Pipe_Step):
         :type additional_args: list, optional
         :param verbosity: Level of verbosity, defaults to 1
         :type verbosity: int, optional
-        """ 
+        """
         self.data_ids = {
-            "in_paths": ["ms_spectra",],
+            "in_paths": ["ms_spectra"],
             "out_path": ["sirius_annotated_data_paths"],
             "standard": ["processed_data_paths"],
             "projectspace": ["standard"],
             "config": ["standard"],
         }
         super().__init__(
-            mandatory_patterns={
-                self.data_ids["in_paths"][0]: r".*\.mgf$",
-                "config": r".*\.txt$"
-            },
-            patterns={
-                self.data_ids["in_paths"][0]: r".*_sirius",
-                "config": r".*sirius_config"
-            },
+            mandatory_patterns={self.data_ids["in_paths"][0]: r".*\.mgf$", "config": r".*\.txt$"},
+            patterns={self.data_ids["in_paths"][0]: r".*_sirius", "config": r".*sirius_config"},
             save_log=save_log,
             additional_args=additional_args,
             verbosity=verbosity,
@@ -161,7 +155,7 @@ class Sirius_Runner(Pipe_Step):
             config = self.config
 
         additional_args = self.link_additional_args(**kwargs)
-        
+
         config = self.extract_config(config=config)
 
         cmd = (
@@ -171,10 +165,7 @@ class Sirius_Runner(Pipe_Step):
 
         self.compute(
             step_function=execute_verbose_command,
-            in_out=dict(
-                in_paths=in_paths,
-                out_path={self.data_ids["out_path"][0]: out_path},
-            ),
+            in_out=dict(in_paths=in_paths, out_path={self.data_ids["out_path"][0]: out_path}),
             log_path=self.get_log_path(out_path=out_path),
             cmd=cmd,
             verbosity=self.verbosity,
@@ -229,7 +220,7 @@ class Sirius_Runner(Pipe_Step):
                 if self.match_path(pattern=file_type, path=entry):
                     matched_in_paths[file_type] = join(path, entry)
                     break
-        
+
         if matched_in_paths:
             os.makedirs(out_path, exist_ok=True)
             self.run_single(
@@ -241,7 +232,7 @@ class Sirius_Runner(Pipe_Step):
             )
         else:
             logger.warn(
-                message=f"Found no matched_in_paths={matched_in_paths}, inferred from in_paths={in_paths}",
+                message=f"Found no matched_in_paths={matched_in_paths}, inferred from in_paths={in_paths}"
             )
 
     def run_nested(

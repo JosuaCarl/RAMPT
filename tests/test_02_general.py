@@ -137,7 +137,9 @@ def test_extract():
 
     dictionary = {"in": {"standard": 1}}
     assert pipe_step.fill_dict_standards(dictionary, ["in_1", "in_2"], "in") == {
-        "in": {"standard": 1}, "in_1": {"standard": 1}, "in_2": {"standard": 1}
+        "in": {"standard": 1},
+        "in_1": {"standard": 1},
+        "in_2": {"standard": 1},
     }
 
     # Extract standard

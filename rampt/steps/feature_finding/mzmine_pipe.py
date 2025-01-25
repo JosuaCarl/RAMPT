@@ -103,10 +103,7 @@ class MZmine_Runner(Pipe_Step):
                 self.data_ids["in_paths"][0]: rf".*\.({r'|'.join(valid_formats)})$",
                 "batch": r".*\.mzbatch$",
             },
-            patterns={
-                self.data_ids["in_paths"][0]: r".*",
-                "batch": r".*",
-            },
+            patterns={self.data_ids["in_paths"][0]: r".*", "batch": r".*"},
             save_log=save_log,
             additional_args=additional_args,
             verbosity=verbosity,

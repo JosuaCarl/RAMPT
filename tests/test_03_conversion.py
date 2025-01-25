@@ -91,7 +91,11 @@ def test_msconv_pipe_run_nested():
         },
         {
             "in_paths": join(mock_path, "nested_test_folder", "minimal_file.mzML"),
-            "out_path": {"community_formatted_data_paths": join(out_path, "nested_test_folder", "minimal_file.mzML")},
+            "out_path": {
+                "community_formatted_data_paths": join(
+                    out_path, "nested_test_folder", "minimal_file.mzML"
+                )
+            },
         },
     ]
     assert os.path.isfile(join(out_path, "minimal_file.mzML"))
@@ -160,7 +164,11 @@ def test_msconv_pipe_run_cross():
         },
         {
             "in_paths": join(mock_path, "nested_test_folder", "minimal_file.mzML"),
-            "out_path": {"community_formatted_data_paths": join(out_path, "nested_test_folder", "minimal_file.mzXML")},
+            "out_path": {
+                "community_formatted_data_paths": join(
+                    out_path, "nested_test_folder", "minimal_file.mzXML"
+                )
+            },
         },
     ]
     assert os.path.isfile(join(out_path, "minimal_file.mzXML"))

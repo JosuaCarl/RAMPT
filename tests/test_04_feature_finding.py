@@ -83,7 +83,10 @@ def test_mzmine_pipe_run():
     mzmine_runner.compute_futures()
 
     assert mzmine_runner.processed_ios == [
-        {"in_paths": join(out_path, "source_files.txt"), "out_path": {"processed_data_paths": out_path}}
+        {
+            "in_paths": join(out_path, "source_files.txt"),
+            "out_path": {"processed_data_paths": out_path},
+        }
     ]
     with open(join(out_path, "source_files.txt"), "r") as f:
         lines = f.readlines()

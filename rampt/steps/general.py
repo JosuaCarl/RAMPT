@@ -224,7 +224,6 @@ class Step_Configuration:
         else:
             return None
 
-
     # Dictionary represenation
     def dict_representation(self, attribute=None):
         attribute = attribute if attribute is not None else self
@@ -576,14 +575,15 @@ class Pipe_Step(Step_Configuration):
         )
 
     # Distribution methods
-    def fill_dict_standards(self, dictionary: dict, replacement_keys: list[str], standards_key: str = "standard"):
+    def fill_dict_standards(
+        self, dictionary: dict, replacement_keys: list[str], standards_key: str = "standard"
+    ):
         if standards_key in dictionary:
             for replacement_key in replacement_keys:
                 if replacement_key not in dictionary:
                     dictionary[replacement_key] = dictionary[standards_key]
 
         return dictionary
-    
 
     def extract_standard(self, standard_value: str = "standard", **kwargs) -> dict:
         """
