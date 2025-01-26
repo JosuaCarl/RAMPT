@@ -634,7 +634,7 @@ class Pipe_Step(Step_Configuration):
             return list(optionals.values())
 
     # Input valudation an distribution
-    def check_io(self, io:dict, valid_runs: list[dict] = []) -> list:
+    def check_io(self, io: dict, valid_runs: list[dict] = []) -> list:
         """
         Check for a valid run style (single, directory, nested,...).
 
@@ -654,7 +654,9 @@ class Pipe_Step(Step_Configuration):
                 for io_key, io_dict in io_combos.items():
                     if io_key in io:
                         for key, value_validation_method in io_dict.items():
-                            if key not in io[io_key] or not value_validation_method(io[io_key][key]):
+                            if key not in io[io_key] or not value_validation_method(
+                                io[io_key][key]
+                            ):
                                 combo_valid = False
                                 break
                     else:
@@ -663,8 +665,6 @@ class Pipe_Step(Step_Configuration):
                 if combo_valid:
                     valid_run_styles.append(run_style)
         return valid_run_styles
-        
-        
 
     def distribute_scheduled(
         self,

@@ -17,35 +17,21 @@ data_warning = "Data must contain at least 2 columns with peak information to ca
 
 def test_summary_check_io():
     analysis_runner = Analysis_Runner()
-    assert "single" in analysis_runner.check_io({
-        "in_paths": {
-            "summary_paths": join(mock_path, "empty_file"),
-            },
-        "out_path": {
-            "analysis_paths": out_path
-            },
+    assert "single" in analysis_runner.check_io(
+        {
+            "in_paths": {"summary_paths": join(mock_path, "empty_file")},
+            "out_path": {"analysis_paths": out_path},
         }
     )
 
-    assert "directory" in analysis_runner.check_io({
-        "in_paths": {
-            "summary_paths": mock_path
-            },
-        "out_path": {
-            "analysis_paths": out_path
-            },
-        },
+    assert "directory" in analysis_runner.check_io(
+        {"in_paths": {"summary_paths": mock_path}, "out_path": {"analysis_paths": out_path}}
     )
 
     assert "nested" in analysis_runner.check_io(
-            {"in_paths": {
-                "summary_paths": [mock_path]
-                },
-            "out_path": {
-                "analysis_paths": out_path
-                },
-            },
-        )
+        {"in_paths": {"summary_paths": [mock_path]}, "out_path": {"analysis_paths": out_path}}
+    )
+
 
 def test_analysis_search_check_peak_info():
     analysis_runner = Analysis_Runner()

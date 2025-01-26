@@ -87,39 +87,42 @@ class Analysis_Runner(Pipe_Step):
             patterns={self.data_ids["in_paths"][0]: r"^(.*[\\/])?summary"},
             mandatory_patterns={self.data_ids["in_paths"][0]: r".*\.tsv$"},
             valid_runs=[
-                {"single": {
-                    "in_paths": {
-                        "summary_paths":
-                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                {
+                    "single": {
+                        "in_paths": {
+                            "summary_paths": lambda val: isinstance(val, str)
+                            and os.path.isfile(val)
                         },
-                    "out_path": {
-                        "analysis_paths":
-                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        "out_path": {
+                            "analysis_paths": lambda val: isinstance(val, str)
+                            and os.path.isdir(val)
                         },
-                    },
+                    }
                 },
-                {"directory": {
-                    "in_paths": {
-                        "summary_paths":
-                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                {
+                    "directory": {
+                        "in_paths": {
+                            "summary_paths": lambda val: isinstance(val, str) and os.path.isdir(val)
                         },
-                    "out_path": {
-                        "analysis_paths":
-                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        "out_path": {
+                            "analysis_paths": lambda val: isinstance(val, str)
+                            and os.path.isdir(val)
                         },
-                    },
+                    }
                 },
-                {"nested": {
-                    "in_paths": {
-                        "summary_paths":
-                        lambda val: (isinstance(val, list) and all([os.path.isdir(v) for v in val])) or \
-                                    (isinstance (val, str) and os.path.isdir(val))
+                {
+                    "nested": {
+                        "in_paths": {
+                            "summary_paths": lambda val: (
+                                isinstance(val, list) and all([os.path.isdir(v) for v in val])
+                            )
+                            or (isinstance(val, str) and os.path.isdir(val))
                         },
-                    "out_path": {
-                        "analysis_paths": 
-                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        "out_path": {
+                            "analysis_paths": lambda val: isinstance(val, str)
+                            and os.path.isdir(val)
                         },
-                    },
+                    }
                 },
             ],
             save_log=save_log,

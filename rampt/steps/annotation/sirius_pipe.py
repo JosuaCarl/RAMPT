@@ -93,50 +93,53 @@ class Sirius_Runner(Pipe_Step):
             mandatory_patterns={self.data_ids["in_paths"][0]: r".*\.mgf$", "config": r".*\.txt$"},
             patterns={self.data_ids["in_paths"][0]: r".*_sirius", "config": r".*sirius_config"},
             valid_runs=[
-                {"single": {
-                    "in_paths": {
-                        "ms_spectra":
-                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                {
+                    "single": {
+                        "in_paths": {
+                            "ms_spectra": lambda val: isinstance(val, str) and os.path.isfile(val)
                         },
-                    "out_path": {
-                        "sirius_annotated_data_paths": 
-                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        "out_path": {
+                            "sirius_annotated_data_paths": lambda val: isinstance(val, str)
+                            and os.path.isdir(val)
                         },
-                    },
+                    }
                 },
-                {"directory": {
-                    "in_paths": {
-                        "processed_data_paths": 
-                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                {
+                    "directory": {
+                        "in_paths": {
+                            "processed_data_paths": lambda val: isinstance(val, str)
+                            and os.path.isdir(val)
                         },
-                    "out_path": {
-                        "sirius_annotated_data_paths": 
-                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        "out_path": {
+                            "sirius_annotated_data_paths": lambda val: isinstance(val, str)
+                            and os.path.isdir(val)
                         },
-                    },
+                    }
                 },
-                {"multiple directories": {
-                    "in_paths": {
-                        "ms_spectra":
-                        lambda val:isinstance (val, str) and os.path.isdir(val),
-                    },
-                    "out_path": {
-                        "sirius_annotated_data_paths": 
-                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                {
+                    "multiple directories": {
+                        "in_paths": {
+                            "ms_spectra": lambda val: isinstance(val, str) and os.path.isdir(val)
                         },
-                    },
+                        "out_path": {
+                            "sirius_annotated_data_paths": lambda val: isinstance(val, str)
+                            and os.path.isdir(val)
+                        },
+                    }
                 },
-                {"nested": {
-                    "in_paths": {
-                        "processed_data_paths":
-                        lambda val: (isinstance(val, list) and all([os.path.isdir(v) for v in val])) or \
-                                    (isinstance (val, str) and os.path.isdir(val))
+                {
+                    "nested": {
+                        "in_paths": {
+                            "processed_data_paths": lambda val: (
+                                isinstance(val, list) and all([os.path.isdir(v) for v in val])
+                            )
+                            or (isinstance(val, str) and os.path.isdir(val))
                         },
-                    "out_path": {
-                        "sirius_annotated_data_paths": 
-                        lambda val: isinstance (val, str) and os.path.isdir(val)
-                    },
-                    },
+                        "out_path": {
+                            "sirius_annotated_data_paths": lambda val: isinstance(val, str)
+                            and os.path.isdir(val)
+                        },
+                    }
                 },
             ],
             save_log=save_log,
@@ -246,7 +249,7 @@ class Sirius_Runner(Pipe_Step):
         # Catch single values
         if not isinstance(in_paths, dict):
             in_paths = {"processed_data_paths": in_paths}
-        
+
         # Special case: standard as summary of file_types
         in_paths = self.fill_dict_standards(
             dictionary=in_paths,

@@ -16,93 +16,71 @@ make_out(out_path)
 
 def test_gnps_check_io():
     gnps_runner = GNPS_Runner()
-    assert "single from log" in gnps_runner.check_io({
-        "in_paths": {
-            "mzmine_log": join(mock_path, "empty_file")
-            },
-        "out_path": {
-            "gnps_annotated_data_paths": out_path
-            },
+    assert "single from log" in gnps_runner.check_io(
+        {
+            "in_paths": {"mzmine_log": join(mock_path, "empty_file")},
+            "out_path": {"gnps_annotated_data_paths": out_path},
         }
     )
 
-    assert "single from data all" in gnps_runner.check_io({
-        "in_paths": {
-            "feature_quantification": join(mock_path, "empty_file"),
-            "feature_ms2": join(mock_path, "empty_file"),
-            "additional_pairs": join(mock_path, "empty_file"),
-            "sample_metadata": join(mock_path, "empty_file"),
+    assert "single from data all" in gnps_runner.check_io(
+        {
+            "in_paths": {
+                "feature_quantification": join(mock_path, "empty_file"),
+                "feature_ms2": join(mock_path, "empty_file"),
+                "additional_pairs": join(mock_path, "empty_file"),
+                "sample_metadata": join(mock_path, "empty_file"),
             },
-        "out_path": {
-            "gnps_annotated_data_paths": out_path
-            },
-        }
-    )
-    
-    assert "single from data minimum" in gnps_runner.check_io({
-        "in_paths": {
-            "feature_quantification": join(mock_path, "empty_file"),
-            "feature_ms2": join(mock_path, "empty_file"),
-            },
-        "out_path": {
-            "gnps_annotated_data_paths": out_path
-            },
+            "out_path": {"gnps_annotated_data_paths": out_path},
         }
     )
 
-    assert "directory" in gnps_runner.check_io({
-        "in_paths": {
-            "processed_data_paths": mock_path
+    assert "single from data minimum" in gnps_runner.check_io(
+        {
+            "in_paths": {
+                "feature_quantification": join(mock_path, "empty_file"),
+                "feature_ms2": join(mock_path, "empty_file"),
             },
-        "out_path": {
-            "gnps_annotated_data_paths": out_path
-            },
+            "out_path": {"gnps_annotated_data_paths": out_path},
         }
     )
 
-    assert "multiple directories from log" in gnps_runner.check_io({
-        "in_paths": {
-            "mzmine_log": mock_path
-        },
-        "out_path": {
-            "gnps_annotated_data_paths": out_path
-            },
+    assert "directory" in gnps_runner.check_io(
+        {
+            "in_paths": {"processed_data_paths": mock_path},
+            "out_path": {"gnps_annotated_data_paths": out_path},
         }
     )
 
-    assert "multiple directories from data all" in gnps_runner.check_io({
-        "in_paths": {
-            "feature_quantification": mock_path,
-            "feature_ms2": mock_path,
-            "additional_pairs": mock_path,
-            "sample_metadata": mock_path,
+    assert "multiple directories from log" in gnps_runner.check_io(
+        {"in_paths": {"mzmine_log": mock_path}, "out_path": {"gnps_annotated_data_paths": out_path}}
+    )
+
+    assert "multiple directories from data all" in gnps_runner.check_io(
+        {
+            "in_paths": {
+                "feature_quantification": mock_path,
+                "feature_ms2": mock_path,
+                "additional_pairs": mock_path,
+                "sample_metadata": mock_path,
             },
-        "out_path": {
-            "gnps_annotated_data_paths": out_path
-            },
+            "out_path": {"gnps_annotated_data_paths": out_path},
         }
     )
 
-    assert "multiple directories from  minimum" in gnps_runner.check_io({
-        "in_paths": {
-            "feature_quantification": mock_path,
-            "feature_ms2": mock_path,
-        },
-        "out_path": {
-            "gnps_annotated_data_paths": out_path
-            },
+    assert "multiple directories from  minimum" in gnps_runner.check_io(
+        {
+            "in_paths": {"feature_quantification": mock_path, "feature_ms2": mock_path},
+            "out_path": {"gnps_annotated_data_paths": out_path},
         }
     )
 
     assert "nested" in gnps_runner.check_io(
-            {"in_paths": {
-                "processed_data_paths": [mock_path]
-                },
-            "out_path": {
-                "gnps_annotated_data_paths": out_path
-                },
-            },
-        )
+        {
+            "in_paths": {"processed_data_paths": [mock_path]},
+            "out_path": {"gnps_annotated_data_paths": out_path},
+        }
+    )
 
 
 def test_gnps_submit():
@@ -129,7 +107,8 @@ def test_gnps_pipe_run_single():
     gnps_runner = GNPS_Runner(verbosity=3)
 
     gnps_runner.run_single(
-        in_paths={"mzmine_log": join(example_path, "mzmine_log.txt")}, out_path={"gnps_annotated_data_paths": out_path},
+        in_paths={"mzmine_log": join(example_path, "mzmine_log.txt")},
+        out_path={"gnps_annotated_data_paths": out_path},
     )
 
     assert os.path.isfile(join(out_path, "fbmn_all_db_annotations.json"))
@@ -168,7 +147,9 @@ def test_gnps_pipe_run():
     assert gnps_runner.processed_ios == [
         {
             "in_paths": {"mzmine_log": join(example_path, "mzmine_log.txt")},
-            "out_path": {"gnps_annotated_data_paths": join(out_path, "fbmn_all_db_annotations.json")},
+            "out_path": {
+                "gnps_annotated_data_paths": join(out_path, "fbmn_all_db_annotations.json")
+            },
         }
     ]
 

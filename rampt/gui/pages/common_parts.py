@@ -6,6 +6,7 @@ from rampt.gui.helpers import *
 
 # Intemediary paths for selections
 
+
 def create_expandable_setting(
     create_methods: dict, title: str, hover_text: str = "", expanded=False, **kwargs
 ):
@@ -31,10 +32,9 @@ selection_trees_full = {}
 
 selected = {}
 
+
 def create_file_selection(
-    process: str,
-    param_attribute_in: str = "scheduled_ios",
-    file_dialog_kwargs: dict = {},
+    process: str, param_attribute_in: str = "scheduled_ios", file_dialog_kwargs: dict = {}
 ):
     naming_list = [process, param_attribute_in]
 
