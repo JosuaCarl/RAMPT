@@ -48,6 +48,7 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         "in_paths": {"processed_data_paths": in_dir},
         "out_path": {"gnps_annotated_data_paths": out_dir},
     }
+    ic(gnps_runner.scheduled_ios)
     return gnps_runner.run()
 
 
@@ -113,6 +114,113 @@ class GNPS_Runner(Pipe_Step):
                     4
                 ]: r".*\.(tsv|csv)",  # TODO: Find out naming of metadata file
             },
+            valid_runs=[
+                {"single from log": {
+                    "in_paths": {
+                        "mzmine_log":
+                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                        },
+                    "out_path": {
+                        "gnps_annotated_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+                {"single from data all": {
+                    "in_paths": {
+                        "feature_quantification":
+                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                        "feature_ms2":
+                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                        "additional_pairs":
+                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                        "sample_metadata":
+                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                        },
+                    "out_path": {
+                        "gnps_annotated_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+                {"single from data minimum": {
+                    "in_paths": {
+                        "feature_quantification":
+                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                        "feature_ms2":
+                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                        },
+                    "out_path": {
+                        "gnps_annotated_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+                {"directory": {
+                    "in_paths": {
+                        "processed_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    "out_path": {
+                        "gnps_annotated_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+                {"multiple directories from log": {
+                    "in_paths": {
+                        "mzmine_log":
+                        lambda val:isinstance (val, str) and os.path.isdir(val),
+                    },
+                    "out_path": {
+                        "gnps_annotated_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+                {"multiple directories from data all": {
+                    "in_paths": {
+                        "feature_quantification":
+                        lambda val:isinstance (val, str) and os.path.isdir(val),
+                        "feature_ms2":
+                        lambda val:isinstance (val, str) and os.path.isdir(val),
+                        "additional_pairs":
+                        lambda val:isinstance (val, str) and os.path.isdir(val),
+                        "sample_metadata":
+                        lambda val:isinstance (val, str) and os.path.isdir(val),
+                    },
+                    "out_path": {
+                        "gnps_annotated_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+                {"multiple directories from  minimum": {
+                    "in_paths": {
+                        "feature_quantification":
+                        lambda val:isinstance (val, str) and os.path.isdir(val),
+                        "feature_ms2":
+                        lambda val:isinstance (val, str) and os.path.isdir(val),
+                    },
+                    "out_path": {
+                        "gnps_annotated_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+                {"nested": {
+                    "in_paths": {
+                        "processed_data_paths":
+                        lambda val: (isinstance(val, list) and all([os.path.isdir(v) for v in val])) or \
+                                    (isinstance (val, str) and os.path.isdir(val))
+                        },
+                    "out_path": {
+                        "gnps_annotated_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                    },
+                    },
+                },
+            ],
             save_log=save_log,
             additional_args=additional_args,
             verbosity=verbosity,
@@ -273,7 +381,7 @@ class GNPS_Runner(Pipe_Step):
         :raises BrokenPipeError: When the task does not complete in the expected time
         """
         in_paths = in_out["in_paths"]
-        out_path = get_if_dict(out_path, self.data_ids["out_path"])
+        out_path = get_if_dict(in_out["out_path"], self.data_ids["out_path"])
 
         # Use MZmine GNPS submit, if existent
         mzmine_log, gnps_response = self.extract_optional(
@@ -288,7 +396,7 @@ class GNPS_Runner(Pipe_Step):
             if self.resubmit:
                 if self.data_ids["standard"] in in_paths:
                     standard_dir = self.extract_standard(
-                        in_paths=in_paths, standard_value=self.standard_key
+                        in_paths=in_paths, standard_value=self.data_ids["standard"]
                     )
                     in_files = self.match_dir_paths(dir=standard_dir)
                 else:
@@ -412,9 +520,9 @@ class GNPS_Runner(Pipe_Step):
         :return: Future computations
         :rtype: list
         """
-        in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
+        in_paths = to_list(get_if_dict(in_paths, self.data_ids["standard"]))
         out_path = get_if_dict(out_path, self.data_ids["out_path"])
-
+        
         for in_path in in_paths:
             root, dirs, files = next(os.walk(in_path))
 

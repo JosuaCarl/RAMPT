@@ -30,6 +30,56 @@ def test_installation():
     assert tool_available(["mzmine", "mzmine_console"])
 
 
+def test_mzmine_check_io():
+    mzmine_runner = MZmine_Runner()
+    assert "single" in mzmine_runner.check_io(
+        {"in_paths": {
+            "community_formatted_data_paths": join(mock_path, "minimal_file.mzML")
+            },
+        "out_path": {
+            "processed_data_paths": out_path
+            },
+        },
+    )
+    assert "single" in mzmine_runner.check_io(
+        {"in_paths": {
+            "community_formatted_data_paths": [join(mock_path, "minimal_file.mzML")]
+            },
+        "out_path": {
+            "processed_data_paths": out_path
+            },
+        },
+    )
+
+    assert "directory" in mzmine_runner.check_io(
+        {"in_paths": {
+            "community_formatted_data_paths": mock_path
+            },
+        "out_path": {
+            "processed_data_paths": out_path
+            },
+        },
+    )
+    assert "directory" in mzmine_runner.check_io(
+        {"in_paths": {
+            "community_formatted_data_paths": [mock_path]
+            },
+        "out_path": {
+            "processed_data_paths": out_path
+            },
+        },
+    )
+
+    assert "nested" in mzmine_runner.check_io(
+            {"in_paths": {
+                "community_formatted_data_paths": [mock_path]
+                },
+            "out_path": {
+                "processed_data_paths": out_path
+                },
+            },
+        )
+
 def test_mzmine_pipe_run_single():
     clean_out(out_path)
 

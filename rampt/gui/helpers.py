@@ -6,7 +6,6 @@ import tempfile
 from pathlib import Path as Path
 
 import tkinter.filedialog as fd
-import tkfilebrowser as tkfb
 
 from taipy.gui import download
 
@@ -51,7 +50,9 @@ def open_file_folder(
         return fd.asksaveasfilename(**kwargs)
     if select_folder:
         if multiple:
-            return tkfb.askopendirnames(**kwargs)
+            logger.warn(
+                "Multiple directory selection not yet implemented."
+            )
         else:
             return fd.askdirectory(**kwargs)
     elif multiple:

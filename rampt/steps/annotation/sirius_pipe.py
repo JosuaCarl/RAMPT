@@ -92,6 +92,53 @@ class Sirius_Runner(Pipe_Step):
         super().__init__(
             mandatory_patterns={self.data_ids["in_paths"][0]: r".*\.mgf$", "config": r".*\.txt$"},
             patterns={self.data_ids["in_paths"][0]: r".*_sirius", "config": r".*sirius_config"},
+            valid_runs=[
+                {"single": {
+                    "in_paths": {
+                        "ms_spectra":
+                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                        },
+                    "out_path": {
+                        "sirius_annotated_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+                {"directory": {
+                    "in_paths": {
+                        "processed_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    "out_path": {
+                        "sirius_annotated_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+                {"multiple directories": {
+                    "in_paths": {
+                        "ms_spectra":
+                        lambda val:isinstance (val, str) and os.path.isdir(val),
+                    },
+                    "out_path": {
+                        "sirius_annotated_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+                {"nested": {
+                    "in_paths": {
+                        "processed_data_paths":
+                        lambda val: (isinstance(val, list) and all([os.path.isdir(v) for v in val])) or \
+                                    (isinstance (val, str) and os.path.isdir(val))
+                        },
+                    "out_path": {
+                        "sirius_annotated_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                    },
+                    },
+                },
+            ],
             save_log=save_log,
             additional_args=additional_args,
             verbosity=verbosity,
@@ -196,6 +243,10 @@ class Sirius_Runner(Pipe_Step):
         projectspace = get_if_dict(projectspace, self.data_ids["projectspace"])
         config = get_if_dict(config, self.data_ids["config"])
 
+        # Catch single values
+        if not isinstance(in_paths, dict):
+            in_paths = {"processed_data_paths": in_paths}
+        
         # Special case: standard as summary of file_types
         in_paths = self.fill_dict_standards(
             dictionary=in_paths,
@@ -224,7 +275,7 @@ class Sirius_Runner(Pipe_Step):
         if matched_in_paths:
             os.makedirs(out_path, exist_ok=True)
             self.run_single(
-                in_paths=join(in_paths, entry),
+                in_paths=matched_in_paths,
                 out_path=out_path,
                 projectspace=projectspace,
                 config=config,
@@ -252,17 +303,20 @@ class Sirius_Runner(Pipe_Step):
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
         """
-        in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
+        in_paths = to_list(get_if_dict(in_paths, self.data_ids["standard"]))
         out_path = get_if_dict(out_path, self.data_ids["out_path"])
+        projectspace = get_if_dict(kwargs.get("projectspace", None), self.data_ids["projectspace"])
 
         for in_path in in_paths:
             root, dirs, files = next(os.walk(in_path))
 
             for file in files:
-                if self.match_path(pattern=self.data_ids["in_path"][0], path=file):
+                if self.match_path(pattern=self.data_ids["in_paths"][0], path=file):
                     self.run_directory(in_paths=in_path, out_path=out_path, **kwargs)
 
             for dir in dirs:
+                if projectspace:
+                    kwargs["projectspace"] = join(projectspace, dir)
                 self.run_nested(
                     in_paths=join(in_path, dir),
                     out_path=join(out_path, dir),

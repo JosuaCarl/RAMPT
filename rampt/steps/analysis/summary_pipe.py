@@ -113,6 +113,101 @@ class Summary_Runner(Pipe_Step):
                 self.data_ids["in_paths"][5]: r".*\.tsv$",
                 self.data_ids["in_paths"][6]: r".*\.json$",
             },
+            valid_runs=[
+                {"single all": {
+                    "in_paths": {
+                        "quantification":
+                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                        "formula_identifications":
+                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                        "canopus_formula_summary":
+                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                        "structure_identifications":
+                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                        "canopus_structure_summary":
+                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                        "denovo_structure_identifications":
+                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                        "gnps_annotations":
+                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                        },
+                    "out_path": {
+                        "summary_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+                {"single": {
+                    "in_paths": {
+                        "quantification":
+                        lambda val: isinstance (val, str) and os.path.isfile(val),
+                        },
+                    "out_path": {
+                        "summary_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+                {"directory": {
+                    "in_paths": {
+                        "quantification":
+                        lambda val: isinstance (val, str) and os.path.isdir(val),
+                        "annotations":
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    "out_path": {
+                        "summary_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+                {"multiple directories all": {
+                    "in_paths": {
+                        "quantification":
+                        lambda val:isinstance (val, str) and os.path.isdir(val),
+                        "formula_identifications":
+                        lambda val:isinstance (val, str) and os.path.isdir(val),
+                        "canopus_formula_summary":
+                        lambda val:isinstance (val, str) and os.path.isdir(val),
+                        "structure_identifications":
+                        lambda val:isinstance (val, str) and os.path.isdir(val),
+                        "canopus_structure_summary":
+                        lambda val:isinstance (val, str) and os.path.isdir(val),
+                        "denovo_structure_identifications":
+                        lambda val:isinstance (val, str) and os.path.isdir(val),
+                        "gnps_annotations":
+                        lambda val:isinstance (val, str) and os.path.isdir(val),
+                    },
+                    "out_path": {
+                        "summary_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+                {"multiple directories minimum": {
+                    "in_paths": {
+                        "quantification":
+                        lambda val:isinstance (val, str) and os.path.isdir(val),
+                    },
+                    "out_path": {
+                        "summary_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+                {"nested": {
+                    "in_paths": {
+                        "annotations":
+                        lambda val: (isinstance(val, list) and all([os.path.isdir(v) for v in val])) or \
+                                    (isinstance (val, str) and os.path.isdir(val))
+                        },
+                    "out_path": {
+                        "summary_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+            ],
             save_log=save_log,
             additional_args=additional_args,
             verbosity=verbosity,
@@ -420,7 +515,7 @@ class Summary_Runner(Pipe_Step):
         :param recusion_level: Current level of recursion, important for determination of level of verbose output, defaults to 0
         :type recusion_level: int, optional
         """
-        in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
+        in_paths = to_list(get_if_dict(in_paths, self.data_ids["standard"]))
         out_path = get_if_dict(out_path, self.data_ids["out_path"])
 
         for in_path in in_paths:

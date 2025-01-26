@@ -121,6 +121,43 @@ class MSconvert_Runner(Pipe_Step):
                 self.data_ids["in_paths"][0]: rf".*\.({r'|'.join(self.valid_formats)})$"
             },
             patterns={self.data_ids["in_paths"][0]: r".*"},
+            valid_runs=[
+                {"single": {
+                    "in_paths": {
+                        "raw_data_paths":
+                        lambda val: (isinstance(val, list) and all([os.path.exists(v) for v in val])) or \
+                                    (isinstance (val, str) and os.path.exists(val))
+                        },
+                    "out_path": {
+                        "community_formatted_data_paths": 
+                        lambda val: isinstance (val, str)}
+                    },
+                },
+                {"directory": {
+                    "in_paths": {
+                        "raw_data_paths": 
+                        lambda val: (isinstance(val, list) and all([os.path.isdir(v) for v in val])) or \
+                                    (isinstance (val, str) and os.path.isdir(val))
+                    },
+                    "out_path": {
+                        "community_formatted_data_paths": 
+                        lambda val: isinstance (val, str)
+                    },
+                },
+                },
+                {"nested": {
+                    "in_paths": {
+                        "raw_data_paths":
+                        lambda val: (isinstance(val, list) and all([os.path.isdir(v) for v in val])) or \
+                                    (isinstance (val, str) and os.path.isdir(val))
+                        },
+                    "out_path": {
+                        "community_formatted_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                    },
+                    },
+                },
+            ],
             exec_path=exec_path,
             save_log=save_log,
             overwrite=overwrite,

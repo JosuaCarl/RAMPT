@@ -14,6 +14,82 @@ out_path, mock_path, example_path, batch_path, installs_path = contruct_common_p
 make_out(out_path)
 
 
+def test_summary_check_io():
+    summary_runner = Summary_Runner()
+    assert "single all" in summary_runner.check_io({
+        "in_paths": {
+            "quantification": join(mock_path, "empty_file"),
+            "formula_identifications": join(mock_path, "empty_file"),
+            "canopus_formula_summary": join(mock_path, "empty_file"),
+            "structure_identifications": join(mock_path, "empty_file"),
+            "canopus_structure_summary": join(mock_path, "empty_file"),
+            "denovo_structure_identifications": join(mock_path, "empty_file"),
+            "gnps_annotations": join(mock_path, "empty_file"),
+            },
+        "out_path": {
+            "summary_paths": out_path
+            },
+        },
+    )
+
+    assert "single" in summary_runner.check_io({
+        "in_paths": {
+            "quantification": join(mock_path, "empty_file"),
+            },
+        "out_path": {
+            "summary_paths": out_path
+            },
+        }
+    )
+
+    assert "directory" in summary_runner.check_io({
+        "in_paths": {
+            "quantification": mock_path,
+            "annotations": mock_path,
+            },
+        "out_path": {
+            "summary_paths": out_path
+            },
+        }
+    )
+
+    assert "multiple directories all" in summary_runner.check_io({
+        "in_paths": {
+            "quantification": mock_path,
+            "formula_identifications": mock_path,
+            "canopus_formula_summary": mock_path,
+            "structure_identifications": mock_path,
+            "canopus_structure_summary": mock_path,
+            "denovo_structure_identifications": mock_path,
+            "gnps_annotations": mock_path,
+        },
+        "out_path": {
+            "summary_paths": out_path
+            },
+        },
+    )
+
+    assert "multiple directories minimum" in summary_runner.check_io({
+        "in_paths": {
+            "quantification": mock_path,
+        },
+        "out_path": {
+            "summary_paths": out_path
+            },
+        },
+    )
+
+    assert "nested" in summary_runner.check_io(
+            {"in_paths": {
+                "annotations": [mock_path]
+                },
+            "out_path": {
+                "summary_paths": out_path
+                },
+            },
+        )
+
+
 def test_summary_add_quantification():
     clean_out(out_path)
 

@@ -5,15 +5,6 @@ import taipy.gui.builder as tgb
 from rampt.gui.helpers import *
 
 # Intemediary paths for selections
-## File selection
-uploaded_paths = {}
-select_folders = {}
-
-selection_trees_pruned = {}
-selection_trees_full = {}
-
-selected = {}
-
 
 def create_expandable_setting(
     create_methods: dict, title: str, hover_text: str = "", expanded=False, **kwargs
@@ -31,13 +22,21 @@ def create_expandable_setting(
             tgb.part()
 
 
+## File selection
+uploaded_paths = {}
+select_folders = {}
+
+selection_trees_pruned = {}
+selection_trees_full = {}
+
+selected = {}
+
 def create_file_selection(
     process: str,
     param_attribute_in: str = "scheduled_ios",
-    io_key: str = "standard",
     file_dialog_kwargs: dict = {},
 ):
-    naming_list = [process, param_attribute_in, io_key] if io_key else [process, param_attribute_in]
+    naming_list = [process, param_attribute_in]
 
     # Construct intermediary dicts
     selector_id = "_".join(naming_list)

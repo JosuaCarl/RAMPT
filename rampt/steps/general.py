@@ -265,6 +265,7 @@ class Pipe_Step(Step_Configuration):
         contains: str = None,
         patterns: dict[str, str] = {"in": ".*"},
         mandatory_patterns: dict[str, str] = {"in": ".*"},
+        valid_runs: list[dict] = [],
         save_log: bool = False,
         verbosity: int = 1,
         additional_args: list = [],
@@ -295,8 +296,10 @@ class Pipe_Step(Step_Configuration):
         :type contains: str, optional
         :param patterns: Matching patterns for finding appropriate folders, defaults to None
         :type patterns: dict[str,str], optional
-        :param mandatory_patterns: Mandatory pattern, that must be in the step, defaults to 1
+        :param mandatory_patterns: Mandatory pattern, that must be in the step, defaults to {}
         :type mandatory_patterns: dict[str,str], optional
+        :param valid_runs: Valid runs to check for, defaults to []
+        :type valid_runs: list[dict], optional
         :param save_log: Whether to save the output(s).
         :type save_log: bool, optional
         :param verbosity: Level of verbosity, defaults to 1
@@ -321,7 +324,7 @@ class Pipe_Step(Step_Configuration):
             save_log=save_log,
             verbosity=verbosity,
         )
-
+        self.valid_runs = valid_runs
         self.common_execs = []
         self.exec_path = exec_path
         self.futures = []
@@ -629,6 +632,39 @@ class Pipe_Step(Step_Configuration):
             return next(iter(optionals.values()))
         else:
             return list(optionals.values())
+
+    # Input valudation an distribution
+    def check_io(self, io:dict, valid_runs: list[dict] = []) -> list:
+        """
+        Check for a valid run style (single, directory, nested,...).
+
+        :param io: In_out dictionary
+        :type io: dict
+        :param valid_runs: A list of valid run_style, i/o dicts, defaults to []
+        :type valid_runs: list[dict], optional
+        :return: Valid run styles
+        :rtype: list
+        """
+        valid_runs = valid_runs if valid_runs else self.valid_runs
+        # Check keys
+        valid_run_styles = []
+        for valid_run in valid_runs:
+            for run_style, io_combos in valid_run.items():
+                combo_valid = True
+                for io_key, io_dict in io_combos.items():
+                    if io_key in io:
+                        for key, value_validation_method in io_dict.items():
+                            if key not in io[io_key] or not value_validation_method(io[io_key][key]):
+                                combo_valid = False
+                                break
+                    else:
+                        combo_valid = False
+                        break
+                if combo_valid:
+                    valid_run_styles.append(run_style)
+        return valid_run_styles
+        
+        
 
     def distribute_scheduled(
         self,

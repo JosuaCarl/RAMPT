@@ -104,6 +104,44 @@ class MZmine_Runner(Pipe_Step):
                 "batch": r".*\.mzbatch$",
             },
             patterns={self.data_ids["in_paths"][0]: r".*", "batch": r".*"},
+            valid_runs=[
+                {"single": {
+                    "in_paths": {
+                        "community_formatted_data_paths":
+                        lambda val: (isinstance(val, list) and all([os.path.isfile(v) for v in val])) or \
+                                    (isinstance (val, str) and os.path.isfile(val))
+                        },
+                    "out_path": {
+                        "processed_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                        },
+                    },
+                },
+                {"directory": {
+                    "in_paths": {
+                        "community_formatted_data_paths": 
+                        lambda val: (isinstance(val, list) and all([os.path.isdir(v) for v in val])) or \
+                                    (isinstance (val, str) and os.path.isdir(val))
+                    },
+                    "out_path": {
+                        "processed_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                    },
+                },
+                },
+                {"nested": {
+                    "in_paths": {
+                        "community_formatted_data_paths":
+                        lambda val: (isinstance(val, list) and all([os.path.isdir(v) for v in val])) or \
+                                    (isinstance (val, str) and os.path.isdir(val))
+                        },
+                    "out_path": {
+                        "processed_data_paths": 
+                        lambda val: isinstance (val, str) and os.path.isdir(val)
+                    },
+                    },
+                },
+            ],
             save_log=save_log,
             additional_args=additional_args,
             verbosity=verbosity,

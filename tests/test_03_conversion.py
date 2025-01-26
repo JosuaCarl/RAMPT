@@ -29,6 +29,57 @@ def test_installation():
     assert tool_available("msconvert")
 
 
+def test_msconv_check_io():
+    msconvert_runner = MSconvert_Runner()
+    assert "single" in msconvert_runner.check_io(
+        {"in_paths": {
+            "raw_data_paths": join(mock_path, "minimal_file.mzML")
+            },
+        "out_path": {
+            "community_formatted_data_paths": out_path
+            },
+        },
+    )
+    assert "single" in msconvert_runner.check_io(
+        {"in_paths": {
+            "raw_data_paths": [join(mock_path, "minimal_file.mzML")]
+            },
+        "out_path": {
+            "community_formatted_data_paths": out_path
+            },
+        },
+    )
+
+    assert "directory" in msconvert_runner.check_io(
+        {"in_paths": {
+            "raw_data_paths": mock_path
+            },
+        "out_path": {
+            "community_formatted_data_paths": out_path
+            },
+        },
+    )
+    assert "directory" in msconvert_runner.check_io(
+        {"in_paths": {
+            "raw_data_paths": [mock_path]
+            },
+        "out_path": {
+            "community_formatted_data_paths": out_path
+            },
+        },
+    )
+
+    assert "nested" in msconvert_runner.check_io(
+            {"in_paths": {
+                "raw_data_paths": [mock_path]
+                },
+            "out_path": {
+                "community_formatted_data_paths": out_path
+                },
+            },
+        )
+
+
 def test_msconv_pipe_run_single():
     clean_out(out_path)
 

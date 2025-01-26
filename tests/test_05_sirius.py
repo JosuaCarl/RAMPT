@@ -42,6 +42,49 @@ def test_installation():
     process.wait()
 
 
+def test_sirius_check_io():
+    sirius_runner = Sirius_Runner()
+    assert "single" in sirius_runner.check_io({
+        "in_paths": {
+            "ms_spectra": join(mock_path, "empty_file")
+            },
+        "out_path": {
+            "sirius_annotated_data_paths": out_path
+            },
+        }
+    )
+    
+    assert "directory" in sirius_runner.check_io({
+        "in_paths": {
+            "processed_data_paths": mock_path
+            },
+        "out_path": {
+            "sirius_annotated_data_paths": out_path
+            },
+        }
+    )
+    
+    assert "multiple directories" in sirius_runner.check_io({
+        "in_paths": {
+            "ms_spectra": mock_path
+        },
+        "out_path": {
+            "sirius_annotated_data_paths": out_path
+            },
+        }
+    )
+
+    assert "nested" in sirius_runner.check_io(
+            {"in_paths": {
+                "processed_data_paths": [mock_path]
+                },
+            "out_path": {
+                "sirius_annotated_data_paths": out_path
+                },
+            },
+        )
+
+
 def test_sirius_pipe_run_single():
     clean_out(out_path)
 
@@ -61,7 +104,10 @@ def test_sirius_pipe_run_directory():
     # Supoerficial testing of run_directory
     sirius_runner = Sirius_Runner(config=example_path)
 
-    sirius_runner.run_directory(in_paths=example_path, out_path=out_path)
+    sirius_runner.run_directory(
+        in_paths={"processed_data_paths": example_path},
+        out_path={"sirius_annotated_data_paths": out_path}
+    )
 
     assert os.path.isfile(join(out_path, "projectspace.sirius"))
     assert os.path.isfile(join(out_path, "structure_identifications.tsv"))
