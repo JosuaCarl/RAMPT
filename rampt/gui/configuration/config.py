@@ -96,7 +96,6 @@ analysis_params_config = Config.configure_json_data_node(id="analysis_params", s
 mzmine_batch_config = Config.configure_in_memory_data_node(id="mzmine_batch", scope=Scope.SCENARIO)
 
 
-
 # Sorter methods
 def merge_ios(*args) -> list[dict]:
     merged_ios = []
@@ -130,9 +129,7 @@ def sort_out(
                     sorted_io.update({key: io_dict[out_key][key]})
                 else:
                     # Return standard out
-                    sorted_io.update(
-                        {key: io_dict[out_key][step_instance.data_ids[out_key][0]]}
-                    )
+                    sorted_io.update({key: io_dict[out_key][step_instance.data_ids[out_key][0]]})
             sorted_ios.append({return_key: sorted_io})
         pipe_step_ios.append(sorted_ios)
     return pipe_step_ios
@@ -188,7 +185,11 @@ def generic_step(
     step_instance.run(out_folder=out_folder, **kwargs)
 
     if out_step_params:
-        out = sort_out(io_dicts=step_instance.processed_ios, step_instance=step_instance, out_step_params=out_step_params)
+        out = sort_out(
+            io_dicts=step_instance.processed_ios,
+            step_instance=step_instance,
+            out_step_params=out_step_params,
+        )
     else:
         out = [step_instance.processed_ios]
     ic(out)
@@ -290,10 +291,7 @@ def summarize_annotations(
 
 
 def analyze_difference(
-    entrypoint: bool,
-    summary_data_paths: dict[str, StrPath],
-    step_params: dict,
-    global_params: dict,
+    entrypoint: bool, summary_data_paths: dict[str, StrPath], step_params: dict, global_params: dict
 ):
     return generic_step(
         step_class=Analysis_Runner,
@@ -389,12 +387,7 @@ summarize_annotations_config = Config.configure_task(
 analyze_difference_config = Config.configure_task(
     "analyze_difference",
     function=analyze_difference,
-    input=[
-        entrypoint_config,
-        summary_paths_config,
-        analysis_params_config,
-        global_params_config,
-    ],
+    input=[entrypoint_config, summary_paths_config, analysis_params_config, global_params_config],
     output=analysis_paths_config,
     skippable=False,
 )

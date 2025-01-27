@@ -106,11 +106,11 @@ optional_data_nodes = {
 match_entrypoint_step_node = {
     "↔️ Conversion": {
         "conversion_params": ["raw_data_paths"],
-        "feature_finding_params.batch": ["mzmine_batch"]
+        "feature_finding_params.batch": ["mzmine_batch"],
     },
     "🔍 Feature finding": {
         "feature_finding_params": ["community_formatted_data_paths"],
-        "feature_finding_params.batch": ["mzmine_batch"]
+        "feature_finding_params.batch": ["mzmine_batch"],
     },
     "✒️ Annotation": {
         "gnps_params": ["processed_data_paths_gnps"],
@@ -167,14 +167,15 @@ def lock_scenario(state):
                         valid_run_styles = pipe_step.check_io(io)
 
                         run_style = get_attribute_recursive(
-                            state,
-                            f'run_style.{pipe_step_id.replace("_params", "")}_scheduled_ios'
+                            state, f'run_style.{pipe_step_id.replace("_params", "")}_scheduled_ios'
                         )
                         if run_style in valid_run_styles:
                             io.update({"run_style": run_style})
                             io_node.append(io)
                         else:
-                            logger.warn(f"Invalid io for run style '{run_style}' in '{pipe_step_id}': {io}")
+                            logger.warn(
+                                f"Invalid io for run style '{run_style}' in '{pipe_step_id}': {io}"
+                            )
 
                     if io_node:
                         data_node = state.scenario.data_nodes.get(data_node_id)
@@ -187,7 +188,6 @@ def lock_scenario(state):
         state.refresh("scenario")
     else:
         logger.log("No entrypoint defined.")
-
 
 
 ## Interaction
@@ -247,7 +247,12 @@ with tgb.Page(style=style) as configuration:
 
             tgb.text("Where would you like to enter the workflow ?", mode="markdown")
             tgb.selector(
-                "{entrypoint}", lov="{entrypoints}", dropdown=True, filter=True, multiple=False, on_change=change_entrypoint,
+                "{entrypoint}",
+                lov="{entrypoints}",
+                dropdown=True,
+                filter=True,
+                multiple=False,
+                on_change=change_entrypoint,
             )
 
             # Create possible settings

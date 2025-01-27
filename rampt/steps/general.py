@@ -541,7 +541,7 @@ class Pipe_Step(Step_Configuration):
             results = response[0]
             out, err = [response[i] if i < len(response) else None for i in range(1, 3)]
         else:
-            results, future, out, err = [None]*4
+            results, future, out, err = [None] * 4
 
         self.store_progress(
             in_out=kwargs.get("in_out"),
@@ -701,12 +701,7 @@ class Pipe_Step(Step_Configuration):
                     valid_run_styles.append(run_style)
         return valid_run_styles
 
-    def distribute_scheduled(
-        self,
-        correct_runner: str = None,
-        kwargs: dict = {},
-        **scheduled_io,
-    ):
+    def distribute_scheduled(self, correct_runner: str = None, kwargs: dict = {}, **scheduled_io):
         """
         Distribute the scheduled io
 
@@ -716,14 +711,13 @@ class Pipe_Step(Step_Configuration):
         if not correct_runner:
             valid_run_styles = self.check_io(scheduled_io)
             if any(["dir" in vrs for vrs in valid_run_styles]):
-                correct_runner = "directory" 
+                correct_runner = "directory"
             elif any(["single" in vrs for vrs in valid_run_styles]):
                 correct_runner = "single"
             elif any(["nested" in vrs for vrs in valid_run_styles]):
                 correct_runner = "nested"
             else:
                 logger.warn(f"Invalid io for step '{self.__class__.__name__}': {scheduled_io}")
-
 
         match correct_runner:
             case "nested":
