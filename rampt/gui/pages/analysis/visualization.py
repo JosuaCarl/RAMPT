@@ -45,10 +45,10 @@ data_node = None
 
 representable_data_nodes = []
 representable_data_node_mapping = {
-    "gnps_annotation": gnps_annotations_config,
-    "sirius_annotation": sirius_annotations_config,
-    "summary_data": summary_data_config,
-    "analysis_data": analysis_data_config,
+    "gnps_annotated_data_paths": gnps_annotations_config,
+    "sirius_annotated_data_paths": sirius_annotations_config,
+    "summary_paths": summary_data_config,
+    "analysis_paths": analysis_data_config,
 }
 
 
@@ -56,7 +56,7 @@ def filter_representable(state, id, scenario_name) -> bool:
     representable_data_nodes = []
     for name, node in state.scenario.data_nodes.items():
         if (
-            name.replace("_paths", "") in representable_data_node_mapping
+            name in representable_data_node_mapping
             and node.is_ready_for_reading
             and node.read()
         ):
@@ -131,13 +131,13 @@ figure_path_possibilities = []
 def prepare_figure_path(state, name, figure_id: str):
     match figure_id:
         case "values heatmap":
-            path_node = "summary_data_paths"
+            path_node = "summary_paths"
         case "signal intensity distribution":
-            path_node = "summary_data_paths"
+            path_node = "summary_paths"
         case "zscore heatmap":
-            path_node = "analysis_data_paths"
+            path_node = "analysis_paths"
         case "zscore cutoff accumulation":
-            path_node = "analysis_data_paths"
+            path_node = "analysis_paths"
     figure_path_possibilities = read_data_node(state, path_node)
     if figure_path_possibilities:
         set_attribute_recursive(state, "figure_path_possibilities", figure_path_possibilities)
