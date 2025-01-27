@@ -14,7 +14,8 @@ def create_conversion():
         tgb.text("###### Select raw data", mode="markdown")
         create_file_selection(
             process="conversion",
-            pipe_step=conversion_params, file_dialog_kwargs={"multiple": True} # Activate if open mutiple dir found
+            pipe_step=conversion_params,
+            file_dialog_kwargs={"multiple": True},  # Activate if open mutiple dir found
         )
 
 

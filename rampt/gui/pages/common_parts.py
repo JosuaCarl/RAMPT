@@ -259,7 +259,7 @@ def create_list_selection(
     with tgb.layout(columns="1 4", columns__mobile="1", gap="5%"):
         with tgb.part(render="{local}"):
             if extensions:
-                file_types = [(f"{ext[1:]} files", f"*{ext}") for ext in extensions.split(",") ]
+                file_types = [(f"{ext[1:]} files", f"*{ext}") for ext in extensions.split(",")]
                 tgb.button(
                     f"Select {name}",
                     on_action=lambda state: construct_selection_list(
@@ -277,8 +277,7 @@ def create_list_selection(
                     on_action=lambda state: construct_selection_list(
                         state,
                         open_file_folder(
-                            initialdir=get_directory(default_value),
-                            **file_dialog_kwargs,
+                            initialdir=get_directory(default_value), **file_dialog_kwargs
                         ),
                     ),
                 )

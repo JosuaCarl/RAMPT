@@ -245,7 +245,9 @@ class Step_Configuration:
 
         # Case dictionary
         attributes_dict = {}
-        attributes_dict_representation = attribute if isinstance(attribute, dict) else attribute.__dict__
+        attributes_dict_representation = (
+            attribute if isinstance(attribute, dict) else attribute.__dict__
+        )
         for attribute, value in attributes_dict_representation.items():
             if hasattr(value, "__dict__") or isinstance(value, dict):
                 attributes_dict[attribute] = self.dict_representation(value)

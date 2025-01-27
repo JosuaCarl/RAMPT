@@ -94,17 +94,26 @@ entrypoint = "↔️ Conversion"
 
 # Entrypoint lock matches
 optional_data_nodes = {
-    "↔️ Conversion": ["sirius_annotated_data_paths", "gnps_annotated_data_paths"],
-    "🔍 Feature finding": ["sirius_annotated_data_paths", "gnps_annotated_data_paths"],
-    "✒️ Annotation": ["sirius_annotated_data_paths", "gnps_annotated_data_paths"],
+    "↔️ Conversion": ["sirius_annotated_data_paths", "gnps_annotated_data_paths", "sirius_config"],
+    "🔍 Feature finding": ["sirius_annotated_data_paths", "gnps_annotated_data_paths", "sirius_config"],
+    "✒️ Annotation": ["sirius_annotated_data_paths", "gnps_annotated_data_paths", "sirius_config"],
     "🧺 Summary": ["sirius_annotated_data_paths", "gnps_annotated_data_paths"],
     "📈 Analysis": [],
 }
 match_entrypoint_step_node = {
     "↔️ Conversion": {"conversion_params": ["raw_data_paths"]},
     "🔍 Feature finding": {"feature_finding_params": ["community_formatted_data_paths"]},
-    "✒️ Annotation": {"gnps_params": ["processed_data_paths_gnps"], "sirius_params": ["processed_data_paths_sirius"]},
-    "🧺 Summary": {"summary_params": ["processed_data_paths_quant", "sirius_annotated_data_paths", "gnps_annotated_data_paths"]},
+    "✒️ Annotation": {
+        "gnps_params": ["processed_data_paths_gnps"],
+        "sirius_params": ["processed_data_paths_sirius"],
+    },
+    "🧺 Summary": {
+        "summary_params": [
+            "processed_data_paths_quant",
+            "sirius_annotated_data_paths",
+            "gnps_annotated_data_paths",
+        ]
+    },
     "📈 Analysis": {"analysis_params": ["summary_paths"]},
 }
 
@@ -116,6 +125,7 @@ def change_entrypoint():
 
 def lock_scenario(state):
     entrypoint = get_attribute_recursive(state, "entrypoint")
+    state.scenario.data_nodes.get("entrypoint").write(entrypoint)
 
     # Fill optionals
     for optional_data_node_id in optional_data_nodes[entrypoint]:
@@ -131,7 +141,9 @@ def lock_scenario(state):
 
             io_node = []
             io = {}
-            for scheduled_in_paths in get_attribute_recursive(state, f"{pipe_step_id}.scheduled_ios"):
+            for scheduled_in_paths in get_attribute_recursive(
+                state, f"{pipe_step_id}.scheduled_ios"
+            ):
                 ic(scheduled_in_paths)
                 io = {
                     "in_paths": scheduled_in_paths,
@@ -156,19 +168,17 @@ def lock_scenario(state):
                     logger.warn(f"Not a valid io for {pipe_step_id}: {io}")
 
             if io_node:
-                ic(data_node_id)
                 data_node = state.scenario.data_nodes.get(data_node_id)
-                ic(state.scenario.data_nodes)
-                ic(data_node)
-                ic(io_node)
                 data_node.write(io_node)
+
+                out_path_root = get_attribute_recursive(state, "out_path_root" )
+                state.scenario.data_nodes.get("Out_path_root").write(out_path_root)
 
     params = construct_params_dict(state)
     for param_id, param in params.items():
         state.scenario.data_nodes.get(param_id).write(param)
 
     state.refresh("scenario")
-
 
 
 ## Interaction
@@ -252,10 +262,15 @@ with tgb.Page(style=style) as configuration:
 
                 # Out Path
                 tgb.text("###### Select root folder for output", mode="markdown")
+                """
                 create_list_selection(
-                    process="out_path_root", name="out", file_dialog_kwargs={"select_folder": True}, extensions=None, attribute=None,
+                    process="out_path_root",
+                    name="out",
+                    file_dialog_kwargs={"select_folder": True},
+                    extensions=None,
+                    attribute=None,
                 )
-
+                """                
                 with tgb.part(render="{local}"):
                     tgb.button(
                         "Select out",
@@ -263,9 +278,9 @@ with tgb.Page(style=style) as configuration:
                             state,
                             "out_path_root",
                             open_file_folder(select_folder=True, multiple=False),
-                            refresh=True,
                         ),
                     )
+                tgb.text("{out_path_root}")
 
             # Create advanced settings
             tgb.text("### Advanced settings", mode="markdown")
