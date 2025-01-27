@@ -251,24 +251,37 @@ def create_list_selection(
             set_attribute_recursive(state, f"list_options.{selector_id}", list_options[selector_id])
 
     def update_selection(state, name, value):
-        set_attribute_recursive(state, f"{process}_params.{attribute}", value, refresh=True)
+        if attribute:
+            set_attribute_recursive(state, f"{process}_params.{attribute}", value, refresh=True)
+        else:
+            set_attribute_recursive(state, process, value, refresh=True)
 
     with tgb.layout(columns="1 4", columns__mobile="1", gap="5%"):
         with tgb.part(render="{local}"):
-            tgb.button(
-                f"Select {name}",
-                on_action=lambda state: construct_selection_list(
-                    state,
-                    open_file_folder(
-                        multiple=False,
-                        filetypes=[
-                            (f"{ext[1:]} files", f"*{ext}") for ext in extensions.split(",")
-                        ],
-                        initialdir=get_directory(default_value),
-                        **file_dialog_kwargs,
+            if extensions:
+                file_types = [(f"{ext[1:]} files", f"*{ext}") for ext in extensions.split(",") ]
+                tgb.button(
+                    f"Select {name}",
+                    on_action=lambda state: construct_selection_list(
+                        state,
+                        open_file_folder(
+                            file_types=file_types,
+                            initialdir=get_directory(default_value),
+                            **file_dialog_kwargs,
+                        ),
                     ),
-                ),
-            )
+                )
+            else:
+                tgb.button(
+                    f"Select {name}",
+                    on_action=lambda state: construct_selection_list(
+                        state,
+                        open_file_folder(
+                            initialdir=get_directory(default_value),
+                            **file_dialog_kwargs,
+                        ),
+                    ),
+                )
         with tgb.part(render="{not local}"):
             tgb.file_selector(
                 f"{{list_uploaded.{selector_id}}}",

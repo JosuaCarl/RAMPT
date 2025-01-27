@@ -328,7 +328,6 @@ def analyze_difference(
 
 
 # Tasks
-"""
 convert_files_config = Config.configure_task(
     "convert_files",
     function=convert_files,
@@ -343,8 +342,6 @@ convert_files_config = Config.configure_task(
     output=community_formatted_data_paths_config,
     skippable=False,
 )
-
-"""
 
 find_features_config = Config.configure_task(
     "find_features",
@@ -435,7 +432,7 @@ analyze_difference_config = Config.configure_task(
 ms_analysis_config = Config.configure_scenario(
     id="MS_analysis",
     task_configs=[
-        # convert_files_config,
+        convert_files_config,
         find_features_config,
         annotate_sirius_config,
         annotate_gnps_config,
@@ -443,7 +440,7 @@ ms_analysis_config = Config.configure_scenario(
         analyze_difference_config,
     ],
     sequences={
-        # "Convert": [convert_files_config],
+        "Convert": [convert_files_config],
         "Find features": [find_features_config],
         "Sirius annotation": [annotate_sirius_config],
         "GNPS annotation": [annotate_gnps_config],

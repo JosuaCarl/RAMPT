@@ -227,10 +227,33 @@ class Step_Configuration:
     # Dictionary represenation
     def dict_representation(self, attribute=None):
         attribute = attribute if attribute is not None else self
+
+        # Case iterable (list)
+        attributes_list = []
+        if isinstance(attribute, list):
+            for value in attribute:
+                if hasattr(value, "__dict__") or isinstance(value, dict):
+                    attributes_list.append(self.dict_representation(value))
+                elif isinstance(value, list):
+                    attributes_list.append(self.dict_representation(value))
+                elif callable(value):
+                    # Replace functions with True (we have only bool functions in representations)
+                    attributes_list.append(True)
+                else:
+                    attributes_list.append(value)
+            return attributes_list
+
+        # Case dictionary
         attributes_dict = {}
-        for attribute, value in attribute.__dict__.items():
-            if hasattr(value, "__dict__"):
+        attributes_dict_representation = attribute if isinstance(attribute, dict) else attribute.__dict__
+        for attribute, value in attributes_dict_representation.items():
+            if hasattr(value, "__dict__") or isinstance(value, dict):
                 attributes_dict[attribute] = self.dict_representation(value)
+            elif isinstance(value, list):
+                attributes_dict[attribute] = self.dict_representation(value)
+            elif callable(value):
+                # Replace functions with True (we have only bool functions in representations)
+                attributes_dict[attribute] = True
             else:
                 attributes_dict[attribute] = value
         return attributes_dict
@@ -654,7 +677,10 @@ class Pipe_Step(Step_Configuration):
                 for io_key, io_dict in io_combos.items():
                     if io_key in io:
                         for key, value_validation_method in io_dict.items():
-                            if key not in io[io_key] or not value_validation_method(
+                            if key not in io[io_key]:
+                                combo_valid = False
+                                break
+                            if callable(value_validation_method) and not value_validation_method(
                                 io[io_key][key]
                             ):
                                 combo_valid = False
