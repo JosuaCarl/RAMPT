@@ -95,7 +95,11 @@ entrypoint = "↔️ Conversion"
 # Entrypoint lock matches
 optional_data_nodes = {
     "↔️ Conversion": ["sirius_annotated_data_paths", "gnps_annotated_data_paths", "sirius_config"],
-    "🔍 Feature finding": ["sirius_annotated_data_paths", "gnps_annotated_data_paths", "sirius_config"],
+    "🔍 Feature finding": [
+        "sirius_annotated_data_paths",
+        "gnps_annotated_data_paths",
+        "sirius_config",
+    ],
     "✒️ Annotation": ["sirius_annotated_data_paths", "gnps_annotated_data_paths", "sirius_config"],
     "🧺 Summary": ["sirius_annotated_data_paths", "gnps_annotated_data_paths"],
     "📈 Analysis": [],
@@ -171,7 +175,7 @@ def lock_scenario(state):
                 data_node = state.scenario.data_nodes.get(data_node_id)
                 data_node.write(io_node)
 
-                out_path_root = get_attribute_recursive(state, "out_path_root" )
+                out_path_root = get_attribute_recursive(state, "out_path_root")
                 state.scenario.data_nodes.get("Out_path_root").write(out_path_root)
 
     params = construct_params_dict(state)
@@ -270,7 +274,7 @@ with tgb.Page(style=style) as configuration:
                     extensions=None,
                     attribute=None,
                 )
-                """                
+                """
                 with tgb.part(render="{local}"):
                     tgb.button(
                         "Select out",
