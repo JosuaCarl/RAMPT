@@ -119,7 +119,13 @@ def merge_ios(*args) -> list[dict]:
         merged_ios.append(merged_io)
     return merged_ios
 
-def sort_out(io_dicts:list[dict], out_step_params: list, sort_key: str = "out_path", return_key: str = "in_paths") -> list[list]:
+
+def sort_out(
+    io_dicts: list[dict],
+    out_step_params: list,
+    sort_key: str = "out_path",
+    return_key: str = "in_paths",
+) -> list[list]:
     pipe_step_ios = []
     for pipe_step_param in out_step_params:
         sorted_ios = []
@@ -132,7 +138,9 @@ def sort_out(io_dicts:list[dict], out_step_params: list, sort_key: str = "out_pa
                     sorted_io.update({key: io_dict[sort_key][key]})
                 else:
                     # Return standard out
-                    sorted_io.update({key: io_dict[sort_key][pipe_step_param["data_ids"][sort_key]]})
+                    sorted_io.update(
+                        {key: io_dict[sort_key][pipe_step_param["data_ids"][sort_key]]}
+                    )
             sorted_ios.append({return_key: sorted_io})
         pipe_step_ios.append(sorted_ios)
     return pipe_step_ios
@@ -155,7 +163,7 @@ def generic_step(
     if not entrypoint:
         for entry in ["patterns", "pattern", "contains", "prefix", "suffix"]:
             global_params.pop(entry)
-    
+
     # Create step_instance
     step_params.update(global_params)
     step_instance = step_class(**step_params)
@@ -188,13 +196,9 @@ def generic_step(
     step_instance.run(out_folder=out_folder, **kwargs)
 
     if out_step_params:
-        return sort_out(
-            io_dicts=step_instance.processed_ios,
-            out_step_params=out_step_params,
-        )
+        return sort_out(io_dicts=step_instance.processed_ios, out_step_params=out_step_params)
     else:
         return step_instance.processed_ios
-
 
 
 def convert_files(
@@ -356,7 +360,11 @@ find_features_config = Config.configure_task(
         sirius_params_config,
         gnps_params_config,
     ],
-    output=[processed_data_paths_quant_config, processed_data_paths_sirius_config, processed_data_paths_gnps_config],
+    output=[
+        processed_data_paths_quant_config,
+        processed_data_paths_sirius_config,
+        processed_data_paths_gnps_config,
+    ],
     skippable=False,
 )
 
@@ -427,7 +435,7 @@ analyze_difference_config = Config.configure_task(
 ms_analysis_config = Config.configure_scenario(
     id="MS_analysis",
     task_configs=[
-        #convert_files_config,
+        # convert_files_config,
         find_features_config,
         annotate_sirius_config,
         annotate_gnps_config,
@@ -435,7 +443,7 @@ ms_analysis_config = Config.configure_scenario(
         analyze_difference_config,
     ],
     sequences={
-        #"Convert": [convert_files_config],
+        # "Convert": [convert_files_config],
         "Find features": [find_features_config],
         "Sirius annotation": [annotate_sirius_config],
         "GNPS annotation": [annotate_gnps_config],

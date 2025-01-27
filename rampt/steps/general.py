@@ -801,9 +801,7 @@ class Pipe_Step(Step_Configuration):
             )
 
             self.distribute_scheduled(
-                correct_runner=scheduled_io.get("run_style", None),
-                kwargs=kwargs,
-                **scheduled_io
+                correct_runner=scheduled_io.get("run_style", None), kwargs=kwargs, **scheduled_io
             )
 
             logger.log(

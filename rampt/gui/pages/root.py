@@ -48,7 +48,6 @@ save_path = None
 save_file_types = [("json files", "*.json")]
 
 
-
 def construct_params_dict(state, param_segment_names: list = param_segment_names):
     params = {}
     for segment_name in param_segment_names:
@@ -106,14 +105,16 @@ optional_data_nodes = {
 match_entrypoint_pipe_steps = {
     "↔️ Conversion": {"conversion_params": "conversion_io"},
     "🔍 Feature finding": {"feature_finding_params": "feature_finding_io"},
-    "✒️ Annotation": { "gnps_params": "gnps_io", "sirius_params": "sirius_io" },
+    "✒️ Annotation": {"gnps_params": "gnps_io", "sirius_params": "sirius_io"},
     "🧺 Summary": {"summary_params": "summary_io"},
     "📈 Analysis": {"analysis_params": "analysis_io"},
 }
 
+
 def change_entrypoint():
     # TODO: create sequences that fit
     pass
+
 
 def lock_scenario(state):
     entrypoint = get_attribute_recursive(state, "entrypoint")
@@ -121,7 +122,7 @@ def lock_scenario(state):
     # Fill optionals
     for optional_data_node_id in optional_data_nodes[entrypoint]:
         data_node.write(optional_data_node_id, None)
-    
+
     # Check current step information
     pipe_steps_nodes = match_entrypoint_pipe_steps.get(entrypoint)
     for pipe_step_id, data_node_id in pipe_steps_nodes.items():
@@ -130,13 +131,15 @@ def lock_scenario(state):
         io_node = []
         for scheduled_in_paths in get_attribute_recursive(state, f"{pipe_step}.scheduled_ios"):
             io = {
-                    "in_paths":{
-                        scheduled_in_paths
-                    },
-                    "out_path":{
-                        {pipe_step.data_ids["out_path"]: get_attribute_recursive(state, "out_path_root")}
+                "in_paths": {scheduled_in_paths},
+                "out_path": {
+                    {
+                        pipe_step.data_ids["out_path"]: get_attribute_recursive(
+                            state, "out_path_root"
+                        )
                     }
-                }
+                },
+            }
             valid_run_styles = pipe_step.check_io(io)
 
             if "nested" in valid_run_styles:
@@ -150,14 +153,13 @@ def lock_scenario(state):
                 io_node.append(io)
             else:
                 logger.warn(f"Not a valid io for {pipe_step_id}: {io}")
-    
+
         state.data_nodes.get(data_node_id).write(io_node)
 
     for data_node_id, data_node in state.data_nodes.items():
         if data_node_id.endswith("_params"):
             step_params = get_attribute_recursive(state, data_node_id)
             data_node.write(step_params.dict_representation())
-
 
 
 ## Interaction

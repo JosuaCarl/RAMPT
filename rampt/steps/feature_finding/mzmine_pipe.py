@@ -253,10 +253,7 @@ class MZmine_Runner(Pipe_Step):
             step_function=execute_verbose_command,
             in_out=dict(
                 in_paths=in_path,
-                out_path={
-                    self.data_ids["out_path"][0]: out_path,
-                    "mzmine_log": self.log_paths[-1],
-                }
+                out_path={self.data_ids["out_path"][0]: out_path, "mzmine_log": self.log_paths[-1]},
             ),
             log_path=self.get_log_path(out_path=out_path),
             cmd=cmd,

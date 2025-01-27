@@ -21,7 +21,6 @@ def create_expandable_setting(
             tgb.part()
 
 
-
 ## File selection
 uploaded_paths = {}
 select_folders = {}
@@ -56,7 +55,6 @@ def create_file_selection(
     select_folders.update({selector_id: False})
     selected.update({selector_id: []})
 
-    
     run_styles.update({selector_id: [list(run.keys())[0] for run in pipe_step.valid_runs]})
     run_style.update({selector_id: ""})
 
@@ -101,33 +99,34 @@ def create_file_selection(
         selected_labels = [
             element.get("label") if isinstance(element, dict) else element for element in value
         ]
-        
+
         # Get selected input
         selected_input = get_attribute_recursive(state, f"selected_input.{selector_id}")
         if selected_input:
             in_paths_key = "_".join(selected_input.split(" "))
-            
+
             in_paths_list = get_attribute_recursive(state, f"{process}_params.{param_attribute_in}")
             if in_paths_list:
                 in_paths_dictionary = in_paths_list[-1]
                 pipe_step = get_attribute_recursive(state, f"{process}_params")
                 valid_runs = [
-                    {
-                        key: {"in_paths": value["in_paths"]}
-                        for key, value in vr.copy().items()
-                    }
+                    {key: {"in_paths": value["in_paths"]} for key, value in vr.copy().items()}
                     for vr in pipe_step.valid_runs
                 ]
-                if get_attribute_recursive(state, f"run_style.{selector_id}") in pipe_step.check_io(io={"in_paths": in_paths_dictionary}, valid_runs=valid_runs):
+                if get_attribute_recursive(state, f"run_style.{selector_id}") in pipe_step.check_io(
+                    io={"in_paths": in_paths_dictionary}, valid_runs=valid_runs
+                ):
                     in_paths_list.append({in_paths_key: selected_labels})
                 else:
                     in_paths_dictionary.update({in_paths_key: selected_labels})
                     in_paths_list[-1] = in_paths_dictionary
             else:
                 in_paths_list = [{in_paths_key: selected_labels}]
-            
+
             if in_paths_list[-1]:
-                set_attribute_recursive(state, f"locked_inputs.{selector_id}", list(in_paths_list[-1].keys()))
+                set_attribute_recursive(
+                    state, f"locked_inputs.{selector_id}", list(in_paths_list[-1].keys())
+                )
             set_attribute_recursive(
                 state, f"{process}_params.{param_attribute_in}", in_paths_list, refresh=True
             )
@@ -161,9 +160,9 @@ def create_file_selection(
             label="Select run style",
             filter=True,
             dropdown=True,
-            on_change=lambda state, name, val: make_input_selector(state)
-    )
-        
+            on_change=lambda state, name, val: make_input_selector(state),
+        )
+
     # Input type
     with tgb.layout(columns="2 2 1", columns__mobile="1", gap="5%"):
         tgb.selector(
@@ -171,7 +170,7 @@ def create_file_selection(
             lov=f"{{possible_inputs.{selector_id}}}",
             label="Select input type",
             filter=True,
-            dropdown=True
+            dropdown=True,
         )
         tgb.selector(
             f"{{locked_inputs.{selector_id}}}",
@@ -181,11 +180,7 @@ def create_file_selection(
             multiple=True,
             active=False,
         )
-        tgb.button(
-            label="Reset package",
-            on_action=lambda state, id, payload: reset_package(state)
-        )
-
+        tgb.button(label="Reset package", on_action=lambda state, id, payload: reset_package(state))
 
     with tgb.layout(columns="1 4", columns__mobile="1", gap="5%"):
         # Selector
