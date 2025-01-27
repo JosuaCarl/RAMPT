@@ -55,11 +55,7 @@ representable_data_node_mapping = {
 def filter_representable(state, id, scenario_name) -> bool:
     representable_data_nodes = []
     for name, node in state.scenario.data_nodes.items():
-        if (
-            name in representable_data_node_mapping
-            and node.is_ready_for_reading
-            and node.read()
-        ):
+        if name in representable_data_node_mapping and node.is_ready_for_reading and node.read():
             representable_data_nodes.append(node)
     set_attribute_recursive(state, "representable_data_nodes", representable_data_nodes)
 
