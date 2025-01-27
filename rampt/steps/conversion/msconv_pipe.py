@@ -51,13 +51,19 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         save_log=save_log,
         additional_args=additional_args,
         verbosity=verbosity,
-        nested=nested,
         workers=n_workers,
     )
-    msconvert_runner.scheduled_ios = {
-        "in_paths": {"raw_data_paths": in_dir},
-        "out_path": {"community_formatted_data_paths": out_dir},
-    }
+    if nested:
+        msconvert_runner.scheduled_ios = {
+            "in_paths": {"raw_data_paths": in_dir},
+            "out_path": {"community_formatted_data_paths": out_dir},
+            "run_style": "nested",
+        }
+    else:
+        msconvert_runner.scheduled_ios = {
+            "in_paths": {"raw_data_paths": in_dir},
+            "out_path": {"community_formatted_data_paths": out_dir},
+        }
     return msconvert_runner.run()
 
 
@@ -242,7 +248,8 @@ class MSconvert_Runner(Pipe_Step):
                     step_function=execute_verbose_command,
                     cmd=cmd,
                     in_out=dict(
-                        in_paths=in_path, out_path={self.data_ids["out_path"][0]: out_path}
+                        in_paths={self.data_ids["in_paths"][0]: in_path},
+                        out_path={self.data_ids["out_path"][0]: out_path},
                     ),
                     log_path=self.get_log_path(out_path=out_path),
                     verbosity=self.verbosity,

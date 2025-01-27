@@ -48,10 +48,17 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         nested=nested,
         valid_formats=valid_formats,
     )
-    mzmine_runner.scheduled_ios = {
-        "in_paths": {"community_formatted_data_paths": in_dir},
-        "out_path": {"processed_data_paths": out_dir},
-    }
+    if nested:
+        mzmine_runner.scheduled_ios = {
+            "in_paths": {"community_formatted_data_paths": in_dir},
+            "out_path": {"processed_data_paths": out_dir},
+            "run_style": "nested",
+        }
+    else:
+        mzmine_runner.scheduled_ios = {
+            "in_paths": {"community_formatted_data_paths": in_dir},
+            "out_path": {"processed_data_paths": out_dir},
+        }
     mzmine_runner.run()
 
 
@@ -253,7 +260,7 @@ class MZmine_Runner(Pipe_Step):
         self.compute(
             step_function=execute_verbose_command,
             in_out=dict(
-                in_paths=in_path,
+                in_paths={self.data_ids["in_paths"][0]: in_path},
                 out_path={self.data_ids["out_path"][0]: out_path, "mzmine_log": log_path},
             ),
             log_path=log_path,

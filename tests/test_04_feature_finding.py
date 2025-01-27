@@ -72,7 +72,10 @@ def test_mzmine_pipe_run_single():
     # Superficial testing of run_single
     mzmine_runner = MZmine_Runner(batch=join(batch_path, "minimal.mzbatch"), user=user, verbosity=3)
 
-    mzmine_runner.run_single(in_paths=join(example_path, "minimal.mzML"), out_path=out_path)
+    mzmine_runner.run_single(
+        in_paths={"community_formatted_data_paths": join(example_path, "minimal.mzML")},
+        out_path={"processed_data_paths": out_path},
+    )
 
     assert os.path.isfile(join(out_path, "out_iimn_fbmn_quant.csv"))
     assert os.path.isfile(join(out_path, "out_sirius.mgf"))
@@ -83,7 +86,10 @@ def test_mzmine_pipe_run_directory():
     # Supoerficial testing of run_directory
     mzmine_runner = MZmine_Runner(batch=join(batch_path, "minimal.mzbatch"), user=user)
 
-    mzmine_runner.run_directory(in_paths=example_path, out_path=out_path)
+    mzmine_runner.run_directory(
+        in_paths={"community_formatted_data_paths": example_path},
+        out_path={"processed_data_paths": out_path},
+    )
 
     assert os.path.isfile(join(out_path, "out_iimn_fbmn_quant.csv"))
     assert os.path.isfile(join(out_path, "out_sirius.mgf"))
@@ -115,13 +121,20 @@ def test_mzmine_pipe_run():
     # Superficial testing of run
     mzmine_runner = MZmine_Runner(batch=join(batch_path, "minimal.mzbatch"), user=user, workers=2)
 
-    mzmine_runner.run([dict(in_paths=example_path, out_path=out_path)])
+    mzmine_runner.run(
+        [
+            dict(
+                in_paths={"community_formatted_data_paths": example_path},
+                out_path={"processed_data_paths": out_path},
+            )
+        ]
+    )
     mzmine_runner.compute_futures()
 
     assert mzmine_runner.processed_ios == [
         {
-            "in_paths": join(out_path, "source_files.txt"),
-            "out_path": {"processed_data_paths": out_path},
+            "in_paths": {"community_formatted_data_paths": join(out_path, "source_files.txt")},
+            "out_path": {"mzmine_log": None, "processed_data_paths": out_path},
         }
     ]
     with open(join(out_path, "source_files.txt"), "r") as f:

@@ -44,11 +44,17 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         nested=nested,
         workers=n_workers,
     )
-    gnps_runner.scheduled_ios = {
-        "in_paths": {"processed_data_paths": in_dir},
-        "out_path": {"gnps_annotated_data_paths": out_dir},
-    }
-    ic(gnps_runner.scheduled_ios)
+    if nested:
+        gnps_runner.scheduled_ios = {
+            "in_paths": {"processed_data_paths": in_dir},
+            "out_path": {"gnps_annotated_data_paths": out_dir},
+            "run_style": "nested",
+        }
+    else:
+        gnps_runner.scheduled_ios = {
+            "in_paths": {"processed_data_paths": in_dir},
+            "out_path": {"gnps_annotated_data_paths": out_dir},
+        }
     return gnps_runner.run()
 
 
@@ -250,10 +256,12 @@ class GNPS_Runner(Pipe_Step):
             if query in line:
                 response_json = re.search(r"{.*}", line.replace(query, ""))[0]
                 return json.loads(response_json)
-        logger.error(
+        logger.log(
             message=f"Query <{query}> was not found in mzmine_log: Please provide a valid string or path.",
-            error_type=ValueError,
+            minimum_verbosity=2,
+            verbosity=self.verbosity,
         )
+        return None
 
     def extract_task_info(self, query: str, mzmine_log: StrPath = None) -> dict:
         """
@@ -291,13 +299,15 @@ class GNPS_Runner(Pipe_Step):
                 query=self.mzmine_log_query, mzmine_log=mzmine_log
             )
 
-        if gnps_response["status"] == "Success":
+        if gnps_response and gnps_response["status"] == "Success":
             task_id = gnps_response["task_id"]
         else:
-            logger.error(
+            logger.log(
                 message="mzmine_log reports an unsuccessful job submission to GNPS by mzmine.",
-                error_type=ValueError,
+                minimum_verbosity=2,
+                verbosity=self.verbosity,
             )
+            return None, None
 
         url = f"https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={task_id}"
         return task_id, check_for_str_request(
@@ -433,7 +443,7 @@ class GNPS_Runner(Pipe_Step):
             )
 
         else:
-            raise BrokenPipeError(f"Status of {task_id} was not marked DONE.")
+            logger.warn(f"Status of {task_id} was not marked DONE. The FBMN run was unsuccessful.")
 
     # RUN
     def run_single(self, in_paths: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
@@ -475,6 +485,7 @@ class GNPS_Runner(Pipe_Step):
             # Catch files
             if os.path.isfile(path):
                 matched_in_paths[file_type] = path
+                break
             # Search directories
             for entry in os.listdir(path):
                 if self.match_path(pattern=file_type, path=entry):

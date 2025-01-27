@@ -44,10 +44,17 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         nested=nested,
         workers=n_workers,
     )
-    sirius_runner.scheduled_ios = {
-        "in_paths": {"processed_data_paths": in_dir},
-        "out_path": {"sirius_annotated_data_paths": out_dir},
-    }
+    if nested:
+        sirius_runner.scheduled_ios = {
+            "in_paths": {"processed_data_paths": in_dir},
+            "out_path": {"sirius_annotated_data_paths": out_dir},
+            "run_style": "nested",
+        }
+    else:
+        sirius_runner.scheduled_ios = {
+            "in_paths": {"processed_data_paths": in_dir},
+            "out_path": {"sirius_annotated_data_paths": out_dir},
+        }
     return sirius_runner.run(projectspace=projectspace)
 
 
@@ -215,7 +222,10 @@ class Sirius_Runner(Pipe_Step):
 
         self.compute(
             step_function=execute_verbose_command,
-            in_out=dict(in_paths=in_paths, out_path={self.data_ids["out_path"][0]: out_path}),
+            in_out=dict(
+                in_paths={self.data_ids["in_paths"][0]: in_paths},
+                out_path={self.data_ids["out_path"][0]: out_path},
+            ),
             log_path=self.get_log_path(out_path=out_path),
             cmd=cmd,
             verbosity=self.verbosity,
@@ -269,6 +279,7 @@ class Sirius_Runner(Pipe_Step):
             # Catch files
             if os.path.isfile(path):
                 matched_in_paths[file_type] = path
+                break
             # Search directories
             for entry in os.listdir(path):
                 if self.match_path(pattern=file_type, path=entry):

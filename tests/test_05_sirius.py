@@ -120,12 +120,19 @@ def test_sirius_pipe_run():
     # Superficial testing of run
     sirius_runner = Sirius_Runner(workers=2)
 
-    sirius_runner.run([dict(in_paths=example_path, out_path=out_path)])
+    sirius_runner.run(
+        [
+            dict(
+                in_paths={"ms_spectra": example_path},
+                out_path={"sirius_annotated_data_paths": out_path},
+            )
+        ]
+    )
     sirius_runner.compute_futures()
 
     assert sirius_runner.processed_ios == [
         {
-            "in_paths": join(example_path, "example_files_sirius.mgf"),
+            "in_paths": {"ms_spectra": join(example_path, "example_files_sirius.mgf")},
             "out_path": {"sirius_annotated_data_paths": out_path},
         }
     ]

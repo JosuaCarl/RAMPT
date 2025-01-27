@@ -10,12 +10,10 @@
 - Handling of data_input
 - Unification of pipe step execution
 - Mightier pattern matchin with regex for all file matchin operations
-
-[- Batch files are now read to search for output information (including metadata)]
+- Better autodetection of run-style, paired with manual possibilities
 
 ## ✨New✨
 - Choose entrypoints for scenarios
 - Added logger class to facilitate handling output and debugging
 - Provide a .mzuser file to make your computations with
 
-[- Responsive folder setting]

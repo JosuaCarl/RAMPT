@@ -18,7 +18,7 @@ def test_step_configuration():
     # Initialization test
     step_configuration = Step_Configuration("test")
     assert step_configuration.name == "test"
-    assert step_configuration.patterns == {"in": ".*"}
+    assert step_configuration.patterns == {}
 
     # Update test
     step_configuration = Step_Configuration("test")
@@ -27,6 +27,8 @@ def test_step_configuration():
     assert not step_configuration.overwrite
     assert step_configuration.verbosity == 3
     assert step_configuration.prefix == "Chuck"
+
+    step_configuration.update_patterns(["in"])
     assert step_configuration.patterns["in"] == r"^Chuck.*.*.*Norris$"
 
     # Saving test

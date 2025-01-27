@@ -10,6 +10,9 @@ feature_finding_params = MZmine_Runner()
 
 mzmine_default_folder = os.path.join(Path.home(), ".mzmine", "users")
 
+def read_out_batch_file(batch_path: StrPath):
+    
+
 
 def create_feature_finding():
     with tgb.part(render="{'feat' in entrypoint.lower()}"):

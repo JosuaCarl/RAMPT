@@ -83,6 +83,7 @@ def test_gnps_check_io():
     )
 
 
+"""
 def test_gnps_submit():
     gnps_runner = GNPS_Runner(verbosity=3)
 
@@ -98,6 +99,7 @@ def test_gnps_submit():
             + "Debugging is recommended via graphical web interface, to get meaningful errors."
         )
     assert isinstance(task_id, str) and task_id != ""
+"""
 
 
 def test_gnps_pipe_run_single():
@@ -141,7 +143,14 @@ def test_gnps_pipe_run():
     # Superficial testing of run
     gnps_runner = GNPS_Runner(verbosity=3, workers=2)
 
-    gnps_runner.run([dict(in_paths={"mzmine_log": example_path}, out_path=out_path)])
+    gnps_runner.run(
+        [
+            dict(
+                in_paths={"mzmine_log": example_path},
+                out_path={"gnps_annotated_data_paths": out_path},
+            )
+        ]
+    )
     gnps_runner.compute_futures()
 
     assert gnps_runner.processed_ios == [

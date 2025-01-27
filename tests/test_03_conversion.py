@@ -122,11 +122,13 @@ def test_msconv_pipe_run_nested():
 
     assert msconvert_runner.processed_ios == [
         {
-            "in_paths": join(mock_path, "minimal_file.mzML"),
+            "in_paths": {"raw_data_paths": join(mock_path, "minimal_file.mzML")},
             "out_path": {"community_formatted_data_paths": join(out_path, "minimal_file.mzML")},
         },
         {
-            "in_paths": join(mock_path, "nested_test_folder", "minimal_file.mzML"),
+            "in_paths": {
+                "raw_data_paths": join(mock_path, "nested_test_folder", "minimal_file.mzML")
+            },
             "out_path": {
                 "community_formatted_data_paths": join(
                     out_path, "nested_test_folder", "minimal_file.mzML"
@@ -154,11 +156,18 @@ def test_msconv_pipe_run():
         workers=1,
     )
 
-    msconvert_runner.run(in_outs=[dict(in_paths=mock_path, out_path=out_path)])
+    msconvert_runner.run(
+        in_outs=[
+            dict(
+                in_paths={"raw_data_paths": mock_path},
+                out_path={"community_formatted_data_paths": out_path},
+            )
+        ]
+    )
 
     assert msconvert_runner.processed_ios == [
         {
-            "in_paths": join(mock_path, "minimal_file.mzML"),
+            "in_paths": {"raw_data_paths": join(mock_path, "minimal_file.mzML")},
             "out_path": {"community_formatted_data_paths": join(out_path, "minimal_file.mzML")},
         }
     ]
@@ -167,11 +176,18 @@ def test_msconv_pipe_run():
     clean_out(out_path)
 
     # Specific run
-    msconvert_runner.run([dict(in_paths=join(mock_path, "minimal_file.mzML"), out_path=out_path)])
+    msconvert_runner.run(
+        [
+            dict(
+                in_paths={"raw_data_paths": join(mock_path, "minimal_file.mzML")},
+                out_path={"community_formatted_data_paths": out_path},
+            )
+        ]
+    )
 
     assert msconvert_runner.processed_ios == [
         {
-            "in_paths": join(mock_path, "minimal_file.mzML"),
+            "in_paths": {"raw_data_paths": join(mock_path, "minimal_file.mzML")},
             "out_path": {"community_formatted_data_paths": join(out_path, "minimal_file.mzML")},
         }
     ]
@@ -187,19 +203,27 @@ def test_msconv_pipe_run_cross():
         pattern=r".*\.mzML$",
         save_log=False,
         verbosity=3,
-        nested=True,
         workers=1,
     )
 
-    msconvert_runner.run([dict(in_paths=mock_path, out_path=out_path)])
-
+    msconvert_runner.run(
+        in_outs=[
+            dict(
+                in_paths={"raw_data_paths": mock_path},
+                out_path={"community_formatted_data_paths": out_path},
+                run_style="nested",
+            )
+        ]
+    )
     assert msconvert_runner.processed_ios == [
         {
-            "in_paths": join(mock_path, "minimal_file.mzML"),
+            "in_paths": {"raw_data_paths": join(mock_path, "minimal_file.mzML")},
             "out_path": {"community_formatted_data_paths": join(out_path, "minimal_file.mzXML")},
         },
         {
-            "in_paths": join(mock_path, "nested_test_folder", "minimal_file.mzML"),
+            "in_paths": {
+                "raw_data_paths": join(mock_path, "nested_test_folder", "minimal_file.mzML")
+            },
             "out_path": {
                 "community_formatted_data_paths": join(
                     out_path, "nested_test_folder", "minimal_file.mzXML"

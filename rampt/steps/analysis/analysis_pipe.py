@@ -46,10 +46,17 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         nested=nested,
         workers=n_workers,
     )
-    analysis_runner.scheduled_ios = {
-        "in_paths": {"summary_paths": in_dir},
-        "out_path": {"analysis_paths": out_dir},
-    }
+    if nested:
+        analysis_runner.scheduled_ios = {
+            "in_paths": {"summary_paths": in_dir},
+            "out_path": {"analysis_paths": out_dir},
+            "run_style": "nested",
+        }
+    else:
+        analysis_runner.scheduled_ios = {
+            "in_paths": {"summary_paths": in_dir},
+            "out_path": {"analysis_paths": out_dir},
+        }
     return analysis_runner.run()
 
 
@@ -268,7 +275,10 @@ class Analysis_Runner(Pipe_Step):
         self.compute(
             step_function=capture_and_log,
             func=self.complete_analysis,
-            in_out=dict(in_paths=in_paths, out_path={self.data_ids["out_path"][0]: out_path}),
+            in_out=dict(
+                in_paths={self.data_ids["in_paths"][0]: in_paths},
+                out_path={self.data_ids["out_path"][0]: out_path},
+            ),
             log_path=self.get_log_path(out_path=out_path),
         )
 
@@ -291,6 +301,7 @@ class Analysis_Runner(Pipe_Step):
             # Catch files
             if os.path.isfile(path):
                 matched_in_paths[file_type] = path
+                break
             # Search directories
             for entry in os.listdir(path):
                 if self.match_path(pattern=file_type, path=entry):

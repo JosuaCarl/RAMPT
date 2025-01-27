@@ -49,10 +49,23 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
         nested=nested,
         workers=n_workers,
     )
-    summary_runner.scheduled_ios = {
-        "in_paths": {"quantification": in_dir_quantification, "annotations": in_dir_annotations},
-        "out_path": {"summary_paths": out_dir},
-    }
+    if nested:
+        summary_runner.scheduled_ios = {
+            "in_paths": {
+                "quantification": in_dir_quantification,
+                "annotations": in_dir_annotations,
+            },
+            "out_path": {"summary_paths": out_dir},
+            "run_style": "nested",
+        }
+    else:
+        summary_runner.scheduled_ios = {
+            "in_paths": {
+                "quantification": in_dir_quantification,
+                "annotations": in_dir_annotations,
+            },
+            "out_path": {"summary_paths": out_dir},
+        }
     return summary_runner.run()
 
 
@@ -483,6 +496,7 @@ class Summary_Runner(Pipe_Step):
             # Catch files
             if os.path.isfile(path):
                 matched_in_paths[file_type] = path
+                break
             # Search directories
             for entry in os.listdir(path):
                 if self.match_path(pattern=file_type, path=entry):

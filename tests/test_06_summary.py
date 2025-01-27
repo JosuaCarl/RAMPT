@@ -164,8 +164,7 @@ def test_summary_pipe_run_single():
             "quantification": join(example_path, "example_files_iimn_fbmn_quant.csv"),
             "gnps_annotations": join(example_path, "example_files_fbmn_all_db_annotations.json"),
         },
-        out_path=out_path,
-        annotation_file_type="gnps_annotations",
+        out_path={"summary_paths": out_path},
     )
 
     assert os.path.isfile(join(out_path, "summary.tsv"))
@@ -178,7 +177,8 @@ def test_summary_pipe_run_directory():
     summary_runner = Summary_Runner()
 
     summary_runner.run_directory(
-        in_paths={"quantification": example_path, "annotation": example_path}, out_path=out_path
+        in_paths={"quantification": example_path, "annotation": example_path},
+        out_path={"summary_paths": out_path},
     )
 
     assert os.path.isfile(join(out_path, "summary.tsv"))

@@ -18,3 +18,4 @@
 - Remove non-displayable data-nodes from analysis tab data_node_selector
 - x_out_paths should handle multiple files/folders (and return a list of paths that can be matched to in_paths)
 - Parallelizastion especially of SIRIUS and GNPS
+- Batch files are read to search for output information (parse .mzbatch file as XML)

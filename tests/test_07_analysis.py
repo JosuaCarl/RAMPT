@@ -85,7 +85,10 @@ def test_analysis_pipe_run_single():
     # Superficial testing of run_single
     analysis_runner = Analysis_Runner()
 
-    analysis_runner.run_single(in_paths=join(example_path, "summary.tsv"), out_path=out_path)
+    analysis_runner.run_single(
+        in_paths={"summary_paths": join(example_path, "summary.tsv")},
+        out_path={"analysis_paths": out_path},
+    )
 
     assert os.path.isfile(join(out_path, "analysis.tsv"))
     assert os.path.isfile(join(out_path, "analysis_positive_mode.tsv"))
@@ -97,7 +100,9 @@ def test_analysis_pipe_run_directory():
     # Supoerficial testing of run_directory
     analysis_runner = Analysis_Runner(mzmine_log=example_path)
 
-    analysis_runner.run_directory(in_paths={"summary_paths": example_path}, out_path=out_path)
+    analysis_runner.run_directory(
+        in_paths={"summary_paths": example_path}, out_path={"analysis_paths": out_path}
+    )
 
     assert os.path.isfile(join(out_path, "analysis.tsv"))
     assert os.path.isfile(join(out_path, "analysis_positive_mode.tsv"))
@@ -121,11 +126,16 @@ def test_analysis_pipe_run():
     # Superficial testing of run
     analysis_runner = Analysis_Runner(workers=2)
 
-    analysis_runner.run([dict(in_paths={"summary_paths": example_path}, out_path=out_path)])
+    analysis_runner.run(
+        [dict(in_paths={"summary_paths": example_path}, out_path={"analysis_paths": out_path})]
+    )
     analysis_runner.compute_futures()
 
     assert analysis_runner.processed_ios == [
-        {"in_paths": join(example_path, "summary.tsv"), "out_path": {"analysis_paths": out_path}}
+        {
+            "in_paths": {"summary_paths": join(example_path, "summary.tsv")},
+            "out_path": {"analysis_paths": out_path},
+        }
     ]
 
 
