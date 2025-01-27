@@ -16,6 +16,8 @@ make_out(out_path)
 
 minimal_global_patterns = {"patterns": None, "additional_args": None}
 
+# TODO: FIX tests
+
 
 def test_generic_step():
     try:

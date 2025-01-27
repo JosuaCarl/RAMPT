@@ -205,7 +205,7 @@ def test_summary_pipe_run():
         [
             dict(
                 in_paths={"quantification": example_path, "annotations": example_path},
-                out_path=out_path,
+                out_path= {"summary_paths": out_path,}
             )
         ]
     )
