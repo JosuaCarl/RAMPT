@@ -50,9 +50,8 @@ def open_file_folder(
         return fd.asksaveasfilename(**kwargs)
     if select_folder:
         if multiple:
-            logger.warn("Multiple directory selection not yet implemented.")
-        else:
-            return fd.askdirectory(**kwargs)
+            logger.warn("Multiple directories selection not yet implemented.")
+        return fd.askdirectory(**kwargs)
     elif multiple:
         return fd.askopenfilenames(**kwargs)
     else:

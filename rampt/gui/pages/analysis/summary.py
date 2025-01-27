@@ -11,12 +11,8 @@ summary_params = Summary_Runner()
 # TODO: Implement passing of two files to scheduled_ios
 def create_summary():
     with tgb.part(render="{'summ' in entrypoint.lower()}"):
-        tgb.text("###### Select quantification table (.csv)", mode="markdown")
-        create_file_selection(process="summary", io_key="quantification")
-
-    with tgb.part(render="{'summ' in entrypoint.lower()}"):
-        tgb.text("###### Select annotation data", mode="markdown")
-        create_file_selection(process="summary", io_key="annotation")
+        tgb.text("###### Select data to summarize", mode="markdown")
+        create_file_selection(process="summary", pipe_step=summary_params)
 
 
 def create_summary_advanced():

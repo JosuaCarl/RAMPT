@@ -15,7 +15,7 @@ def create_sirius():
         tgb.text("#### Sirius", mode="markdown")
         tgb.text("###### Select spectra (.mgf)", mode="markdown")
         create_file_selection(
-            process="sirius", io_key="ms_spectra", file_dialog_kwargs={"multiple": False}
+            process="sirius", pipe_step=sirius_params, file_dialog_kwargs={"multiple": False}
         )
 
 

@@ -48,6 +48,7 @@ save_path = None
 save_file_types = [("json files", "*.json")]
 
 
+
 def construct_params_dict(state, param_segment_names: list = param_segment_names):
     params = {}
     for segment_name in param_segment_names:
@@ -85,168 +86,78 @@ def load_params(state, path: StrPath = None, scenario_name: str = "Default"):
 
 
 # SCENARIO
+tasks = tp.get_tasks()
+ic(tasks)
 scenario = tp.create_scenario(ms_analysis_config, name="Default")
 
 out_path_root = None
 
-## Synchronisation of Scenario
-# TODO: Change structure so that previous steps are preferred as inputs
-match_data_node = {
-    # Used to decide which values (the last in the list) are used in case of conflicts
-    # Processed chained Inputs are preffered to scheduled targets
-    # In Data Paths
-    # TODO: ADJUST DATA NODE SEARCH
-    "raw_data_paths": [""],
-    "community_formatted_data_paths": [
-        "feature_finding_params.scheduled_in",
-        "conversion_params.processed_out",
-    ],
-    "processed_data_paths": [
-        "summary_params.scheduled_in['quantification']",
-        "gnps_params.scheduled_in",
-        "sirius_params.scheduled_in",
-        "feature_finding_params.processed_out",
-    ],
-    "gnps_annotation_paths": [
-        "summary_params.scheduled_in['annotation']",
-        "gnps_params.processed_out",
-    ],
-    "sirius_annotation_paths": [
-        "summary_params.scheduled_in['annotation']",
-        "sirius_params.processed_out",
-    ],
-    "summary_data_paths": ["analysis_params.scheduled_in", "summary_params.processed_out"],
-    "analysis_data_paths": ["analysis_params.processed_out"],
-    # Out Data
-    "out_path_root": ["out_path_root"],
-    # Batches and more
-    "mzmine_batch": ["feature_finding_params.batch"],
-    "mzmine_log": ["feature_finding_params.log_paths", "gnps_params.mzmine_log"],
-    "sirius_config": ["sirius_params.config"],
-    "sirius_projectspace": ["sirius_params.projectspace"],
-}
-
-optional_data_nodes = ["out_path_root", "sirius_annotation_paths", "gnps_annotation_paths"]
-
 entrypoints = ["↔️ Conversion", "🔍 Feature finding", "✒️ Annotation", "🧺 Summary", "📈 Analysis"]
 entrypoint = "↔️ Conversion"
 
-
-# TODO merge dicts with | to get node
-match_entrypoint = {
-    "*": {"out_path_root": ["out_path_root"]},
-    "↔️ Conversion": {
-        "raw_data_paths": ["conversion_params.scheduled_ios"],
-        "mzmine_batch": ["feature_finding_params.batch"],
-        "mzmine_user": ["feature_finding_params.user"],
-    },
-    "🔍 Feature finding": {
-        "community_formatted_data_paths": ["feature_finding_params.scheduled_ios"],
-        "mzmine_batch": ["feature_finding_params.batch"],
-        "mzmine_user": ["feature_finding_params.user"],
-    },
-    "✒️ Annotation": {
-        "processed_data_paths": [
-            "summary_params.scheduled_ios",
-            "gnps_params.scheduled_ios",
-            "sirius_params.scheduled_ios",
-        ]
-    },
-    "🧺 Summary": {
-        "gnps_annotation_paths": ["summary_params.scheduled_ios"],
-        "sirius_annotation_paths": ["summary_params.scheduled_ios"],
-    },
-    "📈 Analysis": {"summary_data_paths": ["analysis_params.scheduled_ios"]},
+# Entrypoint lock matches
+optional_data_nodes = {
+    "↔️ Conversion": ["sirius_annotated_data_paths", "gnps_annotated_data_paths"],
+    "🔍 Feature finding": ["sirius_annotated_data_paths", "gnps_annotated_data_paths"],
+    "✒️ Annotation": ["sirius_annotated_data_paths", "gnps_annotated_data_paths"],
+    "🧺 Summary": ["sirius_annotated_data_paths", "gnps_annotated_data_paths"],
+    "📈 Analysis": [],
+}
+match_entrypoint_pipe_steps = {
+    "↔️ Conversion": {"conversion_params": "conversion_io"},
+    "🔍 Feature finding": {"feature_finding_params": "feature_finding_io"},
+    "✒️ Annotation": { "gnps_params": "gnps_io", "sirius_params": "sirius_io" },
+    "🧺 Summary": {"summary_params": "summary_io"},
+    "📈 Analysis": {"analysis_params": "analysis_io"},
 }
 
+def change_entrypoint():
+    # TODO: create sequences that fit
+    pass
 
 def lock_scenario(state):
-    # Fetch scenario
-    scenario = state.scenario
+    entrypoint = get_attribute_recursive(state, "entrypoint")
 
-    # Obtain parameters
-    parameters = construct_params_dict(state)
+    # Fill optionals
+    for optional_data_node_id in optional_data_nodes[entrypoint]:
+        data_node.write(optional_data_node_id, None)
+    
+    # Check current step information
+    pipe_steps_nodes = match_entrypoint_pipe_steps.get(entrypoint)
+    for pipe_step_id, data_node_id in pipe_steps_nodes.items():
+        pipe_step = get_attribute_recursive(state, pipe_step_id)
 
-    # Write Nones to optional nodes
-    for optional_data_node in optional_data_nodes:
-        scenario.data_nodes.get(optional_data_node).write(None)
+        io_node = []
+        for scheduled_in_paths in get_attribute_recursive(state, f"{pipe_step}.scheduled_ios"):
+            io = {
+                    "in_paths":{
+                        scheduled_in_paths
+                    },
+                    "out_path":{
+                        {pipe_step.data_ids["out_path"]: get_attribute_recursive(state, "out_path_root")}
+                    }
+                }
+            valid_run_styles = pipe_step.check_io(io)
 
-    # Get required nodes
-    entrypoint_required_nodes = match_entrypoint.get(get_attribute_recursive(state, "entrypoint"))
-    entrypoint_required_nodes = entrypoint_required_nodes | match_entrypoint.get("*")
+            if "nested" in valid_run_styles:
+                io.update({"run_style": "nested"})
+                io_node.append(io)
+            elif "single" in valid_run_styles:
+                io.update({"run_style": "single"})
+                io_node.append({"single": io})
+            elif "dir" in valid_run_styles:
+                io.update({"run_style": "directory"})
+                io_node.append(io)
+            else:
+                logger.warn(f"Not a valid io for {pipe_step_id}: {io}")
+    
+        state.data_nodes.get(data_node_id).write(io_node)
 
-    # Iterate over required nodes
-    for data_node_id, access_points in entrypoint_required_nodes.items():
-        content = {}
-        # Iterate over access points of data_node
-        for access_point in access_points:
-            # Extract information from access_point
-            access_point = regex.split(r"\.|(?:\[[\"\'](.*?)[\"\']\])", access_point)
-            value = parameters
-            for access_part in access_point:
-                value = value.get(access_part)
+    for data_node_id, data_node in state.data_nodes.items():
+        if data_node_id.endswith("_params"):
+            step_params = get_attribute_recursive(state, data_node_id)
+            data_node.write(step_params.dict_representation())
 
-            # Merge content dictionary (Last entry overwrites) just accept last of rest
-            content = content | value if isinstance(value, dict) else value
-
-        # Write to data node
-        scenario.data_nodes.get(data_node_id).write(content)
-
-    # Write param nodes
-    for param_data_node_id, param in parameters.items():
-        scenario.data_nodes.get(param_data_node_id).write(param)
-
-    state.scenario = scenario
-    state.refresh("scenario")
-
-
-"""
-def lock_scenario(state):
-    global scenario
-    scenario = state.scenario
-
-    # Retrieve parameters
-    params = construct_params_dict(state)
-    data_nodes = params.copy()
-
-    # Iterate over all possible matches
-    for data_node_key, attribute_keys in match_data_node.items():
-        # Iterate over all possible places, where data nodes info could come from
-        for istate_attribute in attribute_keys:
-            # Split to get attributes
-            attribute_split = regex.split(r"\.|(?:\[[\"\'](.*?)[\"\']\])", state_attribute)
-
-            # Filter empty strings out
-            attribute_split = [part for part in attribute_split if part]
-
-            # Get final value
-            value = params
-            for key_part in attribute_split:
-                # Case there is a list of values that needs to be passed from dict entry
-                if isinstance(value, list):
-                    value = [entry.get(key_part) for entry in value]
-                else:
-                    value = value.get(key_part)
-
-            # Check whether the value is written or optional
-            if value:
-                # Write value to node directory
-                for state_attribute in attribute_keys:
-                    set_attribute_recursive(state, state_attribute, value, refresh=True)
-                data_nodes[data_node_key] = value
-
-    # Write Nones to optional nodes
-    for optional_data_node in optional_data_nodes:
-        scenario.data_nodes.get(optional_data_node).write(None)
-
-    # Write values to data node
-    for key, data_node in scenario.data_nodes.items():
-        if data_nodes.get(key) is not None:
-            data_node.write(data_nodes.get(key))
-
-    state.scenario = scenario
-    state.refresh("scenario")
-"""
 
 
 ## Interaction

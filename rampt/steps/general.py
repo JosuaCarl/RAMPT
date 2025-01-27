@@ -800,7 +800,11 @@ class Pipe_Step(Step_Configuration):
                 verbosity=self.verbosity,
             )
 
-            self.distribute_scheduled(kwargs=kwargs, **scheduled_io)
+            self.distribute_scheduled(
+                correct_runner=scheduled_io.get("run_style", None),
+                kwargs=kwargs,
+                **scheduled_io
+            )
 
             logger.log(
                 message=f'Processed {scheduled_io["in_paths"]} -> {scheduled_io["out_path"]}',
