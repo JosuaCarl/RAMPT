@@ -435,21 +435,6 @@ class GNPS_Runner(Pipe_Step):
         else:
             raise BrokenPipeError(f"Status of {task_id} was not marked DONE.")
 
-    # Distribution
-    def distribute_scheduled(self, **scheduled_io):
-        if self.nested:
-            correct_runner = "nested"
-        else:
-            correct_runner = "single"
-            for path in filter(
-                None,
-                self.extract_optional(scheduled_io["in_paths"], keys=self.data_ids["in_paths"]),
-            ):
-                if os.path.isdir(path):
-                    correct_runner = "directory"
-
-        return super().distribute_scheduled(correct_runner=correct_runner, **scheduled_io)
-
     # RUN
     def run_single(self, in_paths: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
         """

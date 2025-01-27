@@ -116,6 +116,7 @@ class Step_Configuration:
         contains: str = None,
         patterns: dict[str, str] = {},
         mandatory_patterns: dict[str, str] = {},
+        out_path_root: StrPath = "",
         save_log: bool = True,
         verbosity: int = 1,
     ):
@@ -143,6 +144,8 @@ class Step_Configuration:
         :type patterns: dict[str,str], optional
         :param mandatory_patterns: Mandatory pattern, that must be in the step, defaults to 1
         :type mandatory_patterns: dict[str,str], optional
+        :param out_path_root: Output folder, defaults to ""
+        :type out_path_root: dict[str,str], optional
         :param save_log: Whether to save the output(s), defaults to True.
         :type save_log: bool, optional
         :param verbosity: Level of verbosity, defaults to 1
@@ -159,6 +162,7 @@ class Step_Configuration:
         self.contains = contains
         self.patterns = patterns
         self.mandatory_patterns = mandatory_patterns
+        self.out_path_root = out_path_root
         self.save_log = save_log
         self.verbosity = verbosity
         self.update_patterns(list(self.patterns.keys()))
@@ -520,21 +524,24 @@ class Pipe_Step(Step_Configuration):
         :type **kwargs: **kwargs
         """
         # Catch passed bash commands
-        if isinstance(step_function, str):
-            kwargs["cmd"] = step_function
-            step_function = execute_verbose_command
+        if step_function:
+            if isinstance(step_function, str):
+                kwargs["cmd"] = step_function
+                step_function = execute_verbose_command
 
-        # Check parallelization
-        if self.workers > 1:
-            response = [None, None, None]
-            future = dask.delayed(step_function)(*args, **kwargs)
+            # Check parallelization
+            if self.workers > 1:
+                response = [None, None, None]
+                future = dask.delayed(step_function)(*args, **kwargs)
+            else:
+                response = step_function(*args, **kwargs)
+                future = None
+
+            # Extract results
+            results = response[0]
+            out, err = [response[i] if i < len(response) else None for i in range(1, 3)]
         else:
-            response = step_function(*args, **kwargs)
-            future = None
-
-        # Extract results
-        results = response[0]
-        out, err = [response[i] if i < len(response) else None for i in range(1, 3)]
+            results, future, out, err = [None]*4
 
         self.store_progress(
             in_out=kwargs.get("in_out"),
@@ -696,36 +703,33 @@ class Pipe_Step(Step_Configuration):
 
     def distribute_scheduled(
         self,
-        standard_value: str = "standard",
         correct_runner: str = None,
         kwargs: dict = {},
         **scheduled_io,
     ):
         """
-        Distribute the scheduled
+        Distribute the scheduled io
 
-        :param standard_value: _description_, defaults to "standard"
-        :type standard_value: str, optional
         :return: _description_
         :rtype: _type_
         """
-        if hasattr(self, "data_ids") and standard_value == "standard":
-            standard_value = self.data_ids["standard"][0]
-        standard_in = self.extract_standard(standard_value, in_paths=scheduled_io["in_paths"])
-
         if not correct_runner:
-            if self.nested:
-                correct_runner = "nested"
-            elif os.path.isdir(standard_in):
-                correct_runner = "directory"
-            else:
+            valid_run_styles = self.check_io(scheduled_io)
+            if any(["dir" in vrs for vrs in valid_run_styles]):
+                correct_runner = "directory" 
+            elif any(["single" in vrs for vrs in valid_run_styles]):
                 correct_runner = "single"
+            elif any(["nested" in vrs for vrs in valid_run_styles]):
+                correct_runner = "nested"
+            else:
+                logger.warn(f"Invalid io for step '{self.__class__.__name__}': {scheduled_io}")
+
 
         match correct_runner:
             case "nested":
                 logger.log(
                     f"Distributing to {self.__class__.__name__} nested run.",
-                    minimum_verbosity=3,
+                    minimum_verbosity=2,
                     verbosity=self.verbosity,
                 )
                 return self.run_nested(**scheduled_io, **kwargs)
@@ -733,14 +737,14 @@ class Pipe_Step(Step_Configuration):
             case "directory":
                 logger.log(
                     f"Distributing to {self.__class__.__name__} directory run.",
-                    minimum_verbosity=3,
+                    minimum_verbosity=2,
                     verbosity=self.verbosity,
                 )
                 return self.run_directory(**scheduled_io, **kwargs)
             case "single":
                 logger.log(
                     f"Distributing to {self.__class__.__name__} single run.",
-                    minimum_verbosity=3,
+                    minimum_verbosity=2,
                     verbosity=self.verbosity,
                 )
                 return self.run_single(**scheduled_io, **kwargs)
@@ -818,6 +822,7 @@ class Pipe_Step(Step_Configuration):
 
         # Loop over all in/out combinations
         for scheduled_io in self.scheduled_ios:
+            ic(scheduled_io)
             # Skip already processed files/folders
             if scheduled_io in self.processed_ios and not self.overwrite:
                 continue

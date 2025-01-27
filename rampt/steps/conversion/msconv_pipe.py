@@ -248,6 +248,14 @@ class MSconvert_Runner(Pipe_Step):
                     verbosity=self.verbosity,
                 )
             else:
+                self.compute(
+                    step_function=None,
+                    in_out=dict(
+                        in_paths=in_path, out_path={self.data_ids["out_path"][0]: out_path}
+                    ),
+                    log_path=self.get_log_path(out_path=out_path),
+                    verbosity=self.verbosity,
+                )
                 logger.log(
                     f"The path {in_path} or {hypothetical_out_path} is invalid or was written before."
                     + "You can either set overwrite=True or adjust the file size threshold to change out_path checking behaviour.",

@@ -87,26 +87,31 @@ def load_params(state, path: StrPath = None, scenario_name: str = "Default"):
 # SCENARIO
 scenario = tp.create_scenario(ms_analysis_config, name="Default")
 
-out_path_root = None
+data_node_in = None
+data_nodes_in = []
+
+selected_data_in = []
 
 entrypoints = ["↔️ Conversion", "🔍 Feature finding", "✒️ Annotation", "🧺 Summary", "📈 Analysis"]
-entrypoint = "↔️ Conversion"
+entrypoint = ""
 
 # Entrypoint lock matches
 optional_data_nodes = {
-    "↔️ Conversion": ["sirius_annotated_data_paths", "gnps_annotated_data_paths", "sirius_config"],
-    "🔍 Feature finding": [
-        "sirius_annotated_data_paths",
-        "gnps_annotated_data_paths",
-        "sirius_config",
-    ],
-    "✒️ Annotation": ["sirius_annotated_data_paths", "gnps_annotated_data_paths", "sirius_config"],
+    "↔️ Conversion": ["sirius_annotated_data_paths", "gnps_annotated_data_paths"],
+    "🔍 Feature finding": ["sirius_annotated_data_paths", "gnps_annotated_data_paths"],
+    "✒️ Annotation": ["sirius_annotated_data_paths", "gnps_annotated_data_paths"],
     "🧺 Summary": ["sirius_annotated_data_paths", "gnps_annotated_data_paths"],
     "📈 Analysis": [],
 }
 match_entrypoint_step_node = {
-    "↔️ Conversion": {"conversion_params": ["raw_data_paths"]},
-    "🔍 Feature finding": {"feature_finding_params": ["community_formatted_data_paths"]},
+    "↔️ Conversion": {
+        "conversion_params": ["raw_data_paths"],
+        "feature_finding_params.batch": ["mzmine_batch"]
+    },
+    "🔍 Feature finding": {
+        "feature_finding_params": ["community_formatted_data_paths"],
+        "feature_finding_params.batch": ["mzmine_batch"]
+    },
     "✒️ Annotation": {
         "gnps_params": ["processed_data_paths_gnps"],
         "sirius_params": ["processed_data_paths_sirius"],
@@ -122,67 +127,67 @@ match_entrypoint_step_node = {
 }
 
 
-def change_entrypoint():
-    # TODO: create sequences that fit
+def change_entrypoint(state, *args):
     pass
 
 
 def lock_scenario(state):
     entrypoint = get_attribute_recursive(state, "entrypoint")
-    state.scenario.data_nodes.get("entrypoint").write(entrypoint)
+    if entrypoint in match_entrypoint_step_node:
+        state.scenario.data_nodes.get("entrypoint").write(entrypoint)
 
-    # Fill optionals
-    for optional_data_node_id in optional_data_nodes[entrypoint]:
-        state.scenario.data_nodes.get(optional_data_node_id).write(None)
+        # Fill optionals
+        for optional_data_node_id in optional_data_nodes[entrypoint]:
+            state.scenario.data_nodes.get(optional_data_node_id).write(None)
 
-    # Check current step information
-    pipe_steps_nodes = match_entrypoint_step_node.get(entrypoint)
-    for pipe_step_id, data_node_ids in pipe_steps_nodes.items():
-        ic(pipe_step_id)
-        ic(data_node_ids)
-        for data_node_id in data_node_ids:
-            pipe_step = get_attribute_recursive(state, pipe_step_id)
-
-            io_node = []
-            io = {}
-            for scheduled_in_paths in get_attribute_recursive(
-                state, f"{pipe_step_id}.scheduled_ios"
-            ):
-                ic(scheduled_in_paths)
-                io = {
-                    "in_paths": scheduled_in_paths,
-                    "out_path": {
-                        pipe_step.data_ids["out_path"][0]: get_attribute_recursive(
-                            state, "out_path_root"
-                        )
-                    },
-                }
-                valid_run_styles = pipe_step.check_io(io)
-
-                if "nested" in valid_run_styles:
-                    io.update({"run_style": "nested"})
-                    io_node.append(io)
-                elif "single" in valid_run_styles:
-                    io.update({"run_style": "single"})
-                    io_node.append({"single": io})
-                elif "dir" in valid_run_styles:
-                    io.update({"run_style": "directory"})
-                    io_node.append(io)
+        # Check current step information
+        pipe_steps_nodes = match_entrypoint_step_node.get(entrypoint)
+        for pipe_step_id, data_node_ids in pipe_steps_nodes.items():
+            for data_node_id in data_node_ids:
+                if "." in pipe_step_id:
+                    data = get_attribute_recursive(state, pipe_step_id)
+                    data_node = state.scenario.data_nodes.get(data_node_id)
+                    data_node.write(data)
                 else:
-                    logger.warn(f"Not a valid io for {pipe_step_id}: {io}")
+                    pipe_step = get_attribute_recursive(state, pipe_step_id)
+                    io_node = []
+                    io = {}
+                    for scheduled_in_paths in get_attribute_recursive(
+                        state, f"{pipe_step_id}.scheduled_ios"
+                    ):
+                        ic(scheduled_in_paths)
+                        io = {
+                            "in_paths": scheduled_in_paths,
+                            "out_path": {
+                                pipe_step.data_ids["out_path"][0]: get_attribute_recursive(
+                                    state, "global_params.out_path_root"
+                                )
+                            },
+                        }
+                        valid_run_styles = pipe_step.check_io(io)
 
-            if io_node:
-                data_node = state.scenario.data_nodes.get(data_node_id)
-                data_node.write(io_node)
+                        run_style = get_attribute_recursive(
+                            state,
+                            f'run_style.{pipe_step_id.replace("_params", "")}_scheduled_ios'
+                        )
+                        if run_style in valid_run_styles:
+                            io.update({"run_style": run_style})
+                            io_node.append(io)
+                        else:
+                            logger.warn(f"Invalid io for run style '{run_style}' in '{pipe_step_id}': {io}")
 
-                out_path_root = get_attribute_recursive(state, "out_path_root")
-                state.scenario.data_nodes.get("Out_path_root").write(out_path_root)
+                    if io_node:
+                        data_node = state.scenario.data_nodes.get(data_node_id)
+                        data_node.write(io_node)
 
-    params = construct_params_dict(state)
-    for param_id, param in params.items():
-        state.scenario.data_nodes.get(param_id).write(param)
+        params = construct_params_dict(state)
+        for param_id, param in params.items():
+            state.scenario.data_nodes.get(param_id).write(param)
 
-    state.refresh("scenario")
+        state.refresh("scenario")
+    else:
+        logger.log("No entrypoint defined.")
+
 
 
 ## Interaction
@@ -242,7 +247,7 @@ with tgb.Page(style=style) as configuration:
 
             tgb.text("Where would you like to enter the workflow ?", mode="markdown")
             tgb.selector(
-                "{entrypoint}", lov="{entrypoints}", dropdown=True, filter=True, multiple=False
+                "{entrypoint}", lov="{entrypoints}", dropdown=True, filter=True, multiple=False, on_change=change_entrypoint,
             )
 
             # Create possible settings
@@ -266,25 +271,17 @@ with tgb.Page(style=style) as configuration:
 
                 # Out Path
                 tgb.text("###### Select root folder for output", mode="markdown")
-                """
-                create_list_selection(
-                    process="out_path_root",
-                    name="out",
-                    file_dialog_kwargs={"select_folder": True},
-                    extensions=None,
-                    attribute=None,
-                )
-                """
-                with tgb.part(render="{local}"):
-                    tgb.button(
-                        "Select out",
-                        on_action=lambda state: set_attribute_recursive(
-                            state,
-                            "out_path_root",
-                            open_file_folder(select_folder=True, multiple=False),
-                        ),
-                    )
-                tgb.text("{out_path_root}")
+                with tgb.layout("1 4", columns__mobile="1"):
+                    with tgb.part(render="{local}"):
+                        tgb.button(
+                            "Select out",
+                            on_action=lambda state: set_attribute_recursive(
+                                state,
+                                "global_params.out_path_root",
+                                open_file_folder(select_folder=True, multiple=False),
+                            ),
+                        )
+                    tgb.text("{global_params.out_path_root}")
 
             # Create advanced settings
             tgb.text("### Advanced settings", mode="markdown")

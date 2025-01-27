@@ -265,7 +265,7 @@ def create_list_selection(
                     on_action=lambda state: construct_selection_list(
                         state,
                         open_file_folder(
-                            file_types=file_types,
+                            filetypes=file_types,
                             initialdir=get_directory(default_value),
                             **file_dialog_kwargs,
                         ),

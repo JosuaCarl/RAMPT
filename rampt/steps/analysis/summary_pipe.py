@@ -416,7 +416,7 @@ class Summary_Runner(Pipe_Step):
 
     # Distribution
     def distribute_scheduled(self, **scheduled_io):
-        return super().distribute_scheduled(standard_value="quantification", **scheduled_io)
+        return super().distribute_scheduled(**scheduled_io)
 
     # RUN
     def run_single(
