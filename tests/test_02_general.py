@@ -65,7 +65,7 @@ def test_pipe_step():
 
     # Test computation with same input
     pipe_step.reset_progress()
-    pipe_step.compute("echo Hello!", in_out={"in_path": "/mnt/x/bar", "out_path": "/mnt/y/foo"})
+    pipe_step.compute(execute_verbose_command, cmd="echo Hello!", in_out={"in_path": "/mnt/x/bar", "out_path": "/mnt/y/foo"})
     assert pipe_step.processed_ios == [{"in_path": "/mnt/x/bar", "out_path": "/mnt/y/foo"}]
     assert pipe_step.results == [None]
     assert pipe_step.outs[0].startswith("Hello!")
@@ -73,8 +73,8 @@ def test_pipe_step():
     # Test parallel execution
     pipe_step.reset_progress()
     pipe_step.workers = 2
-    pipe_step.compute("echo Hello", in_out={"in_path": "/mnt/x/bar", "out_path": "/mnt/y/foo"})
-    pipe_step.compute("echo all!", in_out={"in_path": "/mnt/x/foo", "out_path": "/mnt/y/foo"})
+    pipe_step.compute(execute_verbose_command, cmd="echo Hello", in_out={"in_path": "/mnt/x/bar", "out_path": "/mnt/y/foo"})
+    pipe_step.compute(execute_verbose_command, cmd="echo all!", in_out={"in_path": "/mnt/x/foo", "out_path": "/mnt/y/foo"})
     pipe_step.compute_futures()
     assert pipe_step.processed_ios == [
         {"in_path": "/mnt/x/bar", "out_path": "/mnt/y/foo"},
@@ -104,6 +104,7 @@ def test_pattern_matching():
         mandatory_patterns={"in": ".*nice$"},
     )
     assert pipe_step.name == "test"
+    pipe_step.update_patterns(["in"])
 
     # Test matching
     assert pipe_step.match_path(r"\.mzXML$", "a.mzXML", by_name=False)

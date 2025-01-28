@@ -164,7 +164,6 @@ class MSconvert_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "community_formatted_data_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },

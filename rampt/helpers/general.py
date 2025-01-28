@@ -463,7 +463,7 @@ def replace_file_ending(path: StrPath, new_ending: str) -> str:
     :rtype: str
     """
     new_ending = new_ending[1:] if new_ending.startswith(".") else new_ending
-    return ".".join(path.split(".") + [new_ending])
+    return ".".join(path.split(".")[:-1] + [new_ending])
 
 
 # Command methods

@@ -55,8 +55,10 @@ representable_data_node_mapping = {
 def filter_representable(state, id, scenario_name) -> bool:
     representable_data_nodes = []
     for name, node in state.scenario.data_nodes.items():
+        ic(name)
         if name in representable_data_node_mapping and node.is_ready_for_reading and node.read():
             representable_data_nodes.append(node)
+    ic(representable_data_nodes)
     set_attribute_recursive(state, "representable_data_nodes", representable_data_nodes)
 
 
@@ -77,6 +79,7 @@ def fill_path_selection(state, *args):
         for in_element in path_dict.values():
             for path in to_list(in_element):
                 extracted_single_paths.append(path)
+    ic(extracted_single_paths)
 
     set_attribute_recursive(state, "paths_to_data", extracted_single_paths)
     set_attribute_recursive(state, "path_to_data", extracted_single_paths[0])
