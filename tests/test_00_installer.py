@@ -12,6 +12,7 @@ out_path, mock_path, example_path, batch_path, installer_path = contruct_common_
 make_out(out_path)
 
 
+# TODO: FIX CHANGING ADDRESSES (MSCONVERT)
 urls = {
     "MSconvert": {
         "win64": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt83/3339046/pwiz-bin-windows-x86_64-vc143-release-3_0_25011_8ace8f0.tar.bz2",

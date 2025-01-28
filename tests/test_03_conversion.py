@@ -130,9 +130,9 @@ def test_msconv_pipe_run_nested():
                 "raw_data_paths": [join(mock_path, "nested_test_folder", "minimal_file.mzML")]
             },
             "out_path": {
-                "community_formatted_data_paths": [join(
-                    out_path, "nested_test_folder", "minimal_file.mzML"
-                )]
+                "community_formatted_data_paths": [
+                    join(out_path, "nested_test_folder", "minimal_file.mzML")
+                ]
             },
         },
     ]
@@ -225,9 +225,9 @@ def test_msconv_pipe_run_cross():
                 "raw_data_paths": [join(mock_path, "nested_test_folder", "minimal_file.mzML")]
             },
             "out_path": {
-                "community_formatted_data_paths": [join(
-                    out_path, "nested_test_folder", "minimal_file.mzXML"
-                )]
+                "community_formatted_data_paths": [
+                    join(out_path, "nested_test_folder", "minimal_file.mzXML")
+                ]
             },
         },
     ]

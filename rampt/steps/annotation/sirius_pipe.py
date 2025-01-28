@@ -103,7 +103,9 @@ class Sirius_Runner(Pipe_Step):
                 {
                     "single": {
                         "in_paths": {
-                            "ms_spectra": lambda val: isinstance(val, str) and os.path.isfile(val)
+                            "ms_spectra": lambda val: isinstance(val, str)
+                            and os.path.isfile(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isdfile(val[0]))
                         },
                         "out_path": {
                             "sirius_annotated_data_paths": lambda val: isinstance(val, str)
@@ -115,6 +117,7 @@ class Sirius_Runner(Pipe_Step):
                         "in_paths": {
                             "processed_data_paths": lambda val: isinstance(val, str)
                             and os.path.isdir(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0]))
                         },
                         "out_path": {
                             "sirius_annotated_data_paths": lambda val: isinstance(val, str)
@@ -122,7 +125,7 @@ class Sirius_Runner(Pipe_Step):
                     }
                 },
                 {
-                    "multiple directories": {
+                    "individual directory": {
                         "in_paths": {
                             "ms_spectra": lambda val: isinstance(val, str) and os.path.isdir(val)
                         },

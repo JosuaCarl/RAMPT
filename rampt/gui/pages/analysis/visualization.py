@@ -55,18 +55,12 @@ representable_data_node_mapping = {
 def filter_representable(state, id, scenario_name) -> bool:
     representable_data_nodes = []
     for name, node in state.scenario.data_nodes.items():
-        ic(name)
         if name in representable_data_node_mapping and node.is_ready_for_reading and node.read():
             representable_data_nodes.append(node)
-    ic(representable_data_nodes)
     set_attribute_recursive(state, "representable_data_nodes", representable_data_nodes)
 
 
-def fill_path_selection(state, *args):
-    path_data_node = get_attribute_recursive(state, "path_data_node")
-    in_outs = path_data_node.read()
-    ic(in_outs)
-
+def get_only_paths(in_outs: dict):
     extracted_single_paths = []
     for in_out in to_list(in_outs):
         # Define path dictionary
@@ -79,7 +73,14 @@ def fill_path_selection(state, *args):
         for in_element in path_dict.values():
             for path in to_list(in_element):
                 extracted_single_paths.append(path)
-    ic(extracted_single_paths)
+    return extracted_single_paths
+
+
+def fill_path_selection(state, *args):
+    path_data_node = get_attribute_recursive(state, "path_data_node")
+    in_outs = path_data_node.read()
+
+    extracted_single_paths = get_only_paths(in_outs=in_outs)
 
     set_attribute_recursive(state, "paths_to_data", extracted_single_paths)
     set_attribute_recursive(state, "path_to_data", extracted_single_paths[0])
@@ -91,23 +92,25 @@ populate_data_node_ids = {}
 
 def populate_data_node(state, *args):
     path_node_name = get_attribute_recursive(state, "path_data_node").get_simple_label()
-    data_node_name = path_node_name.replace("_paths", "")
 
     path = get_attribute_recursive(state, "path_to_data")
     path = ask_filepath(path)
 
+    ic(path)
+    ic(path_node_name)
+
     # Write Check if path
     if os.path.isfile(path):
         # Get original config
-        data_node_config = representable_data_node_mapping.get(data_node_name)
+        data_node_config = representable_data_node_mapping.get(path_node_name)
 
         # Modify id to allow duplicates
-        if data_node_name in populate_data_node_ids:
-            populate_data_node_ids[data_node_name] += 1
+        if path_node_name in populate_data_node_ids:
+            populate_data_node_ids[path_node_name] += 1
         else:
-            populate_data_node_ids[data_node_name] = 1
+            populate_data_node_ids[path_node_name] = 1
         name = "_".join(os.path.split(path)[1].split("."))
-        data_node_name = f"{name}_{populate_data_node_ids[data_node_name]}"
+        data_node_name = f"{name}_{populate_data_node_ids[path_node_name]}"
         data_node_config.id = data_node_name
         data_node_config.default_path = path
 
@@ -153,7 +156,8 @@ def prepare_figure_path(state, name, figure_id: str):
             path_node = "analysis_paths"
         case "zscore cutoff accumulation":
             path_node = "analysis_paths"
-    figure_path_possibilities = read_data_node(state, path_node)
+    figure_path_possibilities = get_only_paths(read_data_node(state, path_node))
+
     if figure_path_possibilities:
         set_attribute_recursive(state, "figure_path_possibilities", figure_path_possibilities)
         set_attribute_recursive(state, "figure_path", figure_path_possibilities[0])

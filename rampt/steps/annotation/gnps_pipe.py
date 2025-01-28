@@ -124,7 +124,9 @@ class GNPS_Runner(Pipe_Step):
                 {
                     "single from log": {
                         "in_paths": {
-                            "mzmine_log": lambda val: isinstance(val, str) and os.path.isfile(val)
+                            "mzmine_log": lambda val: isinstance(val, str)
+                            and os.path.isfile(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0]))
                         },
                         "out_path": {"gnps_annotated_data_paths": lambda val: isinstance(val, str)},
                     }
@@ -133,12 +135,17 @@ class GNPS_Runner(Pipe_Step):
                     "single from data all": {
                         "in_paths": {
                             "feature_quantification": lambda val: isinstance(val, str)
-                            and os.path.isfile(val),
-                            "feature_ms2": lambda val: isinstance(val, str) and os.path.isfile(val),
+                            and os.path.isfile(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
+                            "feature_ms2": lambda val: isinstance(val, str)
+                            and os.path.isfile(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
                             "additional_pairs": lambda val: isinstance(val, str)
-                            and os.path.isfile(val),
+                            and os.path.isfile(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
                             "sample_metadata": lambda val: isinstance(val, str)
-                            and os.path.isfile(val),
+                            and os.path.isfile(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
                         },
                         "out_path": {"gnps_annotated_data_paths": lambda val: isinstance(val, str)},
                     }
@@ -147,8 +154,11 @@ class GNPS_Runner(Pipe_Step):
                     "single from data minimum": {
                         "in_paths": {
                             "feature_quantification": lambda val: isinstance(val, str)
-                            and os.path.isfile(val),
-                            "feature_ms2": lambda val: isinstance(val, str) and os.path.isfile(val),
+                            and os.path.isfile(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
+                            "feature_ms2": lambda val: isinstance(val, str)
+                            and os.path.isfile(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
                         },
                         "out_path": {"gnps_annotated_data_paths": lambda val: isinstance(val, str)},
                     }
@@ -158,6 +168,7 @@ class GNPS_Runner(Pipe_Step):
                         "in_paths": {
                             "processed_data_paths": lambda val: isinstance(val, str)
                             and os.path.isdir(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0]))
                         },
                         "out_path": {"gnps_annotated_data_paths": lambda val: isinstance(val, str)},
                     }
@@ -165,7 +176,9 @@ class GNPS_Runner(Pipe_Step):
                 {
                     "multiple directories from log": {
                         "in_paths": {
-                            "mzmine_log": lambda val: isinstance(val, str) and os.path.isdir(val)
+                            "mzmine_log": lambda val: isinstance(val, str)
+                            and os.path.isdir(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0]))
                         },
                         "out_path": {"gnps_annotated_data_paths": lambda val: isinstance(val, str)},
                     }
@@ -174,12 +187,17 @@ class GNPS_Runner(Pipe_Step):
                     "multiple directories from data all": {
                         "in_paths": {
                             "feature_quantification": lambda val: isinstance(val, str)
-                            and os.path.isdir(val),
-                            "feature_ms2": lambda val: isinstance(val, str) and os.path.isdir(val),
+                            and os.path.isdir(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
+                            "feature_ms2": lambda val: isinstance(val, str)
+                            and os.path.isdir(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
                             "additional_pairs": lambda val: isinstance(val, str)
-                            and os.path.isdir(val),
+                            and os.path.isdir(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
                             "sample_metadata": lambda val: isinstance(val, str)
-                            and os.path.isdir(val),
+                            and os.path.isdir(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
                         },
                         "out_path": {"gnps_annotated_data_paths": lambda val: isinstance(val, str)},
                     }
@@ -188,8 +206,11 @@ class GNPS_Runner(Pipe_Step):
                     "multiple directories from  minimum": {
                         "in_paths": {
                             "feature_quantification": lambda val: isinstance(val, str)
-                            and os.path.isdir(val),
-                            "feature_ms2": lambda val: isinstance(val, str) and os.path.isdir(val),
+                            and os.path.isdir(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
+                            "feature_ms2": lambda val: isinstance(val, str)
+                            and os.path.isdir(val)
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
                         },
                         "out_path": {"gnps_annotated_data_paths": lambda val: isinstance(val, str)},
                     }
