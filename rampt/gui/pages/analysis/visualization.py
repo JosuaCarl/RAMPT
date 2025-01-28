@@ -62,8 +62,24 @@ def filter_representable(state, id, scenario_name) -> bool:
 
 def fill_path_selection(state, *args):
     path_data_node = get_attribute_recursive(state, "path_data_node")
-    set_attribute_recursive(state, "paths_to_data", path_data_node.read())
-    set_attribute_recursive(state, "path_to_data", path_data_node.read()[0])
+    in_outs = path_data_node.read()
+    ic(in_outs)
+
+    extracted_single_paths = []
+    for in_out in to_list(in_outs):
+        # Define path dictionary
+        if "in_paths" in in_out:
+            path_dict = in_out["in_paths"]
+        else:
+            path_dict = in_out
+        
+        # Extract single paths to list
+        for in_element in path_dict.values():
+            for path in to_list(in_element):
+                extracted_single_paths.append(path)
+
+    set_attribute_recursive(state, "paths_to_data", extracted_single_paths)
+    set_attribute_recursive(state, "path_to_data", extracted_single_paths[0])
 
 
 populated_data_nodes = []

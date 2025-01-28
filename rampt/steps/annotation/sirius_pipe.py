@@ -107,7 +107,6 @@ class Sirius_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "sirius_annotated_data_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },
@@ -119,7 +118,6 @@ class Sirius_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "sirius_annotated_data_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },
@@ -130,7 +128,6 @@ class Sirius_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "sirius_annotated_data_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },
@@ -144,7 +141,6 @@ class Sirius_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "sirius_annotated_data_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },

@@ -82,7 +82,6 @@ def test_gnps_check_io():
         }
     )
 
-
 def test_gnps_submit():
     gnps_runner = GNPS_Runner(verbosity=3)
 

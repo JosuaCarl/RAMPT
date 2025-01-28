@@ -220,12 +220,14 @@ class MSconvert_Runner(Pipe_Step):
         :param out_path: Path to output directory.
         :type out_path: dict[str, StrPath]
         """
-        in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
-        out_path = get_if_dict(out_path, self.data_ids["out_path"])
+        in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"][0]))
+        out_path = get_if_dict(out_path, self.data_ids["out_path"][0])
 
+        cmds, ins, outs, step_functions = ([], [], [], [])
         for in_path in in_paths:
             # Check for valid I/O
-            hypothetical_out_path = join(out_path, replace_file_ending(in_path, self.target_format))
+            head, tail = os.path.split(in_path)
+            hypothetical_out_path = join(out_path, replace_file_ending(tail, self.target_format))
             in_valid, out_valid = self.select_for_conversion(
                 in_path=in_path, out_path=hypothetical_out_path
             )
@@ -241,34 +243,33 @@ class MSconvert_Runner(Pipe_Step):
                     + rf'-o "{out_path}" --outfile "{out_file_name}" "{in_path}" {additional_args}'
                 )
 
-                if not os.path.isfile(out_path):
-                    out_path = os.path.join(out_path, out_file_name)
-
-                self.compute(
-                    step_function=execute_verbose_command,
-                    cmd=cmd,
-                    in_out=dict(
-                        in_paths={self.data_ids["in_paths"][0]: in_path},
-                        out_path={self.data_ids["out_path"][0]: out_path},
-                    ),
-                    log_path=self.get_log_path(out_path=out_path),
-                    verbosity=self.verbosity,
-                )
+                if os.path.isfile(out_path):
+                    out_file = out_path
+                else:
+                    out_file = os.path.join(out_path, out_file_name)
+                outs.append(out_file)
+                step_functions.append(execute_verbose_command)
+                cmds.append(cmd)
             else:
-                self.compute(
-                    step_function=None,
-                    in_out=dict(
-                        in_paths=in_path, out_path={self.data_ids["out_path"][0]: out_path}
-                    ),
-                    log_path=self.get_log_path(out_path=out_path),
-                    verbosity=self.verbosity,
-                )
+                step_functions.append(None)
+                outs.append(None)
                 logger.log(
                     f"The path {in_path} or {hypothetical_out_path} is invalid or was written before."
                     + "You can either set overwrite=True or adjust the file size threshold to change out_path checking behaviour.",
                     minimum_verbosity=3,
                     verbosity=self.verbosity,
                 )
+            ins.append(in_path)
+        self.compute(
+            step_function=step_functions,
+            cmd=cmds,
+            in_out=dict(
+                    in_paths={self.data_ids["in_paths"][0]: ins},
+                    out_path={self.data_ids["out_path"][0]: outs},
+                ),
+            log_path=self.get_log_path(out_path=out_path),
+            verbosity=self.verbosity,
+        )
 
     def run_directory(self, in_paths: dict[str, StrPath], out_path: dict[str, StrPath], **kwargs):
         """
@@ -282,16 +283,39 @@ class MSconvert_Runner(Pipe_Step):
         in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
         out_path = get_if_dict(out_path, self.data_ids["out_path"])
 
+        found_entries = []
         for in_path in in_paths:
             # Check folder with valid input:
             if self.match_path(pattern=self.data_ids["in_paths"][0], path=in_path):
+                found_entries.append(in_path)
                 self.run_single(in_paths=in_path, out_path=out_path, **kwargs)
-
-            # Check for files with valid patterns
-            for entry in os.listdir(in_path):
-                if self.match_path(pattern=self.data_ids["in_paths"][0], path=entry):
-                    os.makedirs(out_path, exist_ok=True)
-                    self.run_single(in_paths=join(in_path, entry), out_path=out_path, **kwargs)
+            else:
+                # Check for files with valid patterns
+                if found_entries:
+                    self.run_single(
+                        in_paths={self.data_ids["in_paths"][0]: found_entries},
+                        out_path=out_path,
+                        **kwargs
+                    )
+                    found_entries = []
+                for entry in os.listdir(in_path):
+                    if self.match_path(pattern=self.data_ids["in_paths"][0], path=entry):
+                        os.makedirs(out_path, exist_ok=True)
+                        found_entries.append(join(in_path, entry))
+                if found_entries:
+                    self.run_single(
+                        in_paths={self.data_ids["in_paths"][0]: found_entries},
+                        out_path=out_path,
+                        **kwargs
+                    )
+                    found_entries = []
+        
+        if found_entries:
+            self.run_single(
+                in_paths={self.data_ids["in_paths"][0]: found_entries},
+                out_path=out_path,
+                **kwargs
+            )
 
     def run_nested(
         self,
@@ -314,14 +338,12 @@ class MSconvert_Runner(Pipe_Step):
         in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
         out_path = get_if_dict(out_path, self.data_ids["out_path"])
 
-        ic(self.patterns)
 
         for in_path in in_paths:
             root, dirs, files = next(os.walk(in_path))
 
             for i, file in enumerate(files):
                 if self.match_path(pattern=self.data_ids["in_paths"][0], path=file):
-                    ic(file)
                     self.run_directory(in_paths=in_path, out_path=out_path, **kwargs)
                     break
 

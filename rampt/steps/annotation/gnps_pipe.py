@@ -128,7 +128,6 @@ class GNPS_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "gnps_annotated_data_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },
@@ -145,7 +144,6 @@ class GNPS_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "gnps_annotated_data_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },
@@ -158,7 +156,6 @@ class GNPS_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "gnps_annotated_data_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },
@@ -170,7 +167,6 @@ class GNPS_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "gnps_annotated_data_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },
@@ -181,7 +177,6 @@ class GNPS_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "gnps_annotated_data_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },
@@ -198,7 +193,6 @@ class GNPS_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "gnps_annotated_data_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },
@@ -211,7 +205,6 @@ class GNPS_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "gnps_annotated_data_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },
@@ -225,7 +218,6 @@ class GNPS_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "gnps_annotated_data_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },

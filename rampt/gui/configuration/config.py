@@ -100,13 +100,19 @@ mzmine_batch_config = Config.configure_in_memory_data_node(id="mzmine_batch", sc
 def merge_ios(*args) -> list[dict]:
     merged_ios = []
     for io_dicts in zip(*args):
-        merged_io = {}
+
+        merged_io_dict = {}
+        # Iterate over found yes ("in_paths", "out_paths")
         for io_key in io_dicts[0].keys():
             merged_io_key = {}
             for io_dict in io_dicts:
-                merged_io_key.update({io_dict[io_key]})
-            merged_io.update(merged_io_key)
-        merged_ios.append(merged_io)
+                if io_key in merged_io_key:
+                    merged_io_key[io_key].update(io_dict[io_key])
+                else:
+                    merged_io_key.update({io_key: io_dict[io_key]})
+            merged_io_dict.update(merged_io_key)
+
+        merged_ios.append(merged_io_dict)
     return merged_ios
 
 
@@ -123,17 +129,32 @@ def sort_out(
         for io_dict in io_dicts:
             sorted_io = {}
             # Fill all needed parameters
-            for key in pipe_step_param["data_ids"][return_key]:
-                if key in io_dict[out_key]:
-                    # Return assigned value
-                    sorted_io.update({key: io_dict[out_key][key]})
-                else:
-                    # Return standard out
-                    sorted_io.update({key: io_dict[out_key][step_instance.data_ids[out_key][0]]})
+            for key in io_dict[out_key].keys():
+                sorted_io.update({key: io_dict[out_key][key]})
             sorted_ios.append({return_key: sorted_io})
         pipe_step_ios.append(sorted_ios)
     return pipe_step_ios
 
+def fixate_global_parameters(global_params: dict, entrypoint: bool = False) -> dict:
+    """
+    Delete overhanging entries in the global parameters
+
+    :param global_params: Global parameters
+    :type global_params: dict
+    :param entrypoint: Whether the parameters are set to an entry point, defaults to False
+    :type entrypoint: bool, optional
+    :return: Curated global parameters
+    :rtype: dict
+    """
+    # Delete mandatory patterns (as they should not be overwritten, because they are mandatory)
+    global_params.pop("mandatory_patterns")
+    # Delete patterns overwrite, when not set
+    for attribute in ["patterns", "pattern", "contains", "prefix", "suffix"]:
+        if not entrypoint or global_params.get(attribute, None) is None:
+            global_params.pop(attribute, None)
+    return global_params
+    
+    
 
 # TODO: DOCUMENTATION & TESTING
 # Task methods
@@ -149,12 +170,15 @@ def generic_step(
 ) -> tuple[Any] | Any:
     ic(in_outs)
     # Fixate parameters
-    if not entrypoint:
-        for entry in ["patterns", "pattern", "contains", "prefix", "suffix"]:
-            global_params.pop(entry)
+    global_params = fixate_global_parameters(
+        global_params=global_params,
+        entrypoint=entrypoint
+    )
 
     # Create step_instance
     step_params.update(global_params)
+    # Delete valid runs, as this is saved incorrectly
+    step_params.pop("valid_runs")
     step_instance = step_class(**step_params)
 
     logger.log(
@@ -184,14 +208,16 @@ def generic_step(
     # Run step
     step_instance.run(out_folder=out_folder, **kwargs)
 
+    # Only retain unique computations
+    processed_out = get_uniques(arr=step_instance.processed_ios)
     if out_step_params:
         out = sort_out(
-            io_dicts=step_instance.processed_ios,
+            io_dicts=processed_out,
             step_instance=step_instance,
             out_step_params=out_step_params,
         )
     else:
-        out = [step_instance.processed_ios]
+        out = [processed_out]
     ic(out)
     return out[0] if len(out) == 1 else out
 

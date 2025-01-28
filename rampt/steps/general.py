@@ -292,8 +292,8 @@ class Pipe_Step(Step_Configuration):
         suffix: str = None,
         prefix: str = None,
         contains: str = None,
-        patterns: dict[str, str] = {"in": ".*"},
-        mandatory_patterns: dict[str, str] = {"in": ".*"},
+        patterns: dict[str, str] = {},
+        mandatory_patterns: dict[str, str] = {},
         valid_runs: list[dict] = [],
         save_log: bool = False,
         verbosity: int = 1,
@@ -511,46 +511,97 @@ class Pipe_Step(Step_Configuration):
         self.results = []
         self.futures = []
 
+    def mirror_dict_extract_last(self, dictionary: dict, i: int = None):
+        mirrored_dict = {}
+        for key, value in dictionary.items():
+            if isinstance(value, dict):
+                mirrored_dict.update(
+                    {key: self.mirror_dict_extract_last(value)}
+                )
+            elif isinstance(value, list) and i is not None:
+                mirrored_dict.update({key: value[i]})
+            else:
+                mirrored_dict.update({key: value})
+        return mirrored_dict
+
+
+
     # Executing
-    def compute(self, step_function: Callable | str | list, *args, **kwargs):
+    def compute(self, step_function: Callable | str | list, in_out: dict, cmd: str|list = None,  *args, **kwargs):
         """
         Execute a computation of a command with or without parallelization.
 
         :param step_function: Function to execute with arguments
         :type step_function: Callable|str|list
+        :param cmd: Function to execute with arguments
+        :type cmd: Callable|str|list
+        :param in_out: Main in/out inputs
+        :type in_out: dict
         :param *args: Arguments without keywords for the function
         :type *args: *args
         :param **kwargs: Keyword arguments, must contain in_paths, and out_path
         :type **kwargs: **kwargs
         """
         # Catch passed bash commands
-        if step_function:
-            if isinstance(step_function, str):
-                kwargs["cmd"] = step_function
-                step_function = execute_verbose_command
+        if step_function:            
+            if isinstance(step_function, list):
+                for i, sf in enumerate(step_function):
+                    if cmd:
+                        kwargs["cmd"] = cmd[i]
+                    io = self.mirror_dict_extract_last(in_out, i)
 
-            # Check parallelization
-            if self.workers > 1:
-                response = [None, None, None]
-                future = dask.delayed(step_function)(*args, **kwargs)
+                    # Check parallelization
+                    if self.workers > 1:
+                        response = [None, None, None]
+                        future = dask.delayed(sf)(in_out=io, *args, **kwargs)
+                    else:
+                        response = sf(in_out=io, *args, **kwargs)
+                        future = None
+
+                    # Extract results
+                    results = response[0]
+                    out, err = [response[i] if i < len(response) else None for i in range(1, 3)]
+                    self.store_progress(
+                        in_out=in_out,
+                        results=results,
+                        future=future,
+                        out=out,
+                        err=err,
+                        log_path=kwargs.get("log_path", None),
+                    )
             else:
-                response = step_function(*args, **kwargs)
-                future = None
+                if cmd:
+                    kwargs["cmd"] = cmd
+                # Check parallelization
+                if self.workers > 1:
+                    response = [None, None, None]
+                    future = dask.delayed(step_function)(in_out=in_out, *args, **kwargs)
+                else:
+                    response = step_function(in_out=in_out, *args, **kwargs)
+                    future = None
 
-            # Extract results
-            results = response[0]
-            out, err = [response[i] if i < len(response) else None for i in range(1, 3)]
+                # Extract results
+                results = response[0]
+                out, err = [response[i] if i < len(response) else None for i in range(1, 3)]
+                self.store_progress(
+                    in_out=in_out,
+                    results=results,
+                    future=future,
+                    out=out,
+                    err=err,
+                    log_path=kwargs.get("log_path", None),
+                )
+                
+
         else:
-            results, future, out, err = [None] * 4
-
-        self.store_progress(
-            in_out=kwargs.get("in_out"),
-            results=results,
-            future=future,
-            out=out,
-            err=err,
-            log_path=kwargs.get("log_path", None),
-        )
+            self.store_progress(
+                in_out=in_out,
+                results=None,
+                future=None,
+                out=None,
+                err=None,
+                log_path=kwargs.get("log_path", None),
+            )
 
     def compute_futures(self):
         """
@@ -816,9 +867,13 @@ class Pipe_Step(Step_Configuration):
 
         # Loop over all in/out combinations
         for scheduled_io in self.scheduled_ios:
-            ic(scheduled_io)
             # Skip already processed files/folders
             if scheduled_io in self.processed_ios and not self.overwrite:
+                logger.log(
+                    "Computation already done. Skipping. Set `overwrite` to True to force re-computation.",
+                    minimum_verbosity=1,
+                    verbosity=self.verbosity,
+                )
                 continue
 
             logger.log(

@@ -122,7 +122,6 @@ class MZmine_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "processed_data_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },
@@ -136,7 +135,6 @@ class MZmine_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "processed_data_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },
@@ -150,7 +148,6 @@ class MZmine_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "processed_data_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },
@@ -220,9 +217,6 @@ class MZmine_Runner(Pipe_Step):
         else:
             return None
 
-    # Distribution
-    def distribute_scheduled(self, **scheduled_io):
-        return super().distribute_scheduled(**scheduled_io)
 
     # RUN
     def run_single(
@@ -290,7 +284,10 @@ class MZmine_Runner(Pipe_Step):
         batch = get_if_dict(batch, self.data_ids["batch"])
         batch = batch if batch else self.batch
 
+        ic(in_paths)
+
         for in_path in in_paths:
+            ic(in_path)
             root, dirs, files = next(os.walk(in_path))
             if not batch:
                 for file in os.listdir(files):

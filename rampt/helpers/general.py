@@ -133,6 +133,21 @@ def insert_unlinked_list(arr: list, index: int, object) -> list:
     arr_new.insert(index, object)
     return arr_new
 
+def get_uniques(arr: list) -> list:
+    """
+    Get unique values from list
+
+    :param arr: Old list
+    :type arr: list
+    :return: List with unique values from old list
+    :rtype: list
+    """
+    arr_new = []
+    for element in arr:
+        if element not in arr_new:
+            arr_new.append(element)
+    return arr_new
+
 
 # Dict operations
 def get_if_dict(container: Any, keys: list[str] | str, default_value: Any = None) -> Any:
@@ -446,7 +461,8 @@ def replace_file_ending(path: StrPath, new_ending: str) -> str:
     :return: File path with new ending
     :rtype: str
     """
-    return regex.sub(r"(.*\.).*", rf"\1{new_ending}", path)
+    new_ending = new_ending[1:] if new_ending.startswith(".") else new_ending
+    return ".".join(path.split(".") + [new_ending])
 
 
 # Command methods

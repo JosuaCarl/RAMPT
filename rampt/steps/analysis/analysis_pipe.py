@@ -102,7 +102,6 @@ class Analysis_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "analysis_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },
@@ -113,7 +112,6 @@ class Analysis_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "analysis_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },
@@ -127,7 +125,6 @@ class Analysis_Runner(Pipe_Step):
                         },
                         "out_path": {
                             "analysis_paths": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
                         },
                     }
                 },
