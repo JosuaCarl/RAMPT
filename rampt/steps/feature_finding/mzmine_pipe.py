@@ -120,9 +120,7 @@ class MZmine_Runner(Pipe_Step):
                             )
                             or (isinstance(val, str) and os.path.isfile(val))
                         },
-                        "out_path": {
-                            "processed_data_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"processed_data_paths": lambda val: isinstance(val, str)},
                     }
                 },
                 {
@@ -133,9 +131,7 @@ class MZmine_Runner(Pipe_Step):
                             )
                             or (isinstance(val, str) and os.path.isdir(val))
                         },
-                        "out_path": {
-                            "processed_data_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"processed_data_paths": lambda val: isinstance(val, str)},
                     }
                 },
                 {
@@ -146,9 +142,7 @@ class MZmine_Runner(Pipe_Step):
                             )
                             or (isinstance(val, str) and os.path.isdir(val))
                         },
-                        "out_path": {
-                            "processed_data_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"processed_data_paths": lambda val: isinstance(val, str)},
                     }
                 },
             ],
@@ -216,7 +210,6 @@ class MZmine_Runner(Pipe_Step):
             return source_files_path
         else:
             return None
-
 
     # RUN
     def run_single(

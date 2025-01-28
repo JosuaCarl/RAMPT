@@ -264,9 +264,9 @@ class MSconvert_Runner(Pipe_Step):
             step_function=step_functions,
             cmd=cmds,
             in_out=dict(
-                    in_paths={self.data_ids["in_paths"][0]: ins},
-                    out_path={self.data_ids["out_path"][0]: outs},
-                ),
+                in_paths={self.data_ids["in_paths"][0]: ins},
+                out_path={self.data_ids["out_path"][0]: outs},
+            ),
             log_path=self.get_log_path(out_path=out_path),
             verbosity=self.verbosity,
         )
@@ -295,7 +295,7 @@ class MSconvert_Runner(Pipe_Step):
                     self.run_single(
                         in_paths={self.data_ids["in_paths"][0]: found_entries},
                         out_path=out_path,
-                        **kwargs
+                        **kwargs,
                     )
                     found_entries = []
                 for entry in os.listdir(in_path):
@@ -306,15 +306,13 @@ class MSconvert_Runner(Pipe_Step):
                     self.run_single(
                         in_paths={self.data_ids["in_paths"][0]: found_entries},
                         out_path=out_path,
-                        **kwargs
+                        **kwargs,
                     )
                     found_entries = []
-        
+
         if found_entries:
             self.run_single(
-                in_paths={self.data_ids["in_paths"][0]: found_entries},
-                out_path=out_path,
-                **kwargs
+                in_paths={self.data_ids["in_paths"][0]: found_entries}, out_path=out_path, **kwargs
             )
 
     def run_nested(
@@ -337,7 +335,6 @@ class MSconvert_Runner(Pipe_Step):
         """
         in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
         out_path = get_if_dict(out_path, self.data_ids["out_path"])
-
 
         for in_path in in_paths:
             root, dirs, files = next(os.walk(in_path))

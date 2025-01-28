@@ -133,6 +133,7 @@ def insert_unlinked_list(arr: list, index: int, object) -> list:
     arr_new.insert(index, object)
     return arr_new
 
+
 def get_uniques(arr: list) -> list:
     """
     Get unique values from list

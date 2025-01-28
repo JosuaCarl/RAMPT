@@ -100,7 +100,6 @@ mzmine_batch_config = Config.configure_in_memory_data_node(id="mzmine_batch", sc
 def merge_ios(*args) -> list[dict]:
     merged_ios = []
     for io_dicts in zip(*args):
-
         merged_io_dict = {}
         # Iterate over found yes ("in_paths", "out_paths")
         for io_key in io_dicts[0].keys():
@@ -135,6 +134,7 @@ def sort_out(
         pipe_step_ios.append(sorted_ios)
     return pipe_step_ios
 
+
 def fixate_global_parameters(global_params: dict, entrypoint: bool = False) -> dict:
     """
     Delete overhanging entries in the global parameters
@@ -153,8 +153,7 @@ def fixate_global_parameters(global_params: dict, entrypoint: bool = False) -> d
         if not entrypoint or global_params.get(attribute, None) is None:
             global_params.pop(attribute, None)
     return global_params
-    
-    
+
 
 # TODO: DOCUMENTATION & TESTING
 # Task methods
@@ -170,10 +169,7 @@ def generic_step(
 ) -> tuple[Any] | Any:
     ic(in_outs)
     # Fixate parameters
-    global_params = fixate_global_parameters(
-        global_params=global_params,
-        entrypoint=entrypoint
-    )
+    global_params = fixate_global_parameters(global_params=global_params, entrypoint=entrypoint)
 
     # Create step_instance
     step_params.update(global_params)
@@ -212,9 +208,7 @@ def generic_step(
     processed_out = get_uniques(arr=step_instance.processed_ios)
     if out_step_params:
         out = sort_out(
-            io_dicts=processed_out,
-            step_instance=step_instance,
-            out_step_params=out_step_params,
+            io_dicts=processed_out, step_instance=step_instance, out_step_params=out_step_params
         )
     else:
         out = [processed_out]

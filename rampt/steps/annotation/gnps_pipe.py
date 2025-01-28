@@ -126,9 +126,7 @@ class GNPS_Runner(Pipe_Step):
                         "in_paths": {
                             "mzmine_log": lambda val: isinstance(val, str) and os.path.isfile(val)
                         },
-                        "out_path": {
-                            "gnps_annotated_data_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"gnps_annotated_data_paths": lambda val: isinstance(val, str)},
                     }
                 },
                 {
@@ -142,9 +140,7 @@ class GNPS_Runner(Pipe_Step):
                             "sample_metadata": lambda val: isinstance(val, str)
                             and os.path.isfile(val),
                         },
-                        "out_path": {
-                            "gnps_annotated_data_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"gnps_annotated_data_paths": lambda val: isinstance(val, str)},
                     }
                 },
                 {
@@ -154,9 +150,7 @@ class GNPS_Runner(Pipe_Step):
                             and os.path.isfile(val),
                             "feature_ms2": lambda val: isinstance(val, str) and os.path.isfile(val),
                         },
-                        "out_path": {
-                            "gnps_annotated_data_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"gnps_annotated_data_paths": lambda val: isinstance(val, str)},
                     }
                 },
                 {
@@ -165,9 +159,7 @@ class GNPS_Runner(Pipe_Step):
                             "processed_data_paths": lambda val: isinstance(val, str)
                             and os.path.isdir(val)
                         },
-                        "out_path": {
-                            "gnps_annotated_data_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"gnps_annotated_data_paths": lambda val: isinstance(val, str)},
                     }
                 },
                 {
@@ -175,9 +167,7 @@ class GNPS_Runner(Pipe_Step):
                         "in_paths": {
                             "mzmine_log": lambda val: isinstance(val, str) and os.path.isdir(val)
                         },
-                        "out_path": {
-                            "gnps_annotated_data_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"gnps_annotated_data_paths": lambda val: isinstance(val, str)},
                     }
                 },
                 {
@@ -191,9 +181,7 @@ class GNPS_Runner(Pipe_Step):
                             "sample_metadata": lambda val: isinstance(val, str)
                             and os.path.isdir(val),
                         },
-                        "out_path": {
-                            "gnps_annotated_data_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"gnps_annotated_data_paths": lambda val: isinstance(val, str)},
                     }
                 },
                 {
@@ -203,9 +191,7 @@ class GNPS_Runner(Pipe_Step):
                             and os.path.isdir(val),
                             "feature_ms2": lambda val: isinstance(val, str) and os.path.isdir(val),
                         },
-                        "out_path": {
-                            "gnps_annotated_data_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"gnps_annotated_data_paths": lambda val: isinstance(val, str)},
                     }
                 },
                 {
@@ -216,9 +202,7 @@ class GNPS_Runner(Pipe_Step):
                             )
                             or (isinstance(val, str) and os.path.isdir(val))
                         },
-                        "out_path": {
-                            "gnps_annotated_data_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"gnps_annotated_data_paths": lambda val: isinstance(val, str)},
                     }
                 },
             ],

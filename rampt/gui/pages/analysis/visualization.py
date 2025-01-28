@@ -72,7 +72,7 @@ def fill_path_selection(state, *args):
             path_dict = in_out["in_paths"]
         else:
             path_dict = in_out
-        
+
         # Extract single paths to list
         for in_element in path_dict.values():
             for path in to_list(in_element):

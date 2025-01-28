@@ -515,19 +515,22 @@ class Pipe_Step(Step_Configuration):
         mirrored_dict = {}
         for key, value in dictionary.items():
             if isinstance(value, dict):
-                mirrored_dict.update(
-                    {key: self.mirror_dict_extract_last(value)}
-                )
+                mirrored_dict.update({key: self.mirror_dict_extract_last(value)})
             elif isinstance(value, list) and i is not None:
                 mirrored_dict.update({key: value[i]})
             else:
                 mirrored_dict.update({key: value})
         return mirrored_dict
 
-
-
     # Executing
-    def compute(self, step_function: Callable | str | list, in_out: dict, cmd: str|list = None,  *args, **kwargs):
+    def compute(
+        self,
+        step_function: Callable | str | list,
+        in_out: dict,
+        cmd: str | list = None,
+        *args,
+        **kwargs,
+    ):
         """
         Execute a computation of a command with or without parallelization.
 
@@ -543,7 +546,7 @@ class Pipe_Step(Step_Configuration):
         :type **kwargs: **kwargs
         """
         # Catch passed bash commands
-        if step_function:            
+        if step_function:
             if isinstance(step_function, list):
                 for i, sf in enumerate(step_function):
                     if cmd:
@@ -591,7 +594,6 @@ class Pipe_Step(Step_Configuration):
                     err=err,
                     log_path=kwargs.get("log_path", None),
                 )
-                
 
         else:
             self.store_progress(

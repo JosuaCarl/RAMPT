@@ -100,9 +100,7 @@ class Analysis_Runner(Pipe_Step):
                             "summary_paths": lambda val: isinstance(val, str)
                             and os.path.isfile(val)
                         },
-                        "out_path": {
-                            "analysis_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"analysis_paths": lambda val: isinstance(val, str)},
                     }
                 },
                 {
@@ -110,9 +108,7 @@ class Analysis_Runner(Pipe_Step):
                         "in_paths": {
                             "summary_paths": lambda val: isinstance(val, str) and os.path.isdir(val)
                         },
-                        "out_path": {
-                            "analysis_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"analysis_paths": lambda val: isinstance(val, str)},
                     }
                 },
                 {
@@ -123,9 +119,7 @@ class Analysis_Runner(Pipe_Step):
                             )
                             or (isinstance(val, str) and os.path.isdir(val))
                         },
-                        "out_path": {
-                            "analysis_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"analysis_paths": lambda val: isinstance(val, str)},
                     }
                 },
             ],

@@ -145,9 +145,7 @@ class Summary_Runner(Pipe_Step):
                             "gnps_annotations": lambda val: isinstance(val, str)
                             and os.path.isfile(val),
                         },
-                        "out_path": {
-                            "summary_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"summary_paths": lambda val: isinstance(val, str)},
                     }
                 },
                 {
@@ -156,9 +154,7 @@ class Summary_Runner(Pipe_Step):
                             "quantification": lambda val: isinstance(val, str)
                             and os.path.isfile(val)
                         },
-                        "out_path": {
-                            "summary_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"summary_paths": lambda val: isinstance(val, str)},
                     }
                 },
                 {
@@ -168,9 +164,7 @@ class Summary_Runner(Pipe_Step):
                             and os.path.isdir(val),
                             "annotations": lambda val: isinstance(val, str) and os.path.isdir(val),
                         },
-                        "out_path": {
-                            "summary_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"summary_paths": lambda val: isinstance(val, str)},
                     }
                 },
                 {
@@ -191,9 +185,7 @@ class Summary_Runner(Pipe_Step):
                             "gnps_annotations": lambda val: isinstance(val, str)
                             and os.path.isdir(val),
                         },
-                        "out_path": {
-                            "summary_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"summary_paths": lambda val: isinstance(val, str)},
                     }
                 },
                 {
@@ -202,9 +194,7 @@ class Summary_Runner(Pipe_Step):
                             "quantification": lambda val: isinstance(val, str)
                             and os.path.isdir(val)
                         },
-                        "out_path": {
-                            "summary_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"summary_paths": lambda val: isinstance(val, str)},
                     }
                 },
                 {
@@ -215,9 +205,7 @@ class Summary_Runner(Pipe_Step):
                             )
                             or (isinstance(val, str) and os.path.isdir(val))
                         },
-                        "out_path": {
-                            "summary_paths": lambda val: isinstance(val, str)
-                        },
+                        "out_path": {"summary_paths": lambda val: isinstance(val, str)},
                     }
                 },
             ],
