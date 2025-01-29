@@ -76,12 +76,17 @@ def save_params(state, path: StrPath = None, scenario_name: str = None):
 
 def load_params(state, path: StrPath = None, scenario_name: str = "Default"):
     path = path if path else os.path.join(work_dir_root, f"{scenario_name}_config.json")
-    with open(path, "r") as file:
-        params = json.loads(file.read())
+    if os.path.isfile(path):
+        with open(path, "r") as file:
+            params = json.loads(file.read())
 
-    for segment_name, segment_params in params.items():
-        for attribute, param in segment_params.items():
-            set_attribute_recursive(state, f"{segment_name}.{attribute}", param, refresh=True)
+        for segment_name, segment_params in params.items():
+            for attribute, param in segment_params.items():
+                set_attribute_recursive(state, f"{segment_name}.{attribute}", param, refresh=True)
+    else:
+        logger.warn(
+            f"Invalid path for configuration: {path}",
+        )
 
 
 # SCENARIO

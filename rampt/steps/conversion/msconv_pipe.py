@@ -259,6 +259,8 @@ class MSconvert_Runner(Pipe_Step):
                     verbosity=self.verbosity,
                 )
             ins.append(in_path)
+        ic(ins)
+        ic(outs)
         self.compute(
             step_function=step_functions,
             cmd=cmds,
@@ -282,10 +284,12 @@ class MSconvert_Runner(Pipe_Step):
         in_paths = to_list(get_if_dict(in_paths, self.data_ids["in_paths"]))
         out_path = get_if_dict(out_path, self.data_ids["out_path"])
 
+        ic(in_paths)
         found_entries = []
         for in_path in in_paths:
             # Check folder with valid input:
             if self.match_path(pattern=self.data_ids["in_paths"][0], path=in_path):
+                ic(in_path)
                 found_entries.append(in_path)
                 self.run_single(in_paths=in_path, out_path=out_path, **kwargs)
             else:
@@ -299,6 +303,7 @@ class MSconvert_Runner(Pipe_Step):
                     found_entries = []
                 for entry in os.listdir(in_path):
                     if self.match_path(pattern=self.data_ids["in_paths"][0], path=entry):
+                        ic(entry)
                         os.makedirs(out_path, exist_ok=True)
                         found_entries.append(join(in_path, entry))
                 if found_entries:
