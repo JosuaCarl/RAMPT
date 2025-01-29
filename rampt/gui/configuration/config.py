@@ -99,7 +99,9 @@ mzmine_batch_config = Config.configure_in_memory_data_node(id="mzmine_batch", sc
 # Sorter methods
 def merge_ios(*args) -> list[dict]:
     merged_ios = []
-    for io_dicts in zip(*args):
+    ios = [arg for arg in args if arg]
+    ic(ios)
+    for io_dicts in zip(ios):
         merged_io_dict = {}
         # Iterate over found yes ("in_paths", "out_paths")
         for io_key in io_dicts[0].keys():
