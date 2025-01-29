@@ -504,10 +504,9 @@ class Summary_Runner(Pipe_Step):
         matched_in_paths = in_paths.copy()
         for file_type, path in in_paths.items():
             if file_type in self.data_ids["in_paths"]:
-
                 # Catch files
                 if os.path.isfile(path):
-                        matched_in_paths[file_type] = path
+                    matched_in_paths[file_type] = path
 
                 # Search directories
                 for entry in os.listdir(path):

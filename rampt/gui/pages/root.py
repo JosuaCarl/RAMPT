@@ -84,9 +84,7 @@ def load_params(state, path: StrPath = None, scenario_name: str = "Default"):
             for attribute, param in segment_params.items():
                 set_attribute_recursive(state, f"{segment_name}.{attribute}", param, refresh=True)
     else:
-        logger.warn(
-            f"Invalid path for configuration: {path}",
-        )
+        logger.warn(f"Invalid path for configuration: {path}")
 
 
 # SCENARIO
