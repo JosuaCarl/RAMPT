@@ -282,10 +282,14 @@ class MZmine_Runner(Pipe_Step):
         for in_path in in_paths:
             ic(in_path)
             root, dirs, files = next(os.walk(in_path))
+
+            # Look for batch file
             if not batch:
                 for file in os.listdir(files):
                     if self.match_path(pattern="batch", path=file):
                         batch = join(in_path, file) if not self.batch else None
+
+            # Collect source files
             source_file_path = self.collect_source_files(
                 files=files, root_path_in=in_path, root_path_out=out_path
             )

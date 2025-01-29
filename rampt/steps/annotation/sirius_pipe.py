@@ -207,8 +207,7 @@ class Sirius_Runner(Pipe_Step):
         if projectspace is None:
             projectspace = self.projectspace if self.projectspace else out_path
         config = get_if_dict(config, self.data_ids["config"])
-        if config is None:
-            config = self.config
+        config = config if config else self.config
 
         additional_args = self.link_additional_args(**kwargs)
 
@@ -254,6 +253,7 @@ class Sirius_Runner(Pipe_Step):
         out_path = get_if_dict(out_path, self.data_ids["out_path"])
         projectspace = get_if_dict(projectspace, self.data_ids["projectspace"])
         config = get_if_dict(config, self.data_ids["config"])
+        config = config if config else self.config
 
         # Catch single values
         if not isinstance(in_paths, dict):
@@ -267,7 +267,7 @@ class Sirius_Runner(Pipe_Step):
         )
 
         # Search for config present in folder
-        if config is None and self.config is None:
+        if not config:
             for entry in os.listdir(in_paths):
                 if self.match_path(pattern="config", path=entry):
                     config = join(in_paths, entry)
@@ -275,15 +275,16 @@ class Sirius_Runner(Pipe_Step):
         # Search for relevant files
         matched_in_paths = in_paths.copy()
         for file_type, path in in_paths.items():
-            # Catch files
-            if os.path.isfile(path):
-                matched_in_paths[file_type] = path
-                break
-            # Search directories
-            for entry in os.listdir(path):
-                if self.match_path(pattern=file_type, path=entry):
-                    matched_in_paths[file_type] = join(path, entry)
-                    break
+            if file_type in self.data_ids["in_paths"]:
+                
+                # Catch files
+                if os.path.isfile(path):
+                        matched_in_paths[file_type] = path
+
+                # Search directories
+                for entry in os.listdir(path):
+                    if self.match_path(pattern=file_type, path=entry):
+                        matched_in_paths[file_type] = join(path, entry)
 
         if matched_in_paths:
             os.makedirs(out_path, exist_ok=True)

@@ -459,7 +459,10 @@ class GNPS_Runner(Pipe_Step):
         self.compute(
             step_function=capture_and_log,
             func=self.gnps_check_resubmit,
-            in_out=dict(in_paths=in_paths, out_path={self.data_ids["out_path"][0]: out_path}),
+            in_out=dict(
+                in_paths={self.data_ids["in_paths"][0]: in_paths},
+                out_path={self.data_ids["out_path"][0]: out_path},
+            ),
             log_path=self.get_log_path(out_path=out_path),
         )
 
@@ -479,15 +482,17 @@ class GNPS_Runner(Pipe_Step):
         # Search for valid files
         matched_in_paths = in_paths.copy()
         for file_type, path in in_paths.items():
-            # Catch files
-            if os.path.isfile(path):
-                matched_in_paths[file_type] = path
-                break
-            # Search directories
-            for entry in os.listdir(path):
-                if self.match_path(pattern=file_type, path=entry):
-                    matched_in_paths[file_type] = join(path, entry)
-                    break
+            if file_type in self.data_ids["in_paths"]:
+
+                # Catch files
+                if os.path.isfile(path):
+                    if file_type in self.data_ids["in_paths"]:
+                        matched_in_paths[file_type] = path
+
+                # Search directories
+                for entry in os.listdir(path):
+                    if self.match_path(pattern=file_type, path=entry):
+                        matched_in_paths[file_type] = join(path, entry)
 
         if matched_in_paths:
             os.makedirs(out_path, exist_ok=True)
