@@ -7,6 +7,7 @@ Use mzmine for feature finding.
 # Imports
 import os
 import argparse
+from lxml import etree
 
 from os.path import join
 
@@ -155,6 +156,11 @@ class MZmine_Runner(Pipe_Step):
         self.common_execs = ["mzmine", "mzmine.exe", "mzmine_console"]
         self.exec_path = self.check_execs(exec_path=exec_path)
         self.batch = batch
+        self.batchstep_methods = [
+            "io.github.mzmine.modules.io.export_features_gnps.fbmn.GnpsFbmnExportAndSubmitModule",
+            "io.github.mzmine.modules.io.export_features_sirius.SiriusExportModule",
+            "io.github.mzmine.modules.io.export_features_gnps.fbmn.GnpsFbmnExportAndSubmitModule",
+        ]
         self.valid_formats = valid_formats
         self.name = "mzmine"
 
@@ -178,6 +184,48 @@ class MZmine_Runner(Pipe_Step):
                 message=f"Batch path {self.batch} is no file. Please point to a valid mzbatch file.",
                 error_type=ValueError,
             )
+    def adjust_batch_out(self, batch_path: StrPath, out_batch_path: StrPath = None, batchstep_methods: list[str] = []) -> StrPath:
+        """
+        Adjust the batch file to integrate with future steps.
+        
+        :param batch_path: Path to batch_file
+        :type batch_path: StrPath
+        :param out_batch_path: Path to out_batch, defaults to None
+        :type out_batch_path: StrPath, optional
+        :param batchstep_methods: Methods to search for in batchsteps
+        :type batchstep_methods: list[str]
+        :return: Written batch out file
+        :rtype: StrPath
+        """
+        batchstep_methods = batchstep_methods if batchstep_methods else self.batchstep_methods
+        tree = etree.parse(batch_path)
+        root = tree.getroot()
+
+        # Change current file name
+        for batchstep in root.iter("batchstep"):
+            for parameter in batchstep.iter("parameter"):
+                if "file" in parameter.attrib["name"].lower():
+                    for current_file in parameter.iter("current_file"):                
+                        if batchstep.attrib["method"] in batchstep_methods and "Filename" == parameter.attrib["name"]:
+                            current_file.text = ""
+                        else:
+                            if current_file.text and not os.path.exists(current_file.text):
+                                logger.warn(
+                                    f"{current_file.text} not found. Please change batch file {batch_path} to contain only local paths."
+                                )
+                    for file in parameter.iter("file"):
+                        if file.text and not os.path.exists(file.text):
+                            logger.warn(
+                                f"{file.text} not found. Please change batch file {batch_path} to contain only local paths."
+                            )
+        if not out_batch_path:
+            head, tail = os.path.split(batch_path)
+            file_name = ".".join(tail.split(".")[:-1])
+            out_batch_path = os.path.join(head, f"{file_name}_rampt.mzbatch")
+            
+        tree.write(out_batch_path, pretty_print=True)
+
+        return out_batch_path
 
     def collect_source_files(
         self, files: list, root_path_out: StrPath, root_path_in: StrPath = None
@@ -240,6 +288,8 @@ class MZmine_Runner(Pipe_Step):
             in_path = source_file_path
         else:
             in_path = in_paths[0]
+
+        batch = self.adjust_batch_out(batch)
 
         cmd = rf'"{self.exec_path}" {self.login} --batch "{batch}" --input "{in_path}" --output "{out_path}" {additional_args}'
 
