@@ -70,8 +70,6 @@ def test_summary_check_io():
 
 
 def test_summary_add_quantification():
-    clean_out(out_path)
-
     # Superficial testing of run_single
     summary_runner = Summary_Runner()
 

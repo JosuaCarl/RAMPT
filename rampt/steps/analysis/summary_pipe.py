@@ -417,6 +417,7 @@ class Summary_Runner(Pipe_Step):
         in_paths = in_out["in_paths"]
         out_path = get_if_dict(in_out["out_path"], self.data_ids["out_path"])
 
+        ic(in_paths)
         # Make quantification table as base
         summary = self.add_quantification(
             quantification_path=in_paths.pop("quantification"), summary=summary
@@ -465,10 +466,7 @@ class Summary_Runner(Pipe_Step):
         self.compute(
             step_function=capture_and_log,
             func=self.summarize_info,
-            in_out=dict(
-                in_paths={self.data_ids["in_paths"][0]: in_paths},
-                out_path={self.data_ids["out_path"][0]: out_path},
-            ),
+            in_out=dict(in_paths=in_paths, out_path={self.data_ids["out_path"][0]: out_path}),
             log_path=self.get_log_path(out_path=out_path),
         )
 

@@ -184,10 +184,13 @@ class MZmine_Runner(Pipe_Step):
                 message=f"Batch path {self.batch} is no file. Please point to a valid mzbatch file.",
                 error_type=ValueError,
             )
-    def adjust_batch_out(self, batch_path: StrPath, out_batch_path: StrPath = None, batchstep_methods: list[str] = []) -> StrPath:
+
+    def adjust_batch_out(
+        self, batch_path: StrPath, out_batch_path: StrPath = None, batchstep_methods: list[str] = []
+    ) -> StrPath:
         """
         Adjust the batch file to integrate with future steps.
-        
+
         :param batch_path: Path to batch_file
         :type batch_path: StrPath
         :param out_batch_path: Path to out_batch, defaults to None
@@ -205,8 +208,11 @@ class MZmine_Runner(Pipe_Step):
         for batchstep in root.iter("batchstep"):
             for parameter in batchstep.iter("parameter"):
                 if "file" in parameter.attrib["name"].lower():
-                    for current_file in parameter.iter("current_file"):                
-                        if batchstep.attrib["method"] in batchstep_methods and "Filename" == parameter.attrib["name"]:
+                    for current_file in parameter.iter("current_file"):
+                        if (
+                            batchstep.attrib["method"] in batchstep_methods
+                            and "Filename" == parameter.attrib["name"]
+                        ):
                             current_file.text = ""
                         else:
                             if current_file.text and not os.path.exists(current_file.text):
@@ -222,7 +228,7 @@ class MZmine_Runner(Pipe_Step):
             head, tail = os.path.split(batch_path)
             file_name = ".".join(tail.split(".")[:-1])
             out_batch_path = os.path.join(head, f"{file_name}_rampt.mzbatch")
-            
+
         tree.write(out_batch_path, pretty_print=True)
 
         return out_batch_path
