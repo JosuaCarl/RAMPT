@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import taipy as tp
 import taipy.gui.builder as tgb
 
 from rampt.gui.helpers import *
@@ -35,7 +36,13 @@ run_style = {}
 
 possible_inputs = {}
 selected_input = {}
-locked_inputs = {}
+packaged_inputs = {}
+
+
+current_in_node_config = tp.Config.configure_json_data_node(
+    id="current_in_node", scope=tp.Scope.GLOBAL,
+)
+current_in_node = tp.create_global_data_node(current_in_node_config)
 
 
 def create_file_selection(
@@ -60,7 +67,7 @@ def create_file_selection(
 
     possible_inputs.update({selector_id: []})
     selected_input.update({selector_id: ""})
-    locked_inputs.update({selector_id: []})
+    packaged_inputs.update({selector_id: []})
 
     def construct_selection_tree(state, new_path: StrPath = None):
         """
@@ -86,7 +93,7 @@ def create_file_selection(
 
     def update_selection(state, name, value):
         """
-        Merge values of selection with I/O dictionary
+        Update the in values of an i/o dictionary
 
         :param state: State of taipy application
         :type state: State
@@ -101,47 +108,75 @@ def create_file_selection(
         ]
 
         # Get selected input
-        selected_input = get_attribute_recursive(state, f"selected_input.{selector_id}")
-        if selected_input:
-            in_paths_key = "_".join(selected_input.split(" "))
+        selected_input_type = get_attribute_recursive(state, f"selected_input.{selector_id}")
+        if selected_input_type:
+            selected_input_type = "_".join(selected_input_type.split(" "))
+            current_in = get_attribute_recursive(state, "current_in_node").read()
+            ic(current_in)
 
-            in_paths_list = get_attribute_recursive(state, f"{process}_params.{param_attribute_in}")
-            if in_paths_list:
-                in_paths_dictionary = in_paths_list[-1]
-                pipe_step = get_attribute_recursive(state, f"{process}_params")
-                valid_runs = [
-                    {key: {"in_paths": value["in_paths"]} for key, value in vr.copy().items()}
-                    for vr in pipe_step.valid_runs
-                ]
-                if get_attribute_recursive(state, f"run_style.{selector_id}") in pipe_step.check_io(
-                    io={"in_paths": in_paths_dictionary}, valid_runs=valid_runs
-                ):
-                    in_paths_list.append({in_paths_key: selected_labels})
-                else:
-                    in_paths_dictionary.update({in_paths_key: selected_labels})
-                    in_paths_list[-1] = in_paths_dictionary
+            if current_in:
+                current_in.update({selected_input_type: selected_labels})
             else:
-                in_paths_list = [{in_paths_key: selected_labels}]
+                current_in = {selected_input_type: selected_labels}
 
-            if in_paths_list[-1]:
-                set_attribute_recursive(
-                    state, f"locked_inputs.{selector_id}", list(in_paths_list[-1].keys())
-                )
+            ic(current_in)
             set_attribute_recursive(
-                state, f"{process}_params.{param_attribute_in}", in_paths_list, refresh=True
+                state, f"packaged_inputs.{selector_id}", list(current_in.keys())
             )
+            current_in_node.write(current_in)
+            set_attribute_recursive(state, "current_in_node", current_in_node)
+            ic(current_in_node.read())
         else:
-            logger.log("No input selected.")
+            logger.log("No input type selected.")
 
-    def reset_package(state, *args):
+    def schedule_package(state, *args):
+        """
+        Schedule a package for execution.
+
+        :param state: _description_
+        :type state: _type_
+        """
+        pipe_step = get_attribute_recursive(state, f"{process}_params")
+        run_style = get_attribute_recursive(state, f"run_style.{selector_id}")
+        selected_input_type = get_attribute_recursive(state, f"selected_input.{selector_id}")
+        selected_input_type = "_".join(selected_input_type.split(" "))
+
+        current_in = get_attribute_recursive(state, "current_in_node").read()
+        
         in_paths_list = get_attribute_recursive(state, f"{process}_params.{param_attribute_in}")
-        if in_paths_list:
-            in_paths_list[-1] = {}
 
-        set_attribute_recursive(state, f"locked_inputs.{selector_id}", [])
+        valid_runs_only_in = [
+            {key: {"in_paths": value["in_paths"]} for key, value in vr.copy().items()}
+            for vr in pipe_step.valid_runs
+        ]
+        valid_run_styles = pipe_step.check_io(
+            io={"in_paths": current_in}, valid_runs=valid_runs_only_in
+        )
+
+        if run_style in valid_run_styles:
+            if in_paths_list:
+                in_paths_list.append(current_in)
+            else:
+                in_paths_list = [current_in]
+            current_in = {}
+        else:
+            logger.log(
+                "The current given input does not fulfill the minimum requirements for a valid run.",
+                minimum_verbosity=2,
+                verbosity=get_attribute_recursive(state, "global_params.verbosity")
+            )
+
         set_attribute_recursive(
             state, f"{process}_params.{param_attribute_in}", in_paths_list, refresh=True
         )
+        set_attribute_recursive(state, f"packaged_inputs.{selector_id}", [])
+        current_in_node.write(current_in)
+        set_attribute_recursive(state, "current_in_node", current_in_node)
+
+    def clear_package(state, *args):
+        set_attribute_recursive(state, f"packaged_inputs.{selector_id}", [])
+        current_in_node.write({})
+        set_attribute_recursive(state, "current_in_node", current_in_node)
 
     def make_input_selector(state):
         run_style = get_attribute_recursive(state, f"run_style.{selector_id}")
@@ -153,7 +188,8 @@ def create_file_selection(
 
     # Run_style
     tgb.text("What data do you want to select for your run ?", mode="markdown")
-    with tgb.part():
+    # Input type
+    with tgb.layout(columns="1 1", columns__mobile="1", gap="5%"):
         tgb.selector(
             f"{{run_style.{selector_id}}}",
             lov=f"{{run_styles.{selector_id}}}",
@@ -162,9 +198,6 @@ def create_file_selection(
             dropdown=True,
             on_change=lambda state, name, val: make_input_selector(state),
         )
-
-    # Input type
-    with tgb.layout(columns="2 2 1", columns__mobile="1", gap="5%"):
         tgb.selector(
             f"{{selected_input.{selector_id}}}",
             lov=f"{{possible_inputs.{selector_id}}}",
@@ -172,20 +205,10 @@ def create_file_selection(
             filter=True,
             dropdown=True,
         )
-        tgb.selector(
-            f"{{locked_inputs.{selector_id}}}",
-            lov=f"{{possible_inputs.{selector_id}}}",
-            label="In execution package",
-            mode="check",
-            multiple=True,
-            active=False,
-        )
-        tgb.button(label="Reset package", on_action=lambda state, id, payload: reset_package(state))
 
     with tgb.layout(columns="1 4", columns__mobile="1", gap="5%"):
         # Selector
         with tgb.part():
-            tgb.toggle(f"{{select_folders.{selector_id}}}", label="Select folder")
             with tgb.part(render="{local}"):
                 tgb.button(
                     "Select in",
@@ -199,14 +222,16 @@ def create_file_selection(
                         ),
                     ),
                 )
+            tgb.toggle(f"{{select_folders.{selector_id}}}", label="Select folder")
             with tgb.part(render="{not local}"):
                 tgb.file_selector(
                     f"{{uploaded_paths.{selector_id}}}",
-                    label="Select in",
+                    label="Select In",
                     extensions="*",
                     drop_message=f"Drop files/folders for {process} here:",
                     multiple=True,
                     on_action=lambda state: construct_selection_tree(state),
+                    hover_text="Click to choose files from your local file system."
                 )
 
         # Selection tree
@@ -218,6 +243,29 @@ def create_file_selection(
             multiple=process in ["conversion", "feature_finding"],
             expanded=True,
             on_change=lambda state, name, value: update_selection(state, name, value),
+            hover_text="Select files to fill input type with."
+        )
+
+    # Overview
+    tgb.text("###### Data package", mode="markdown")
+    with tgb.layout(columns="2 1 1", columns__mobile="1", gap="5%"):
+        tgb.selector(
+            f"{{packaged_inputs.{selector_id}}}",
+            lov=f"{{possible_inputs.{selector_id}}}",
+            label="Package checklist:",
+            mode="check",
+            multiple=True,
+            active=False,
+        )
+        tgb.button(label="🧹 Clear package", on_action=lambda state, id, payload: clear_package(state))
+        tgb.button(label="➕ Add package to run", on_action=lambda state, id, payload: schedule_package(state))
+    tgb.data_node(
+            "{current_in_node}",
+            show_history=False,
+            show_properties=False,
+            show_custom_properties=False,
+            show_owner=False,
+            id="current_in_node"
         )
 
 
@@ -232,7 +280,7 @@ def create_list_selection(
     attribute: str = "batch",
     extensions: str = "*",
     name: str = "batch file",
-    default_value=str(Path.home()),
+    default_value="",
     file_dialog_kwargs: dict = {},
 ):
     selector_id = f"{process}_{attribute}"
@@ -256,6 +304,10 @@ def create_list_selection(
         else:
             set_attribute_recursive(state, process, value, refresh=True)
 
+    if default_value:
+        ic(default_value)
+        file_dialog_kwargs["initialdir"] = get_directory(default_value)
+
     with tgb.layout(columns="1 4", columns__mobile="1", gap="5%"):
         with tgb.part(render="{local}"):
             if extensions:
@@ -266,7 +318,6 @@ def create_list_selection(
                         state,
                         open_file_folder(
                             filetypes=file_types,
-                            initialdir=get_directory(default_value),
                             **file_dialog_kwargs,
                         ),
                     ),
@@ -277,7 +328,7 @@ def create_list_selection(
                     on_action=lambda state: construct_selection_list(
                         state,
                         open_file_folder(
-                            initialdir=get_directory(default_value), **file_dialog_kwargs
+                            **file_dialog_kwargs
                         ),
                     ),
                 )

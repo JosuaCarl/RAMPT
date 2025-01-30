@@ -1,10 +1,10 @@
 # Changes
 
 ## 🔧Fixes🔧
-- Fiel catching in directory run
+- GNPS directory passing
 
 ## ⏫Improvements⏫
 - Installer visualization improvement
 
 ## ✨New✨
-
+- Added standard operating procedures

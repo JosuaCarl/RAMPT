@@ -140,10 +140,10 @@ class GNPS_Runner(Pipe_Step):
                             "feature_ms2": lambda val: isinstance(val, str)
                             and os.path.isfile(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "additional_pairs": lambda val: isinstance(val, str)
+                            "additional_pairs": lambda val: not val or isinstance(val, str)
                             and os.path.isfile(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "sample_metadata": lambda val: isinstance(val, str)
+                            "sample_metadata": lambda val: not val or isinstance(val, str)
                             and os.path.isfile(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
                         },
@@ -192,10 +192,10 @@ class GNPS_Runner(Pipe_Step):
                             "feature_ms2": lambda val: isinstance(val, str)
                             and os.path.isdir(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "additional_pairs": lambda val: isinstance(val, str)
+                            "additional_pairs": lambda val: not val or isinstance(val, str)
                             and os.path.isdir(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "sample_metadata": lambda val: isinstance(val, str)
+                            "sample_metadata": lambda val: not val or isinstance(val, str)
                             and os.path.isdir(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
                         },
@@ -393,6 +393,7 @@ class GNPS_Runner(Pipe_Step):
         in_paths = in_out["in_paths"]
         out_path = get_if_dict(in_out["out_path"], self.data_ids["out_path"])
 
+        ic(in_paths)
         # Use MZmine GNPS submit, if existent
         mzmine_log, gnps_response = self.extract_optional(
             in_paths, keys=["mzmine_log", "gnps_response"]
@@ -420,7 +421,13 @@ class GNPS_Runner(Pipe_Step):
                         ],
                         return_dict=True,
                     )
-                task_id, status = self.submit_to_gnps(**in_files)
+                ic(in_files)
+                if any(in_files):
+                    task_id, status = self.submit_to_gnps(**in_files)
+                else:
+                    logger.warn(
+                        f"No files found in {in_paths}."
+                    )
 
         if status:
             # Obtain results

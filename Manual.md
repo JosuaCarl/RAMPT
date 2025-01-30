@@ -3,7 +3,7 @@
 ## Installation
 ### The easy way
 1. Download latest release for your platform [here](https://github.com/JosuaCarl/RAMPT/releases)
-2. Run the installer
+2. Run the installer and follow along
 3. The program should be available on PATH
 
 

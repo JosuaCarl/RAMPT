@@ -133,22 +133,22 @@ class Summary_Runner(Pipe_Step):
                             "quantification": lambda val: isinstance(val, str)
                             and os.path.isfile(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "formula_identifications": lambda val: isinstance(val, str)
+                            "formula_identifications": lambda val: not val or isinstance(val, str)
                             and os.path.isfile(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "canopus_formula_summary": lambda val: isinstance(val, str)
+                            "canopus_formula_summary": lambda val: not val or isinstance(val, str)
                             and os.path.isfile(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "structure_identifications": lambda val: isinstance(val, str)
+                            "structure_identifications": lambda val: not val or isinstance(val, str)
                             and os.path.isfile(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "canopus_structure_summary": lambda val: isinstance(val, str)
+                            "canopus_structure_summary": lambda val: not val or isinstance(val, str)
                             and os.path.isfile(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "denovo_structure_identifications": lambda val: isinstance(val, str)
+                            "denovo_structure_identifications": lambda val: not val or isinstance(val, str)
                             and os.path.isfile(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "gnps_annotations": lambda val: isinstance(val, str)
+                            "gnps_annotations": lambda val: not val or isinstance(val, str)
                             and os.path.isfile(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
                         },
@@ -184,22 +184,22 @@ class Summary_Runner(Pipe_Step):
                             "quantification": lambda val: isinstance(val, str)
                             and os.path.isdir(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "formula_identifications": lambda val: isinstance(val, str)
+                            "formula_identifications": lambda val: not val or isinstance(val, str)
                             and os.path.isdir(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "canopus_formula_summary": lambda val: isinstance(val, str)
+                            "canopus_formula_summary": lambda val: not val or isinstance(val, str)
                             and os.path.isdir(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "structure_identifications": lambda val: isinstance(val, str)
+                            "structure_identifications": lambda val: not val or isinstance(val, str)
                             and os.path.isdir(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "canopus_structure_summary": lambda val: isinstance(val, str)
+                            "canopus_structure_summary": lambda val: not val or isinstance(val, str)
                             and os.path.isdir(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "denovo_structure_identifications": lambda val: isinstance(val, str)
+                            "denovo_structure_identifications": lambda val: not val or isinstance(val, str)
                             and os.path.isdir(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "gnps_annotations": lambda val: isinstance(val, str)
+                            "gnps_annotations": lambda val: not val or isinstance(val, str)
                             and os.path.isdir(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
                         },

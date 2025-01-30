@@ -90,8 +90,8 @@ def load_params(state, path: StrPath = None, scenario_name: str = "Default"):
 # SCENARIO
 scenario = tp.create_scenario(ms_analysis_config, name="Default")
 
-data_node_in = None
-data_nodes_in = []
+io_node = None
+io_nodes = []
 
 selected_data_in = []
 
@@ -130,8 +130,29 @@ match_entrypoint_step_node = {
 }
 
 
+# TODO: Give overwiew over I/O nodes
 def change_entrypoint(state, *args):
-    pass
+    current_in_node = get_attribute_recursive(state, "current_in_node")
+    current_in_node.write({})
+    set_attribute_recursive(state, "current_in_node", current_in_node)
+    """
+    entrypoint = get_attribute_recursive(state, "entrypoint")
+    io_nodes = []
+    for step_param, data_nodes in match_entrypoint_step_node(entrypoint).items():
+        for io_node in get_attribute_recursive(state, f"{step_param}.scheduled_ios"):
+            io_nodes.append(io_node)    
+    set_attribute_recursive(state, "io_nodes", io_nodes)
+    """
+    """
+            # Overview
+            tgb.data_node(
+                "{io_node}",
+                show_history=True,
+                show_properties=False,
+                show_custom_properties=False,
+                show_owner=False,
+            )
+    """
 
 
 def lock_scenario(state):
@@ -290,6 +311,7 @@ with tgb.Page(style=style) as configuration:
                             ),
                         )
                     tgb.text("{global_params.out_path_root}")
+
 
             # Create advanced settings
             tgb.text("### Advanced settings", mode="markdown")
