@@ -399,7 +399,7 @@ class Summary_Runner(Pipe_Step):
         return summary
 
     def add_annotations(
-        self, annotation_files: dict[str, list[StrPath]|StrPath], summary: pd.DataFrame
+        self, annotation_files: dict[str, list[StrPath] | StrPath], summary: pd.DataFrame
     ) -> pd.DataFrame:
         # Order the annotations
         annotation_files_ordered = {}

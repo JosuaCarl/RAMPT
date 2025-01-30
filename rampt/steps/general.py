@@ -745,8 +745,10 @@ class Pipe_Step(Step_Configuration):
                             ):
                                 combo_valid = False
                                 break
-                            elif key in io[io_key] and callable(value_validation_method) and not value_validation_method(
-                                io[io_key][key]
+                            elif (
+                                key in io[io_key]
+                                and callable(value_validation_method)
+                                and not value_validation_method(io[io_key][key])
                             ):
                                 combo_valid = False
                                 break

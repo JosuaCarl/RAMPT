@@ -100,13 +100,10 @@ mzmine_batch_config = Config.configure_in_memory_data_node(id="mzmine_batch", sc
 def merge_ios(*args) -> list[dict]:
     merged_ios = []
     ios = [arg for arg in args if arg]
-    ic(ios)
     for io_dicts in zip(*ios):
-        ic(io_dicts)
         merged_io_dict = {}
         # Iterate over found yes ("in_paths", "out_paths")
         for io_key in io_dicts[0].keys():
-            ic(io_key)
             merged_io_key = {}
             for io_dict in io_dicts:
                 if isinstance(io_dict[io_key], dict):
@@ -200,7 +197,6 @@ def generic_step(
 
     # Add out_folder to out_root
     for scheduled_io in step_instance.scheduled_ios:
-        ic(scheduled_io)
         out_path_root = global_params["out_path_root"]
         scheduled_io["out_path"] = {
             step_instance.data_ids["out_path"][0]: os.path.join(out_path_root, out_folder)
