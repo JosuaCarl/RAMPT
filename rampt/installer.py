@@ -31,7 +31,7 @@ Anyone is free to copy, modify, publish, use, compile, sell, or distribute this 
 
 In jurisdictions that recognize copyright laws, the author or authors of this software dedicate any and all copyright interest in the software to the public domain. We make this dedication for the benefit of the public at large and to the detriment of our heirs and successors. We intend this dedication to be an overt act of relinquishment in perpetuity of all present and future rights to this software under copyright law.
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 
@@ -334,22 +334,22 @@ class InstallerApp(tk.Tk):
         self.name = "rampt"
         self.urls = {
             "MSconvert": {
-                "win64": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt83/3339046/pwiz-bin-windows-x86_64-vc143-release-3_0_25011_8ace8f0.tar.bz2",
+                "win64": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt83/3360938/pwiz-bin-windows-x86_64-vc143-release-3_0_25029_b4f97eb.tar.bz2",
                 "win32": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt36/2440017/pwiz-bin-windows-x86-vc143-release-3_0_23129_dfd6c0a.tar.bz2",
                 "mac": None,
-                "linux": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt17/3339048/pwiz-bin-linux-x86_64-gcc7-release-3_0_25011_8ace8f0.tar.bz2",
+                "linux": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt17/3362588/pwiz-bin-linux-x86_64-gcc7-release-3_0_25030_b4f97eb.tar.bz2",
             },
             "MZmine": {
-                "win64": "https://github.com/mzmine/mzmine/releases/download/v4.4.3/mzmine_Windows_portable-4.4.3.zip",
-                "win32": "https://github.com/mzmine/mzmine/releases/download/v4.4.3/mzmine_Windows_portable-4.4.3.zip",
-                "mac": "https://github.com/mzmine/mzmine/releases/download/v4.4.3/mzmine_macOS_portable_academia-4.4.3.zip",
-                "linux": "https://github.com/mzmine/mzmine/releases/download/v4.4.3/mzmine_Linux_portable-4.4.3.zip",
+                "win64": "https://github.com/mzmine/mzmine/releases/download/v4.5.0/mzmine_Windows_portable-4.5.0.zip",
+                "win32": "https://github.com/mzmine/mzmine/releases/download/v4.5.0/mzmine_Windows_portable-4.5.0.zip",
+                "mac": "https://github.com/mzmine/mzmine/releases/download/v4.5.0/mzmine_macOS_portable_academia-4.5.0.zip",
+                "linux": "https://github.com/mzmine/mzmine/releases/download/v4.5.0/mzmine_Linux_portable-4.5.0.zip",
             },
             "Sirius": {
-                "win64": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-win64.zip",
-                "win32": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-win64.zip",
-                "mac": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-osx64.zip",
-                "linux": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-linux64.zip",
+                "win64": "https://github.com/sirius-ms/sirius/releases/download/v6.1.1/sirius-6.1.1-win-x64.zip",
+                "win32": "https://github.com/sirius-ms/sirius/releases/download/v6.1.1/sirius-6.1.1-win-x64.zip",
+                "mac": "https://github.com/sirius-ms/sirius/releases/download/v6.1.1/sirius-6.1.1-macos-x64.zip",
+                "linux": "https://github.com/sirius-ms/sirius/releases/download/v6.1.1/sirius-6.1.1-linux-x64.zip",
             },
         }
 
@@ -369,7 +369,7 @@ class InstallerApp(tk.Tk):
         self.component_vars = {
             "MSconvert": tk.BooleanVar(value=True),
             "MZmine": tk.BooleanVar(value=True),
-            "SIRIUS": tk.BooleanVar(value=True),
+            "Sirius": tk.BooleanVar(value=True),
         }
 
         # List of pages
@@ -377,6 +377,7 @@ class InstallerApp(tk.Tk):
             self.create_component_page,
             self.create_license_page,
             self.create_installation_location_page,
+            self.create_installation_page,
         ]
 
         # Main frame for dynamic content
@@ -479,9 +480,22 @@ class InstallerApp(tk.Tk):
     ):
         # Check for command availability
         path_to_tool = tool_available(command)
+
         if command and path_to_tool and not force:
+            self.update_secondary_progressbar(
+                step_message=f"Checked {name} availability on PATH. Tool already available.",
+                install_name=name,
+                total_steps=1,
+                last_step=False,
+            )
             return path_to_tool
         else:
+            self.update_secondary_progressbar(
+                step_message=f"Checked {name} availability on PATH",
+                install_name=name,
+                total_steps=4,
+                last_step=False,
+            )
             if isinstance(urls, dict):
                 if "mac" in self.op_sys:
                     url = urls.get("mac")
@@ -501,7 +515,12 @@ class InstallerApp(tk.Tk):
                     f"{name} is not available for {self.op_sys}."
                     + "To use it, please  find a way to install and add it to PATH yourself."
                 )
-
+            self.update_secondary_progressbar(
+                step_message=f"Fetched {name} URL",
+                install_name=name,
+                total_steps=4,
+                last_step=False,
+            )
             # Hash check
             if hash_url_addendum:
                 response = requests.get(url + hash_url_addendum)
@@ -516,6 +535,12 @@ class InstallerApp(tk.Tk):
                 target_path=install_path,
                 expected_hash=expected_hash,
                 extraction_method=extraction_method,
+            )
+            self.update_secondary_progressbar(
+                step_message=f"Downloaded {name}.",
+                install_name=name,
+                total_steps=4,
+                last_step=False,
             )
 
             if bin_paths:
@@ -533,6 +558,12 @@ class InstallerApp(tk.Tk):
                     path=join(install_path, bin_path),
                     local_only=self.local_only,
                 )
+            self.update_secondary_progressbar(
+                step_message=f"Added {name} to PATH.",
+                install_name=name,
+                total_steps=4,
+                last_step=True,
+            )
 
             return os.path.abspath(install_path)
 
@@ -540,8 +571,9 @@ class InstallerApp(tk.Tk):
         urls = self.urls
         if not standalone:
             components = [self.name] + components
-        for component in components:
+        for i, component in enumerate(components):
             logger.log(f"Installing {component}")
+            self.install_status.insert(tk.END, f"Installing {component}:\n")
             match component:
                 case self.name:
                     self.install_project(
@@ -563,7 +595,7 @@ class InstallerApp(tk.Tk):
 
                 case "MZmine":
                     self.install_component(
-                        name="MZmine",
+                        name=component,
                         urls=urls.get(component),
                         install_path=self.install_path,
                         bin_paths={"windows": "", "*": "bin"},
@@ -573,7 +605,7 @@ class InstallerApp(tk.Tk):
 
                 case "Sirius":
                     self.install_component(
-                        name="Sirius",
+                        name=component,
                         urls=urls.get(component),
                         install_path=self.install_path,
                         hash_url_addendum=".sha256",
@@ -582,7 +614,9 @@ class InstallerApp(tk.Tk):
                         force=force,
                     )
 
-            self.update_primary_progress(install_name=component, total_installs=len(components) + 1)
+            self.update_primary_progress(
+                total_installs=len(components), last_iteration=i == len(components) - 1
+            )
 
     # NAVIGATION
     def load_page(self):
@@ -594,21 +628,25 @@ class InstallerApp(tk.Tk):
         self.pages[self.current_page]()
 
         # Update navigation button states
-        self.prev_button.config(state=tk.NORMAL if self.current_page > 0 else tk.DISABLED)
-        self.next_button.config(
-            text="Install" if self.current_page == len(self.pages) - 1 else "Next"
+        self.prev_button.config(
+            state=tk.NORMAL
+            if self.current_page > 0 and self.current_page < len(self.pages) - 1
+            else tk.DISABLED
         )
+        self.next_button.config(
+            text="Next" if self.current_page < len(self.pages) - 2 else "Install",
+            state=tk.NORMAL if self.current_page < len(self.pages) - 1 else tk.DISABLED,
+        )
+        if self.current_page == len(self.pages) - 1:
+            self.install()
 
     def next_page(self):
         """
         Handles navigation to the next page.
         """
         if self.accept_var.get() or self.current_page != 1:
-            if self.current_page < len(self.pages) - 1:
-                self.current_page += 1
-                self.load_page()
-            else:
-                self.install()
+            self.current_page += 1
+            self.load_page()
 
     def previous_page(self):
         """Handles navigation to the previous page."""
@@ -649,6 +687,10 @@ class InstallerApp(tk.Tk):
         Label(
             self.main_frame,
             text="If the component is not selected, it should be install by the user and accessible in PATH.",
+        ).pack(pady=20)
+        Label(
+            self.main_frame,
+            text="Due to changing URLS (especially for msconvert), success is not guaranteed.",
         ).pack(pady=20)
 
         Checkbutton(
@@ -702,21 +744,37 @@ class InstallerApp(tk.Tk):
         if directory:
             self.install_path.set(directory)
 
-    def update_primary_progress(self, install_name, total_installs):
+    def update_primary_progress(self, total_installs, last_iteration: bool = False):
         if self.primary_progressbar:
-            self.primary_progressbar["value"] = (
-                self.primary_progressbar["value"] + 100 / total_installs
+            self.primary_progressbar["value"] = self.primary_progressbar["value"] + (
+                100 / total_installs
             )
-            self.install_status.insert(tk.END, f"{install_name} installation completed.\n")
-            if self.primary_progressbar["value"] >= 100:
-                self.install_status.insert(tk.END, "Installation complete")
+            if last_iteration:
+                self.primary_progressbar["value"] = 100
+                self.install_status.insert(tk.END, "Installation complete. yay!")
 
-    def install(self):
-        """Final installation process."""
+    def update_secondary_progressbar(
+        self, step_message: str, install_name, total_steps, last_step: bool = False
+    ):
+        if self.secondary_progressbar:
+            self.secondary_progressbar["value"] = self.secondary_progressbar["value"] + (
+                100 / total_steps
+            )
+        self.install_status.insert(tk.END, step_message + "\n")
+        if last_step:
+            self.secondary_progressbar["value"] = 100
+            self.install_status.insert(tk.END, f"{install_name} installed.\n")
+
+    def create_installation_page(self):
+        Label(self.main_frame, text="Installation", font=("Arial", 14, "bold")).pack(pady=10)
         # Primary progress bar (overall progress)
         Label(root, text="Overall Progress:").pack(pady=(10, 0))
         self.primary_progressbar = Progressbar(root, length=300, mode="determinate")
         self.primary_progressbar.pack(pady=10)
+
+        Label(root, text="Step Progress:").pack(pady=(10, 0))
+        self.secondary_progressbar = Progressbar(root, length=300, mode="determinate")
+        self.secondary_progressbar.pack(pady=10)
 
         frame = Frame(root)
         frame.pack(pady=10, fill=tk.BOTH, expand=True)
@@ -733,6 +791,11 @@ class InstallerApp(tk.Tk):
         # Configure scrollbar to work with text field
         self.install_scrollbar.config(command=self.install_status.yview)
         self.install_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    def install(self):
+        """Final installation process."""
+        logger.log("Starting installation")
+        self.install_status.insert(tk.END, "Starting installation:\n")
 
         selected_components = [name for name, var in self.component_vars.items() if var.get()]
         self.install_path = self.install_path.get()

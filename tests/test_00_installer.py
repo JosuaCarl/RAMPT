@@ -12,25 +12,24 @@ out_path, mock_path, example_path, batch_path, installer_path = contruct_common_
 make_out(out_path)
 
 
-# TODO: FIX CHANGING ADDRESSES (MSCONVERT)
 urls = {
     "MSconvert": {
-        "win64": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt83/3339046/pwiz-bin-windows-x86_64-vc143-release-3_0_25011_8ace8f0.tar.bz2",
+        "win64": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt83/3360938/pwiz-bin-windows-x86_64-vc143-release-3_0_25029_b4f97eb.tar.bz2",
         "win32": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt36/2440017/pwiz-bin-windows-x86-vc143-release-3_0_23129_dfd6c0a.tar.bz2",
         "mac": None,
-        "linux": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt17/3339048/pwiz-bin-linux-x86_64-gcc7-release-3_0_25011_8ace8f0.tar.bz2",
+        "linux": "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt17/3362588/pwiz-bin-linux-x86_64-gcc7-release-3_0_25030_b4f97eb.tar.bz2",
     },
     "MZmine": {
-        "win64": "https://github.com/mzmine/mzmine/releases/download/v4.4.3/mzmine_Windows_portable-4.4.3.zip",
-        "win32": "https://github.com/mzmine/mzmine/releases/download/v4.4.3/mzmine_Windows_portable-4.4.3.zip",
-        "mac": "https://github.com/mzmine/mzmine/releases/download/v4.4.3/mzmine_macOS_portable_academia-4.4.3.zip",
-        "linux": "https://github.com/mzmine/mzmine/releases/download/v4.4.3/mzmine_Linux_portable-4.4.3.zip",
+        "win64": "https://github.com/mzmine/mzmine/releases/download/v4.5.0/mzmine_Windows_portable-4.5.0.zip",
+        "win32": "https://github.com/mzmine/mzmine/releases/download/v4.5.0/mzmine_Windows_portable-4.5.0.zip",
+        "mac": "https://github.com/mzmine/mzmine/releases/download/v4.5.0/mzmine_macOS_portable_academia-4.5.0.zip",
+        "linux": "https://github.com/mzmine/mzmine/releases/download/v4.5.0/mzmine_Linux_portable-4.5.0.zip",
     },
     "Sirius": {
-        "win64": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-win64.zip",
-        "win32": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-win64.zip",
-        "mac": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-osx64.zip",
-        "linux": "https://github.com/sirius-ms/sirius/releases/download/v6.0.7/sirius-6.0.7-linux64.zip",
+        "win64": "https://github.com/sirius-ms/sirius/releases/download/v6.1.1/sirius-6.1.1-win-x64.zip",
+        "win32": "https://github.com/sirius-ms/sirius/releases/download/v6.1.1/sirius-6.1.1-win-x64.zip",
+        "mac": "https://github.com/sirius-ms/sirius/releases/download/v6.1.1/sirius-6.1.1-macos-x64.zip",
+        "linux": "https://github.com/sirius-ms/sirius/releases/download/v6.1.1/sirius-6.1.1-linux-x64.zip",
     },
 }
 
