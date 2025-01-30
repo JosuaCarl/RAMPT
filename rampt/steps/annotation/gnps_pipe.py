@@ -140,10 +140,12 @@ class GNPS_Runner(Pipe_Step):
                             "feature_ms2": lambda val: isinstance(val, str)
                             and os.path.isfile(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "additional_pairs": lambda val: not val or isinstance(val, str)
+                            "additional_pairs": lambda val: not val
+                            or isinstance(val, str)
                             and os.path.isfile(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "sample_metadata": lambda val: not val or isinstance(val, str)
+                            "sample_metadata": lambda val: not val
+                            or isinstance(val, str)
                             and os.path.isfile(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
                         },
@@ -192,10 +194,12 @@ class GNPS_Runner(Pipe_Step):
                             "feature_ms2": lambda val: isinstance(val, str)
                             and os.path.isdir(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "additional_pairs": lambda val: not val or isinstance(val, str)
+                            "additional_pairs": lambda val: not val
+                            or isinstance(val, str)
                             and os.path.isdir(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "sample_metadata": lambda val: not val or isinstance(val, str)
+                            "sample_metadata": lambda val: not val
+                            or isinstance(val, str)
                             and os.path.isdir(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
                         },
@@ -425,9 +429,7 @@ class GNPS_Runner(Pipe_Step):
                 if any(in_files):
                     task_id, status = self.submit_to_gnps(**in_files)
                 else:
-                    logger.warn(
-                        f"No files found in {in_paths}."
-                    )
+                    logger.warn(f"No files found in {in_paths}.")
 
         if status:
             # Obtain results

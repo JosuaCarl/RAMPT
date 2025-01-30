@@ -312,7 +312,6 @@ with tgb.Page(style=style) as configuration:
                         )
                     tgb.text("{global_params.out_path_root}")
 
-
             # Create advanced settings
             tgb.text("### Advanced settings", mode="markdown")
             create_expandable_setting(

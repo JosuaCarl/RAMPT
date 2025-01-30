@@ -40,7 +40,7 @@ packaged_inputs = {}
 
 
 current_in_node_config = tp.Config.configure_json_data_node(
-    id="current_in_node", scope=tp.Scope.GLOBAL,
+    id="current_in_node", scope=tp.Scope.GLOBAL
 )
 current_in_node = tp.create_global_data_node(current_in_node_config)
 
@@ -142,7 +142,7 @@ def create_file_selection(
         selected_input_type = "_".join(selected_input_type.split(" "))
 
         current_in = get_attribute_recursive(state, "current_in_node").read()
-        
+
         in_paths_list = get_attribute_recursive(state, f"{process}_params.{param_attribute_in}")
 
         valid_runs_only_in = [
@@ -163,7 +163,7 @@ def create_file_selection(
             logger.log(
                 "The current given input does not fulfill the minimum requirements for a valid run.",
                 minimum_verbosity=2,
-                verbosity=get_attribute_recursive(state, "global_params.verbosity")
+                verbosity=get_attribute_recursive(state, "global_params.verbosity"),
             )
 
         set_attribute_recursive(
@@ -231,7 +231,7 @@ def create_file_selection(
                     drop_message=f"Drop files/folders for {process} here:",
                     multiple=True,
                     on_action=lambda state: construct_selection_tree(state),
-                    hover_text="Click to choose files from your local file system."
+                    hover_text="Click to choose files from your local file system.",
                 )
 
         # Selection tree
@@ -243,7 +243,7 @@ def create_file_selection(
             multiple=process in ["conversion", "feature_finding"],
             expanded=True,
             on_change=lambda state, name, value: update_selection(state, name, value),
-            hover_text="Select files to fill input type with."
+            hover_text="Select files to fill input type with.",
         )
 
     # Overview
@@ -257,16 +257,21 @@ def create_file_selection(
             multiple=True,
             active=False,
         )
-        tgb.button(label="🧹 Clear package", on_action=lambda state, id, payload: clear_package(state))
-        tgb.button(label="➕ Add package to run", on_action=lambda state, id, payload: schedule_package(state))
-    tgb.data_node(
-            "{current_in_node}",
-            show_history=False,
-            show_properties=False,
-            show_custom_properties=False,
-            show_owner=False,
-            id="current_in_node"
+        tgb.button(
+            label="🧹 Clear package", on_action=lambda state, id, payload: clear_package(state)
         )
+        tgb.button(
+            label="➕ Add package to run",
+            on_action=lambda state, id, payload: schedule_package(state),
+        )
+    tgb.data_node(
+        "{current_in_node}",
+        show_history=False,
+        show_properties=False,
+        show_custom_properties=False,
+        show_owner=False,
+        id="current_in_node",
+    )
 
 
 # List selectors
@@ -315,21 +320,14 @@ def create_list_selection(
                 tgb.button(
                     f"Select {name}",
                     on_action=lambda state: construct_selection_list(
-                        state,
-                        open_file_folder(
-                            filetypes=file_types,
-                            **file_dialog_kwargs,
-                        ),
+                        state, open_file_folder(filetypes=file_types, **file_dialog_kwargs)
                     ),
                 )
             else:
                 tgb.button(
                     f"Select {name}",
                     on_action=lambda state: construct_selection_list(
-                        state,
-                        open_file_folder(
-                            **file_dialog_kwargs
-                        ),
+                        state, open_file_folder(**file_dialog_kwargs)
                     ),
                 )
         with tgb.part(render="{not local}"):

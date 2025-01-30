@@ -31,8 +31,4 @@ def create_sirius_advanced():
 
     tgb.html("br")
 
-    create_list_selection(
-        process="sirius",
-        attribute="projectspace",
-        name="projectspace",
-    )
+    create_list_selection(process="sirius", attribute="projectspace", name="projectspace")
