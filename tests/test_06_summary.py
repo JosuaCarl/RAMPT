@@ -215,13 +215,13 @@ def test_summary_pipe_run():
                 "annotations": [example_path],
                 "canopus_formula_summary": [join(example_path, "canopus_formula_summary.tsv")],
                 "canopus_structure_summary": [join(example_path, "canopus_structure_summary.tsv")],
-                "denovo_structure_identifications": [join(
-                    example_path, "denovo_structure_identifications.tsv"
-                )],
+                "denovo_structure_identifications": [
+                    join(example_path, "denovo_structure_identifications.tsv")
+                ],
                 "formula_identifications": [join(example_path, "formula_identifications.tsv")],
-                "gnps_annotations": [join(
-                    example_path, "example_files_fbmn_all_db_annotations.json"
-                )],
+                "gnps_annotations": [
+                    join(example_path, "example_files_fbmn_all_db_annotations.json")
+                ],
                 "quantification": [join(example_path, "example_files_iimn_fbmn_quant.csv")],
                 "structure_identifications": [join(example_path, "structure_identifications.tsv")],
             },
