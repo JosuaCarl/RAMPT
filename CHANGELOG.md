@@ -1,10 +1,10 @@
 # Changes
 
 ## 🔧Fixes🔧
-- Passing of multi-file inputs
-- Hand-along consistency
+- Fiel catching in directory run
 
 ## ⏫Improvements⏫
+- Installer visualization improvement
 
 ## ✨New✨
 

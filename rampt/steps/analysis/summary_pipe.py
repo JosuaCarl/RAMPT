@@ -505,11 +505,11 @@ class Summary_Runner(Pipe_Step):
                 # Catch files
                 if os.path.isfile(path):
                     matched_in_paths[file_type] = path
-
-                # Search directories
-                for entry in os.listdir(path):
-                    if self.match_path(pattern=file_type, path=entry):
-                        matched_in_paths[file_type] = join(path, entry)
+                else:
+                    # Search directories
+                    for entry in os.listdir(path):
+                        if self.match_path(pattern=file_type, path=entry):
+                            matched_in_paths[file_type] = join(path, entry)
 
         ic(out_path)
         if "quantification" in matched_in_paths:

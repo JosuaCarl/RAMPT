@@ -315,7 +315,7 @@ def link_rampt(
 
 
 class InstallerApp(tk.Tk):
-    def __init__(self, root, local_only: bool = False):
+    def __init__(self, root, local_only: bool = False, show_progress: bool = True):
         self.local_only = local_only
         self.op_sys = pf.system().lower()
 
@@ -379,6 +379,8 @@ class InstallerApp(tk.Tk):
             self.create_installation_location_page,
             self.create_installation_page,
         ]
+
+        self.show_progress = show_progress
 
         # Main frame for dynamic content
         self.main_frame = Frame(root)
@@ -573,7 +575,8 @@ class InstallerApp(tk.Tk):
             components = [self.name] + components
         for i, component in enumerate(components):
             logger.log(f"Installing {component}")
-            self.install_status.insert(tk.END, f"Installing {component}:\n")
+            if self.show_progress:
+                self.install_status.insert(tk.END, f"Installing {component}:\n")
             match component:
                 case self.name:
                     self.install_project(
@@ -745,25 +748,27 @@ class InstallerApp(tk.Tk):
             self.install_path.set(directory)
 
     def update_primary_progress(self, total_installs, last_iteration: bool = False):
-        if self.primary_progressbar:
-            self.primary_progressbar["value"] = self.primary_progressbar["value"] + (
-                100 / total_installs
-            )
-            if last_iteration:
-                self.primary_progressbar["value"] = 100
-                self.install_status.insert(tk.END, "Installation complete. yay!")
+        if self.show_progress:
+            if self.primary_progressbar:
+                self.primary_progressbar["value"] = self.primary_progressbar["value"] + (
+                    100 / total_installs
+                )
+                if last_iteration:
+                    self.primary_progressbar["value"] = 100
+                    self.install_status.insert(tk.END, "Installation complete. yay!")
 
     def update_secondary_progressbar(
         self, step_message: str, install_name, total_steps, last_step: bool = False
     ):
-        if self.secondary_progressbar:
-            self.secondary_progressbar["value"] = self.secondary_progressbar["value"] + (
-                100 / total_steps
-            )
-        self.install_status.insert(tk.END, step_message + "\n")
-        if last_step:
-            self.secondary_progressbar["value"] = 100
-            self.install_status.insert(tk.END, f"{install_name} installed.\n")
+        if self.show_progress:
+            if self.secondary_progressbar:
+                self.secondary_progressbar["value"] = self.secondary_progressbar["value"] + (
+                    100 / total_steps
+                )
+            self.install_status.insert(tk.END, step_message + "\n")
+            if last_step:
+                self.secondary_progressbar["value"] = 100
+                self.install_status.insert(tk.END, f"{install_name} installed.\n")
 
     def create_installation_page(self):
         Label(self.main_frame, text="Installation", font=("Arial", 14, "bold")).pack(pady=10)

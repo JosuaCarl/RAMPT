@@ -55,7 +55,7 @@ def test_tool_available():
 def test_install_uv():
     clean_out(out_path)
     root = tk.Tk()
-    installer = InstallerApp(root, local_only=True)
+    installer = InstallerApp(root, local_only=True, show_progress=False)
     installer.install_uv()
     assert tool_available("uv")
 
@@ -63,7 +63,7 @@ def test_install_uv():
 def test_install_project():
     clean_out(out_path)
     root = tk.Tk()
-    installer = InstallerApp(root, local_only=True)
+    installer = InstallerApp(root, local_only=True, show_progress=False)
     name = "rampt"
     install_path = installer.install_project(
         name=name,
@@ -79,7 +79,7 @@ def test_install_project():
 def test_install_msconvert(recwarn):
     clean_out(out_path)
     root = tk.Tk()
-    installer = InstallerApp(root, local_only=True)
+    installer = InstallerApp(root, local_only=True, show_progress=False)
     name = "MSconvert"
 
     install_path = installer.install_component(
@@ -106,7 +106,7 @@ def test_install_msconvert(recwarn):
 def test_install_mzmine():
     clean_out(out_path)
     root = tk.Tk()
-    installer = InstallerApp(root, local_only=True)
+    installer = InstallerApp(root, local_only=True, show_progress=False)
     name = "MZmine"
 
     install_path = installer.install_component(
@@ -121,7 +121,7 @@ def test_install_mzmine():
 def test_install_sirius():
     clean_out(out_path)
     root = tk.Tk()
-    installer = InstallerApp(root, local_only=True)
+    installer = InstallerApp(root, local_only=True, show_progress=False)
     name = "Sirius"
 
     install_path = installer.install_component(
@@ -136,7 +136,7 @@ def test_install_sirius():
 def test_install_components():
     clean_out(out_path)
     root = tk.Tk()
-    installer = InstallerApp(root, local_only=True)
+    installer = InstallerApp(root, local_only=True, show_progress=False)
     installer.install_path = out_path
 
     installer.install_components(["MSconvert", "MZmine", "Sirius"])

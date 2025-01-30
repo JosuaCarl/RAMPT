@@ -485,13 +485,12 @@ class GNPS_Runner(Pipe_Step):
             if file_type in self.data_ids["in_paths"]:
                 # Catch files
                 if os.path.isfile(path):
-                    if file_type in self.data_ids["in_paths"]:
-                        matched_in_paths[file_type] = path
-
-                # Search directories
-                for entry in os.listdir(path):
-                    if self.match_path(pattern=file_type, path=entry):
-                        matched_in_paths[file_type] = join(path, entry)
+                    matched_in_paths[file_type] = path
+                else:
+                    # Search directories
+                    for entry in os.listdir(path):
+                        if self.match_path(pattern=file_type, path=entry):
+                            matched_in_paths[file_type] = join(path, entry)
 
         if matched_in_paths:
             os.makedirs(out_path, exist_ok=True)
