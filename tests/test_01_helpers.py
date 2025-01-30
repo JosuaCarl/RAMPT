@@ -194,13 +194,13 @@ def test_execute_verbose_command():
     execute_verbose_command("echo test4", verbosity=1)
     assert not os.path.isfile(join(out_path, "text.txt"))
 
-    execute_verbose_command(f"echo test > {join( out_path, "text.txt")}", verbosity=3)
+    execute_verbose_command(f"echo test > {join(out_path, 'text.txt')}", verbosity=3)
     assert os.path.isfile(join(out_path, "text.txt"))
     with open(join(out_path, "text.txt"), "r") as f:
         text = f.read()
         assert text.strip() == "test"
 
-    execute_verbose_command(f"echo test2 > {join( out_path, "text.txt")}", verbosity=1)
+    execute_verbose_command(f"echo test2 > {join(out_path, 'text.txt')}", verbosity=1)
     with open(join(out_path, "text.txt"), "r") as f:
         text = f.read()
         assert text.strip() == "test2"

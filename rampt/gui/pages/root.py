@@ -170,7 +170,7 @@ def lock_scenario(state):
                         valid_run_styles = pipe_step.check_io(io)
 
                         run_style = get_attribute_recursive(
-                            state, f'run_style.{pipe_step_id.replace("_params", "")}_scheduled_ios'
+                            state, f"run_style.{pipe_step_id.replace('_params', '')}_scheduled_ios"
                         )
                         if run_style in valid_run_styles:
                             io.update({"run_style": run_style})

@@ -879,7 +879,7 @@ class Pipe_Step(Step_Configuration):
                 continue
 
             logger.log(
-                message=f'Processing {scheduled_io["in_paths"]} -> {scheduled_io["out_path"]}',
+                message=f"Processing {scheduled_io['in_paths']} -> {scheduled_io['out_path']}",
                 minimum_verbosity=2,
                 verbosity=self.verbosity,
             )
@@ -889,7 +889,7 @@ class Pipe_Step(Step_Configuration):
             )
 
             logger.log(
-                message=f'Processed {scheduled_io["in_paths"]} -> {scheduled_io["out_path"]}',
+                message=f"Processed {scheduled_io['in_paths']} -> {scheduled_io['out_path']}",
                 minimum_verbosity=2,
                 verbosity=self.verbosity,
             )
