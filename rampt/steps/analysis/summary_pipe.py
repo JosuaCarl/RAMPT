@@ -425,7 +425,7 @@ class Summary_Runner(Pipe_Step):
         ic(in_paths)
         # Make quantification table as base
         summary = self.add_quantification(
-            quantification_path=in_paths.pop("quantification")[0], summary=summary
+            quantification_path=to_list(in_paths.pop("quantification"))[0], summary=summary
         )
 
         # Add annotations
@@ -506,15 +506,16 @@ class Summary_Runner(Pipe_Step):
         # Search for relevant files
         matched_in_paths = in_paths.copy()
         for file_type, path in in_paths.items():
+            path = to_list(path)[0]
             if file_type in self.data_ids["in_paths"]:
                 # Catch files
                 if os.path.isfile(path):
-                    matched_in_paths[file_type] = path
+                    matched_in_paths[file_type] = [path]
                 else:
                     # Search directories
                     for entry in os.listdir(path):
                         if self.match_path(pattern=file_type, path=entry):
-                            matched_in_paths[file_type] = join(path, entry)
+                            matched_in_paths[file_type] = [join(path, entry)]
 
         ic(out_path)
         if "quantification" in matched_in_paths:

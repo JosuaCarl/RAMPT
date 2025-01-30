@@ -293,6 +293,7 @@ class Analysis_Runner(Pipe_Step):
         # Search for relevant files
         matched_in_paths = in_paths.copy()
         for file_type, path in in_paths.items():
+            path = to_list(path)[0]
             if file_type in self.data_ids["in_paths"]:
                 # Catch files
                 if os.path.isfile(path):
