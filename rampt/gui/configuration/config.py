@@ -101,16 +101,19 @@ def merge_ios(*args) -> list[dict]:
     merged_ios = []
     ios = [arg for arg in args if arg]
     ic(ios)
-    for io_dicts in zip(ios):
+    for io_dicts in zip(*ios):
+        ic(io_dicts)
         merged_io_dict = {}
         # Iterate over found yes ("in_paths", "out_paths")
         for io_key in io_dicts[0].keys():
+            ic(io_key)
             merged_io_key = {}
             for io_dict in io_dicts:
-                if io_key in merged_io_key:
-                    merged_io_key[io_key].update(io_dict[io_key])
-                else:
-                    merged_io_key.update({io_key: io_dict[io_key]})
+                if isinstance(io_dict[io_key], dict):
+                    if io_key in merged_io_key:
+                        merged_io_key[io_key].update(io_dict[io_key])
+                    else:
+                        merged_io_key.update({io_key: io_dict[io_key]})
             merged_io_dict.update(merged_io_key)
 
         merged_ios.append(merged_io_dict)

@@ -739,10 +739,13 @@ class Pipe_Step(Step_Configuration):
                 for io_key, io_dict in io_combos.items():
                     if io_key in io:
                         for key, value_validation_method in io_dict.items():
-                            if key not in io[io_key]:
+                            if key not in io[io_key] and (
+                                callable(value_validation_method)
+                                and not value_validation_method(None)
+                            ):
                                 combo_valid = False
                                 break
-                            if callable(value_validation_method) and not value_validation_method(
+                            elif key in io[io_key] and callable(value_validation_method) and not value_validation_method(
                                 io[io_key][key]
                             ):
                                 combo_valid = False
@@ -765,7 +768,7 @@ class Pipe_Step(Step_Configuration):
             valid_run_styles = self.check_io(scheduled_io)
             if any(["dir" in vrs for vrs in valid_run_styles]):
                 correct_runner = "directory"
-            elif any(["single" in vrs for vrs in valid_run_styles]):
+            elif any(["sing" in vrs for vrs in valid_run_styles]):
                 correct_runner = "single"
             elif any(["nested" in vrs for vrs in valid_run_styles]):
                 correct_runner = "nested"

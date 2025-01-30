@@ -140,11 +140,11 @@ class GNPS_Runner(Pipe_Step):
                             "feature_ms2": lambda val: isinstance(val, str)
                             and os.path.isfile(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "additional_pairs": lambda val: not val
+                            "additional_pairs": lambda val: (not val)
                             or isinstance(val, str)
                             and os.path.isfile(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "sample_metadata": lambda val: not val
+                            "sample_metadata": lambda val: (not val)
                             or isinstance(val, str)
                             and os.path.isfile(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
@@ -194,11 +194,11 @@ class GNPS_Runner(Pipe_Step):
                             "feature_ms2": lambda val: isinstance(val, str)
                             and os.path.isdir(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "additional_pairs": lambda val: not val
+                            "additional_pairs": lambda val: (not val)
                             or isinstance(val, str)
                             and os.path.isdir(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "sample_metadata": lambda val: not val
+                            "sample_metadata": lambda val: (not val)
                             or isinstance(val, str)
                             and os.path.isdir(val)
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),

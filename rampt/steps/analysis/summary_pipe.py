@@ -130,32 +130,27 @@ class Summary_Runner(Pipe_Step):
                 {
                     "single all": {
                         "in_paths": {
-                            "quantification": lambda val: isinstance(val, str)
-                            and os.path.isfile(val)
+                            "quantification": lambda val: (
+                                isinstance(val, str) and os.path.isfile(val)
+                            )
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "formula_identifications": lambda val: not val
-                            or isinstance(val, str)
-                            and os.path.isfile(val)
+                            "formula_identifications": lambda val: (not val)
+                            or (isinstance(val, str) and os.path.isfile(val))
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "canopus_formula_summary": lambda val: not val
-                            or isinstance(val, str)
-                            and os.path.isfile(val)
+                            "canopus_formula_summary": lambda val: (not val)
+                            or (isinstance(val, str) and os.path.isfile(val))
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "structure_identifications": lambda val: not val
-                            or isinstance(val, str)
-                            and os.path.isfile(val)
+                            "structure_identifications": lambda val: (not val)
+                            or (isinstance(val, str) and os.path.isfile(val))
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "canopus_structure_summary": lambda val: not val
-                            or isinstance(val, str)
-                            and os.path.isfile(val)
+                            "canopus_structure_summary": lambda val: (not val)
+                            or (isinstance(val, str) and os.path.isfile(val))
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "denovo_structure_identifications": lambda val: not val
-                            or isinstance(val, str)
-                            and os.path.isfile(val)
+                            "denovo_structure_identifications": lambda val: (not val)
+                            or (isinstance(val, str) and os.path.isfile(val))
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
-                            "gnps_annotations": lambda val: not val
-                            or isinstance(val, str)
-                            and os.path.isfile(val)
+                            "gnps_annotations": lambda val: (not val)
+                            or (isinstance(val, str) and os.path.isfile(val))
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
                         },
                         "out_path": {"summary_paths": lambda val: isinstance(val, str)},
@@ -164,8 +159,9 @@ class Summary_Runner(Pipe_Step):
                 {
                     "single": {
                         "in_paths": {
-                            "quantification": lambda val: isinstance(val, str)
-                            and os.path.isfile(val)
+                            "quantification": lambda val: (
+                                isinstance(val, str) and os.path.isfile(val)
+                            )
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0]))
                         },
                         "out_path": {"summary_paths": lambda val: isinstance(val, str)},
@@ -174,8 +170,9 @@ class Summary_Runner(Pipe_Step):
                 {
                     "directory": {
                         "in_paths": {
-                            "quantification": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
+                            "quantification": lambda val: (
+                                isinstance(val, str) and os.path.isdir(val)
+                            )
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
                             "annotations": lambda val: isinstance(val, str)
                             and os.path.isdir(val)
@@ -187,32 +184,27 @@ class Summary_Runner(Pipe_Step):
                 {
                     "multiple directories all": {
                         "in_paths": {
-                            "quantification": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
+                            "quantification": lambda val: (
+                                isinstance(val, str) and os.path.isdir(val)
+                            )
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "formula_identifications": lambda val: not val
-                            or isinstance(val, str)
-                            and os.path.isdir(val)
+                            "formula_identifications": lambda val: (not val)
+                            or (isinstance(val, str) and os.path.isdir(val))
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "canopus_formula_summary": lambda val: not val
-                            or isinstance(val, str)
-                            and os.path.isdir(val)
+                            "canopus_formula_summary": lambda val: (not val)
+                            or (isinstance(val, str) and os.path.isdir(val))
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "structure_identifications": lambda val: not val
-                            or isinstance(val, str)
-                            and os.path.isdir(val)
+                            "structure_identifications": lambda val: (not val)
+                            or (isinstance(val, str) and os.path.isdir(val))
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "canopus_structure_summary": lambda val: not val
-                            or isinstance(val, str)
-                            and os.path.isdir(val)
+                            "canopus_structure_summary": lambda val: (not val)
+                            or (isinstance(val, str) and os.path.isdir(val))
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "denovo_structure_identifications": lambda val: not val
-                            or isinstance(val, str)
-                            and os.path.isdir(val)
+                            "denovo_structure_identifications": lambda val: (not val)
+                            or (isinstance(val, str) and os.path.isdir(val))
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
-                            "gnps_annotations": lambda val: not val
-                            or isinstance(val, str)
-                            and os.path.isdir(val)
+                            "gnps_annotations": lambda val: (not val)
+                            or (isinstance(val, str) and os.path.isdir(val))
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
                         },
                         "out_path": {"summary_paths": lambda val: isinstance(val, str)},
@@ -221,8 +213,9 @@ class Summary_Runner(Pipe_Step):
                 {
                     "multiple directories minimum": {
                         "in_paths": {
-                            "quantification": lambda val: isinstance(val, str)
-                            and os.path.isdir(val)
+                            "quantification": lambda val: (
+                                isinstance(val, str) and os.path.isdir(val)
+                            )
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0]))
                         },
                         "out_path": {"summary_paths": lambda val: isinstance(val, str)},
@@ -406,13 +399,13 @@ class Summary_Runner(Pipe_Step):
         return summary
 
     def add_annotations(
-        self, annotation_files: dict[str, StrPath], summary: pd.DataFrame
+        self, annotation_files: dict[str, list[StrPath]|StrPath], summary: pd.DataFrame
     ) -> pd.DataFrame:
         # Order the annotations
         annotation_files_ordered = {}
         for key in self.ordered_annotations:
             if key in annotation_files:
-                annotation_files_ordered[key] = annotation_files[key]
+                annotation_files_ordered[key] = to_list(annotation_files[key])[0]
 
         # Append all annotations
         for annotation_file_type, annotation_path in annotation_files_ordered.items():
@@ -432,7 +425,7 @@ class Summary_Runner(Pipe_Step):
         ic(in_paths)
         # Make quantification table as base
         summary = self.add_quantification(
-            quantification_path=in_paths.pop("quantification"), summary=summary
+            quantification_path=in_paths.pop("quantification")[0], summary=summary
         )
 
         # Add annotations
