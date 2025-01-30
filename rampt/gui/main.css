@@ -76,3 +76,6 @@ h6{
 #current_in_node.taipy_gui_core-data-node.MuiBox-root div.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation1.MuiAccordion-root.MuiAccordion-rounded.Mui-expanded.MuiAccordion-gutters div.MuiCollapse-root.MuiCollapse-vertical.MuiCollapse-entered div.MuiCollapse-wrapper.MuiCollapse-vertical div.MuiCollapse-wrapperInner.MuiCollapse-vertical div.MuiStack-root{
     display: none;
 }
+#current_in_node-dn-tabpanel-data div.MuiGrid2-root.MuiGrid2-container.MuiGrid2-direction-xs-row div.MuiGrid2-root.MuiGrid2-direction-xs-row div.MuiFormControl-root.MuiTextField-root{
+    display: none;
+}
