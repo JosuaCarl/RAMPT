@@ -165,7 +165,7 @@ def generic_step(
     global_params: dict,
     entrypoint: bool,
     in_outs: list[dict] = None,
-    out_folder: StrPath = ".",
+    out_folder: StrPath = None,
     out_step_params: list[dict] = [],
     **kwargs,
 ) -> tuple[Any] | Any:
