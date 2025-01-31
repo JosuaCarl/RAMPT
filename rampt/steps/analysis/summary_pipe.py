@@ -52,7 +52,7 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
     if nested:
         summary_runner.scheduled_ios = {
             "in_paths": {
-                "quantification": in_dir_quantification,
+                "processed_data_paths": in_dir_quantification,
                 "annotations": in_dir_annotations,
             },
             "out_path": {"summary_paths": out_dir},
@@ -61,7 +61,7 @@ def main(args: argparse.Namespace | dict, unknown_args: list[str] = []):
     else:
         summary_runner.scheduled_ios = {
             "in_paths": {
-                "quantification": in_dir_quantification,
+                "processed_data_paths": in_dir_quantification,
                 "annotations": in_dir_annotations,
             },
             "out_path": {"summary_paths": out_dir},
@@ -96,7 +96,7 @@ class Summary_Runner(Pipe_Step):
         """
         self.data_ids = {
             "in_paths": [
-                "quantification",
+                "processed_data_paths",
                 "formula_identifications",
                 "canopus_formula_summary",
                 "structure_identifications",
@@ -130,7 +130,7 @@ class Summary_Runner(Pipe_Step):
                 {
                     "single all": {
                         "in_paths": {
-                            "quantification": lambda val: (
+                            "processed_data_paths": lambda val: (
                                 isinstance(val, str) and os.path.isfile(val)
                             )
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0])),
@@ -159,7 +159,7 @@ class Summary_Runner(Pipe_Step):
                 {
                     "single": {
                         "in_paths": {
-                            "quantification": lambda val: (
+                            "processed_data_paths": lambda val: (
                                 isinstance(val, str) and os.path.isfile(val)
                             )
                             or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0]))
@@ -170,7 +170,7 @@ class Summary_Runner(Pipe_Step):
                 {
                     "directory": {
                         "in_paths": {
-                            "quantification": lambda val: (
+                            "processed_data_paths": lambda val: (
                                 isinstance(val, str) and os.path.isdir(val)
                             )
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
@@ -184,7 +184,7 @@ class Summary_Runner(Pipe_Step):
                 {
                     "multiple directories all": {
                         "in_paths": {
-                            "quantification": lambda val: (
+                            "processed_data_paths": lambda val: (
                                 isinstance(val, str) and os.path.isdir(val)
                             )
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0])),
@@ -213,7 +213,7 @@ class Summary_Runner(Pipe_Step):
                 {
                     "multiple directories minimum": {
                         "in_paths": {
-                            "quantification": lambda val: (
+                            "processed_data_paths": lambda val: (
                                 isinstance(val, str) and os.path.isdir(val)
                             )
                             or (isinstance(val, list) and len(val) == 1 and os.path.isdir(val[0]))
@@ -425,7 +425,7 @@ class Summary_Runner(Pipe_Step):
         ic(in_paths)
         # Make quantification table as base
         summary = self.add_quantification(
-            quantification_path=to_list(in_paths.pop("quantification"))[0], summary=summary
+            quantification_path=to_list(in_paths.pop("processed_data_paths"))[0], summary=summary
         )
 
         # Add annotations
@@ -518,7 +518,7 @@ class Summary_Runner(Pipe_Step):
                             matched_in_paths[file_type] = [join(path, entry)]
 
         ic(out_path)
-        if "quantification" in matched_in_paths:
+        if "processed_data_paths" in matched_in_paths:
             os.makedirs(out_path, exist_ok=True)
             self.run_single(in_paths=matched_in_paths, out_path=out_path, summary=summary, **kwargs)
         else:

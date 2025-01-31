@@ -102,23 +102,15 @@ class GNPS_Runner(Pipe_Step):
                 self.data_ids["in_paths"][0]: r".*mzmine_log\.txt$",
                 self.data_ids["in_paths"][1]: r".*fbmn_quant",
                 self.data_ids["in_paths"][2]: r".*fbmn",
-                self.data_ids["in_paths"][
-                    3
-                ]: r".*metadata",  # TODO: Find out naming of additional pairs file
-                self.data_ids["in_paths"][
-                    4
-                ]: r".*metadata",  # TODO: Find out naming of metadata file
+                self.data_ids["in_paths"][3]: r".*fbmn_edges_msannotation",
+                self.data_ids["in_paths"][4]: r".*metadata",
             },
             mandatory_patterns={
                 self.data_ids["in_paths"][0]: r".*",
                 self.data_ids["in_paths"][1]: r".*\.csv$",
                 self.data_ids["in_paths"][2]: r".*\.mgf$",
-                self.data_ids["in_paths"][
-                    3
-                ]: r".*\.(tsv|csv)",  # TODO: Find out naming of additional pairs file
-                self.data_ids["in_paths"][
-                    4
-                ]: r".*\.(tsv|csv)",  # TODO: Find out naming of metadata file
+                self.data_ids["in_paths"][3]: r".*\.csv",
+                self.data_ids["in_paths"][4]: r".*\.csv",
             },
             valid_runs=[
                 {
@@ -469,7 +461,7 @@ class GNPS_Runner(Pipe_Step):
             step_function=capture_and_log,
             func=self.gnps_check_resubmit,
             in_out=dict(
-                in_paths={self.data_ids["in_paths"][0]: in_paths},
+                in_paths=in_paths,
                 out_path={self.data_ids["out_path"][0]: out_path},
             ),
             log_path=self.get_log_path(out_path=out_path),

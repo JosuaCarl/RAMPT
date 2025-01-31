@@ -19,7 +19,7 @@ def test_summary_check_io():
     assert "single all" in summary_runner.check_io(
         {
             "in_paths": {
-                "quantification": join(mock_path, "empty_file"),
+                "processed_data_paths": join(mock_path, "empty_file"),
                 "formula_identifications": join(mock_path, "empty_file"),
                 "canopus_formula_summary": join(mock_path, "empty_file"),
                 "structure_identifications": join(mock_path, "empty_file"),
@@ -33,14 +33,14 @@ def test_summary_check_io():
 
     assert "single" in summary_runner.check_io(
         {
-            "in_paths": {"quantification": join(mock_path, "empty_file")},
+            "in_paths": {"processed_data_paths": join(mock_path, "empty_file")},
             "out_path": {"summary_paths": out_path},
         }
     )
 
     assert "directory" in summary_runner.check_io(
         {
-            "in_paths": {"quantification": mock_path, "annotations": mock_path},
+            "in_paths": {"processed_data_paths": mock_path, "annotations": mock_path},
             "out_path": {"summary_paths": out_path},
         }
     )
@@ -48,7 +48,7 @@ def test_summary_check_io():
     assert "multiple directories all" in summary_runner.check_io(
         {
             "in_paths": {
-                "quantification": mock_path,
+                "processed_data_paths": mock_path,
                 "formula_identifications": mock_path,
                 "canopus_formula_summary": mock_path,
                 "structure_identifications": mock_path,
@@ -61,7 +61,7 @@ def test_summary_check_io():
     )
 
     assert "multiple directories minimum" in summary_runner.check_io(
-        {"in_paths": {"quantification": mock_path}, "out_path": {"summary_paths": out_path}}
+        {"in_paths": {"processed_data_paths": mock_path}, "out_path": {"summary_paths": out_path}}
     )
 
     assert "nested" in summary_runner.check_io(
@@ -114,7 +114,7 @@ def test_summary_add_annotations():
     summary_runner = Summary_Runner()
 
     # Prepare annotation data
-    in_paths = {"annotations": example_path, "quantification": example_path}
+    in_paths = {"annotations": example_path, "processed_data_paths": example_path}
     summary_runner.fill_dict_standards(
         dictionary=in_paths,
         replacement_keys=summary_runner.ordered_annotations,
@@ -129,7 +129,7 @@ def test_summary_add_annotations():
                 break
 
     summary = summary_runner.add_quantification(
-        matched_in_paths.pop("quantification"), summary=None
+        matched_in_paths.pop("processed_data_paths"), summary=None
     )
     summary = summary_runner.add_annotations(matched_in_paths, summary=summary)
 
@@ -159,7 +159,7 @@ def test_summary_pipe_run_single():
 
     summary_runner.run_single(
         in_paths={
-            "quantification": [join(example_path, "example_files_iimn_fbmn_quant.csv")],
+            "processed_data_paths": [join(example_path, "example_files_iimn_fbmn_quant.csv")],
             "gnps_annotations": [join(example_path, "example_files_fbmn_all_db_annotations.json")],
         },
         out_path={"summary_paths": out_path},
@@ -175,7 +175,7 @@ def test_summary_pipe_run_directory():
     summary_runner = Summary_Runner()
 
     summary_runner.run_directory(
-        in_paths={"quantification": [example_path], "annotation": [example_path]},
+        in_paths={"processed_data_paths": [example_path], "annotation": [example_path]},
         out_path={"summary_paths": out_path},
     )
 
@@ -202,7 +202,7 @@ def test_summary_pipe_run():
     summary_runner.run(
         [
             dict(
-                in_paths={"quantification": [example_path], "annotations": [example_path]},
+                in_paths={"processed_data_paths": [example_path], "annotations": [example_path]},
                 out_path={"summary_paths": out_path},
             )
         ]
@@ -222,7 +222,7 @@ def test_summary_pipe_run():
                 "gnps_annotations": [
                     join(example_path, "example_files_fbmn_all_db_annotations.json")
                 ],
-                "quantification": [join(example_path, "example_files_iimn_fbmn_quant.csv")],
+                "processed_data_paths": [join(example_path, "example_files_iimn_fbmn_quant.csv")],
                 "structure_identifications": [join(example_path, "structure_identifications.tsv")],
             },
             "out_path": {"summary_paths": join(out_path, "summary.tsv")},

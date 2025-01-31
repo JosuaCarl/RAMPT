@@ -105,7 +105,7 @@ class Sirius_Runner(Pipe_Step):
                         "in_paths": {
                             "ms_spectra": lambda val: isinstance(val, str)
                             and os.path.isfile(val)
-                            or (isinstance(val, list) and len(val) == 1 and os.path.isdfile(val[0]))
+                            or (isinstance(val, list) and len(val) == 1 and os.path.isfile(val[0]))
                         },
                         "out_path": {
                             "sirius_annotated_data_paths": lambda val: isinstance(val, str)
@@ -213,22 +213,23 @@ class Sirius_Runner(Pipe_Step):
 
         config = self.extract_config(config=config)
 
-        cmd = (
-            rf'"{self.exec_path}" --project "{join(projectspace, "projectspace.sirius")}" --input "{in_paths}" '
-            + rf'config {config} write-summaries --output "{out_path}" {additional_args}'
-        )
+        for in_path in to_list(in_paths):
+            cmd = (
+                rf'"{self.exec_path}" --project "{join(projectspace, "projectspace.sirius")}" --input "{in_path}" '
+                + rf'config {config} write-summaries --output "{out_path}" {additional_args}'
+            )
 
-        self.compute(
-            step_function=execute_verbose_command,
-            in_out=dict(
-                in_paths={self.data_ids["in_paths"][0]: in_paths},
-                out_path={self.data_ids["out_path"][0]: out_path},
-            ),
-            log_path=self.get_log_path(out_path=out_path),
-            cmd=cmd,
-            verbosity=self.verbosity,
-            decode_text=False,
-        )
+            self.compute(
+                step_function=execute_verbose_command,
+                in_out=dict(
+                    in_paths={self.data_ids["in_paths"][0]: in_paths},
+                    out_path={self.data_ids["out_path"][0]: out_path},
+                ),
+                log_path=self.get_log_path(out_path=out_path),
+                cmd=cmd,
+                verbosity=self.verbosity,
+                decode_text=False,
+            )
 
     def run_directory(
         self,
