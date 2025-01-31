@@ -401,9 +401,9 @@ class GNPS_Runner(Pipe_Step):
         # Own GNPS FBMN submission
         if not status:
             if self.resubmit:
-                if self.data_ids["standard"] in in_paths:
+                if self.data_ids["standard"][0] in in_paths:
                     standard_dir = self.extract_standard(
-                        in_paths=in_paths, standard_value=self.data_ids["standard"]
+                        in_paths=in_paths, standard_value=self.data_ids["standard"][0]
                     )
                     in_files = self.match_dir_paths(dir=standard_dir)
                 else:
@@ -478,7 +478,7 @@ class GNPS_Runner(Pipe_Step):
         )
 
         # Search for valid files
-        matched_in_paths = in_paths.copy()
+        matched_in_paths = {}
         for file_type, path in in_paths.items():
             path = to_list(path)[0]
             if file_type in self.data_ids["in_paths"]:

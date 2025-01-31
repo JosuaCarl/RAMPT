@@ -1,10 +1,10 @@
 # Changes
 
 ## 🔧Fixes🔧
-- GNPS directory passing
+- GNPS directory handling
+- Sirius directory handling
+- Summary directory handling
 
 ## ⏫Improvements⏫
-- Installer visualization improvement
 
 ## ✨New✨
-- Added standard operating procedures

@@ -291,7 +291,7 @@ class Analysis_Runner(Pipe_Step):
         if not isinstance(in_paths, dict):
             in_paths = {"summary_paths": in_paths}
         # Search for relevant files
-        matched_in_paths = in_paths.copy()
+        matched_in_paths = {}
         for file_type, path in in_paths.items():
             path = to_list(path)[0]
             if file_type in self.data_ids["in_paths"]:
