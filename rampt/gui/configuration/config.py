@@ -20,9 +20,7 @@ from typing import Any
 
 # Data nodes
 # Current selection
-current_in_node_config = Config.configure_json_data_node(
-    id="current_in_node", scope=Scope.GLOBAL
-)
+current_in_node_config = Config.configure_json_data_node(id="current_in_node", scope=Scope.GLOBAL)
 ## Entrypoint
 entrypoint_config = Config.configure_in_memory_data_node(id="entrypoint", scope=Scope.SCENARIO)
 
