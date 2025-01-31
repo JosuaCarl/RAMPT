@@ -232,9 +232,7 @@ class MSconvert_Runner(Pipe_Step):
             )
             additional_args = self.link_additional_args(**kwargs)
 
-            out_file_name = (
-                ".".join(os.path.basename(in_path).split(".")[:-1]) + self.target_format
-            )
+            out_file_name = ".".join(os.path.basename(in_path).split(".")[:-1]) + self.target_format
 
             cmd = (
                 rf'"{self.exec_path}" --{self.target_format[1:]} -e {self.target_format} --64 '
@@ -247,7 +245,7 @@ class MSconvert_Runner(Pipe_Step):
                 out_file = os.path.join(out_path, out_file_name)
             outs.append(out_file)
             ins.append(in_path)
-            
+
             if in_valid and out_valid:
                 step_functions.append(execute_verbose_command)
                 cmds.append(cmd)
