@@ -4,6 +4,7 @@ import taipy as tp
 import taipy.gui.builder as tgb
 
 from rampt.gui.helpers import *
+from rampt.gui.configuration.config import *
 
 
 def create_expandable_setting(
@@ -38,10 +39,6 @@ possible_inputs = {}
 selected_input = {}
 packaged_inputs = {}
 
-
-current_in_node_config = tp.Config.configure_json_data_node(
-    id="current_in_node", scope=tp.Scope.GLOBAL
-)
 current_in_node = tp.create_global_data_node(current_in_node_config)
 
 
