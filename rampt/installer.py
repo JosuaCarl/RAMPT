@@ -13,6 +13,8 @@ import zipfile
 
 from pathlib import Path
 
+import winreg
+
 import platform as pf
 
 import subprocess
@@ -168,15 +170,39 @@ def add_to_local_path(new_path: str):
     os.environ["PATH"] = f"{current_path}{os.pathsep}{new_path}"
     logger.log(f"Linked {new_path} to local python environment.")
 
+def register_application(app_name, app_executable_path):
+    """
+    Registers an application in Windows so it can be run from the command line without modifying PATH.
+    
+    :param app_name: The name of the application (e.g., "myapp.exe")
+    :param app_executable_path: The full path to the application executable
+    """
+    reg_path = rf"Software\Microsoft\Windows\CurrentVersion\App Paths\{app_name}"
 
-def add_to_path(op_sys: str, path: str, local_only: bool = False):
+    try:
+        # Open the registry key for writing (creates if not exists)
+        with winreg.CreateKey(winreg.HKEY_CURRENT_USER, reg_path) as key:
+            winreg.SetValueEx(key, "", 0, winreg.REG_SZ, app_executable_path)  # Default value = full exe path
+            winreg.SetValueEx(key, "Path", 0, winreg.REG_SZ, os.path.dirname(app_executable_path))  # Optional
+
+        print(f"Application '{app_name}' registered successfully!")
+    except Exception as e:
+        print(f"Failed to register application: {e}")
+
+
+
+def add_to_path(op_sys: str, path: str, path_executable: str = None, name:str = "", local_only: bool = False):
     if not local_only and not is_in_path(path):
         exported_to_path = False
         if "windows" in op_sys:
-            current_path = os.environ.get("PATH", "")
-            if str(path) not in current_path:
-                logger.execute_command(["setx", "PATH", f"{path};{current_path}"], wait=True)
-            exported_to_path = True
+            # Example usage
+            if path_executable:
+                register_application(name, path_executable)
+            else:
+                current_path = os.environ.get("PATH", "")
+                if str(path) not in current_path:
+                    logger.execute_command(["setx", "PATH", f"{current_path};{path}"], wait=True)
+                exported_to_path = True
         else:
             for shell_profile in [
                 ".profile",
@@ -455,9 +481,9 @@ class InstallerApp(tk.Tk):
             execution_script = f'#!/usr/bin/sh\n"{python_path}" -m rampt'
             with open(path_executable, "w") as file:
                 file.write(execution_script)
-
         logger.log(f"Python path: {python_path}")
-        add_to_path(op_sys=self.op_sys, path=install_path, local_only=self.local_only)
+
+        add_to_path(op_sys=self.op_sys, path=install_path, path_executable=path_executable, name="RAMPT", local_only=self.local_only)
 
         link_rampt(
             op_sys=self.op_sys,
@@ -478,6 +504,7 @@ class InstallerApp(tk.Tk):
         extraction_method: str = "zip",
         hash_url_addendum: str = None,
         command: str | list = None,
+        executable: str = None,
         force: bool = False,
     ):
         # Check for command availability
@@ -558,6 +585,8 @@ class InstallerApp(tk.Tk):
                 add_to_path(
                     op_sys=self.op_sys,
                     path=join(install_path, bin_path),
+                    path_executable=join(install_path, bin_path, executable),
+                    name=name,
                     local_only=self.local_only,
                 )
             self.update_secondary_progressbar(
@@ -593,6 +622,7 @@ class InstallerApp(tk.Tk):
                         extraction_method="tar.bz2",
                         bin_paths="",
                         command="msconvert",
+                        executable="msconvert.exe",
                         force=force,
                     )
 
@@ -603,6 +633,7 @@ class InstallerApp(tk.Tk):
                         install_path=self.install_path,
                         bin_paths={"windows": "", "*": "bin"},
                         command=["mzmine", "mzmine_console"],
+                        executable="mzmine.exe",
                         force=force,
                     )
 
@@ -614,6 +645,7 @@ class InstallerApp(tk.Tk):
                         hash_url_addendum=".sha256",
                         bin_paths=join("sirius", "bin"),
                         command="sirius",
+                        executable="sirius.exe",
                         force=force,
                     )
 
