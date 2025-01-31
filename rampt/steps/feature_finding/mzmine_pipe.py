@@ -333,10 +333,7 @@ class MZmine_Runner(Pipe_Step):
         batch = get_if_dict(batch, self.data_ids["batch"])
         batch = batch if batch else self.batch
 
-        ic(in_paths)
-
         for in_path in in_paths:
-            ic(in_path)
             root, dirs, files = next(os.walk(in_path))
 
             # Look for batch file

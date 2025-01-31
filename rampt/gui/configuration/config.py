@@ -169,17 +169,14 @@ def generic_step(
     out_step_params: list[dict] = [],
     **kwargs,
 ) -> tuple[Any] | Any:
-    ic(in_outs)
     # Fixate parameters
     global_params = fixate_global_parameters(global_params=global_params, entrypoint=entrypoint)
-    ic(global_params)
 
     # Create step_instance
     step_params.update(global_params)
     # Delete valid runs, as this is saved incorrectly
     step_params.pop("valid_runs")
     step_instance = step_class(**step_params)
-    ic(step_instance.patterns)
 
     logger.log(
         f"Starting {step_instance.name} step",
@@ -215,7 +212,6 @@ def generic_step(
         )
     else:
         out = [processed_out]
-    ic(out)
     return out[0] if len(out) == 1 else out
 
 

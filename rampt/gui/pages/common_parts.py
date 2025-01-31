@@ -112,20 +112,17 @@ def create_file_selection(
         if selected_input_type:
             selected_input_type = "_".join(selected_input_type.split(" "))
             current_in = get_attribute_recursive(state, "current_in_node").read()
-            ic(current_in)
 
             if current_in:
                 current_in.update({selected_input_type: selected_labels})
             else:
                 current_in = {selected_input_type: selected_labels}
 
-            ic(current_in)
             set_attribute_recursive(
                 state, f"packaged_inputs.{selector_id}", list(current_in.keys())
             )
             current_in_node.write(current_in)
             set_attribute_recursive(state, "current_in_node", current_in_node)
-            ic(current_in_node.read())
         else:
             logger.log("No input type selected.")
 
@@ -310,7 +307,6 @@ def create_list_selection(
             set_attribute_recursive(state, process, value, refresh=True)
 
     if default_value:
-        ic(default_value)
         file_dialog_kwargs["initialdir"] = get_directory(default_value)
 
     with tgb.layout(columns="1 4", columns__mobile="1", gap="5%"):

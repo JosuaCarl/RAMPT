@@ -96,9 +96,6 @@ def populate_data_node(state, *args):
     path = get_attribute_recursive(state, "path_to_data")
     path = ask_filepath(path)
 
-    ic(path)
-    ic(path_node_name)
-
     # Write Check if path
     if os.path.isfile(path):
         # Get original config

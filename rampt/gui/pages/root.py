@@ -179,7 +179,6 @@ def lock_scenario(state):
                     for scheduled_in_paths in get_attribute_recursive(
                         state, f"{pipe_step_id}.scheduled_ios"
                     ):
-                        ic(scheduled_in_paths)
                         io = {
                             "in_paths": scheduled_in_paths,
                             "out_path": {

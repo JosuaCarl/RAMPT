@@ -389,7 +389,6 @@ class GNPS_Runner(Pipe_Step):
         in_paths = in_out["in_paths"]
         out_path = get_if_dict(in_out["out_path"], self.data_ids["out_path"])
 
-        ic(in_paths)
         # Use MZmine GNPS submit, if existent
         mzmine_log, gnps_response = self.extract_optional(
             in_paths, keys=["mzmine_log", "gnps_response"]
@@ -417,7 +416,6 @@ class GNPS_Runner(Pipe_Step):
                         ],
                         return_dict=True,
                     )
-                ic(in_files)
                 if any(in_files):
                     task_id, status = self.submit_to_gnps(**in_files)
                 else:

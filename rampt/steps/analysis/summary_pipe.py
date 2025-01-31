@@ -422,7 +422,6 @@ class Summary_Runner(Pipe_Step):
         in_paths = in_out["in_paths"]
         out_path = get_if_dict(in_out["out_path"], self.data_ids["out_path"])
 
-        ic(in_paths)
         # Make quantification table as base
         summary = self.add_quantification(
             quantification_path=to_list(in_paths.pop("processed_data_paths"))[0], summary=summary
@@ -517,7 +516,6 @@ class Summary_Runner(Pipe_Step):
                         if self.match_path(pattern=file_type, path=entry):
                             matched_in_paths[file_type] = [join(path, entry)]
 
-        ic(out_path)
         if "processed_data_paths" in matched_in_paths:
             os.makedirs(out_path, exist_ok=True)
             self.run_single(in_paths=matched_in_paths, out_path=out_path, summary=summary, **kwargs)
