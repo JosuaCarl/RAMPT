@@ -20,7 +20,7 @@ stylekit = {"color_paper_light": "#EFE6F1", "color_background_light": "#EBE5EC"}
 
 def main():
     gui = Gui(pages=pages_dict, css_file="main.css")
-    
+
     orchestrator = tp.Orchestrator()
 
     orchestrator.run(force_restart=True)
