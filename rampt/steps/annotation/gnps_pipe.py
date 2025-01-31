@@ -99,18 +99,18 @@ class GNPS_Runner(Pipe_Step):
         }
         super().__init__(
             patterns={
-                self.data_ids["in_paths"][0]: r".*mzmine_log\.txt$",
+                self.data_ids["in_paths"][0]: r".*mzmine_log",
                 self.data_ids["in_paths"][1]: r".*fbmn_quant",
                 self.data_ids["in_paths"][2]: r".*fbmn",
                 self.data_ids["in_paths"][3]: r".*fbmn_edges_msannotation",
                 self.data_ids["in_paths"][4]: r".*metadata",
             },
             mandatory_patterns={
-                self.data_ids["in_paths"][0]: r".*",
+                self.data_ids["in_paths"][0]: r".*\.txt$",
                 self.data_ids["in_paths"][1]: r".*\.csv$",
                 self.data_ids["in_paths"][2]: r".*\.mgf$",
-                self.data_ids["in_paths"][3]: r".*\.csv",
-                self.data_ids["in_paths"][4]: r".*\.csv",
+                self.data_ids["in_paths"][3]: r".*\.csv$",
+                self.data_ids["in_paths"][4]: r".*\.csv$",
             },
             valid_runs=[
                 {

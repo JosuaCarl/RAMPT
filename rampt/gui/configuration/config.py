@@ -152,7 +152,7 @@ def fixate_global_parameters(global_params: dict, entrypoint: bool = False) -> d
     global_params.pop("mandatory_patterns")
     # Delete patterns overwrite, when not set
     for attribute in ["patterns", "pattern", "contains", "prefix", "suffix"]:
-        if not entrypoint or global_params.get(attribute, None) is None:
+        if not entrypoint or not global_params.get(attribute, None):
             global_params.pop(attribute, None)
     return global_params
 
@@ -172,12 +172,14 @@ def generic_step(
     ic(in_outs)
     # Fixate parameters
     global_params = fixate_global_parameters(global_params=global_params, entrypoint=entrypoint)
+    ic(global_params)
 
     # Create step_instance
     step_params.update(global_params)
     # Delete valid runs, as this is saved incorrectly
     step_params.pop("valid_runs")
     step_instance = step_class(**step_params)
+    ic(step_instance.patterns)
 
     logger.log(
         f"Starting {step_instance.name} step",
