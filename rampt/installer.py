@@ -170,10 +170,11 @@ def add_to_local_path(new_path: str):
     os.environ["PATH"] = f"{current_path}{os.pathsep}{new_path}"
     logger.log(f"Linked {new_path} to local python environment.")
 
+
 def register_application(app_name, app_executable_path):
     """
     Registers an application in Windows so it can be run from the command line without modifying PATH.
-    
+
     :param app_name: The name of the application (e.g., "myapp.exe")
     :param app_executable_path: The full path to the application executable
     """
@@ -182,16 +183,21 @@ def register_application(app_name, app_executable_path):
     try:
         # Open the registry key for writing (creates if not exists)
         with winreg.CreateKey(winreg.HKEY_CURRENT_USER, reg_path) as key:
-            winreg.SetValueEx(key, "", 0, winreg.REG_SZ, app_executable_path)  # Default value = full exe path
-            winreg.SetValueEx(key, "Path", 0, winreg.REG_SZ, os.path.dirname(app_executable_path))  # Optional
+            winreg.SetValueEx(
+                key, "", 0, winreg.REG_SZ, app_executable_path
+            )  # Default value = full exe path
+            winreg.SetValueEx(
+                key, "Path", 0, winreg.REG_SZ, os.path.dirname(app_executable_path)
+            )  # Optional
 
         print(f"Application '{app_name}' registered successfully!")
     except Exception as e:
         print(f"Failed to register application: {e}")
 
 
-
-def add_to_path(op_sys: str, path: str, path_executable: str = None, name:str = "", local_only: bool = False):
+def add_to_path(
+    op_sys: str, path: str, path_executable: str = None, name: str = "", local_only: bool = False
+):
     if not local_only and not is_in_path(path):
         exported_to_path = False
         if "windows" in op_sys:
@@ -483,7 +489,13 @@ class InstallerApp(tk.Tk):
                 file.write(execution_script)
         logger.log(f"Python path: {python_path}")
 
-        add_to_path(op_sys=self.op_sys, path=install_path, path_executable=path_executable, name="RAMPT", local_only=self.local_only)
+        add_to_path(
+            op_sys=self.op_sys,
+            path=install_path,
+            path_executable=path_executable,
+            name="RAMPT",
+            local_only=self.local_only,
+        )
 
         link_rampt(
             op_sys=self.op_sys,
