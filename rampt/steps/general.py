@@ -545,42 +545,19 @@ class Pipe_Step(Step_Configuration):
         :param **kwargs: Keyword arguments, must contain in_paths, and out_path
         :type **kwargs: **kwargs
         """
-        # Catch passed bash commands
-        if step_function:
-            if isinstance(step_function, list):
-                for i, sf in enumerate(step_function):
-                    if cmd:
-                        kwargs["cmd"] = cmd[i]
-                    io = self.mirror_dict_extract_last(in_out, i)
+        for i, sf in enumerate(to_list(step_function)):
+            # Catch passed bash commands
+            if cmd:
+                kwargs["cmd"] = to_list(cmd)[i]
+            io = self.mirror_dict_extract_last(in_out, i)
 
-                    # Check parallelization
-                    if self.workers > 1:
-                        response = [None, None, None]
-                        future = dask.delayed(sf)(in_out=io, *args, **kwargs)
-                    else:
-                        response = sf(in_out=io, *args, **kwargs)
-                        future = None
-
-                    # Extract results
-                    results = response[0]
-                    out, err = [response[i] if i < len(response) else None for i in range(1, 3)]
-                    self.store_progress(
-                        in_out=in_out,
-                        results=results,
-                        future=future,
-                        out=out,
-                        err=err,
-                        log_path=kwargs.get("log_path", None),
-                    )
-            else:
-                if cmd:
-                    kwargs["cmd"] = cmd
+            if callable(sf):
                 # Check parallelization
                 if self.workers > 1:
                     response = [None, None, None]
-                    future = dask.delayed(step_function)(in_out=in_out, *args, **kwargs)
+                    future = dask.delayed(sf)(in_out=io, *args, **kwargs)
                 else:
-                    response = step_function(in_out=in_out, *args, **kwargs)
+                    response = sf(in_out=io, *args, **kwargs)
                     future = None
 
                 # Extract results
@@ -594,16 +571,15 @@ class Pipe_Step(Step_Configuration):
                     err=err,
                     log_path=kwargs.get("log_path", None),
                 )
-
-        else:
-            self.store_progress(
-                in_out=in_out,
-                results=None,
-                future=None,
-                out=None,
-                err=None,
-                log_path=kwargs.get("log_path", None),
-            )
+            else:
+                self.store_progress(
+                    in_out=in_out,
+                    results=None,
+                    future=None,
+                    out=None,
+                    err=None,
+                    log_path=kwargs.get("log_path", None),
+                )
 
     def compute_futures(self):
         """

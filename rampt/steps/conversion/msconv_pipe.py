@@ -230,35 +230,35 @@ class MSconvert_Runner(Pipe_Step):
             in_valid, out_valid = self.select_for_conversion(
                 in_path=in_path, out_path=hypothetical_out_path
             )
+            additional_args = self.link_additional_args(**kwargs)
+
+            out_file_name = (
+                ".".join(os.path.basename(in_path).split(".")[:-1]) + self.target_format
+            )
+
+            cmd = (
+                rf'"{self.exec_path}" --{self.target_format[1:]} -e {self.target_format} --64 '
+                + rf'-o "{out_path}" --outfile "{out_file_name}" "{in_path}" {additional_args}'
+            )
+
+            if os.path.isfile(out_path):
+                out_file = out_path
+            else:
+                out_file = os.path.join(out_path, out_file_name)
+            outs.append(out_file)
+            ins.append(in_path)
+            
             if in_valid and out_valid:
-                additional_args = self.link_additional_args(**kwargs)
-
-                out_file_name = (
-                    ".".join(os.path.basename(in_path).split(".")[:-1]) + self.target_format
-                )
-
-                cmd = (
-                    rf'"{self.exec_path}" --{self.target_format[1:]} -e {self.target_format} --64 '
-                    + rf'-o "{out_path}" --outfile "{out_file_name}" "{in_path}" {additional_args}'
-                )
-
-                if os.path.isfile(out_path):
-                    out_file = out_path
-                else:
-                    out_file = os.path.join(out_path, out_file_name)
-                outs.append(out_file)
                 step_functions.append(execute_verbose_command)
                 cmds.append(cmd)
             else:
                 step_functions.append(None)
-                outs.append(None)
                 logger.log(
                     f"The path {in_path} or {hypothetical_out_path} is invalid or was written before."
                     + "You can either set overwrite=True or adjust the file size threshold to change out_path checking behaviour.",
                     minimum_verbosity=3,
                     verbosity=self.verbosity,
                 )
-            ins.append(in_path)
         ic(ins)
         ic(outs)
         self.compute(

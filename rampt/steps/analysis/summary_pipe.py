@@ -115,7 +115,7 @@ class Summary_Runner(Pipe_Step):
                 self.data_ids["in_paths"][3]: r".*(?<!denovo_)structure_identifications",
                 self.data_ids["in_paths"][4]: r".*canopus_structure_summary",
                 self.data_ids["in_paths"][5]: r".*denovo_structure_identifications",
-                self.data_ids["in_paths"][6]: r".*fbmn_all_db_annotations",
+                self.data_ids["in_paths"][6]: r".*_all_db_annotations",
             },
             mandatory_patterns={
                 self.data_ids["in_paths"][0]: r".*\.csv$",
