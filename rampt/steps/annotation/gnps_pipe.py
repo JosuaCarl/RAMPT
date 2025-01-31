@@ -399,7 +399,7 @@ class GNPS_Runner(Pipe_Step):
                 mzmine_log=mzmine_log, gnps_response=gnps_response
             )
         # Own GNPS FBMN submission
-        else:
+        if not status:
             if self.resubmit:
                 if self.data_ids["standard"] in in_paths:
                     standard_dir = self.extract_standard(
