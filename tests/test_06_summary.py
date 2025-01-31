@@ -212,7 +212,6 @@ def test_summary_pipe_run():
     assert summary_runner.processed_ios == [
         {
             "in_paths": {
-                "annotations": [example_path],
                 "canopus_formula_summary": [join(example_path, "canopus_formula_summary.tsv")],
                 "canopus_structure_summary": [join(example_path, "canopus_structure_summary.tsv")],
                 "denovo_structure_identifications": [
